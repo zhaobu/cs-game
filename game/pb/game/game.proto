@@ -1,0 +1,133 @@
+syntax = "proto3";
+
+import "cy/game/pb/common/head.proto";
+import "cy/game/pb/common/common.proto";
+
+package pbgame;
+
+enum MakeDeskRspCode {
+    MakeDeskNotUse = 0;
+    MakeDeskSucc = 1;
+    MakeDeskArgsErr = 2;
+    MakeDeskNotEnoughMoney = 3;
+    MakeDeskNotEnoughDesk = 4;
+    MakeDeskInternalServerError = 5;
+    MakeDeskUserStatusErr = 6;
+}
+
+enum JoinDeskRspCode {
+    JoinDeskNotUse = 0;
+    JoinDeskSucc = 1;
+    JoinDeskNotExist = 2;
+    JoinDeskDeskFull = 3;    
+    JoinDeskInternalServerError = 4;
+    JoinDeskUserStatusErr = 5;
+    JoinDeskGameStatusErr = 6;
+}
+
+// 查询游戏配置 c -> s
+message QueryGameConfigReq {
+	pbcommon.ReqHead Head = 1;
+    string GameName = 2;
+    // 1匹配 2好友 3比赛
+    int32 Type = 3; 
+}
+
+message QueryGameConfigRsp {
+	pbcommon.RspHead Head = 1;
+    string Name = 2; // 具体游戏配置 如 pbgame_ddz.MatchConfig or pbgame_ddz.FriendsConfigTpl
+    bytes Value = 3;
+}
+
+// 查询桌子信息 c -> s
+message QueryDeskInfoReq {
+    pbcommon.ReqHead Head = 1;
+    uint64 DeskID = 2;
+}
+
+message QueryDeskInfoRsp {
+    pbcommon.RspHead Head = 1;
+    // 1 成功 2 不存在
+    uint32 Code = 2; 
+    pbcommon.DeskInfo Info = 3;
+    string GameArgMsgName = 4; // 具体游戏参数 如 pbgame_ddz.RoomArg
+    bytes GameArgMsgValue = 5;
+}
+
+// 新建桌子 c -> s
+message MakeDeskReq {
+    pbcommon.ReqHead Head = 1;
+    string GameName = 2;    
+    string GameArgMsgName = 3; // 具体游戏参数 如 pbgame_ddz.RoomArg
+    bytes GameArgMsgValue = 4;
+    int64 ClubID = 5;
+}
+
+message MakeDeskRsp {    
+    pbcommon.RspHead Head = 1;
+    MakeDeskRspCode Code = 2;    
+    string StrCode = 3;
+    pbcommon.DeskInfo Info = 4;
+    string GameArgMsgName = 5; // 具体游戏参数 如 pbgame_ddz.RoomArg
+    bytes GameArgMsgValue = 6; 
+}
+
+// 建桌人 摧毁桌子 c -> s
+message DestroyDeskReq {
+    pbcommon.ReqHead Head = 1;
+    // 2:无效DeskID 
+    uint64 DeskID = 2;
+}
+
+message DestroyDeskRsp {
+    pbcommon.RspHead Head = 1;
+    // 1成功 2失败已经开始 3失败必须为房主
+    uint32 Code = 2;
+    string StrCode = 3;
+}
+
+// s -> c 
+message DestroyDeskNotif {
+    uint64 DeskID = 1;
+}
+
+// 加入桌子 c -> s
+message JoinDeskReq {
+    pbcommon.ReqHead Head = 1;
+    uint64 DeskID = 2;
+}
+
+message JoinDeskRsp {
+    pbcommon.RspHead Head = 1;
+    JoinDeskRspCode Code = 2;  
+    string ErrMsg = 3;
+    pbcommon.DeskInfo Info = 4;
+    string GameArgMsgName = 5; // 具体游戏参数 如 pbgame_ddz.RoomArg
+    bytes GameArgMsgValue = 6;
+}
+
+// 离开桌子 c -> s
+message ExitDeskReq {
+    pbcommon.ReqHead Head = 1;
+}
+
+// s -> c
+message ExitDeskRsp {
+    pbcommon.RspHead Head = 1;
+    // 1 成功 2 失败-游戏开始
+    uint32 Code = 2;
+    string ErrMsg = 3;
+}
+
+// 游戏动作 c -> s
+message GameAction {
+    pbcommon.ReqHead Head = 1;    
+    string ActionName = 2; // 具体游戏子命令
+    bytes ActionValue = 3;
+}
+
+// 服务器回应 s -> c
+message GameNotif {
+    string NotifName = 1; // 具体游戏子命令
+    bytes NotifValue = 2;
+}

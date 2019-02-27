@@ -1,0 +1,116 @@
+syntax = "proto3";
+
+import "cy/game/pb/common/head.proto";
+import "cy/game/pb/common/common.proto";
+
+package pbclub;
+
+message ClubMemberInfo {
+    uint64 UserID = 1;
+    string Profile = 2;
+    int32 Online = 3;
+}
+
+message ClubInfo {
+    int64 ID = 1;
+    string Name = 2;
+    uint64 CreateUserID = 3;
+    string Notice = 4;
+    string Arg = 5;    
+    repeated ClubMemberInfo Members = 6;
+}
+
+message ClubList {
+    repeated ClubInfo List = 1;
+}
+
+// c -> s
+message QueryClubByIDReq {
+    pbcommon.ReqHead Head = 1;
+    int64 ClubID = 2;
+}
+message QueryClubByIDRsp {
+    pbcommon.RspHead Head = 1;
+    ClubInfo Info = 2;
+}
+
+// c -> s
+message QueryClubByMemberReq {
+    pbcommon.ReqHead Head = 1;
+    uint64 UserID = 2;
+}
+message QueryClubByMemberRsp {
+    pbcommon.RspHead Head = 1;
+    ClubList Infos = 2;
+}
+
+// c -> s
+message CreateClubReq {
+    pbcommon.ReqHead Head = 1;
+    string Name = 2;        
+    string Notice = 3;
+    string Arg = 4;
+}
+message CreateClubRsp {
+    pbcommon.RspHead Head = 1;
+    // 1成功 2失败
+    int32 Code = 2;
+    ClubInfo Info = 3;
+}
+
+// c -> s
+message RemoveClubReq {
+    pbcommon.ReqHead Head = 1;
+    int64 ClubID = 2;
+}
+message RemoveClubRsp {
+    pbcommon.RspHead Head = 1;
+    // 1成功 2失败
+    int32 Code = 2;
+}
+
+// c -> s
+message UpdateClubReq {
+    pbcommon.ReqHead Head = 1;
+    int64 ClubID = 2;        
+    string Notice = 3;
+    string Arg = 4;
+}
+message UpdateClubRsp {
+    pbcommon.RspHead Head = 1;
+    // 1成功 2失败
+    int32 Code = 2;
+}
+
+// c -> s
+message JoinClubReq {
+    pbcommon.ReqHead Head = 1;
+    int64 ClubID = 2;
+}
+message JoinClubRsp {
+    pbcommon.RspHead Head = 1;
+    // 1成功 2失败
+    int32 Code = 2;
+}
+
+// c -> s
+message ExitClubReq {
+    pbcommon.ReqHead Head = 1;
+    int64 ClubID = 2;
+}
+message ExitClubRsp {
+    pbcommon.RspHead Head = 1;
+    // 1成功 2失败
+    int32 Code = 2;
+}
+
+// c -> s
+message QueryClubDeskReq {
+    pbcommon.ReqHead Head = 1;
+    int64 ClubID = 2;
+}
+
+message QueryClubDeskRsp {  
+    pbcommon.RspHead Head = 1;  
+    repeated pbcommon.DeskInfo Desks = 2;
+}

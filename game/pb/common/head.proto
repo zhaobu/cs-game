@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package pbcommon;
+
+// 请求头
+message ReqHead {
+    uint64 Seq = 1;
+    uint64 UserID = 2; // 冗余
+    string SessionID = 3;
+}
+
+// 响应头
+message RspHead {
+    uint64 Seq = 1;
+}

@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+import "cy/game/pb/common/head.proto";
+import "cy/game/pb/common/common.proto";
+
+package pbcenter;
+
+enum MatchRspCode {
+    NotUse   = 0;
+    Queued   = 1;    
+    StatuErr = 3;
+    Busy     = 4;
+    InvalidGame    = 5; 
+    InvalidRoomID  = 6;
+    NotEnoughMoney = 7;
+    InternalServerError = 8;    
+}
+
+// 匹配游戏 c -> s
+message MatchReq {
+    pbcommon.ReqHead Head = 1;
+    string GameName = 2; // 游戏名称
+    uint32 RoomId = 3; // 房间ID
+    bool IsContinue = 4; // 暂时没用到
+}
+
+message MatchRsp { 
+    pbcommon.RspHead Head = 1;    
+    MatchRspCode Code = 2;   
+    string StrCode = 3; 
+    int32 Sec = 4; // 预计匹配时间(秒) 不准 Code为Queued StatuErr
+    pbcommon.UserStatus Status = 5; // Code为Queued StatuErr
+    string GameName = 6; // Code为Queued StatuErr
+    uint32 RoomID = 7; // Code为Queued StatuErr    
+    bool IsContinue = 8; 
+    string GameArgMsgName = 9; // 具体游戏message name 如 pbgame_ddz.RoomArg
+    bytes GameArgMsgValue = 10; // 具体游戏message value   
+}
+
+// 匹配超时 s -> c
+message MatchTimeOut {
+}
+
+// 取消匹配 c -> s
+message CancelMatchReq {
+    pbcommon.ReqHead Head = 1;
+}
+
+message CancelMatchRsp {
+    pbcommon.RspHead Head = 1;
+    bool Succ = 2;
+}

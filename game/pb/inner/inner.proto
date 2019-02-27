@@ -1,0 +1,31 @@
+// 此文件为服务器内部使用，客户端调用无响应
+syntax = "proto3";
+
+package pbinner;
+
+// UserLogin gate通知其他*服务玩家登陆
+message UserLogin {
+	uint64 UserID = 1;
+}
+
+message UserLeave {
+	uint64 UserID = 1;
+}
+
+// 匹配成功
+message GameMatchSucc {
+	uint32 RoomId = 1;  // 房间ID
+	repeated uint64 UserIDs = 2;
+}
+
+message GameMatchArgsCheckReq {
+	uint32 RoomId = 1;  // 房间ID
+	uint64 UserID = 2;
+}
+
+message GameMatchArgsCheckRsp {
+	// 1成功 2无效房间ID 3查询用户失败 4金币限制
+	uint32 Code = 1;
+	string GameArgMsgName = 2; // 具体游戏message name 如 pbgame_ddz.RoomArg
+    bytes GameArgMsgValue = 3; // 具体游戏message value   
+}
