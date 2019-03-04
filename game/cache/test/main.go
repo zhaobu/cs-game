@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	cache.Init("192.168.0.90:6379", 1)
+	cache.Init("192.168.1.128:6379", 1)
 
 	//fmt.Println(cache.AddClubDeskRelation(10, 100))
 	//fmt.Println(cache.AddClubDeskRelation(10, 102))
