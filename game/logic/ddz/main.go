@@ -38,7 +38,7 @@ type ddz int
 func initLog() {
 	logrus.SetFormatter(&logrus.JSONFormatter{})
 	if *release {
-		logName := fmt.Sprintf("ddz_%d_%d.log", os.Getpid(), time.Now().Unix())
+		logName := fmt.Sprintf("ddz_%d_%d.log.json", os.Getpid(), time.Now().Unix())
 		file, err := os.OpenFile(logName, os.O_CREATE|os.O_WRONLY, 0666)
 		if err == nil {
 			logrus.SetOutput(file)
@@ -46,7 +46,7 @@ func initLog() {
 			logrus.SetOutput(os.Stdout)
 		}
 	} else {
-		logName := fmt.Sprintf("ddz.log")
+		logName := fmt.Sprintf("ddz.log.json")
 		file, err := os.OpenFile(logName, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
 		if err == nil {
 			logrus.SetOutput(file)

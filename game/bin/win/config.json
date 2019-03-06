@@ -1,0 +1,73 @@
+{
+    "match":{
+        "RoomList":[
+            {
+				"Enable":true,
+                "RoomId":1,
+                "Name":"新手场",
+				"FeeType":1,
+				"Fee": 100,
+                "BaseScore":300,
+                "EnterMin":500,
+                "EnterMax":10000,
+                "TopScore":4800            
+            },
+            {
+                "Enable":true,
+                "RoomId":2,
+                "Name":"初级场",
+				"FeeType":1,
+				"Fee": 1300,
+                "BaseScore":4000,
+                "EnterMin":80000,
+                "EnterMax":0,
+                "TopScore":64000
+            },
+			{
+				"Enable":true,
+                "RoomId":3,
+                "Name":"新手场",
+				"FeeType":2,
+				"Fee": 3,
+                "BaseScore":6,
+                "EnterMin":48,
+                "EnterMax":0,
+                "TopScore":24               
+            },
+            {
+                "Enable":true,
+                "RoomId":4,
+                "Name":"初级场",
+				"FeeType":2,
+				"Fee": 30,
+                "BaseScore":60,
+                "EnterMin":450,
+                "EnterMax":0,
+                "TopScore":240
+            }
+        ]
+    },
+    "friends":{
+        "BaseScoreLow":5,
+        "BaseScoreHigh":10,
+        "FeeType":[
+            {"T":1},
+            {"T":2}
+        ]
+        ,
+        "PaymentType":[
+            {"T":1},
+            {"T":2}
+        ],
+        "RInfo":[
+            {"LoopCnt":4, "Fee":3},
+            {"LoopCnt":8, "Fee":6}
+        ],
+        "Def": {
+            "BaseScore": 300,
+            "FeeType": 1,
+            "PaymentType": 1,
+            "LoopCnt": 4
+        }
+    }
+}

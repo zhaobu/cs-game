@@ -1,7 +1,7 @@
 ./clear_redis.sh
 sleep 2
 
-cd bin
+cd bin/linux
 
 ./club >/dev/null &
 echo "club start success" &
