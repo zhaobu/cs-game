@@ -1,0 +1,580 @@
+syntax = "proto3";
+
+import "cy/game/pb/common/common.proto";
+
+package pbgame_mj_changshou;
+
+//游戏状态
+enum GameStatus {
+  SInvalid = 0;
+  SWait = 1;    // 等待中
+  SCall = 2;    // 叫地主
+  SRob = 3;     // 抢地主
+  SDouble = 4;  // 加倍
+  SPlay = 5;    // 打牌
+  SCalc = 6;    // 结算
+  SEnd = 7;     // 完了
+}
+
+// 底牌牌型
+enum BackCardType {
+  BcCtUnknown = 0;    // 无效
+  BcCtJoker2 = 1;     // 大小王
+  BcCtThree = 2;      // 三张
+  BcCtSameColor = 3;  // 同花
+  BcCtChain = 4;      // 顺子
+  BcCtJoker1 = 5;     // 单王
+  BcCtNormal = 6;     // 普通
+}
+
+// 牌型
+enum CardType {
+  CtUnknown = 0;          // 无效
+  CtJokers = 1;           // 大小王
+  CtBomb = 2;             // 炸弹
+  CtSolo = 3;             // 单张
+  CtPair = 4;             // 对子
+  CtThree = 5;            // 三张
+  CtThreeSolo = 6;        // 三带一单
+  CtThreePair = 7;        // 三带一对
+  CtSoloChain = 8;        // 顺子
+  CtPairChain = 9;        // 连对
+  CtThreeChain = 10;      // 飞机
+  CtThreeSoloChain = 11;  // 飞机+相同数量的单牌
+  CtThreePairChain = 12;  // 飞机+相同数量的对牌
+  // 4带1 不合法
+  CtFour2 = 14;  // 4带2张单或者1对
+  CtFour4 = 15;  // 4带2对
+}
+
+enum CallCode {
+  CNotUse = 0;
+  CNotCall = 1;
+  CCall = 2;
+}
+
+enum RobCode {
+  RNotUse = 0;
+  RNotRob = 1;
+  RRob = 2;
+}
+
+enum DoubleCode {
+  DNotUse = 0;
+  DNotDouble = 1;  // 不加倍
+  DDouble = 2;     // 加倍
+}
+
+// 操作掩码
+enum OperMask {
+  OmUnknown = 0;
+  OmHint = 1;   // 提示
+  OmNoout = 2;  // 要不起
+  OmOut = 4;    // 出牌
+  OmShow = 8;   // 明牌
+  OmPass = 16;  // 不出
+}
+
+enum UserGameStatus {
+  UGSNotUse = 0;  // 没有使用
+  UGSSitDown = 1;
+  UGSReady = 2;
+  UGSFree = 3;
+}
+
+// 房间桌子属性 s -> c
+message RoomArg {
+  // 1匹配 2好友 3比赛
+  int32 Type = 14;
+  bool Enable = 1;    // true开启 false关闭
+  uint32 RoomId = 2;  // ID
+  uint64 DeskID = 3;
+  string Name = 4;          // 房间别名
+  uint32 FeeType = 5;       // 服务费类型 1:金币 2:钻石
+  uint32 Fee = 6;           // 服务费
+  uint32 BaseScore = 7;     // 底分
+  uint64 EnterMin = 8;      // 进入下限
+  uint64 EnterMax = 9;      // 进入上限
+  uint64 TopScore = 10;     // 封顶值
+  uint32 SeatCnt = 11;      // 座位数
+  uint32 PaymentType = 12;  // 支付方式 1:个人支付 2:平局支付
+  uint32 LoopCnt = 13;      // 局数
+  bool CheckDistance = 15;  // 距离判断
+}
+
+//游戏开始
+message StartGame {
+  message UserInfo {
+    int32 user_pos = 1;    //玩家方位(1:东2:南3:西4:北)
+    int32 dice_value = 2;  //骰子值
+  }
+
+  int32 banker_id = 1;  //庄家id
+  repeated UserInfo user_info = 2;
+}
+
+//发牌
+message DealCard {
+  int32 card_first = 1;      //第一个出牌的玩家id
+  repeated int32 cards = 2;  //玩家手牌数组
+}
+
+//玩家摸牌
+message DrawCard {
+    int32 chair_id =1; //摸牌玩家
+    int32 card =2;//摸到的牌
+    int32 left_num =3 ;//剩余张数
+
+  }
+}
+
+//玩家摸牌
+message OutCard
+// #玩家出牌
+// game_out_card $3 {
+//   request {
+//     chair_id 0 : integer
+//     card 1 : integer
+//   }
+// }
+
+
+// #玩家该轮的操作
+// game_have_operation $5 {
+//   request {
+//     operation 0 : string        #json:{canChitb:{{11,12},{14,15},..},
+//     canPeng:card, canGangtb={11=11,13=13,..}, canHutb:{1,2,3}}
+//                                  #      能吃            能碰           能杠
+//                                  能胡
+//   }
+// }
+
+// #玩家碰牌
+// game_peng_card $6 {
+//   request {
+//     chair_id 0 : integer
+//     card 1 : integer           #要碰的牌
+//   }
+// }
+
+// #玩家杠牌
+// game_gang_card $7 {
+//   request {
+//     chair_id 0 : integer
+//     card 1 : integer          #要杠的牌
+//     gang_type 2 : integer     #1.梭杠2.暗杠3.明杠
+// 	lose_chair 3 : integer    #放杠的玩家
+//   }
+// }
+
+// #玩家吃牌
+// game_chi_card $8 {
+//   request {
+//     chair_id 0 : integer
+//     card 1 : integer           			 #要吃的牌:22
+//     card_table 2 : *integer              #待吃的牌:{21,23}
+//   }
+// }
+
+// #玩家胡牌
+// game_hu_card $9 {
+//   request {
+//     chair_id 0 : integer                  #胡牌玩家chair_id
+//     card_table 1 : *integer               #胡牌手牌
+//   }
+// }
+
+// .player_balance_info {
+//   huType 0 : string                #jsonG_HuScore_Type类型参数
+//   fishCard 1 : string              #json中鱼
+//   gangType 2 : string              #json
+//   {anGang:1,jieGang:1,fangGang:1,mingGang:1} json
+//                                    # 暗杠数    接杠数    放杠数     明杠数
+//   huCard 3 : integer               #显示胡的牌
+//   handCard 4 : string              #json手牌
+//   point 5 : integer				   # 当局获得分数
+//   total_point 6: integer           # 玩家当前总分数
+// }
+
+// #单局游戏结束
+// game_game_end $10 {
+//   request {
+//     game_index 0 : integer           #当前局数
+//     hu_chairs 1 : *integer           #胡牌玩家chair_id
+//     banker 2 : integer               #庄
+//     #fishpond  3 : *integer          #鱼池
+// 	fishpond  3 : string             #鱼池
+//     player_balance 4 : *player_balance_info  #玩家当局结算信息
+//     isdeuce 5 : boolean              #是否平局(解散不算)
+//   }
+// }
+
+// .player_balance_result {
+//     uid 0 : integer
+//     point 1 : integer
+//     huPai 2 : integer
+//     dianPao 3 : integer
+//     anGang 4 : integer
+//     mingGang 5 : integer
+//     zhongYu 6 : integer
+// }
+
+// #大局结算
+// game_balance_result $11 {
+//   request {
+//     room_id 0 : string
+//     player_result 1 : *player_balance_result
+//   }
+// }
+
+// #倒计时显示在谁头上
+// game_post_timeout_chair $12 {
+//   request {
+//     chair_id 0 : integer
+//   }
+// }
+
+// 房间桌子属性 s -> c
+message RoomArg {
+  // 1匹配 2好友 3比赛
+  int32 Type = 14;
+  bool Enable = 1;    // true开启 false关闭
+  uint32 RoomId = 2;  // ID
+  uint64 DeskID = 3;
+  string Name = 4;          // 房间别名
+  uint32 FeeType = 5;       // 服务费类型 1:金币 2:钻石
+  uint32 Fee = 6;           // 服务费
+  uint32 BaseScore = 7;     // 底分
+  uint64 EnterMin = 8;      // 进入下限
+  uint64 EnterMax = 9;      // 进入上限
+  uint64 TopScore = 10;     // 封顶值
+  uint32 SeatCnt = 11;      // 座位数
+  uint32 PaymentType = 12;  // 支付方式 1:个人支付 2:平局支付
+  uint32 LoopCnt = 13;      // 局数
+  bool CheckDistance = 15;  // 距离判断
+}
+
+// 匹配场配置 s -> c
+message MatchConfig {
+  repeated RoomArg RoomList = 1;  // 房间列表
+}
+
+// lua-pb不支持 repeated基本类型
+message uint32XX {
+  uint32 T = 1;
+}
+
+//
+message RoundInfo {
+  uint32 LoopCnt = 1;  // 局数
+  uint32 Fee = 2;      // 费用
+}
+
+// 好友场配置模板 s -> c
+message FriendsConfigTpl {
+  uint32 BaseScoreLow = 1;            // 底分最小值
+  uint32 BaseScoreHigh = 2;           // 底分最大值
+  repeated uint32XX FeeType = 3;      // 服务费类型 1:金币 2:钻石
+  repeated uint32XX PaymentType = 4;  // 支付方式 1:个人支付 2:平局支付
+  repeated RoundInfo RInfo = 5;
+  //
+  RoomArg Def = 6;  // 默认配置
+}
+
+// 玩家信息 s -> c
+message DeskUserInfo {
+  pbcommon.UserInfo Info = 1;
+  uint32 Dir = 2;  // 方位
+  UserGameStatus Status = 3;
+  uint32 Time = 4;  // 剩余时间
+  CallCode Call = 5;
+  RobCode Rob = 6;
+  DoubleCode Double = 7;
+  OperMask Oper = 8;
+  int32 Mask = 9;  // 打牌阶段 操作类型组合
+  // bool IsFreeOut = 10; // 是否自由出牌
+  bytes LastCards = 10;        // 最后出牌
+  CardType Lct = 11;           // 最后出牌类型
+  bytes HaveCards = 12;        // 手牌
+  uint32 HaveCardCount = 13;   // 手牌数量
+  bool IsTrustee = 14;         // 托管状态
+  uint32 Mul = 15;             // 个人当前倍数
+  bool DoubleEnable = 16;      // true 能加倍
+  uint32 BreakGameAgree = 17;  // 解散游戏同意 0未投票 1同意 2反对
+}
+
+// 已出牌数量
+message OuterCardCount {
+  uint32 Level = 1;  // 1 ~ 15 [3 4 5 6 7 8 9 10 J Q K A 2 小王 大王]
+  uint32 Count = 2;
+}
+
+// 断线重连、进入桌子 桌子信息 s -> c
+message DeskInfo {
+  string GameName = 1;  // 游戏名称 ddz
+  RoomArg Arg = 2;
+  GameStatus Status = 3;
+  uint64 Landlord = 4;               // 地主UserID
+  uint64 Current = 5;                // 当前UserID
+  bytes BackCards = 6;               // 底牌
+  BackCardType Bct = 7;              // 底牌类型
+  uint32 BackMul = 8;                // 底牌倍数
+  uint32 CurrLoopCnt = 9;            // 当前局数
+  uint64 BreakGameStartUserID = 10;  // 解散游戏发起人UserID
+  uint64 CreateUserID = 11;
+  uint64 CurrSeq = 12;  // 当前操作人的seq
+  uint32 BreakGameLeftTime = 13;
+  repeated DeskUserInfo GameUser = 14;  // 准备的玩家信息
+}
+
+message GameStartNotif {
+  uint32 CurrLoopCnt = 1;  // 当前局数
+                           //
+}
+
+// 玩家准备 c -> s
+message UserReadyReq {
+}
+
+message UserReadyRsp {
+  // 1 成功准备
+  // 2 游戏不在等待状态
+  uint32 Code = 1;
+}
+
+message UserGameStatusBroadcast {
+  uint64 UserID = 1;
+  UserGameStatus Status = 2;
+}
+
+// 发牌 s -> c
+message GiveCard {
+  bytes Cards = 1;
+}
+
+// 叫地主通知 s -> c
+message CallNotif {
+  uint64 UserID = 1;
+  uint32 Time = 2;
+}
+
+// 叫地主操作 c -> s
+message UserCall {
+  CallCode Code = 1;
+}
+
+// 叫地主广播 s -> c
+message CallBroadcast {
+  uint64 UserID = 1;
+  CallCode Code = 2;
+}
+
+// 抢地主通知 s -> c
+message RobNotif {
+  uint64 UserID = 1;
+  uint32 Time = 2;
+}
+
+// 抢地主操作 c -> s
+message UserRob {
+  RobCode Code = 1;
+}
+
+// 抢地主广播 s -> c
+message RobBroadcast {
+  uint64 UserID = 1;
+  RobCode Code = 2;
+  uint32 Mul = 3;   // 个人当前倍数
+  uint32 Rang = 4;  // 让牌数量 没实现
+}
+
+// 起底牌 s -> c
+message BackNotif {
+  uint64 Landlord = 1;  // 地主
+  bytes Cards = 2;      // 底牌
+  uint32 BackMul = 3;   // 底牌倍数
+  BackCardType Ct = 4;  // 底牌类型
+  uint32 Mul = 5;       // 个人当前倍数
+}
+
+// 加倍通知 s -> c
+message DoubleNotif {
+  bool Enable = 1;  // true 能加倍
+  uint32 Time = 2;
+}
+
+// 加倍操作 c -> s
+message UserDouble {
+  DoubleCode Code = 1;
+}
+
+// 加倍广播 s -> c
+message DoubleBroadcast {
+  uint64 UserID = 1;
+  DoubleCode Code = 2;
+  uint32 Mul = 3;  // 个人当前倍数
+}
+
+// 操作通知 s -> c
+message OperNotif {
+  uint64 UserID = 1;   // 操作用户
+  int32 Mask = 2;      // 操作类型组合
+  uint32 Time = 3;     // 操作时间
+  bool IsFreeOut = 4;  // 是否自由出牌
+  uint64 Seq = 5;
+}
+
+// 用户操作 c -> s
+message UserOper {
+  OperMask Oper = 1;  // 操作类型
+  CardType Ct = 2;    // 出牌牌型
+  bytes Cards = 3;    // 扑克数据
+  uint64 Seq = 4;
+}
+
+// 出牌广播 s -> c
+message UserOperBroadcast {
+  uint64 UserID = 1;     // 出牌用户
+  OperMask Oper = 2;     // 操作类型
+  CardType Ct = 3;       // 出牌类型
+  bytes Cards = 4;       // 扑克数据
+  bool IsFreeOut = 5;    // 是否自由出牌
+  bool IsTrust = 6;      // 是否托管出牌 是否服务器出牌
+  uint32 LeftCount = 7;  // 剩余牌数
+  uint32 Mul = 8;        // 个人当前倍数
+}
+
+message TipsCard {
+  CardType Ct = 1;  // 出牌类型
+  bytes Cards = 2;  // 扑克数据
+}
+
+// 出牌提示 s -> c
+message TipsCards {
+  repeated TipsCard Tips = 1;
+}
+
+// 用户获取倍数 c -> s
+message MultipleReq {
+}
+
+message UserDoubleInfo {
+  uint64 UserID = 1;
+  uint32 D = 2;
+}
+
+message MultipleRsp {
+  uint32 Init = 1;                     // 初始倍数 这个好像没用
+  uint32 CallRob = 2;                  // 叫抢倍数
+  uint32 Back = 3;                     // 底牌倍数
+  uint32 Bomb = 4;                     // 炸弹倍数
+  uint32 Spring = 5;                   // 春天倍数
+  repeated UserDoubleInfo Double = 6;  // 玩家加倍
+}
+
+// 用户托管 c -> s
+message UserTrustee {
+  bool IsTrustee = 1;  // true托管  false不托管
+}
+
+// 托管广播 s -> c
+message TrusteeBroadcast {
+  uint64 UserID = 1;
+  bool IsTrustee = 2;
+}
+
+// 结束时玩家的信息 s -> c
+message UserEndInfo {
+  uint64 UserID = 1;
+  uint32 EndStatus = 2;  // 结束状态 0:正常 1:破产 2:封顶
+  bytes Cards = 3;       // 剩余牌
+  uint32 FeeType = 4;    // 服务费类型 1:金币 2:钻石
+  int64 Change = 5;      // 变化
+  uint64 Curr = 6;       // 最新
+  uint32 Mul = 7;        // 个人当前倍数
+}
+
+// 游戏结束 s -> c
+message GameOverInfo {
+  uint32 EndType = 1;  // 结束类型 1正常结束 2解散
+  bool IsSpring = 2;
+  repeated UserEndInfo User = 3;
+}
+
+message WealthChange {
+  uint64 UserID = 1;
+  int64 Change = 2;
+}
+
+message OneRound {
+  uint32 RoundID = 1;
+  repeated WealthChange Change = 2;
+}
+
+// 排行榜
+message RankInfo {
+  uint32 Order = 1;  // 排名
+  uint64 UserID = 2;
+  uint32 RoundSum = 3;  // 对局数
+  uint32 WinSum = 4;    // 胜局
+  int64 ChangeSum = 5;
+}
+
+// 战绩 s -> c
+message WarRecord {
+  repeated RankInfo Rank = 1;
+  repeated OneRound Detail = 2;
+}
+
+// 查询战绩 c -> s
+message QueryWarRecord {
+}
+
+// 玩家提议解散游戏 c -> s
+message UserProposeBreakGame {
+}
+
+// 解散游戏投票开始 s -> c
+message BreakGameVoteStart {
+  uint64 UserID = 1;  // 发起人
+  uint32 Time = 2;    // 剩余时间
+}
+
+// 用户投票 c -> s
+message UserBreakGameVote {
+  bool Agree = 1;  // 赞成
+}
+
+// 用户投票广播 s -> c
+message BreakGameVoteBroadcast {
+  uint64 UserID = 1;
+  bool Agree = 2;  // 赞成
+}
+
+// 解散游戏投票结束
+message BreakGameVoteEnd {
+  // 结果 1通过 2拒绝
+  uint32 Code = 1;
+}
+
+// 错误通知 s -> c
+message ErrNotif {
+  // 1 出牌
+  uint32 ErrType = 1;
+}
+
+// c -> s
+message ChatReq {
+  uint64 SenderUserID = 1;
+  uint64 RecverUserID = 2;
+  uint32 MsgID = 3;
+  string FileURL = 4;
+}
+
+// s -> c
+message ChatBroadcast {
+  uint64 SenderUserID = 1;
+  uint64 RecverUserID = 2;
+  uint32 MsgID = 3;
+  string FileURL = 4;
+}

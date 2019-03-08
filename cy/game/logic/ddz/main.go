@@ -47,7 +47,7 @@ func initLog() {
 			panic(err)
 		}
 	} else {
-		logName := fmt.Sprintf("ddz.log")
+		logName := fmt.Sprintf("log/ddz.log")
 		file, err := os.OpenFile(logName, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
 		if err == nil {
 			l.SetOutput(file)
