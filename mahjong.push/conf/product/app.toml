@@ -1,0 +1,8 @@
+# apns p12 文件路径
+apns_p12_file="conf/product/aps.p12"
+# apns p12 文件密码
+apns_p12_passwd="123"
+# 小米push secret key
+mi_secret_key="xxooxxoo"
+# 小米push包名
+mi_package="com.maxpanda.gzmahjong"

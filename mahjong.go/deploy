@@ -1,0 +1,234 @@
+#!/bin/sh
+# 项目的上层目录
+srcdir="$GOPATH/src"
+#项目名称
+project="mahjong.go"
+#项目路径
+projectdir="$srcdir/$project"
+#nohup存放目录
+nohupDir="/data/mahjong.nohup"
+
+#服务器配置
+# 本地环境
+# local_9090[0]="127.0.0.1" # 服务器ip
+# local_9090[1]=9090 # 服务器端口
+# local_9090[2]="local" # 游戏环境 local|qa|product
+# local_9090[3]=2000 # 机器人起始id
+# local_9090[4]=5000 # 机器人上限数, 如果此值设置为0, 表示不支持机器人
+# local_9090[5]=1 # 回应操作间隔
+# local_9090[6]=1 #回应操作随机间隔
+# local_9090[7]=1 #解散回应操作间隔
+# local_9090[8]=1 #解散回应操作随机间隔
+# local_9090[9]=1 #加入操作间隔
+# local_9090[10]=1 #加入操作随机间隔
+local_9000=("127.0.0.1" 9000 "local")
+#aws
+aws_9000=("172.31.18.142" 9000 "qa")
+aws_8999=("172.31.18.142" 8999 "qa")
+#测试服：:q
+qa_9000=("10.26.239.72" 9000 "qa")
+qa_8999=("10.26.239.72" 8999 "qa")
+qa_8998=("10.26.239.72" 8998 "qa")
+qa_8997=("10.26.239.72" 8997 "qa")
+qa_8996=("10.26.239.72" 8996 "qa")
+qa_8995=("10.26.239.72" 8995 "qa")
+qa_8994=("10.26.239.72" 8994 "qa")
+qa_8993=("10.26.239.72" 8993 "qa")
+qa_8992=("10.26.239.72" 8992 "qa")
+qa_8991=("10.26.239.72" 8991 "qa")
+qa_8990=("10.26.239.72" 8990 "qa")
+#g1
+g1_8990=("10.27.96.45" 8990 "product")
+g1_8991=("10.27.96.45" 8991 "product")
+g1_8992=("10.27.96.45" 8992 "product")
+g1_8993=("10.27.96.45" 8993 "product")
+g1_8994=("10.27.96.45" 8994 "product")
+g1_8995=("10.27.96.45" 8995 "product")
+g1_8996=("10.27.96.45" 8996 "product")
+g1_8997=("10.27.96.45" 8997 "product")
+g1_8998=("10.27.96.45" 8998 "product")
+g1_8999=("10.27.96.45" 8999 "product")
+#g2
+g2_8980=("10.28.35.195" 8980 "product")
+g2_8981=("10.28.35.195" 8981 "product")
+g2_8982=("10.28.35.195" 8982 "product")
+g2_8983=("10.28.35.195" 8983 "product")
+g2_8984=("10.28.35.195" 8984 "product")
+g2_8985=("10.28.35.195" 8985 "product")
+g2_8986=("10.28.35.195" 8986 "product")
+g2_8987=("10.28.35.195" 8987 "product")
+g2_8988=("10.28.35.195" 8988 "product")
+g2_8989=("10.28.35.195" 8989 "product")
+#g3
+g3_8970=("10.27.96.49" 8970 "product")
+g3_8971=("10.27.96.49" 8971 "product")
+g3_8972=("10.27.96.49" 8972 "product")
+g3_8973=("10.27.96.49" 8973 "product")
+g3_8974=("10.27.96.49" 8974 "product")
+g3_8975=("10.27.96.49" 8975 "product")
+g3_8976=("10.27.96.49" 8976 "product")
+g3_8977=("10.27.96.49" 8977 "product")
+g3_8978=("10.27.96.49" 8978 "product")
+g3_8979=("10.27.96.49" 8979 "product")
+#g4
+g4_8960=("10.132.21.143" 8960 "product")
+g4_8961=("10.132.21.143" 8961 "product")
+g4_8962=("10.132.21.143" 8962 "product")
+g4_8963=("10.132.21.143" 8963 "product")
+g4_8964=("10.132.21.143" 8964 "product")
+g4_8965=("10.132.21.143" 8965 "product")
+g4_8966=("10.132.21.143" 8966 "product")
+g4_8967=("10.132.21.143" 8967 "product")
+g4_8968=("10.132.21.143" 8968 "product")
+g4_8969=("10.132.21.143" 8969 "product")
+#g5
+g5_8950=("10.80.109.66" 8950 "product")
+g5_8951=("10.80.109.66" 8951 "product")
+g5_8952=("10.80.109.66" 8952 "product")
+g5_8953=("10.80.109.66" 8953 "product")
+g5_8954=("10.80.109.66" 8954 "product")
+g5_8955=("10.80.109.66" 8955 "product")
+g5_8956=("10.80.109.66" 8956 "product")
+g5_8957=("10.80.109.66" 8957 "product")
+g5_8958=("10.80.109.66" 8958 "product")
+g5_8959=("10.80.109.66" 8959 "product")
+#g6
+g6_8940=("10.80.109.18" 8940 "product")
+g6_8941=("10.80.109.18" 8941 "product")
+g6_8942=("10.80.109.18" 8942 "product")
+g6_8943=("10.80.109.18" 8943 "product")
+g6_8944=("10.80.109.18" 8944 "product")
+g6_8945=("10.80.109.18" 8945 "product")
+g6_8946=("10.80.109.18" 8946 "product")
+g6_8947=("10.80.109.18" 8947 "product")
+g6_8948=("10.80.109.18" 8948 "product")
+g6_8949=("10.80.109.18" 8949 "product")
+
+# 获取服务器配置
+getServer () {
+	eval server=(\${${1}[@]})
+	if [ ! -n "$server" ]; then
+		echo $"服务器未支持: $1"
+		exit 2
+	fi
+}
+
+# 更新代码
+pull () {
+	cd $projectdir
+	echo "git pull --tags"
+	git pull --tags
+	echo "git checkout [$1]..."
+	git checkout $1
+	git pull
+	cd -
+}
+
+# 编译安装
+install () {
+	cd $projectdir
+
+	# 编译主程序
+	echo "go build -o $GOBIN/$project.$1"
+	go build -o "$GOBIN/$project.$1"
+
+	cd -
+}
+
+# 更新代码并且编译安装
+inpull() {
+	# 更新代码
+	pull $1
+
+	# 编译安装
+	install $2
+}
+
+#启动新进程
+start() {
+	cd $projectdir
+	
+	getServer $2
+	
+	echo "cd $projectdir"
+	cd $projectdir
+
+	# 服务器ip
+	host=${server[0]}
+	# 开启的端口
+	port=${server[1]}
+	# 游戏环境 local|qa|product
+	env=${server[2]}
+
+	echo "启动主进程"
+	echo "nohup ../../bin/$project.$1 -h=$host -p=$port -env=$env -v=$1 >> $nohupDir/nohup.out.$1 2>&1 &"
+	nohup ../../bin/$project.$1 -h=$host -p=$port -env=$env -v=$1 >> $nohupDir/nohup.out.$1 2>&1 &
+	echo "服务启动完成..."
+	cd -
+}
+
+# 关闭进程
+stop() {
+	getServer $1
+
+	echo "关闭服务器 $1"
+	ps -ef | grep "mahjong.go" | grep "${server[0]}" | grep "${server[1]}" | grep -v grep |awk '{print $2}' |xargs kill
+	echo "进程已关闭"
+}
+
+deploy () {
+	# 更新代码 pull tag/branch
+	pull $1
+	# 编译安装 install version
+	install $2
+	# 关闭旧程序 stop server
+	stop $3
+	# 开启新服务 start server version
+	start $2 $3
+}
+
+help () {
+	echo "Usage:"
+	echo "1. ./deploy pull tag/branch, eg: ./deploy pull prod_1.4.2"
+	echo "2. ./deploy install version, eg: ./deploy install 1.4.2"
+	echo "3. ./deploy inpull tag/branch version, eg: ./deploy inpull prod_1.4.2 1.4.2"
+	echo "4. ./deploy stop server, eg: ./deploy stop local_9090"
+	echo "5. ./deploy start server version, eg: ./deploy start 1.4.2 local_9090"
+
+	echo "Usage:"
+	echo "./deploy deploy server version tag/branch, eg: ./deploy deploy prod_1.4.2 1.4.3 local_9090"
+}
+
+all () {
+	ps -ef | grep $project | grep -v grep
+}
+
+case "$1" in 
+	help)
+		$1
+		;;
+	start)
+		$1 $2 $3
+		;;
+	stop)
+		$1 $2
+		;;
+	pull)
+		$1 $2
+		;;
+	install)
+		$1 $2
+		;;
+	inpull)
+		$1 $2 $3
+		;;
+	deploy)
+		$1 $2 $3 $4
+		;;
+	all)
+		$1
+		;;
+	*)
+	help
+	exit 2
+esac

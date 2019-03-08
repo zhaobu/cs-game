@@ -1,0 +1,23 @@
+# 报警邮件设置
+# 发件服务器地址
+mail_host="smtp.exmail.qq.com"
+# 发件服务器端口
+mail_port=465
+# 报警发送邮件地址
+mail_from_address="monitor2@maxpanda.cn"
+# 邮件来源from
+mail_from_name="monitor2"
+# 报警发送邮箱密码
+mail_from_password="xxooxxoo"
+# 报警对象
+mail_alarm_address_list="wanghu@maxpanda.cn"
+
+# 报警短信设置
+# 密钥id
+sms_access_key_id="xxooxxoo"
+# 密钥密码
+sms_access_key_secret="xxooxxoo"
+# 密钥签名
+sms_access_key_sign_name="趣来网络"
+# 报警对象手机号, 多个用","连接
+sms_number_list="xxooxxoo,xxooxxoo"

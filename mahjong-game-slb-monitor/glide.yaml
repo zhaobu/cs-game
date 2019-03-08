@@ -1,0 +1,17 @@
+package: mahjong-game-slb-monitor
+import:
+- package: github.com/BurntSushi/toml
+  version: v0.3.0
+- package: github.com/astaxie/beego
+  version: v1.8.3
+  subpackages:
+  - logs
+- package: github.com/fwhappy/util
+- package: github.com/garyburd/redigo
+  version: v1.1.0
+  subpackages:
+  - redis
+- package: github.com/sparrc/go-ping
+- package: github.com/bitly/go-simplejson
+  version: v0.5.0
+- package: github.com/fwhappy/mail

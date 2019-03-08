@@ -1,0 +1,11 @@
+# 所属环境
+env="product"
+# 心跳间隔(秒)
+heartbeat_interval=3
+# 屏蔽词过滤
+sensitive_url="http://xxooxxoo:53782/replace"
+# 报警设置
+# 发件服务器地址
+alarm_host="http://xxooxxoo:13579/alarm/mail"
+# 报警标题
+alarm_subject="[正式服]俱乐部服务重启警报"

@@ -1,0 +1,16 @@
+package: mahjong.club
+import:
+- package: github.com/BurntSushi/toml
+  version: v0.3.0
+- package: github.com/astaxie/beego
+  version: v1.8.3
+  subpackages:
+  - logs
+- package: github.com/fwhappy/mahjong
+  subpackages:
+  - protocal
+  - setting
+- package: github.com/fwhappy/util
+- package: github.com/fwhappy/mail
+  subpackages:
+  - exmail

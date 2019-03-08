@@ -1,0 +1,43 @@
+package config
+
+const (
+	TOKEN_SECRET_KEY = "Tq-TqRIqf8fuck" // token密钥
+)
+
+const (
+	// 用户token
+	CACHE_KEY_USER_TOKEN = "mahjong:TOKEN:%v"
+	// 用户当前房间id
+	CACHE_KEY_USER_ROOMID = "USER:ROOMID:%v"
+	// 用户当前房间id
+	CACHE_KEY_ROOM_NUMBER_ID = "ROOM:NUMBER:ID:%v"
+	// 房间对应的remote
+	CACHE_KEY_ROOM_REMOTE = "ROOM:REMOTE:%v"
+	// 活跃服务器列表
+	CACHE_KEY_REMOTE_USER_CNT = "HALL:REMOTE:USER:CNT"
+	// 大厅房间列表
+	CACHE_KEY_HALL_ROOM_IDS = "HALL:ROOM:IDS:%v"
+	// 游戏服配置
+	CACHE_KEY_GAME_SERVERS = "GAME_SERVERS"
+	// 预发布规则
+	CACHE_KEY_GAME_PREVIEW = "GAME_PREVIEW"
+	// 灰度规则
+	CACHE_KEY_GAME_GRAY = "GAME_GRAY_SERVERS"
+	// 所有游戏服真实IP列表
+	CACHE_KEY_SERVER_LISTS = "SERVER:LISTS"
+	// 不健康的SLB列表
+	CACHE_KEY_SLBS_INVALID = "SLBS:INVALID"
+)
+
+const (
+	// ACTIVE_TIMEOUT 预发布规则数据读取过期时间
+	ACTIVE_TIMEOUT = int64(1)
+	// PREVIEW_TIMEOUT 预发布规则数据读取过期时间
+	PREVIEW_TIMEOUT = int64(10)
+	// GAME_SERVERS_TIMEOUT 游戏服列表读取过期时间
+	GAME_SERVERS_TIMEOUT = int64(10)
+	// GRAY_TIMEOUT 灰度配置读取过期时间
+	GRAY_TIMEOUT = int64(10)
+	// CONVERSION_TIMEOUT IP地址切换超时时间
+	CONVERSION_TIMEOUT = int64(5)
+)

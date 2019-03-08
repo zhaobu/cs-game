@@ -1,0 +1,21 @@
+syntax = "proto3";
+package misc;
+
+message SomeMsg {
+    string Name    = 1;
+    bytes  Payload = 2;    
+}
+
+message GroupMsg {
+    string Name = 1;
+    repeated SomeMsg Msgs = 2;
+}
+
+// 下面的先不用
+message FragMsg {
+    uint64 ID      = 1;
+    string Name    = 2;
+    bytes  Payload = 3;
+    uint32 CurrIdx = 4;
+    uint32 Total   = 5;
+}

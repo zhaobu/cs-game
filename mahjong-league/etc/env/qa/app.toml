@@ -1,0 +1,10 @@
+# 所属环境
+env="qa"
+# 选服地址
+select_server_url="http://127.0.0.1:8081/leagueRoomServer"
+# 获取我的房间信息接口
+get_my_server_url="http://127.0.0.1:8081/client/getMyServerForLocal"
+# 通知发奖接口
+rewards_notify_url="http://127.0.0.1:8484/client/notifyLeagueReward"
+# 网关地址列表
+gateway_remotes = ["127.0.0.1:29000"]

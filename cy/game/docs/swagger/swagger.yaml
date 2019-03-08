@@ -1,0 +1,148 @@
+definitions:
+  pbcommon.UserInfo:
+    properties:
+      Agent:
+        type: string
+      Gold:
+        type: integer
+      GoldPre:
+        type: integer
+      Latitude:
+        type: number
+      Longitude:
+        type: number
+      Masonry:
+        type: integer
+      MasonryPre:
+        type: integer
+      Mobile:
+        type: string
+      Name:
+        type: string
+      Profile:
+        type: string
+      SessionID:
+        type: string
+      Sex:
+        type: string
+      UserID:
+        type: integer
+      WxID:
+        type: string
+    type: object
+  web.BindAgentReq:
+    properties:
+      agent:
+        type: string
+      uid:
+        type: integer
+    type: object
+  web.RspCode: {}
+  web.UpdateWealthReq:
+    properties:
+      change:
+        type: integer
+      event:
+        type: integer
+      type:
+        type: integer
+      uid:
+        type: integer
+    type: object
+info:
+  contact: {}
+  license: {}
+paths:
+  /bindagent:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 'agent: 代理ID'
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/web.BindAgentReq'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: 成功时返回用户信息
+          schema:
+            $ref: '#/definitions/pbcommon.UserInfo'
+            type: object
+        "1":
+          description: 绑定失败
+          schema:
+            $ref: '#/definitions/web.RspCode'
+            type: object
+      summary: 绑定代理
+  /gamelist:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: 成功
+          schema:
+            type: string
+      summary: 查询游戏列表
+  /updatewealth:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: type:1金币 2砖石 event:事件类型 暂时未定义
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/web.UpdateWealthReq'
+          type: object
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: 成功时返回用户信息
+          schema:
+            $ref: '#/definitions/pbcommon.UserInfo'
+            type: object
+        "1":
+          description: 更新失败
+          schema:
+            $ref: '#/definitions/web.RspCode'
+            type: object
+      summary: 更新用户财富
+  /userinfo/{userid}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 用户ID
+        in: path
+        name: userid
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "0":
+          description: 用户信息
+          schema:
+            $ref: '#/definitions/pbcommon.UserInfo'
+            type: object
+        "2":
+          description: 用户ID无效
+          schema:
+            $ref: '#/definitions/web.RspCode'
+            type: object
+        "3":
+          description: 更新失败
+          schema:
+            $ref: '#/definitions/web.RspCode'
+            type: object
+      summary: 查询用户信息

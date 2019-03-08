@@ -1,0 +1,20 @@
+hash: a196316fadc18d57c776285ed340aa023467c40be20e65cfd64afd8a08411167
+updated: 2018-04-11T15:53:34.264408+08:00
+imports:
+- name: github.com/astaxie/beego
+  version: bf5c5626ab429e66d88602e1ab1ab5fbf4629a01
+  subpackages:
+  - logs
+- name: github.com/bitly/go-simplejson
+  version: aabad6e819789e569bd6aabf444c935aa9ba1e44
+- name: github.com/BurntSushi/toml
+  version: b26d9c308763d68093482582cea63d69be07a0f0
+- name: github.com/fwhappy/util
+  version: 7e2196226e07c3abb2e286c772ff479a586395b3
+- name: github.com/google/flatbuffers
+  version: 20a400e940634108bad812f571582eeffc728eac
+  subpackages:
+  - go
+- name: github.com/juju/errors
+  version: c7d06af17c68cd34c835053720b21f6549d9b0ee
+testImports: []

@@ -1,0 +1,13 @@
+[node]
+[node.redisNode1]
+host="127.0.0.1"
+port=7480
+auth=""
+[node.redisNode2]
+host="127.0.0.1"
+port=7480
+auth=""
+[node.redisNode2Slave]
+host="127.0.0.1"
+port=7480
+auth=""

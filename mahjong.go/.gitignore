@@ -1,0 +1,11 @@
+/.idea/
+/.DS_Store
+/.git/
+/tests/
+/conf/local/
+/conf/env/local/
+/flatbuffers.sh
+mahjong.go
+deploy.sh
+CONTRIBUTING.md
+.vscode

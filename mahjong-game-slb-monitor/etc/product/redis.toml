@@ -1,0 +1,5 @@
+[node]
+[node.redisNode]
+host="xxooxxoo"
+port=6379
+auth="xxooxxoo"

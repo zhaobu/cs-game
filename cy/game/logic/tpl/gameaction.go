@@ -1,0 +1,49 @@
+package tpl
+
+import (
+	"context"
+	"cy/game/codec"
+	"cy/game/pb/game"
+	"fmt"
+	"runtime/debug"
+
+	"github.com/sirupsen/logrus"
+)
+
+func (t *RoundTpl) GameAction(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
+	pb, err := codec.Msg2Pb(args)
+	if err != nil {
+		t.Log.Error(err.Error())
+		return err
+	}
+
+	req, ok := pb.(*pbgame.GameAction)
+	if !ok {
+		err = fmt.Errorf("not *pbgame.GameAction")
+		t.Log.Error(err.Error())
+		return
+	}
+
+	t.Log.WithFields(logrus.Fields{"uid": args.UserID}).Infof("recv %s %+v ", args.Name, *req)
+
+	defer func() {
+		r := recover()
+		if r != nil {
+			t.Log.WithFields(logrus.Fields{"uid": args.UserID}).Warnf("r:%v stack:%s", r, string(debug.Stack()))
+		}
+	}()
+
+	for _, v := range t.plugins {
+		if plugin, ok := v.(BeforeGameActionPlugin); ok {
+			plugin.BeforeGameAction(req)
+		}
+	}
+
+	for _, v := range t.plugins {
+		if plugin, ok := v.(AfterGameActionPlugin); ok {
+			plugin.AfterGameAction(req)
+		}
+	}
+
+	return nil
+}

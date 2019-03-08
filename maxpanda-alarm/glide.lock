@@ -1,0 +1,28 @@
+hash: 87758eae25ee3a4ccd0d42c18109105b425cb098b1fb23fdeac115bd41d33d5d
+updated: 2017-09-29T17:35:05.924596497+08:00
+imports:
+- name: github.com/astaxie/beego
+  version: d96289a81bf67728cff7a19b067aaecc65a62ec6
+  subpackages:
+  - logs
+- name: github.com/bitly/go-simplejson
+  version: aabad6e819789e569bd6aabf444c935aa9ba1e44
+- name: github.com/BurntSushi/toml
+  version: b26d9c308763d68093482582cea63d69be07a0f0
+- name: github.com/fwhappy/aliyun-sms
+  version: 4a871d3bea506ae91118bd0b4e5609468c7a4682
+  subpackages:
+  - app
+- name: github.com/fwhappy/mail
+  version: 5db7e165061ce11880a99c34a3449d26865d4d81
+  subpackages:
+  - exmail
+- name: github.com/fwhappy/util
+  version: d298f28fa90921bd1e00a2c27cc7afcfcc3962a4
+- name: github.com/KenmyZhang/aliyun-communicate
+  version: cde0c8a1efabc0a473e7e209b51e23734e19e477
+  subpackages:
+  - model
+- name: github.com/pborman/uuid
+  version: e790cca94e6cc75c7064b1332e63811d4aae1a53
+testImports: []

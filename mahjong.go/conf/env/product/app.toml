@@ -1,0 +1,36 @@
+# 所属环境
+env="product"
+# 服务器版本, latest表示最新
+version="1.9.4"
+#是否支持自定义牌, 0|1
+enable_define_tiles=0
+#消息推送地址
+push_url="http://xxooxxoo/client/push"
+# 是否允许用户加入随机房间, 0|1
+# 如果不允许, 会为每一个用户创建一个随机房间, 随后填充机器人
+enable_join_random_room=1
+# 是否允许指定随机房间的配置, 0|1
+enable_random_room_setting=0
+# 是否允许自动托管, 0|1
+enable_auto_hosting=1
+# 俱乐部的地址
+club_remote="xxooxxoo:38438"
+# 回放存储方式 redis|oss
+playback_save_type="oss"
+# oss 配置 回放存储
+oss_endpoint="oss-cn-hangzhou-internal.aliyuncs.com"
+oss_bucket="xxooxxoo"
+oss_access_key_id="xxooxxoo"
+oss_access_key_secret="xxooxxoo"
+# 用户头像地址
+user_avatar_url="http://xxooxxoo/icon/wxicon/%v/%v/%v/94.jpg"
+# 联赛服务器地址
+league_remote="xxooxxoo:31212"
+# 联赛服务器获取用户raceId地址
+leage_get_user_race_url="http://xxooxxoo:31213/getUserRace"
+# 网关地址列表
+gateway_remotes = ["xxooxxoo:29000","xxooxxoo:29001"]
+# 排位赛连胜奖励推送地址
+rank_win_streak_rewards_url = "http://xxooxxoo:8484/client/notifyWinStreak"
+# 选牌服务token验证地址
+selector_token_verify_url = "http://xxooxxoo:8484/client/notifyRecommend"

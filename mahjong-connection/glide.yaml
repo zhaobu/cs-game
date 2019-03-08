@@ -1,0 +1,16 @@
+package: mahjong-connection
+import:
+- package: github.com/BurntSushi/toml
+  version: v0.3.0
+- package: github.com/astaxie/beego
+  version: v1.9.2
+  subpackages:
+  - logs
+- package: github.com/bitly/go-simplejson
+  version: v0.5.0
+- package: github.com/fwhappy/util
+- package: github.com/google/flatbuffers
+  version: v1.9.0
+  subpackages:
+  - go
+- package: github.com/juju/errors

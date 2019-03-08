@@ -1,0 +1,11 @@
+# 所属环境
+env="local"
+# 心跳间隔(秒)
+heartbeat_interval=2
+# 屏蔽词过滤
+sensitive_url="http://127.0.0.1:53782/replace"
+# 报警设置
+# 发件服务器地址
+alarm_host="http://127.0.0.1:13579/alarm/mail"
+# 报警标题
+alarm_subject="[local]俱乐部服务重启警报"

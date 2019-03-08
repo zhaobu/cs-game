@@ -1,0 +1,36 @@
+hash: 886984d64f709f282d53a6dd6fc95d5cb702565cdac84db87f6cc9b676f577bd
+updated: 2017-05-04T14:16:09.72846329+08:00
+imports:
+- name: github.com/astaxie/beego
+  version: 90999717dda6193c6f970eec52e289b0a9e74998
+  subpackages:
+  - logs
+- name: github.com/bitly/go-simplejson
+  version: aabad6e819789e569bd6aabf444c935aa9ba1e44
+- name: github.com/BurntSushi/toml
+  version: bbd5bb678321a0d6e58f1099321dfa73391c1b6f
+- name: github.com/garyburd/redigo
+  version: 8873b2f1995f59d4bcdd2b0dc9858e2cb9bf0c13
+  subpackages:
+  - internal
+  - redis
+- name: github.com/sideshow/apns2
+  version: 6ffbf017e660feff7df81e68de6482e263fae288
+  subpackages:
+  - certificate
+  - payload
+- name: github.com/yilee/xiaomi-push
+  version: 562fbb07388eaa3e1e359fd46809f5a0218e6edb
+- name: golang.org/x/crypto
+  version: 04eae0b62feaaf659a0ce2c4e8dc70b6ae2fff67
+  subpackages:
+  - pkcs12
+  - pkcs12/internal/rc2
+- name: golang.org/x/net
+  version: f315505cf3349909cdf013ea56690da34e96a451
+  subpackages:
+  - context
+  - context/ctxhttp
+  - http2
+  - http2/hpack
+testImports: []
