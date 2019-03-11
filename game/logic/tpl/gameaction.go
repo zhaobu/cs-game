@@ -11,6 +11,13 @@ import (
 )
 
 func (t *RoundTpl) GameAction(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
+	defer func() {
+		r := recover()
+		if r != nil {
+			t.Log.WithFields(logrus.Fields{"uid": args.UserID}).Warnf("r:%v stack:%s", r, string(debug.Stack()))
+		}
+	}()
+
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
 		t.Log.Error(err.Error())
@@ -24,26 +31,14 @@ func (t *RoundTpl) GameAction(ctx context.Context, args *codec.Message, reply *c
 		return
 	}
 
-	t.Log.WithFields(logrus.Fields{"uid": args.UserID}).Infof("recv %s %+v ", args.Name, *req)
-
-	defer func() {
-		r := recover()
-		if r != nil {
-			t.Log.WithFields(logrus.Fields{"uid": args.UserID}).Warnf("r:%v stack:%s", r, string(debug.Stack()))
-		}
-	}()
-
 	for _, v := range t.plugins {
-		if plugin, ok := v.(BeforeGameActionPlugin); ok {
-			plugin.BeforeGameAction(req)
+		if plugin, ok := v.(GameActionPlugin); ok {
+			err = plugin.HandleGameAction(args.UserID, req)
+			if err != nil {
+				break
+			}
 		}
 	}
 
-	for _, v := range t.plugins {
-		if plugin, ok := v.(AfterGameActionPlugin); ok {
-			plugin.AfterGameAction(req)
-		}
-	}
-
-	return nil
+	return
 }

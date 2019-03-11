@@ -6,41 +6,88 @@ import (
 	"cy/game/pb/game"
 	"encoding/json"
 
-	"github.com/gogo/protobuf/proto"
+	"github.com/golang/protobuf/proto"
 	"github.com/gomodule/redigo/redis"
 	"github.com/sirupsen/logrus"
 )
 
 type (
-	BeforeMakeDeskReqPlugin interface {
-		BeforeMakeDeskReq(*pbgame.MakeDeskReq) error
+	DestroyDeskReqPlugin interface {
+		HandleDestroyDeskReq(uid uint64, req *pbgame.DestroyDeskReq) error
 	}
 
-	AfterMakeDeskReqPlugin interface {
-		AfterMakeDeskReq(*pbgame.MakeDeskReq) error
+	ExitDeskReqPlugin interface {
+		HandleExitDeskReq(uid uint64, req *pbgame.ExitDeskReq) error
 	}
 
-	BeforeGameActionPlugin interface {
-		BeforeGameAction(*pbgame.GameAction) error
+	GameActionPlugin interface {
+		HandleGameAction(uid uint64, req *pbgame.GameAction) error
 	}
 
-	AfterGameActionPlugin interface {
-		AfterGameAction(*pbgame.GameAction) error
+	JoinDeskReqPlugin interface {
+		HandleJoinDeskReq(uid uint64, req *pbgame.JoinDeskReq) error
+	}
+
+	MakeDeskReqPlugin interface {
+		HandleMakeDeskReq(uid uint64, req *pbgame.MakeDeskReq, deskID uint64) error
+	}
+
+	QueryGameConfigReqPlugin interface {
+		HandleQueryGameConfigReq(uid uint64, req *pbgame.QueryGameConfigReq) error
 	}
 )
 
 type RoundTpl struct {
-	Log       *logrus.Entry
-	plugins   []interface{}
+	Log      *logrus.Entry
+	plugins  []interface{}
+	gameName string
+	gameID   string
+
 	redisPool *redis.Pool
+}
+
+func (t *RoundTpl) SetName(gameName, gameID string) {
+	t.gameName = gameName
+	t.gameID = gameID
 }
 
 func (t *RoundTpl) Add(p interface{}) {
 	t.plugins = append(t.plugins, p)
 }
 
-func (d *RoundTpl) toGate(pb proto.Message, uids ...uint64) error {
-	d.Log.Infof("send %v %s %+v", uids, proto.MessageName(pb), pb)
+func (t *RoundTpl) toGateNormal(loge *logrus.Entry, pb proto.Message, uids ...uint64) error {
+	t.Log.Infof("send %v %s %+v", uids, proto.MessageName(pb), pb)
+
+	msg := &codec.Message{}
+	err := codec.Pb2Msg(pb, msg)
+	if err != nil {
+		return err
+	}
+
+	var xx struct {
+		Msg  *codec.Message
+		Uids []uint64
+	}
+	xx.Msg = msg
+	xx.Uids = append(xx.Uids, uids...)
+
+	data, err := json.Marshal(xx)
+	if err != nil {
+		return err
+	}
+
+	rc := t.redisPool.Get()
+	defer rc.Close()
+
+	_, err = rc.Do("PUBLISH", "backend_to_gate", data)
+	if err != nil {
+		loge.Error(err.Error())
+	}
+	return err
+}
+
+func (t *RoundTpl) toGate(pb proto.Message, uids ...uint64) error {
+	t.Log.Infof("send %v %s %+v", uids, proto.MessageName(pb), pb)
 
 	notif := &pbgame.GameNotif{}
 	var err error
@@ -67,7 +114,7 @@ func (d *RoundTpl) toGate(pb proto.Message, uids ...uint64) error {
 		return err
 	}
 
-	rc := d.redisPool.Get()
+	rc := t.redisPool.Get()
 	defer rc.Close()
 
 	_, err = rc.Do("PUBLISH", "backend_to_gate", data)

@@ -18,11 +18,11 @@ import (
 )
 
 var (
-	consulAddr = flag.String("consulAddr", "192.168.1.128:8500", "consul address")
+	consulAddr = flag.String("consulAddr", "localhost:8500", "consul address")
 	basePath   = flag.String("base", "/cy_game", "consul prefix path")
 	addr       = flag.String("addr", "localhost:9201", "listen address")
 	release    = flag.Bool("release", false, "run mode release")
-	redisAddr  = flag.String("redisaddr", "192.168.1.128:6379", "redis address")
+	redisAddr  = flag.String("redisaddr", "192.168.0.90:6379", "redis address")
 	redisDb    = flag.Int("redisDb", 1, "redis db select")
 )
 
@@ -39,7 +39,7 @@ func initLog() {
 			logrus.SetOutput(os.Stdout)
 		}
 	} else {
-		logName := fmt.Sprintf("log/center.log")
+		logName := fmt.Sprintf("center.log")
 		file, err := os.OpenFile(logName, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
 		if err == nil {
 			logrus.SetOutput(file)

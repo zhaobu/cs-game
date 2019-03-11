@@ -17,7 +17,7 @@ import (
 )
 
 var (
-	consulAddr = flag.String("consulAddr", "192.168.1.128:8500", "consul address")
+	consulAddr = flag.String("consulAddr", "localhost:8500", "consul address")
 	basePath   = flag.String("base", "/cy_game", "consul prefix path")
 	addr       = flag.String("addr", "localhost:9301", "listen address")
 	release    = flag.Bool("release", false, "run mode release")
@@ -37,7 +37,7 @@ func initLog() {
 			logrus.SetOutput(os.Stdout)
 		}
 	} else {
-		logName := fmt.Sprintf("log/dbproxy.log")
+		logName := fmt.Sprintf("dbproxy.log")
 		file, err := os.OpenFile(logName, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
 		if err == nil {
 			logrus.SetOutput(file)

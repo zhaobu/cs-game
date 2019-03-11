@@ -19,12 +19,12 @@ var (
 	certFile   = flag.String("cert", "", "cert file")
 	keyFile    = flag.String("key", "", "key file")
 	useTLS     = flag.Bool("tls", false, "use TLS")
-	consulAddr = flag.String("consulAddr", "192.168.1.128:8500", "consul address")
+	consulAddr = flag.String("consulAddr", "localhost:8500", "consul address")
 	basePath   = flag.String("base", "/cy_game", "consul prefix path")
 	release    = flag.Bool("release", false, "run mode")
-	redisAddr  = flag.String("redisaddr", "192.168.1.128:6379", "redis address")
+	redisAddr  = flag.String("redisaddr", "192.168.0.90:6379", "redis address")
 	redisDb    = flag.Int("redisDb", 1, "redis db select")
-	mgoURI     = flag.String("mgo", "mongodb://192.168.1.128:27017/game", "mongo connection URI")
+	mgoURI     = flag.String("mgo", "mongodb://192.168.0.90:27017/game", "mongo connection URI")
 
 	mgr = newManager()
 
@@ -43,7 +43,7 @@ func initLog() {
 			logrus.SetOutput(os.Stdout)
 		}
 	} else {
-		logName := fmt.Sprintf("log/gate.log")
+		logName := fmt.Sprintf("gate.log")
 		file, err := os.OpenFile(logName, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
 		if err == nil {
 			logrus.SetOutput(file)

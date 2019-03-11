@@ -2,10 +2,14 @@ package tpl
 
 import (
 	"context"
+	"cy/game/cache"
 	"cy/game/codec"
+	"cy/game/db/mgo"
+	"cy/game/pb/common"
 	"cy/game/pb/game"
 	"fmt"
 	"runtime/debug"
+	"time"
 
 	"github.com/sirupsen/logrus"
 )
@@ -31,19 +35,88 @@ func (t *RoundTpl) MakeDeskReq(ctx context.Context, args *codec.Message, reply *
 		return
 	}
 
+	rsp := &pbgame.MakeDeskRsp{}
+	if req.Head != nil {
+		rsp.Head = &pbcommon.RspHead{Seq: req.Head.Seq}
+	}
+
 	t.Log.WithFields(logrus.Fields{"uid": args.UserID}).Infof("recv %s %+v ", args.Name, *req)
 
-	for _, v := range t.plugins {
-		if plugin, ok := v.(BeforeMakeDeskReqPlugin); ok {
-			plugin.BeforeMakeDeskReq(req)
+	var newDeskID uint64
+	newDeskID, err = cache.AllocDeskID()
+	if err != nil {
+		t.Log.Error(err.Error())
+		// TODO send
+		return
+	}
+
+	defer func() {
+		if err != nil {
+			cache.FreeDeskID(newDeskID)
+		}
+	}()
+
+	deskInfo := &pbcommon.DeskInfo{}
+	deskInfo.ID = newDeskID
+	deskInfo.CreateUserID = args.UserID
+	deskInfo.CreateTime = time.Now().UTC().Unix()
+	deskInfo.GameName = t.gameName
+	deskInfo.GameID = t.gameID
+	deskInfo.ClubID = req.ClubID
+
+	err = cache.AddDeskInfo(deskInfo)
+	if err != nil {
+		t.Log.Error(err.Error())
+		// TODO send
+		return
+	}
+
+	defer func() {
+		if err != nil {
+			cache.DelDeskInfo(newDeskID)
+		}
+	}()
+
+	if req.ClubID != 0 {
+		_, err = mgo.QueryClubByID(req.ClubID)
+		if err == nil {
+			cache.AddClubDeskRelation(req.ClubID, newDeskID)
+			defer func() {
+				if err != nil {
+					cache.DeleteClubDeskRelation(newDeskID)
+				}
+			}()
 		}
 	}
 
+	succ, err := cache.EnterGame(args.UserID, t.gameName, t.gameID, newDeskID, false)
+	if err != nil {
+		t.Log.Error(err.Error())
+		// TODO send
+		return
+	}
+
+	if !succ {
+		// TODO send
+		return
+	}
+
+	defer func() {
+		if err != nil {
+			cache.ExitGame(args.UserID, t.gameName, t.gameID, newDeskID)
+		}
+	}()
+
+	rsp.Info = deskInfo
+
 	for _, v := range t.plugins {
-		if plugin, ok := v.(AfterMakeDeskReqPlugin); ok {
-			plugin.AfterMakeDeskReq(req)
+		if plugin, ok := v.(MakeDeskReqPlugin); ok {
+			err = plugin.HandleMakeDeskReq(args.UserID, req, newDeskID)
+			if err != nil {
+				break
+			}
 		}
 	}
 
-	return nil
+	return err
 }

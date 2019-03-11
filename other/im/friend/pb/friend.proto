@@ -1,0 +1,82 @@
+syntax = "proto3";
+package friendpb;
+
+// c -> s
+message QueryFriendReq {
+    uint64 Seq  = 1;    
+}
+
+// s -> c
+message QueryFriendRsp {
+    uint64 Seq  = 1;
+    map<uint64, bool> Friends = 2;
+    // offset
+}
+
+// c -> s
+message AddFriendReq {
+    uint64 Seq    = 1;
+    uint64 Source = 2;//
+    uint64 Target = 3;
+    string Msg    = 4;
+}
+
+// s -> c & offline
+message AddFriendNotif {
+    uint64 Source = 1;
+    uint64 Target = 2; // 
+    string Msg    = 3;
+    int64 InviteTime = 4;
+    string MsgID     = 5;
+}
+
+enum FriendAction {  
+	Bad   = 0;
+	Agree = 1;    
+    Readed = 2;
+}
+
+// c -> s
+message AddFriendNotifAck {
+    uint64 Source = 1;
+    uint64 Target = 2;
+    string Msg    = 3;
+    FriendAction Code  = 4;    
+    string MsgID  = 5;
+}
+
+// s -> c & offline
+message AddFriendResult {
+    uint64 Source = 1;
+    uint64 Target = 2;
+    string Msg    = 3;
+    FriendAction Code = 4;
+    string MsgID  = 5;
+}
+
+// c -> s
+message AddFriendResultAck {
+    uint64 Source = 1;    
+    string MsgID  = 2;
+}
+
+// c -> 查询离线通知
+message QueryInbox {
+    uint64 MyID      = 1;
+    string StartMsgID = 2;
+    string EndMsgID   = 3;
+    int32 limit      = 4; 
+}
+
+// c -> s
+message DeleteRelationReq {
+    uint64 Seq      = 1;
+    uint64 MyID     = 2;
+    uint64 DelID    = 3;    
+}
+
+message DeleteRelationRsp {
+    uint64 Seq      = 1;
+    int32 Code      = 2;
+    uint64 DelID    = 3;
+}

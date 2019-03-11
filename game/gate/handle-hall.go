@@ -126,7 +126,7 @@ func (s *session) handleHallUpdateBindMobileReq(uid uint64, req *pbhall.UpdateBi
 }
 
 func queryGameList() (gamelist []string, err error) {
-	// "http://192.168.1.128:8500/v1/kv/cy_game/game"
+	// "http://localhost:8500/v1/kv/cy_game/game"
 	url := fmt.Sprintf("http://%s/v1/kv%s/game", *consulAddr, *basePath)
 
 	req := httplib.Get(url)

@@ -7,7 +7,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/Abramovic/logrus_influxdb"
 	"github.com/sirupsen/logrus"
 
 	metrics "github.com/rcrowley/go-metrics"
@@ -20,14 +19,12 @@ const (
 )
 
 var (
-	consulAddr = flag.String("consulAddr", "192.168.1.128:8500", "consul address")
+	consulAddr = flag.String("consulAddr", "localhost:8500", "consul address")
 	basePath   = flag.String("base", "/cy_game", "consul prefix path")
 	addr       = flag.String("addr", "localhost:9401", "listen address")
 	release    = flag.Bool("release", false, "run mode")
 
-	log     *logrus.Entry
-	mj_cs   mjcs
-	deskmgr deskMgr
+	log *logrus.Entry
 )
 
 type mjcs struct {
@@ -47,7 +44,7 @@ func initLog() {
 			panic(err)
 		}
 	} else {
-		logName := fmt.Sprintf("log/%s.log", gameName)
+		logName := fmt.Sprintf("%s.log", gameName)
 		file, err := os.OpenFile(logName, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
 		if err == nil {
 			l.SetOutput(file)
@@ -56,27 +53,22 @@ func initLog() {
 		}
 	}
 
-	hook, err := logrus_influxdb.NewInfluxDB(&logrus_influxdb.Config{
-		Host:          "192.168.1.128", // TODO
-		Port:          8086,
-		Database:      "cygame",
-		Precision:     "ns",
-		Tags:          []string{"serverid", "deskid", "uid"},
-		BatchInterval: (5 * time.Second),
-		Measurement:   gameName,
-		BatchCount:    0, // set to "0" to disable batching
-	})
+	// hook, err := logrus_influxdb.NewInfluxDB(&logrus_influxdb.Config{
+	// 	Host:          "192.168.0.90", // TODO
+	// 	Port:          8086,
+	// 	Database:      "cygame",
+	// 	Precision:     "ns",
+	// 	Tags:          []string{"serverid", "deskid", "uid"},
+	// 	BatchInterval: (5 * time.Second),
+	// 	Measurement:   gameName,
+	// 	BatchCount:    0, // set to "0" to disable batching
+	// })
 
-	if err == nil {
-		l.Hooks.Add(hook)
-	}
+	// if err == nil {
+	// 	l.Hooks.Add(hook)
+	// }
 
 	log = l.WithFields(logrus.Fields{})
-	mj_cs.Log = log
-}
-
-func initLogic() {
-	mj_cs.Add(&deskmgr)
 }
 
 func main() {
@@ -84,13 +76,16 @@ func main() {
 
 	initLog()
 
-	initLogic()
+	var cs mjcs
+	cs.Log = log
+	cs.RoundTpl.SetName(gameName, *addr)
+	cs.Add(&cs)
 
 	s := server.NewServer()
 	addRegistryPlugin(s)
 
 	var err error
-	s.RegisterName("game/"+gameName, &mj_cs, "")
+	s.RegisterName("game/"+gameName, &cs, "")
 	err = s.Serve("tcp", *addr)
 	if err != nil {
 		fmt.Println(err)
