@@ -8,5 +8,6 @@ protoc.exe --go_out=./pb/ -I./pb -I../.. hall/update.proto
 protoc.exe --go_out=./pb/ -I./pb -I../.. login/login.proto --proto_path=./pb/common
 protoc.exe --go_out=./pb/ -I./pb -I../.. game/game.proto
 protoc.exe --go_out=./pb/ -I./pb -I../.. game/ddz/ddz.proto
+protoc.exe --go_out=./pb/ -I./pb -I../.. game/mj/mj_changshou.proto
 
 pause

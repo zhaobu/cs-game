@@ -47,7 +47,7 @@ func (t *RoundTpl) JoinDeskReq(ctx context.Context, args *codec.Message, reply *
 
 	if !succ {
 		// TODO send
-		return
+		return fmt.Errorf("entergame failed %d", args.UserID)
 	}
 
 	defer func() {
@@ -56,14 +56,7 @@ func (t *RoundTpl) JoinDeskReq(ctx context.Context, args *codec.Message, reply *
 		}
 	}()
 
-	for _, v := range t.plugins {
-		if plugin, ok := v.(JoinDeskReqPlugin); ok {
-			err = plugin.HandleJoinDeskReq(args.UserID, req)
-			if err != nil {
-				break
-			}
-		}
-	}
+	err = t.plugin.HandleJoinDeskReq(args.UserID, req)
 
 	return err
 }

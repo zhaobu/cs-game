@@ -79,7 +79,7 @@ func main() {
 	var cs mjcs
 	cs.Log = log
 	cs.RoundTpl.SetName(gameName, *addr)
-	cs.SetPlugin(&cs)
+	cs.Add(&cs)
 
 	s := server.NewServer()
 	addRegistryPlugin(s)

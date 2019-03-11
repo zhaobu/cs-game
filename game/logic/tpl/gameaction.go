@@ -31,14 +31,7 @@ func (t *RoundTpl) GameAction(ctx context.Context, args *codec.Message, reply *c
 		return
 	}
 
-	for _, v := range t.plugins {
-		if plugin, ok := v.(GameActionPlugin); ok {
-			err = plugin.HandleGameAction(args.UserID, req)
-			if err != nil {
-				break
-			}
-		}
-	}
+	err = t.plugin.HandleGameAction(args.UserID, req)
 
 	return
 }

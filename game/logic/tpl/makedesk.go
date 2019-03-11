@@ -5,8 +5,8 @@ import (
 	"cy/game/cache"
 	"cy/game/codec"
 	"cy/game/db/mgo"
-	"cy/game/pb/common"
-	"cy/game/pb/game"
+	pbcommon "cy/game/pb/common"
+	pbgame "cy/game/pb/game"
 	"fmt"
 	"runtime/debug"
 	"time"
@@ -98,7 +98,7 @@ func (t *RoundTpl) MakeDeskReq(ctx context.Context, args *codec.Message, reply *
 
 	if !succ {
 		// TODO send
-		return
+		return fmt.Errorf("entergame failed %d", args.UserID)
 	}
 
 	defer func() {
@@ -109,14 +109,7 @@ func (t *RoundTpl) MakeDeskReq(ctx context.Context, args *codec.Message, reply *
 
 	rsp.Info = deskInfo
 
-	for _, v := range t.plugins {
-		if plugin, ok := v.(MakeDeskReqPlugin); ok {
-			err = plugin.HandleMakeDeskReq(args.UserID, req, newDeskID)
-			if err != nil {
-				break
-			}
-		}
-	}
+	err = t.plugin.HandleMakeDeskReq(args.UserID, req, newDeskID)
 
 	return err
 }

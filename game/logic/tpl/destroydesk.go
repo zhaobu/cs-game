@@ -34,14 +34,7 @@ func (t *RoundTpl) DestroyDeskReq(ctx context.Context, args *codec.Message, repl
 		}
 	}()
 
-	for _, v := range t.plugins {
-		if plugin, ok := v.(DestroyDeskReqPlugin); ok {
-			err = plugin.HandleDestroyDeskReq(args.UserID, req)
-			if err != nil {
-				break
-			}
-		}
-	}
+	err = t.plugin.HandleDestroyDeskReq(args.UserID, req)
 
 	if err == nil {
 		cache.DeleteClubDeskRelation(req.DeskID)

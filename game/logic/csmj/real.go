@@ -66,7 +66,3 @@ func (cs *mjcs) HandleMakeDeskReq(uid uint64, req *pbgame.MakeDeskReq, deskID ui
 
 	return nil
 }
-
-func (cs *mjcs) HandleQueryGameConfigReq(uid uint64, req *pbgame.QueryGameConfigReq) (err error) {
-	return
-}

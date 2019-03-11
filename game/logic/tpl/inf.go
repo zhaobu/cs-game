@@ -3,7 +3,7 @@ package tpl
 import (
 	"cy/game/codec"
 	"cy/game/codec/protobuf"
-	"cy/game/pb/game"
+	pbgame "cy/game/pb/game"
 	"encoding/json"
 
 	"github.com/golang/protobuf/proto"
@@ -12,34 +12,19 @@ import (
 )
 
 type (
-	DestroyDeskReqPlugin interface {
+	GameLogicPlugin interface {
 		HandleDestroyDeskReq(uid uint64, req *pbgame.DestroyDeskReq) error
-	}
-
-	ExitDeskReqPlugin interface {
 		HandleExitDeskReq(uid uint64, req *pbgame.ExitDeskReq) error
-	}
-
-	GameActionPlugin interface {
 		HandleGameAction(uid uint64, req *pbgame.GameAction) error
-	}
-
-	JoinDeskReqPlugin interface {
 		HandleJoinDeskReq(uid uint64, req *pbgame.JoinDeskReq) error
-	}
-
-	MakeDeskReqPlugin interface {
 		HandleMakeDeskReq(uid uint64, req *pbgame.MakeDeskReq, deskID uint64) error
-	}
-
-	QueryGameConfigReqPlugin interface {
 		HandleQueryGameConfigReq(uid uint64, req *pbgame.QueryGameConfigReq) error
 	}
 )
 
 type RoundTpl struct {
 	Log      *logrus.Entry
-	plugins  []interface{}
+	plugin   GameLogicPlugin
 	gameName string
 	gameID   string
 
@@ -51,12 +36,12 @@ func (t *RoundTpl) SetName(gameName, gameID string) {
 	t.gameID = gameID
 }
 
-func (t *RoundTpl) Add(p interface{}) {
-	t.plugins = append(t.plugins, p)
+func (t *RoundTpl) SetPlugin(p GameLogicPlugin) {
+	t.plugin = p
 }
 
 func (t *RoundTpl) toGateNormal(loge *logrus.Entry, pb proto.Message, uids ...uint64) error {
-	t.Log.Infof("send %v %s %+v", uids, proto.MessageName(pb), pb)
+	t.Log.Infof("toGateNormal send %v %s %+v", uids, proto.MessageName(pb), pb)
 
 	msg := &codec.Message{}
 	err := codec.Pb2Msg(pb, msg)
@@ -87,7 +72,7 @@ func (t *RoundTpl) toGateNormal(loge *logrus.Entry, pb proto.Message, uids ...ui
 }
 
 func (t *RoundTpl) toGate(pb proto.Message, uids ...uint64) error {
-	t.Log.Infof("send %v %s %+v", uids, proto.MessageName(pb), pb)
+	t.Log.Infof("toGate send %v %s %+v", uids, proto.MessageName(pb), pb)
 
 	notif := &pbgame.GameNotif{}
 	var err error

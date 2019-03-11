@@ -46,14 +46,7 @@ func (t *RoundTpl) ExitDeskReq(ctx context.Context, args *codec.Message, reply *
 		return
 	}
 
-	for _, v := range t.plugins {
-		if plugin, ok := v.(ExitDeskReqPlugin); ok {
-			err = plugin.HandleExitDeskReq(args.UserID, req)
-			if err != nil {
-				break
-			}
-		}
-	}
+	err = t.plugin.HandleExitDeskReq(args.UserID, req)
 
 	if err == nil {
 		cache.ExitGame(args.UserID, t.gameName, t.gameID, sessInfo.AtDeskID)

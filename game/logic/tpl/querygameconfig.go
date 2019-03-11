@@ -3,7 +3,7 @@ package tpl
 import (
 	"context"
 	"cy/game/codec"
-	"cy/game/pb/game"
+	pbgame "cy/game/pb/game"
 	"fmt"
 	"runtime/debug"
 
@@ -31,14 +31,7 @@ func (t *RoundTpl) QueryGameConfigReq(ctx context.Context, args *codec.Message, 
 		return
 	}
 
-	for _, v := range t.plugins {
-		if plugin, ok := v.(QueryGameConfigReqPlugin); ok {
-			err = plugin.HandleQueryGameConfigReq(args.UserID, req)
-			if err != nil {
-				break
-			}
-		}
-	}
+	err = t.plugin.HandleQueryGameConfigReq(args.UserID, req)
 
 	return
 }
