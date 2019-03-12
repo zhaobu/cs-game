@@ -6,6 +6,26 @@ message int32XX {
   int32 T = 1;
 }
 
+// 房间桌子属性 s -> c
+message RoomArg {
+  // 1匹配 2好友 3比赛
+  int32 Type = 14; 
+  bool Enable = 1; // true开启 false关闭
+  uint32 RoomId = 2; // ID
+  uint64 DeskID = 3;
+  string Name = 4; // 房间别名
+  uint32 FeeType = 5; // 服务费类型 1:金币 2:钻石
+  uint32 Fee = 6; // 服务费
+  uint32 BaseScore = 7; // 底分
+  uint64 EnterMin = 8; // 进入下限
+  uint64 EnterMax = 9; // 进入上限
+  uint64 TopScore = 10; // 封顶值
+  uint32 SeatCnt = 11; // 座位数
+  uint32 PaymentType = 12; // 支付方式 1:个人支付 2:平局支付
+  uint32 LoopCnt = 13; // 局数
+  bool CheckDistance = 15; // 距离判断
+}
+
 ///////////////////////////c-s///////////////////////////
 // 出牌
 message C2SOutCard {

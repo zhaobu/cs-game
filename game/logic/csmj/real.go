@@ -2,8 +2,8 @@ package main
 
 import (
 	"cy/game/db/mgo"
-	"cy/game/pb/game"
-	"cy/game/pb/game/ddz"
+	pbgame "cy/game/pb/game"
+	pbgame_ddz "cy/game/pb/game/ddz"
 )
 
 func getDeskByID(deskID uint64) *desk {

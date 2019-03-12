@@ -33,6 +33,8 @@ var (
 
 type mjcs struct {
 	tpl.RoundTpl
+
+	xx map[uint64]*csDesk
 }
 
 func initLog() {

@@ -12,6 +12,9 @@ import (
 )
 
 type (
+	DeskIf interface {
+	}
+
 	GameLogicPlugin interface {
 		HandleDestroyDeskReq(uid uint64, req *pbgame.DestroyDeskReq) error
 		HandleExitDeskReq(uid uint64, req *pbgame.ExitDeskReq) error

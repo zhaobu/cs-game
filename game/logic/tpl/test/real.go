@@ -2,8 +2,8 @@ package main
 
 import (
 	"cy/game/db/mgo"
-	"cy/game/pb/game"
-	"cy/game/pb/game/ddz"
+	pbgame "cy/game/pb/game"
+	pbgame_ddz "cy/game/pb/game/ddz"
 )
 
 func getDeskByID(deskID uint64) *desk {
@@ -24,6 +24,7 @@ func (cs *mjcs) HandleDestroyDeskReq(uid uint64, req *pbgame.DestroyDeskReq) (er
 }
 
 func (cs *mjcs) HandleExitDeskReq(uid uint64, req *pbgame.ExitDeskReq) (err error) {
+
 	return
 }
 
@@ -32,7 +33,8 @@ func (cs *mjcs) HandleGameAction(uid uint64, req *pbgame.GameAction) (err error)
 }
 
 func (cs *mjcs) HandleJoinDeskReq(uid uint64, req *pbgame.JoinDeskReq) (err error) {
-
+	
+	req.DeskID 
 	return
 }
 
