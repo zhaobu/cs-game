@@ -1,0 +1,1 @@
+nohup consul agent -dev -client 0.0.0.0 > consul.log 2>&1 &

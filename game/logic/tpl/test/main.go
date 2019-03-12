@@ -1,6 +1,8 @@
 package main
 
 import (
+	"cy/game/cache"
+	"cy/game/db/mgo"
 	"cy/game/logic/tpl"
 	"flag"
 	"fmt"
@@ -19,12 +21,14 @@ const (
 )
 
 var (
-	consulAddr = flag.String("consulAddr", "localhost:8500", "consul address")
+	consulAddr = flag.String("consulAddr", "192.168.1.128:8500", "consul address")
 	basePath   = flag.String("base", "/cy_game", "consul prefix path")
 	addr       = flag.String("addr", "localhost:9401", "listen address")
 	release    = flag.Bool("release", false, "run mode")
-
-	log *logrus.Entry
+	redisAddr  = flag.String("redisaddr", "192.168.1.128:6379", "redis address")
+	redisDb    = flag.Int("redisDb", 1, "redis db select")
+	mgoURI     = flag.String("mgo", "mongodb://192.168.1.128:27017/game", "mongo connection URI")
+	log        *logrus.Entry
 )
 
 type mjcs struct {
@@ -54,7 +58,7 @@ func initLog() {
 	}
 
 	// hook, err := logrus_influxdb.NewInfluxDB(&logrus_influxdb.Config{
-	// 	Host:          "192.168.0.90", // TODO
+	// 	Host:          "192.168.1.128", // TODO
 	// 	Port:          8086,
 	// 	Database:      "cygame",
 	// 	Precision:     "ns",
@@ -81,10 +85,17 @@ func main() {
 	cs.RoundTpl.SetName(gameName, *addr)
 	cs.SetPlugin(&cs)
 
+	err := cache.Init(*redisAddr, *redisDb)
+	if err != nil {
+		return
+	}
+
+	if err := mgo.Init(*mgoURI); err != nil {
+		return
+	}
 	s := server.NewServer()
 	addRegistryPlugin(s)
 
-	var err error
 	s.RegisterName("game/"+gameName, &cs, "")
 	err = s.Serve("tcp", *addr)
 	if err != nil {

@@ -1,19 +1,12 @@
 set GOOS=windows
 
-cd gate
-go build -tags consul
-cd ..
+go build -tags consul -o bin/win/gate.exe cy/game/gate
 
-cd center 
-go build -tags consul
-cd ..
+go build -tags consul -o bin/win/center.exe cy/game/center
 
-cd club 
-go build -tags consul
-cd ..
+go build -tags consul -o bin/win/club.exe cy/game/club
 
-cd logic/ddz
-go build -tags consul
-cd ../..
+go build -tags consul -o bin/win/ddz.exe cy/game/logic/ddz
+
 
 pause
