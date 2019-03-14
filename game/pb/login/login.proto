@@ -20,14 +20,15 @@ enum LoginRspCode {
     IdOrPwdFailed = 1;
     Succ = 2;
     Other = 3;
+    MobileNoBind = 4; // 手机登陆时，此手机没有被绑定
 }
 
 // 登陆请求 c -> s
 message LoginReq {
     pbcommon.ReqHead Head = 1;
     LoginType LoginType = 2;     
-    string ID = 3;
-    bytes Password = 4;    
+    string ID = 3; // WX:为微信ID Phone:手机号码
+    string Password = 4; // WX:为空 Phone:登陆密码
     string Version = 5;
     string DeviceType = 6;
     string Sex = 7;
@@ -56,15 +57,15 @@ message KeepAliveReq {
 message KeepAliveRsp {    
 }
 
-// 获取验证码 c -> s
+// 登陆时获取验证码 c -> s
 message MobileCaptchaReq {
     pbcommon.ReqHead Head = 1;
-    string Mobile = 2;
+    string Mobile = 2;        
 }
 
 message MobileCaptchaRsp {
     pbcommon.RspHead Head = 1;
-    // 1 成功发送 2 参数为空 3 此电话没有绑定 4 超过发送限制 5 内部服务错误 6 外部服务错误
+    // 1 成功发送 2 参数错误 3 此号码没有绑定 4 被其他人绑定了 5 超过发送限制 6 内部服务错误 7 外部服务错误
     uint32 Code = 2;
-    string TestCaptcha = 3;
+    string TestCaptcha = 3; // 临时字段
 }

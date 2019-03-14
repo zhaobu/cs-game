@@ -13,6 +13,13 @@ import (
 )
 
 func (t *RoundTpl) ExitDeskReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
+	defer func() {
+		r := recover()
+		if r != nil {
+			t.Log.WithFields(logrus.Fields{"uid": args.UserID}).Warnf("r:%v stack:%s", r, string(debug.Stack()))
+		}
+	}()
+
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
 		t.Log.Error(err.Error())
@@ -26,17 +33,21 @@ func (t *RoundTpl) ExitDeskReq(ctx context.Context, args *codec.Message, reply *
 		return
 	}
 
-	t.Log.WithFields(logrus.Fields{"uid": args.UserID}).Infof("recv %s %+v ", args.Name, *req)
+	rsp := &pbgame.ExitDeskRsp{}
+	if req.Head != nil {
+		rsp.Head = &pbcommon.RspHead{Seq: req.Head.Seq}
+	}
 
 	defer func() {
-		r := recover()
-		if r != nil {
-			t.Log.WithFields(logrus.Fields{"uid": args.UserID}).Warnf("r:%v stack:%s", r, string(debug.Stack()))
-		}
+
+		t.toGateNormal(rsp, args.UserID)
 	}()
+
+	t.Log.WithFields(logrus.Fields{"uid": args.UserID}).Infof("tpl recv %s %+v ", args.Name, *req)
 
 	sessInfo, err := cache.QuerySessionInfo(args.UserID)
 	if err != nil {
+		rsp.Code = 2
 		return
 	}
 
@@ -46,9 +57,9 @@ func (t *RoundTpl) ExitDeskReq(ctx context.Context, args *codec.Message, reply *
 		return
 	}
 
-	err = t.plugin.HandleExitDeskReq(args.UserID, req)
+	t.plugin.HandleExitDeskReq(args.UserID, req, rsp)
 
-	if err == nil {
+	if rsp.Code == 1 {
 		cache.ExitGame(args.UserID, t.gameName, t.gameID, sessInfo.AtDeskID)
 	}
 

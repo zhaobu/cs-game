@@ -25,6 +25,8 @@ func (t *RoundTpl) DestroyDeskReq(ctx context.Context, args *codec.Message, repl
 		return
 	}
 
+	rsp := &pbgame.DestroyDeskRsp{}
+
 	t.Log.WithFields(logrus.Fields{"uid": args.UserID}).Infof("recv %s %+v ", args.Name, *req)
 
 	defer func() {
@@ -34,9 +36,9 @@ func (t *RoundTpl) DestroyDeskReq(ctx context.Context, args *codec.Message, repl
 		}
 	}()
 
-	err = t.plugin.HandleDestroyDeskReq(args.UserID, req)
+	t.plugin.HandleDestroyDeskReq(args.UserID, req, rsp)
 
-	if err == nil {
+	if rsp.Code == 1 {
 		cache.DeleteClubDeskRelation(req.DeskID)
 		cache.DelDeskInfo(req.DeskID)
 		cache.FreeDeskID(req.DeskID)

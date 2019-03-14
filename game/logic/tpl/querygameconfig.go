@@ -3,7 +3,8 @@ package tpl
 import (
 	"context"
 	"cy/game/codec"
-	pbgame "cy/game/pb/game"
+	"cy/game/pb/common"
+	"cy/game/pb/game"
 	"fmt"
 	"runtime/debug"
 
@@ -31,7 +32,18 @@ func (t *RoundTpl) QueryGameConfigReq(ctx context.Context, args *codec.Message, 
 		return
 	}
 
-	err = t.plugin.HandleQueryGameConfigReq(args.UserID, req)
+	rsp := &pbgame.QueryGameConfigRsp{}
+	if req.Head != nil {
+		rsp.Head = &pbcommon.RspHead{Seq: req.Head.Seq}
+	}
+
+	defer func() {
+		t.toGateNormal(rsp, args.UserID)
+	}()
+
+	t.Log.WithFields(logrus.Fields{"uid": args.UserID}).Infof("tpl recv %s %+v ", args.Name, *req)
+
+	t.plugin.HandleQueryGameConfigReq(args.UserID, req, rsp)
 
 	return
 }

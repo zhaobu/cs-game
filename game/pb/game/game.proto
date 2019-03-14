@@ -8,11 +8,13 @@ package pbgame;
 enum MakeDeskRspCode {
     MakeDeskNotUse = 0;
     MakeDeskSucc = 1;
-    MakeDeskArgsErr = 2;
-    MakeDeskNotEnoughMoney = 3;
-    MakeDeskNotEnoughDesk = 4;
+    MakeDeskArgsErr = 2; 
+    MakeDeskNotEnoughMoney = 3; // 财富不够
+    MakeDeskNotEnoughDesk = 4; // 桌子不够
     MakeDeskInternalServerError = 5;
-    MakeDeskUserStatusErr = 6;
+    MakeDeskUserStatusErr = 6; // 创建并进入游戏失败
+    MakeDeskCanNotFindClubID = 7; // 无效的俱乐部ID
+    MakeDeskLimit = 8; // 个数限制
 }
 
 enum JoinDeskRspCode {
@@ -50,9 +52,7 @@ message QueryDeskInfoRsp {
     pbcommon.RspHead Head = 1;
     // 1 成功 2 不存在
     uint32 Code = 2; 
-    pbcommon.DeskInfo Info = 3;
-    string GameArgMsgName = 4; // 具体游戏参数 如 pbgame_ddz.RoomArg
-    bytes GameArgMsgValue = 5;
+    pbcommon.DeskInfo Info = 3;    
 }
 
 // 新建桌子 c -> s
@@ -68,9 +68,7 @@ message MakeDeskRsp {
     pbcommon.RspHead Head = 1;
     MakeDeskRspCode Code = 2;    
     string StrCode = 3;
-    pbcommon.DeskInfo Info = 4;
-    string GameArgMsgName = 5; // 具体游戏参数 如 pbgame_ddz.RoomArg
-    bytes GameArgMsgValue = 6; 
+    pbcommon.DeskInfo Info = 4;    
 }
 
 // 销毁桌子 c -> s
@@ -101,9 +99,7 @@ message JoinDeskRsp {
     pbcommon.RspHead Head = 1;
     JoinDeskRspCode Code = 2;  
     string ErrMsg = 3;
-    pbcommon.DeskInfo Info = 4;
-    string GameArgMsgName = 5; // 具体游戏参数 如 pbgame_ddz.RoomArg
-    bytes GameArgMsgValue = 6;    
+    pbcommon.DeskInfo Info = 4;      
 }
 
 // 离开桌子 c -> s
@@ -130,3 +126,4 @@ message GameNotif {
     string NotifName = 1; // 具体游戏子命令
     bytes NotifValue = 2;
 }
+

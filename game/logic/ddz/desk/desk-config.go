@@ -3,9 +3,9 @@ package desk
 import (
 	"cy/game/codec/protobuf"
 
-	"cy/game/pb/common"
-	"cy/game/pb/game"
-	"cy/game/pb/game/ddz"
+	pbcommon "cy/game/pb/common"
+	pbgame "cy/game/pb/game"
+	pbgame_ddz "cy/game/pb/game/ddz"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"

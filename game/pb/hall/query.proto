@@ -54,14 +54,3 @@ message UserWealthChange {
     int64 MasonryChange = 5;
 }
 
-// 查询手机绑定情况 c -> s
-message QueryMobileIsBindReq {
-    pbcommon.ReqHead Head = 1;
-    string Mobile = 2;
-}
-
-message QueryMobileIsBindRsp {
-    pbcommon.RspHead Head = 1;
-    // 1 没有绑定 2 已经绑定了
-    uint32 Code = 2;
-}

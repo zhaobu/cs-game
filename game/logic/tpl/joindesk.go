@@ -7,11 +7,19 @@ import (
 	"cy/game/pb/common"
 	"cy/game/pb/game"
 	"fmt"
+	"runtime/debug"
 
 	"github.com/sirupsen/logrus"
 )
 
 func (t *RoundTpl) JoinDeskReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
+	defer func() {
+		r := recover()
+		if r != nil {
+			t.Log.WithFields(logrus.Fields{"uid": args.UserID}).Warnf("r:%v stack:%s", r, string(debug.Stack()))
+		}
+	}()
+
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
 		t.Log.Error(err.Error())
@@ -30,33 +38,39 @@ func (t *RoundTpl) JoinDeskReq(ctx context.Context, args *codec.Message, reply *
 		rsp.Head = &pbcommon.RspHead{Seq: req.Head.Seq}
 	}
 
-	t.Log.WithFields(logrus.Fields{"uid": args.UserID}).Infof("recv %s %+v ", args.Name, *req)
+	defer func() {
+		t.toGateNormal(rsp, args.UserID)
+	}()
+
+	t.Log.WithFields(logrus.Fields{"uid": args.UserID}).Infof("tpl recv %s %+v ", args.Name, *req)
 
 	rsp.Info, err = cache.QueryDeskInfo(req.DeskID)
 	if err != nil {
-		// TODO send
-		return
+		rsp.Code = pbgame.JoinDeskRspCode_JoinDeskNotExist
+		rsp.ErrMsg = err.Error()
+		return nil
 	}
 
 	succ, err := cache.EnterGame(args.UserID, t.gameName, t.gameID, req.DeskID, false)
 	if err != nil {
 		t.Log.Error(err.Error())
-		// TODO send
-		return
+		rsp.Code = pbgame.JoinDeskRspCode_JoinDeskInternalServerError
+		rsp.ErrMsg = err.Error()
+		return nil
 	}
 
 	if !succ {
-		// TODO send
-		return fmt.Errorf("entergame failed %d", args.UserID)
+		rsp.Code = pbgame.JoinDeskRspCode_JoinDeskUserStatusErr
+		return
 	}
 
 	defer func() {
-		if err != nil {
+		if rsp.Code != pbgame.JoinDeskRspCode_JoinDeskSucc {
 			cache.ExitGame(args.UserID, t.gameName, t.gameID, req.DeskID)
 		}
 	}()
 
-	err = t.plugin.HandleJoinDeskReq(args.UserID, req)
+	t.plugin.HandleJoinDeskReq(args.UserID, req, rsp)
 
-	return err
+	return
 }

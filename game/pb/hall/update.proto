@@ -1,20 +1,33 @@
 syntax = "proto3";
 
 import "cy/game/pb/common/head.proto";
-import "cy/game/pb/common/common.proto";
 
 package pbhall;
 
-// 更新用户绑定的手机 c -> s
+
+// 更新用户绑定的手机和登陆密码 c -> s
 message UpdateBindMobileReq {
     pbcommon.ReqHead Head = 1;
     string Mobile = 2;
     string Captcha = 3;
+    string Password = 4;
 }
 
 message UpdateBindMobileRsp {
     pbcommon.RspHead Head = 1;
-    // 1 成功 2 验证码或者手机不匹配 3 内部服务错误
+    // 1 成功 2 参数空 3 验证码错误 4 此号码被其他人绑定了 5 内部服务错误
+    uint32 Code = 2;   
+}
+
+message UpdateIdCardReq {
+    pbcommon.ReqHead Head = 1;
+    string IdCard = 2;
+    string Cnname = 3;
+}
+
+message UpdateIdCardRsp {
+    pbcommon.RspHead Head = 1;
+    // 1 成功 2 参数无效 3 验证失败 4 验证不通过 5 更新失败
     uint32 Code = 2;
-    pbcommon.UserInfo Info = 3;
+    string CodeStr = 3;
 }

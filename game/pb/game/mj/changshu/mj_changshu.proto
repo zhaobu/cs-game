@@ -2,28 +2,74 @@ syntax = "proto3";
 
 package pbgame_mj_changshou;
 
-message int32XX {
-  int32 T = 1;
+///////////////////////////房间参数///////////////////////////
+message cyUint32 {
+  uint32 T = 1;
 }
 
-// 房间桌子属性 s -> c
-message RoomArg {
-  // 1匹配 2好友 3比赛
-  int32 Type = 14; 
-  bool Enable = 1; // true开启 false关闭
-  uint32 RoomId = 2; // ID
-  uint64 DeskID = 3;
-  string Name = 4; // 房间别名
-  uint32 FeeType = 5; // 服务费类型 1:金币 2:钻石
-  uint32 Fee = 6; // 服务费
-  uint32 BaseScore = 7; // 底分
-  uint64 EnterMin = 8; // 进入下限
-  uint64 EnterMax = 9; // 进入上限
-  uint64 TopScore = 10; // 封顶值
-  uint32 SeatCnt = 11; // 座位数
-  uint32 PaymentType = 12; // 支付方式 1:个人支付 2:平局支付
-  uint32 LoopCnt = 13; // 局数
-  bool CheckDistance = 15; // 距离判断
+message RoundInfo {
+  uint32 LoopCnt = 1; // 局数 8 16 
+  uint32 Fee = 2; // 个人费用 1 2
+}
+
+// 创建房间参数
+message CreateArg {
+  repeated cyUint32 Rule = 1;
+  uint32 Barhead = 2;
+  uint32 PlayerCount = 3;
+  uint32 Dipiao = 4;
+  RoundInfo RInfo = 5;
+  uint32 PaymentType = 6;
+  uint32 LimitIP = 7;    
+  uint32 Voice = 8;
+}
+
+// 创建房间参数模板
+message CreateArgTpl {
+  // 玩法  二摸三冲 豹子翻倍
+  repeated cyUint32 Rule = 1;
+  // 杠头  板4个 板8个 独龙杠
+  repeated cyUint32 Barhead = 2;
+  // 人数
+  repeated cyUint32 PlayerCount = 3;
+  // 底飘 0~10
+  repeated cyUint32 Dipiao = 4;
+  // 局数
+  repeated RoundInfo RInfo = 5;
+  // 支付方式 1 房主支付 2 平局支付
+  repeated cyUint32 PaymentType = 6;
+  // IP以及位置限制 1 都不选 2 IP以及位置限制 3 IP以及位置限制+强制定位 
+  uint32 LimitIP = 7;  
+  // 语音 1 普通场 2 语音场
+  uint32 Voice = 8;
+  // 默认参数
+  CreateArg Def = 9;
+}
+
+// 桌子参数
+message DeskArg {
+  // 创建房间参数
+  repeated cyUint32 Rule = 1;
+  uint32 Barhead = 2;
+  uint32 PlayerCount = 3;
+  uint32 Dipiao = 4;
+  RoundInfo RInfo = 5;
+  uint32 PaymentType = 6;
+  uint32 LimitIP = 7;    
+  uint32 Voice = 8;
+
+  bool Enable = 9;    
+  // 1 匹配 2 好友 3 比赛 
+  uint32 Type = 10;     
+  // 服务费类型 1 金币 2 钻石
+  uint32 FeeType = 11; 
+  uint64 DeskID = 12;
+  uint32 RoomId = 13; // 匹配场时才有用     
+  string RoomName = 14; // 匹配场时才有用
+}
+
+message int32XX {
+  int32 T = 1;
 }
 
 ///////////////////////////c-s///////////////////////////

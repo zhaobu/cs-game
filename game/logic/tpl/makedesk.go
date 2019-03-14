@@ -25,7 +25,7 @@ func (t *RoundTpl) MakeDeskReq(ctx context.Context, args *codec.Message, reply *
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
 		t.Log.Error(err.Error())
-		return err
+		return
 	}
 
 	req, ok := pb.(*pbgame.MakeDeskReq)
@@ -40,18 +40,22 @@ func (t *RoundTpl) MakeDeskReq(ctx context.Context, args *codec.Message, reply *
 		rsp.Head = &pbcommon.RspHead{Seq: req.Head.Seq}
 	}
 
-	t.Log.WithFields(logrus.Fields{"uid": args.UserID}).Infof("recv %s %+v ", args.Name, *req)
+	defer func() {
+		t.toGateNormal(rsp, args.UserID)
+	}()
+
+	t.Log.WithFields(logrus.Fields{"uid": args.UserID}).Infof("tpl recv %s %+v ", args.Name, *req)
 
 	var newDeskID uint64
-	newDeskID, err = cache.AllocDeskID()
+	newDeskID, err = cache.AllocDeskID() // 1> 分配桌子ID
 	if err != nil {
 		t.Log.Error(err.Error())
-		// TODO send
-		return
+		rsp.Code = pbgame.MakeDeskRspCode_MakeDeskNotEnoughDesk
+		return nil
 	}
 
 	defer func() {
-		if err != nil {
+		if rsp.Code != pbgame.MakeDeskRspCode_MakeDeskSucc {
 			cache.FreeDeskID(newDeskID)
 		}
 	}()
@@ -59,57 +63,66 @@ func (t *RoundTpl) MakeDeskReq(ctx context.Context, args *codec.Message, reply *
 	deskInfo := &pbcommon.DeskInfo{}
 	deskInfo.ID = newDeskID
 	deskInfo.CreateUserID = args.UserID
+	//deskInfo.CreateUserName = ""
 	deskInfo.CreateTime = time.Now().UTC().Unix()
+	deskInfo.ArgName = req.GameArgMsgName
+	deskInfo.ArgValue = req.GameArgMsgValue
 	deskInfo.GameName = t.gameName
 	deskInfo.GameID = t.gameID
 	deskInfo.ClubID = req.ClubID
+	deskInfo.Kind = DeskTypeFriend
 
-	err = cache.AddDeskInfo(deskInfo)
+	err = cache.AddDeskInfo(deskInfo) // 2> 保存桌子信息
 	if err != nil {
 		t.Log.Error(err.Error())
-		// TODO send
-		return
+		rsp.Code = pbgame.MakeDeskRspCode_MakeDeskInternalServerError
+		return nil
 	}
 
 	defer func() {
-		if err != nil {
+		if rsp.Code != pbgame.MakeDeskRspCode_MakeDeskSucc {
 			cache.DelDeskInfo(newDeskID)
 		}
 	}()
 
+	// 3> 俱乐部和桌子的关系
 	if req.ClubID != 0 {
 		_, err = mgo.QueryClubByID(req.ClubID)
-		if err == nil {
-			cache.AddClubDeskRelation(req.ClubID, newDeskID)
-			defer func() {
-				if err != nil {
-					cache.DeleteClubDeskRelation(newDeskID)
-				}
-			}()
+		if err != nil {
+			rsp.Code = pbgame.MakeDeskRspCode_MakeDeskCanNotFindClubID
+			return
 		}
+		// TODO 数量限制
+		cache.AddClubDeskRelation(req.ClubID, newDeskID)
+		defer func() {
+			if rsp.Code != pbgame.MakeDeskRspCode_MakeDeskSucc {
+				cache.DeleteClubDeskRelation(newDeskID)
+			}
+		}()
 	}
 
+	// 4> 进入游戏
 	succ, err := cache.EnterGame(args.UserID, t.gameName, t.gameID, newDeskID, false)
 	if err != nil {
 		t.Log.Error(err.Error())
-		// TODO send
-		return
+		rsp.Code = pbgame.MakeDeskRspCode_MakeDeskUserStatusErr
+		return nil
 	}
 
 	if !succ {
-		// TODO send
-		return fmt.Errorf("entergame failed %d", args.UserID)
+		rsp.Code = pbgame.MakeDeskRspCode_MakeDeskUserStatusErr
+		return nil
 	}
 
 	defer func() {
-		if err != nil {
+		if rsp.Code != pbgame.MakeDeskRspCode_MakeDeskSucc {
 			cache.ExitGame(args.UserID, t.gameName, t.gameID, newDeskID)
 		}
 	}()
 
 	rsp.Info = deskInfo
 
-	err = t.plugin.HandleMakeDeskReq(args.UserID, req, newDeskID)
+	t.plugin.HandleMakeDeskReq(args.UserID, newDeskID, req, rsp)
 
-	return err
+	return nil
 }

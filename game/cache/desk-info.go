@@ -34,7 +34,7 @@ func AddDeskInfo(info *pbcommon.DeskInfo) (err error) {
 		strconv.FormatUint(info.ID, 10),
 		strconv.FormatUint(info.CreateUserID, 10),
 		info.CreateTime,
-		info.CreateArgs,
+		info.ArgName,
 		info.Status,
 		info.GameName,
 		info.GameID,
@@ -83,7 +83,7 @@ func UpdateDeskInfo(info *pbcommon.DeskInfo) error {
 		strconv.FormatUint(info.ID, 10),
 		strconv.FormatUint(info.CreateUserID, 10),
 		info.CreateTime,
-		info.CreateArgs,
+		info.ArgName,
 		info.Status,
 		info.GameName,
 		info.GameID,
@@ -112,7 +112,7 @@ func QueryDeskInfo(deskID uint64) (*pbcommon.DeskInfo, error) {
 	info.ID, _ = strconv.ParseUint(reply["ID"], 10, 64)
 	info.CreateUserID, _ = strconv.ParseUint(reply["CreateUserID"], 10, 64)
 	info.CreateTime, _ = strconv.ParseInt(reply["CreateTime"], 10, 64)
-	info.CreateArgs = reply["CreateArgs"]
+	info.ArgName = reply["ArgName"]
 	info.Status = reply["Status"]
 	info.GameName = reply["GameName"]
 	info.GameID = reply["GameID"]

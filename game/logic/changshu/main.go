@@ -4,37 +4,36 @@ import (
 	"cy/game/cache"
 	"cy/game/db/mgo"
 	"cy/game/logic/tpl"
+	"cy/game/util"
 	"flag"
 	"fmt"
 	"os"
 	"time"
 
-	"github.com/sirupsen/logrus"
-
 	metrics "github.com/rcrowley/go-metrics"
+	"github.com/sirupsen/logrus"
 	"github.com/smallnest/rpcx/server"
 	"github.com/smallnest/rpcx/serverplugin"
 )
 
 const (
-	gameName = "mj-cs"
+	gameName = "11101"
 )
 
 var (
-	consulAddr = flag.String("consulAddr", "192.168.1.128:8500", "consul address")
+	consulAddr = flag.String("consulAddr", "localhost:8500", "consul address")
 	basePath   = flag.String("base", "/cy_game", "consul prefix path")
-	addr       = flag.String("addr", "localhost:9401", "listen address")
+	addr       = flag.String("addr", "localhost:9601", "listen address")
 	release    = flag.Bool("release", false, "run mode")
-	redisAddr  = flag.String("redisaddr", "192.168.1.128:6379", "redis address")
+	redisAddr  = flag.String("redisAddr", "192.168.0.90:6379", "redis address")
 	redisDb    = flag.Int("redisDb", 1, "redis db select")
-	mgoURI     = flag.String("mgo", "mongodb://192.168.1.128:27017/game", "mongo connection URI")
-	log        *logrus.Entry
+	mgoURI     = flag.String("mgo", "mongodb://192.168.0.90:27017/game", "mongo connection URI")
+
+	log *logrus.Entry
 )
 
 type mjcs struct {
 	tpl.RoundTpl
-
-	xx map[uint64]*csDesk
 }
 
 func initLog() {
@@ -60,7 +59,7 @@ func initLog() {
 	}
 
 	// hook, err := logrus_influxdb.NewInfluxDB(&logrus_influxdb.Config{
-	// 	Host:          "192.168.1.128", // TODO
+	// 	Host:          "192.168.0.90", // TODO
 	// 	Port:          8086,
 	// 	Database:      "cygame",
 	// 	Precision:     "ns",
@@ -82,19 +81,37 @@ func main() {
 
 	initLog()
 
+	if *addr == "" {
+		taddr, err := util.AllocListenAddr()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		*addr = taddr.String()
+	}
+
 	var cs mjcs
 	cs.Log = log
 	cs.RoundTpl.SetName(gameName, *addr)
+	cs.RoundTpl.InitRedis(*redisAddr, *redisDb)
 	cs.SetPlugin(&cs)
 
-	err := cache.Init(*redisAddr, *redisDb)
+	var err error
+	err = loadArgTpl("../changshou.config")
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	err = cache.Init(*redisAddr, *redisDb)
 	if err != nil {
 		return
 	}
 
-	if err := mgo.Init(*mgoURI); err != nil {
+	err = mgo.Init(*mgoURI)
+	if err != nil {
 		return
 	}
+
 	s := server.NewServer()
 	addRegistryPlugin(s)
 

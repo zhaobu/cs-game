@@ -27,13 +27,14 @@ message DeskInfo {
 	uint64 ID = 2; // 桌子ID
 	uint64 CreateUserID = 3; // 创建人 0表示系统创建
 	int64 CreateTime = 4;
-	string CreateArgs = 5;	
+	string ArgName = 5;  // 具体游戏参数 如 pbgame_ddz.RoomArg
+	bytes ArgValue = 13;
 	string CreateUserName = 6;
 	string Status = 7; // 
 	string GameName = 8; 
 	string GameID = 9; 
 	int64 ClubID = 11; // 所属俱乐部
-	int32 Kind = 12; // 桌子类型 1匹配 2好友 
+	int64 Kind = 12; // 桌子类型 1匹配 2好友 
 	repeated uint64 UserIDs = 10; // 桌子中的玩家		
 }
 
@@ -57,7 +58,7 @@ message UserInfo {
 	string WxID = 3; // 微信id
 	double Longitude = 4;
 	double Latitude = 5;   
-    string Name = 6;
+    string Name = 6; // 昵称
     string Sex = 7;
     string Profile = 8;
 	string Mobile = 9;		
@@ -66,4 +67,7 @@ message UserInfo {
 	uint64 GoldPre = 12; // 预扣金币
 	uint64 MasonryPre = 13; // 预扣砖石
 	string Agent = 14; // 所属代理
+	string IdentityCard = 15; // 身份证号码
+	string IdentityCardName = 16; // 身份证名称
+	string Password = 17; // 手机登陆密码
 }

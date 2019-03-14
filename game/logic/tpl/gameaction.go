@@ -31,7 +31,7 @@ func (t *RoundTpl) GameAction(ctx context.Context, args *codec.Message, reply *c
 		return
 	}
 
-	err = t.plugin.HandleGameAction(args.UserID, req)
+	t.plugin.HandleGameAction(args.UserID, req)
 
 	return
 }
