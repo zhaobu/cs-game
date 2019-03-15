@@ -12,7 +12,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func (t *RoundTpl) ExitDeskReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
+func (t *RoundTpl) QueryDeskInfoReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
 	defer func() {
 		r := recover()
 		if r != nil {
@@ -26,42 +26,27 @@ func (t *RoundTpl) ExitDeskReq(ctx context.Context, args *codec.Message, reply *
 		return err
 	}
 
-	req, ok := pb.(*pbgame.ExitDeskReq)
+	req, ok := pb.(*pbgame.QueryDeskInfoReq)
 	if !ok {
-		err = fmt.Errorf("not *pbgame.ExitDeskReq")
+		err = fmt.Errorf("not *pbgame.QueryDeskInfoReq")
 		t.Log.Error(err.Error())
 		return
 	}
 
-	rsp := &pbgame.ExitDeskRsp{}
+	rsp := &pbgame.QueryDeskInfoRsp{}
 	if req.Head != nil {
 		rsp.Head = &pbcommon.RspHead{Seq: req.Head.Seq}
 	}
 
 	defer func() {
-
 		t.ToGateNormal(rsp, args.UserID)
 	}()
 
 	t.Log.WithFields(logrus.Fields{"uid": args.UserID}).Infof("tpl recv %s %+v ", args.Name, *req)
 
-	sessInfo, err := cache.QuerySessionInfo(args.UserID)
-	if err != nil {
-		rsp.Code = 2
-		return
-	}
+	rsp.Info, err = cache.QueryDeskInfo(req.DeskID)
 
-	if sessInfo.Status != pbcommon.UserStatus_InGameing ||
-		sessInfo.GameName != t.gameName ||
-		sessInfo.GameID != t.gameID {
-		return
-	}
-
-	t.plugin.HandleExitDeskReq(args.UserID, req, rsp)
-
-	if rsp.Code == 1 {
-		cache.ExitGame(args.UserID, t.gameName, t.gameID, sessInfo.AtDeskID)
-	}
+	t.plugin.HandleQueryDeskInfoReq(args.UserID, req, rsp)
 
 	return
 }

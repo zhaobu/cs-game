@@ -1,0 +1,4 @@
+// 解散
+syntax = "proto3";
+
+package pbgame;

@@ -3,7 +3,7 @@ syntax = "proto3";
 
 package pbinner;
 
-// UserLogin gate通知其他*服务玩家登陆
+// gate通知其他服务器 玩家登陆成功
 message UserLogin {
 	uint64 UserID = 1;
 }
@@ -12,7 +12,8 @@ message UserLeave {
 	uint64 UserID = 1;
 }
 
-// 匹配成功
+// center -> games
+// 匹配成功 
 message GameMatchSucc {
 	uint32 RoomId = 1;  // 房间ID
 	repeated uint64 UserIDs = 2;
@@ -29,3 +30,5 @@ message GameMatchArgsCheckRsp {
 	string GameArgMsgName = 2; // 具体游戏message name 如 pbgame_ddz.RoomArg
     bytes GameArgMsgValue = 3; // 具体游戏message value   
 }
+
+

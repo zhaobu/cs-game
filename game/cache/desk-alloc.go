@@ -28,3 +28,37 @@ func FreeDeskID(deskID uint64) (err error) {
 	_, err = c.Do("SADD", "emptydesk", strconv.FormatUint(deskID, 10))
 	return
 }
+
+func SCAN(pattern string, count int) (find []string) {
+	c := redisPool.Get()
+	defer c.Close()
+
+	if count < 1 || count > 50 {
+		count = 50
+	}
+
+	const start = string("0")
+	var cursor string = start
+
+	for {
+		reply, err := redis.MultiBulk(c.Do("SCAN", cursor, "MATCH", pattern, "COUNT", count))
+		if err != nil {
+			return
+		}
+
+		if len(reply) != 2 {
+			break
+		}
+
+		findN, _ := redis.ByteSlices(reply[1], nil)
+		for _, v := range findN {
+			find = append(find, string(v))
+		}
+
+		cursor = string(reply[0].([]byte))
+		if cursor == start {
+			break
+		}
+	}
+	return
+}

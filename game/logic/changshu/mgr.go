@@ -4,19 +4,19 @@ import "sync"
 
 var (
 	muId2Desk   sync.RWMutex
-	id2desk     = make(map[uint64]*desk)
+	id2desk     = make(map[uint64]*Desk)
 	muUser2desk sync.RWMutex
-	user2desk   = make(map[uint64]*desk)
+	user2desk   = make(map[uint64]*Desk)
 )
 
-func getDeskByID(id uint64) *desk {
+func getDeskByID(id uint64) *Desk {
 	muId2Desk.RLock()
 	defer muId2Desk.RUnlock()
 
 	return id2desk[id]
 }
 
-func updateID2desk(d *desk) bool {
+func updateID2desk(d *Desk) bool {
 	muId2Desk.Lock()
 	defer muId2Desk.Unlock()
 
@@ -35,14 +35,14 @@ func deleteID2desk(deskID uint64) {
 	delete(id2desk, deskID)
 }
 
-func getDeskByUID(uid uint64) *desk {
+func getDeskByUID(uid uint64) *Desk {
 	muUser2desk.RLock()
 	defer muUser2desk.RUnlock()
 
 	return user2desk[uid]
 }
 
-func updateUser2desk(d *desk, uids ...uint64) {
+func updateUser2desk(d *Desk, uids ...uint64) {
 	muUser2desk.Lock()
 	defer muUser2desk.Unlock()
 

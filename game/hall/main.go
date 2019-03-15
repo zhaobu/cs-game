@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	consulAddr = flag.String("consulAddr", "localhost:8500", "consul address")
+	consulAddr = flag.String("consulAddr", "192.168.1.128:8500", "consul address")
 	basePath   = flag.String("base", "/cy_game", "consul prefix path")
 	mgoURI     = flag.String("mgo", "mongodb://192.168.0.90:27017/game", "mongo connection URI")
 )

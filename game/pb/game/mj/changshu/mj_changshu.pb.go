@@ -5,9 +5,8 @@ package pbgame_mj_changshou
 
 import (
 	fmt "fmt"
-	math "math"
-
 	proto "github.com/golang/protobuf/proto"
+	math "math"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -21,7 +20,7 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
-///////////////////////////房间参数///////////////////////////
+// /////////////////////////房间参数///////////////////////////
 type CyUint32 struct {
 	T                    uint32   `protobuf:"varint,1,opt,name=T,proto3" json:"T,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -503,7 +502,7 @@ func (m *Int32XX) GetT() int32 {
 	return 0
 }
 
-///////////////////////////c-s///////////////////////////
+// /////////////////////////c-s///////////////////////////
 // 出牌
 type C2SOutCard struct {
 	Card                 int32    `protobuf:"varint,1,opt,name=card,proto3" json:"card,omitempty"`
@@ -544,7 +543,7 @@ func (m *C2SOutCard) GetCard() int32 {
 	return 0
 }
 
-//碰牌
+// 碰牌
 type C2SPengCard struct {
 	Card                 int32    `protobuf:"varint,1,opt,name=card,proto3" json:"card,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -584,7 +583,7 @@ func (m *C2SPengCard) GetCard() int32 {
 	return 0
 }
 
-//杠牌
+// 杠牌
 type C2SGangCard struct {
 	Card                 int32    `protobuf:"varint,1,opt,name=card,proto3" json:"card,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -624,7 +623,7 @@ func (m *C2SGangCard) GetCard() int32 {
 	return 0
 }
 
-//吃牌
+// 吃牌
 type C2SChiCard struct {
 	Card                 int32      `protobuf:"varint,1,opt,name=card,proto3" json:"card,omitempty"`
 	WillCard             []*Int32XX `protobuf:"bytes,2,rep,name=will_card,json=willCard,proto3" json:"will_card,omitempty"`
@@ -672,7 +671,7 @@ func (m *C2SChiCard) GetWillCard() []*Int32XX {
 	return nil
 }
 
-//胡牌
+// 胡牌
 type C2SHuCard struct {
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -704,7 +703,7 @@ func (m *C2SHuCard) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_C2SHuCard proto.InternalMessageInfo
 
-//取消操作
+// 取消操作
 type C2SCancelAction struct {
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -736,7 +735,7 @@ func (m *C2SCancelAction) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_C2SCancelAction proto.InternalMessageInfo
 
-//重连获取牌局信息
+// 重连获取牌局信息
 type C2SReconnectGame struct {
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -768,8 +767,8 @@ func (m *C2SReconnectGame) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_C2SReconnectGame proto.InternalMessageInfo
 
-///////////////////////////s-c///////////////////////////
-//游戏开始
+// /////////////////////////s-c///////////////////////////
+// 游戏开始
 type UserInfo struct {
 	UserPos              int32    `protobuf:"varint,1,opt,name=user_pos,json=userPos,proto3" json:"user_pos,omitempty"`
 	DiceValue            int32    `protobuf:"varint,2,opt,name=dice_value,json=diceValue,proto3" json:"dice_value,omitempty"`
@@ -864,7 +863,7 @@ func (m *S2CStartGame) GetUserInfo() []*UserInfo {
 	return nil
 }
 
-//发牌
+// 发牌
 type S2CDealCard struct {
 	CardFirst            int32      `protobuf:"varint,1,opt,name=card_first,json=cardFirst,proto3" json:"card_first,omitempty"`
 	Cards                []*Int32XX `protobuf:"bytes,2,rep,name=cards,proto3" json:"cards,omitempty"`
@@ -912,7 +911,7 @@ func (m *S2CDealCard) GetCards() []*Int32XX {
 	return nil
 }
 
-//玩家摸牌
+// 玩家摸牌
 type S2CDrawCard struct {
 	ChairId              int32    `protobuf:"varint,1,opt,name=chair_id,json=chairId,proto3" json:"chair_id,omitempty"`
 	Card                 int32    `protobuf:"varint,2,opt,name=card,proto3" json:"card,omitempty"`
@@ -1015,7 +1014,7 @@ func (m *BuHuaOnce) GetBuCard() int32 {
 	return 0
 }
 
-//补花
+// 补花
 type S2CBuHua struct {
 	ChairId              int32        `protobuf:"varint,1,opt,name=chair_id,json=chairId,proto3" json:"chair_id,omitempty"`
 	BuHuaResult          []*BuHuaOnce `protobuf:"bytes,2,rep,name=bu_hua_result,json=buHuaResult,proto3" json:"bu_hua_result,omitempty"`
@@ -1063,7 +1062,7 @@ func (m *S2CBuHua) GetBuHuaResult() []*BuHuaOnce {
 	return nil
 }
 
-//玩家出牌
+// 玩家出牌
 type S2COutCard struct {
 	ChairId              int32    `protobuf:"varint,1,opt,name=chair_id,json=chairId,proto3" json:"chair_id,omitempty"`
 	Card                 int32    `protobuf:"varint,2,opt,name=card,proto3" json:"card,omitempty"`
@@ -1111,7 +1110,7 @@ func (m *S2COutCard) GetCard() int32 {
 	return 0
 }
 
-//玩家该轮的操作
+// 玩家该轮的操作
 type S2CHaveOperation struct {
 	Operation            string   `protobuf:"bytes,1,opt,name=operation,proto3" json:"operation,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -1151,7 +1150,7 @@ func (m *S2CHaveOperation) GetOperation() string {
 	return ""
 }
 
-//玩家碰牌
+// 玩家碰牌
 type S2CPengCard struct {
 	ChairId              int32    `protobuf:"varint,1,opt,name=chair_id,json=chairId,proto3" json:"chair_id,omitempty"`
 	Card                 int32    `protobuf:"varint,2,opt,name=card,proto3" json:"card,omitempty"`
@@ -1199,7 +1198,7 @@ func (m *S2CPengCard) GetCard() int32 {
 	return 0
 }
 
-//玩家杠牌
+// 玩家杠牌
 type S2CGangCard struct {
 	ChairId              int32    `protobuf:"varint,1,opt,name=chair_id,json=chairId,proto3" json:"chair_id,omitempty"`
 	Card                 int32    `protobuf:"varint,2,opt,name=card,proto3" json:"card,omitempty"`
@@ -1263,7 +1262,7 @@ func (m *S2CGangCard) GetLoseChair() int32 {
 	return 0
 }
 
-//玩家吃牌
+// 玩家吃牌
 type S2CChiCard struct {
 	ChairId              int32      `protobuf:"varint,1,opt,name=chair_id,json=chairId,proto3" json:"chair_id,omitempty"`
 	Card                 int32      `protobuf:"varint,2,opt,name=card,proto3" json:"card,omitempty"`
@@ -1319,7 +1318,7 @@ func (m *S2CChiCard) GetCardTable() []*Int32XX {
 	return nil
 }
 
-//玩家胡牌
+// 玩家胡牌
 type S2CHuCard struct {
 	ChairId              int32      `protobuf:"varint,1,opt,name=chair_id,json=chairId,proto3" json:"chair_id,omitempty"`
 	CardTable            []*Int32XX `protobuf:"bytes,2,rep,name=card_table,json=cardTable,proto3" json:"card_table,omitempty"`
@@ -1367,7 +1366,7 @@ func (m *S2CHuCard) GetCardTable() []*Int32XX {
 	return nil
 }
 
-//倒计时显示在谁头上
+// 倒计时显示在谁头上
 type S2CTimeoutChair struct {
 	ChairId              int32    `protobuf:"varint,1,opt,name=chair_id,json=chairId,proto3" json:"chair_id,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -1487,7 +1486,7 @@ func (m *PlayerBalanceInfo) GetTotalPoint() int32 {
 	return 0
 }
 
-//单局游戏结束
+// 单局游戏结束
 type S2CGameEnd struct {
 	GameIndex            int32                `protobuf:"varint,1,opt,name=game_index,json=gameIndex,proto3" json:"game_index,omitempty"`
 	HuChair              int32                `protobuf:"varint,2,opt,name=hu_chair,json=huChair,proto3" json:"hu_chair,omitempty"`
@@ -1638,7 +1637,7 @@ func (m *PlayerBalanceResult) GetMingGang() int32 {
 	return 0
 }
 
-//大局结算
+// 大局结算
 type S2CBalanceResult struct {
 	RoomName             string                 `protobuf:"bytes,1,opt,name=room_name,json=roomName,proto3" json:"room_name,omitempty"`
 	PlayerResult         []*PlayerBalanceResult `protobuf:"bytes,2,rep,name=player_result,json=playerResult,proto3" json:"player_result,omitempty"`
@@ -1689,11 +1688,11 @@ func (m *S2CBalanceResult) GetPlayerResult() []*PlayerBalanceResult {
 type CardInfo struct {
 	ChairId  int32 `protobuf:"varint,1,opt,name=chair_id,json=chairId,proto3" json:"chair_id,omitempty"`
 	OutCards int32 `protobuf:"varint,2,opt,name=out_cards,json=outCards,proto3" json:"out_cards,omitempty"`
-	//玩家碰的牌 json {"12":1,"13":1}->碰了2萬 3萬
+	// 玩家碰的牌 json {"12":1,"13":1}->碰了2萬 3萬
 	PengCards string `protobuf:"bytes,3,opt,name=peng_cards,json=pengCards,proto3" json:"peng_cards,omitempty"`
-	//玩家杠的牌 json {"16":2}-> 杠了6萬（1:明杠(碰牌后再杠)，2:暗杠，3:接杠)
+	// 玩家杠的牌 json {"16":2}-> 杠了6萬（1:明杠(碰牌后再杠)，2:暗杠，3:接杠)
 	GangCards string `protobuf:"bytes,4,opt,name=gang_cards,json=gangCards,proto3" json:"gang_cards,omitempty"`
-	//玩家吃的牌[11,12,13;22,23,24],3个连续的组成吃
+	// 玩家吃的牌[11,12,13;22,23,24],3个连续的组成吃
 	ChiCards             []*Int32XX `protobuf:"bytes,5,rep,name=chi_cards,json=chiCards,proto3" json:"chi_cards,omitempty"`
 	HandCards            []*Int32XX `protobuf:"bytes,6,rep,name=hand_cards,json=handCards,proto3" json:"hand_cards,omitempty"`
 	CardNum              int32      `protobuf:"varint,7,opt,name=card_num,json=cardNum,proto3" json:"card_num,omitempty"`
@@ -1784,10 +1783,10 @@ func (m *CardInfo) GetPoint() int32 {
 	return 0
 }
 
-//重连获取牌局信息
+// 重连获取牌局信息
 type S2CReconnectGame struct {
 	PlayerCard *CardInfo `protobuf:"bytes,1,opt,name=player_card,json=playerCard,proto3" json:"player_card,omitempty"`
-	//玩家可執行的操作 json  [{"canPeng":true}] [{"canGang":[42]}]
+	// 玩家可執行的操作 json  [{"canPeng":true}] [{"canGang":[42]}]
 	CanOperation         string   `protobuf:"bytes,2,opt,name=can_operation,json=canOperation,proto3" json:"can_operation,omitempty"`
 	CurOutChair          int32    `protobuf:"varint,3,opt,name=cur_out_chair,json=curOutChair,proto3" json:"cur_out_chair,omitempty"`
 	LastOutChair         int32    `protobuf:"varint,4,opt,name=last_out_chair,json=lastOutChair,proto3" json:"last_out_chair,omitempty"`

@@ -22,11 +22,11 @@ import (
 )
 
 var (
-	consulAddr = flag.String("consulAddr", "localhost:8500", "consul address")
+	consulAddr = flag.String("consulAddr", "192.168.1.128:8500", "consul address")
 	basePath   = flag.String("base", "/cy_game", "consul prefix path")
 	addr       = flag.String("addr", "localhost:9301", "listen address")
 	release    = flag.Bool("release", false, "run mode release")
-	redisAddr  = flag.String("redisaddr", "192.168.0.90:6379", "redis address")
+	redisAddr  = flag.String("redisaddr", "192.168.1.128:6379", "redis address")
 	redisDb    = flag.Int("redisDb", 1, "redis db select")
 	mgoURI     = flag.String("mgo", "mongodb://192.168.0.90:27017/game", "mongo connection URI")
 

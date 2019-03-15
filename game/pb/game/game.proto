@@ -38,8 +38,8 @@ message QueryGameConfigReq {
 
 message QueryGameConfigRsp {
 	pbcommon.RspHead Head = 1;
-    string Name = 2; // 具体游戏配置 如 pbgame_ddz.MatchConfig or pbgame_ddz.FriendsConfigTpl
-    bytes Value = 3;
+    string CfgName = 2; // 具体游戏配置 如 pbgame_ddz.MatchConfig or pbgame_ddz.FriendsConfigTpl
+    bytes CfgValue = 3;
 }
 
 // 查询桌子信息 c -> s

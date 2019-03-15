@@ -5,8 +5,8 @@ import (
 	"cy/game/cache"
 	"cy/game/codec"
 	"cy/game/db/mgo"
-	pbcommon "cy/game/pb/common"
-	pbgame "cy/game/pb/game"
+	"cy/game/pb/common"
+	"cy/game/pb/game"
 	"fmt"
 	"runtime/debug"
 	"time"
@@ -41,7 +41,7 @@ func (t *RoundTpl) MakeDeskReq(ctx context.Context, args *codec.Message, reply *
 	}
 
 	defer func() {
-		t.toGateNormal(rsp, args.UserID)
+		t.ToGateNormal(rsp, args.UserID)
 	}()
 
 	t.Log.WithFields(logrus.Fields{"uid": args.UserID}).Infof("tpl recv %s %+v ", args.Name, *req)

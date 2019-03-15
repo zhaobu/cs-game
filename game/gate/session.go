@@ -7,6 +7,7 @@ import (
 	"cy/game/codec"
 	"cy/game/codec/protobuf"
 	"cy/game/pb/common"
+	"cy/game/pb/hall"
 	"cy/game/pb/inner"
 	"cy/game/pb/login"
 	"fmt"
@@ -156,7 +157,7 @@ func (s *session) handleInput() (err error) {
 			return
 		}
 
-		logrus.WithFields(logrus.Fields{"name": msg.Name, "uid": msg.UserID}).Info("recv")
+		logrus.WithFields(logrus.Fields{"name": msg.Name, "uid": msg.UserID}).Info("recv cli")
 
 		if !s.isLoginSucc {
 
@@ -191,7 +192,8 @@ func (s *session) handleInput() (err error) {
 
 				s.afterLoginRsp(loginRsp)
 
-			} else if msg.Name == proto.MessageName((*pblogin.MobileCaptchaReq)(nil)) {
+			} else if msg.Name == proto.MessageName((*pblogin.MobileCaptchaReq)(nil)) ||
+				msg.Name == proto.MessageName((*pbhall.UpdateBindMobileReq)(nil)) {
 				s.dispatch(msg)
 			} else {
 				errorTip = &pbcommon.ErrorTip{Msg: fmt.Sprintf("bad msg order")}
@@ -320,7 +322,7 @@ func (s *session) sendMsg(msg *codec.Message) {
 		return
 	}
 
-	logrus.WithFields(logrus.Fields{"uid": s.uid, "name": msg.Name}).Info("send")
+	logrus.WithFields(logrus.Fields{"uid": s.uid, "name": msg.Name}).Info("send cli")
 
 	defer func() {
 		if r := recover(); r != nil {

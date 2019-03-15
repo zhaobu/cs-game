@@ -107,3 +107,20 @@ func (cs *mjcs) HandleQueryGameConfigReq(uid uint64, req *pbgame.QueryGameConfig
 
 	return
 }
+
+func (cs *mjcs) HandleQueryDeskInfoReq(uid uint64, req *pbgame.QueryDeskInfoReq, rsp *pbgame.QueryDeskInfoRsp) {
+	rsp.Code = 1
+	return
+}
+
+func (cs *mjcs) RunLongTime(deskID uint64, typ int) bool {
+	d := getDeskByID(deskID)
+	if d == nil {
+		return false
+	}
+
+	deleteID2desk(deskID)
+	// deleteUser2desk()
+
+	return true
+}

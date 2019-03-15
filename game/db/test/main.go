@@ -11,9 +11,11 @@ func main() {
 		return
 	}
 
-	fmt.Println(mgo.UpdateBindMobile(11199, "15019439545"))
+	//fmt.Println(mgo.UpdateBindMobile(11199, "15019439545"))
 	//fmt.Println(mgo.QueryUserInfo(99))
-	fmt.Println(mgo.QueryUserByMobile("15019439545"))
+	//fmt.Println(mgo.QueryUserByMobile("15019439545"))
+	fmt.Println(mgo.UpdateBindMobile(0, "15019439545", "123456"))
+
 }
 
 func testWealth() {

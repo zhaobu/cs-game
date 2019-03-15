@@ -1,0 +1,4 @@
+// 聊天
+syntax = "proto3";
+
+package pbgame;

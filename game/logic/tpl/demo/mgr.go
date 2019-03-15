@@ -1,6 +1,8 @@
 package main
 
-import "sync"
+import (
+	"sync"
+)
 
 var (
 	muId2Desk   sync.RWMutex

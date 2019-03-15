@@ -1,9 +1,10 @@
 package tpl
 
 import (
+	"cy/game/cache"
 	"cy/game/codec"
 	"cy/game/codec/protobuf"
-	"cy/game/pb/game"
+	pbgame "cy/game/pb/game"
 	"encoding/json"
 
 	"github.com/golang/protobuf/proto"
@@ -29,6 +30,8 @@ type (
 		HandleJoinDeskReq(uid uint64, req *pbgame.JoinDeskReq, rsp *pbgame.JoinDeskRsp)
 		HandleMakeDeskReq(uid uint64, deskID uint64, req *pbgame.MakeDeskReq, rsp *pbgame.MakeDeskRsp)
 		HandleQueryGameConfigReq(uid uint64, req *pbgame.QueryGameConfigReq, rsp *pbgame.QueryGameConfigRsp)
+		HandleQueryDeskInfoReq(uid uint64, req *pbgame.QueryDeskInfoReq, rsp *pbgame.QueryDeskInfoRsp)
+		RunLongTime(deskID uint64, typ int) bool
 	}
 )
 
@@ -44,9 +47,17 @@ type RoundTpl struct {
 func (t *RoundTpl) SetName(gameName, gameID string) {
 	t.gameName = gameName
 	t.gameID = gameID
+
+	t.delInvalidDesk()
+	t.checkDeskLongTime()
 }
 
 func (t *RoundTpl) InitRedis(redisAddr string, redisDb int) {
+	err := cache.Init(redisAddr, redisDb)
+	if err != nil {
+		panic(err.Error())
+	}
+
 	t.redisPool = &redis.Pool{
 		Dial: func() (redis.Conn, error) {
 			c, err := redis.Dial("tcp", redisAddr)
@@ -66,7 +77,7 @@ func (t *RoundTpl) SetPlugin(p GameLogicPlugin) {
 	t.plugin = p
 }
 
-func (t *RoundTpl) toGateNormal(pb proto.Message, uids ...uint64) error {
+func (t *RoundTpl) ToGateNormal(pb proto.Message, uids ...uint64) error {
 	t.Log.Infof("tpl send %v %s %+v", uids, proto.MessageName(pb), pb)
 
 	msg := &codec.Message{}
@@ -97,37 +108,12 @@ func (t *RoundTpl) toGateNormal(pb proto.Message, uids ...uint64) error {
 	return err
 }
 
-func (t *RoundTpl) toGate(pb proto.Message, uids ...uint64) error {
-	t.Log.Infof("send %v %s %+v", uids, proto.MessageName(pb), pb)
-
-	notif := &pbgame.GameNotif{}
+func (t *RoundTpl) ToGate(pb proto.Message, uids ...uint64) error {
 	var err error
+	notif := &pbgame.GameNotif{}
 	notif.NotifName, notif.NotifValue, err = protobuf.Marshal(pb)
 	if err != nil {
 		return err
 	}
-
-	msg := &codec.Message{}
-	err = codec.Pb2Msg(notif, msg)
-	if err != nil {
-		return err
-	}
-
-	var xx struct {
-		Msg  *codec.Message
-		Uids []uint64
-	}
-	xx.Msg = msg
-	xx.Uids = append(xx.Uids, uids...)
-
-	data, err := json.Marshal(xx)
-	if err != nil {
-		return err
-	}
-
-	rc := t.redisPool.Get()
-	defer rc.Close()
-
-	_, err = rc.Do("PUBLISH", "backend_to_gate", data)
-	return err
+	return t.ToGateNormal(notif, uids...)
 }

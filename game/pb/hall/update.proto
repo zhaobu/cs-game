@@ -19,6 +19,7 @@ message UpdateBindMobileRsp {
     uint32 Code = 2;   
 }
 
+// 身份证绑定验证
 message UpdateIdCardReq {
     pbcommon.ReqHead Head = 1;
     string IdCard = 2;

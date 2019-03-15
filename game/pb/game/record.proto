@@ -1,0 +1,35 @@
+// 战绩
+syntax = "proto3";
+
+package pbgame;
+
+// TODO
+// 查询战绩 查询条件-游戏大类型，保存历史条数
+// 录像保存 下载流程
+
+// 查询战绩
+
+// 玩家单局信息
+message RecordPlayerInfo {
+    uint64 UserID = 1;
+    string UserName = 2;
+    int64 Change = 3;
+}
+
+message GameRecordDetail {
+    int64 StartTime = 1;
+    repeated RecordPlayerInfo Players = 2; // 单局
+    int64 VideoID = 3;
+}
+
+message Video {
+    int64 VideoID = 1;
+    bytes VideoArr = 2; // 录像
+}
+
+message GameRecord {
+    uint64 DeskID = 1;
+    int64 StartTime = 2;
+    RecordPlayerInfo Players = 3; // 总记录
+    repeated GameRecordDetail Detail = 4; // 仅自己可访问
+}

@@ -1,4 +1,4 @@
-package game_logic
+package main
 
 type (
 	emOperType     uint8

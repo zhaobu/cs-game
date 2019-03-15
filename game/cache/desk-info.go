@@ -1,7 +1,7 @@
 package cache
 
 import (
-	pbcommon "cy/game/pb/common"
+	"cy/game/pb/common"
 	"fmt"
 	"strconv"
 	"strings"
@@ -14,7 +14,7 @@ var addDeskInfoScript = redis.NewScript(1, `
 	then
 		return 2
 	else
-		redis.call('HMSET', KEYS[1], 'Uuid', ARGV[1], 'ID', ARGV[2], 'CreateUserID', ARGV[3], 'CreateTime', ARGV[4], 'CreateArgs',  ARGV[5], 'Status', ARGV[6], 'GameName', ARGV[7], 'GameID', ARGV[8], 'UserIDs', ARGV[9], 'ClubID', ARGV[10] )
+		redis.call('HMSET', KEYS[1], 'Uuid', ARGV[1], 'ID', ARGV[2], 'CreateUserID', ARGV[3], 'CreateUserName', ARGV[4], 'CreateTime', ARGV[5], 'ArgName',  ARGV[6], 'ArgValue',  ARGV[7], 'Status', ARGV[8], 'GameName', ARGV[9], 'GameID', ARGV[10], 'UserIDs', ARGV[11], 'ClubID', ARGV[12], 'Kind', ARGV[13] )
 		return 1
 	end
 	`)
@@ -33,13 +33,16 @@ func AddDeskInfo(info *pbcommon.DeskInfo) (err error) {
 		strconv.FormatUint(info.Uuid, 10),
 		strconv.FormatUint(info.ID, 10),
 		strconv.FormatUint(info.CreateUserID, 10),
+		info.CreateUserName,
 		info.CreateTime,
 		info.ArgName,
+		info.ArgValue,
 		info.Status,
 		info.GameName,
 		info.GameID,
 		strings.Join(uids, ","),
 		strconv.FormatInt(info.ClubID, 10),
+		strconv.FormatInt(info.Kind, 10),
 	))
 	if err != nil {
 		return err
@@ -61,7 +64,7 @@ var updateDeskInfoScript = redis.NewScript(1, `
 	if (redis.call('HGET', KEYS[1], 'Uuid')==ARGV[1])
 	then
 		redis.call('HINCRBY', KEYS[1], 'Uuid', 1)
-		redis.call('HMSET', KEYS[1], 'ID', ARGV[2], 'CreateUserID', ARGV[3], 'CreateTime', ARGV[4], 'CreateArgs',  ARGV[5], 'Status', ARGV[6], 'GameName', ARGV[7], 'GameID', ARGV[8], 'UserIDs', ARGV[9], 'ClubID', ARGV[10] )
+		redis.call('HMSET', KEYS[1], 'ID', ARGV[2], 'CreateUserID', ARGV[3], 'CreateUserName', ARGV[4], 'CreateTime', ARGV[5], 'ArgName',  ARGV[6], 'ArgValue',  ARGV[7], 'Status', ARGV[8], 'GameName', ARGV[9], 'GameID', ARGV[10], 'UserIDs', ARGV[11], 'ClubID', ARGV[12] )
 		return 1
 	else
 		return 2
@@ -82,8 +85,10 @@ func UpdateDeskInfo(info *pbcommon.DeskInfo) error {
 		strconv.FormatUint(info.Uuid, 10),
 		strconv.FormatUint(info.ID, 10),
 		strconv.FormatUint(info.CreateUserID, 10),
+		info.CreateUserName,
 		info.CreateTime,
 		info.ArgName,
+		info.ArgValue,
 		info.Status,
 		info.GameName,
 		info.GameID,
@@ -111,12 +116,15 @@ func QueryDeskInfo(deskID uint64) (*pbcommon.DeskInfo, error) {
 	info.Uuid, _ = strconv.ParseUint(reply["Uuid"], 10, 64)
 	info.ID, _ = strconv.ParseUint(reply["ID"], 10, 64)
 	info.CreateUserID, _ = strconv.ParseUint(reply["CreateUserID"], 10, 64)
+	info.CreateUserName = reply["CreateUserName"]
 	info.CreateTime, _ = strconv.ParseInt(reply["CreateTime"], 10, 64)
 	info.ArgName = reply["ArgName"]
+	info.ArgValue = []byte(reply["ArgValue"])
 	info.Status = reply["Status"]
 	info.GameName = reply["GameName"]
 	info.GameID = reply["GameID"]
 	info.ClubID, _ = strconv.ParseInt(reply["ClubID"], 10, 64)
+	info.Kind, _ = strconv.ParseInt(reply["Kind"], 10, 64)
 
 	for _, v := range strings.Split(reply["UserIDs"], ",") {
 		if uid, err := strconv.ParseUint(v, 10, 64); err == nil {

@@ -73,30 +73,26 @@ func backendLoginReq(loginReq *pblogin.LoginReq) (loginRsp *pblogin.LoginRsp) {
 		loginRsp.Code = pblogin.LoginRspCode_Succ
 	case pblogin.LoginType_Phone:
 		mobile := loginReq.ID
-		reqCaptcha := string(loginReq.Password)
 
-		if mobile == "" || reqCaptcha == "" {
+		if mobile == "" || loginReq.Password == "" {
 			loginRsp.Code = pblogin.LoginRspCode_IdOrPwdFailed
 			return
 		}
 
-		captcha, err := cache.GetCaptcha(mobile)
-		if err != nil || captcha != reqCaptcha {
-			loginRsp.Code = pblogin.LoginRspCode_IdOrPwdFailed
-			return
-		}
-
-		cache.DeleteCaptcha(mobile)
-
-		loginRsp.User, err = mgo.QueryUserByMobile(mobile)
+		userInfo, err := mgo.QueryUserByMobile(mobile)
 		if err != nil {
-			loginRsp.Code = pblogin.LoginRspCode_Other
+			loginRsp.Code = pblogin.LoginRspCode_MobileNoBind
 			loginRsp.StrCode = err.Error()
 			return
 		}
 
-		loginRsp.Code = pblogin.LoginRspCode_Succ
+		if userInfo.Password != loginReq.Password {
+			loginRsp.Code = pblogin.LoginRspCode_IdOrPwdFailed
+			return
+		}
 
+		loginRsp.User = userInfo
+		loginRsp.Code = pblogin.LoginRspCode_Succ
 	default:
 		loginRsp.Code = pblogin.LoginRspCode_Other
 	}
@@ -120,7 +116,7 @@ func (s *session) handleLogin(msg *codec.Message) error {
 	case *pblogin.KeepAliveReq:
 		s.handleLoginKeepAliveReq(v)
 	case *pblogin.MobileCaptchaReq:
-		s.handleLoginMobileCaptchaReq(v)
+		s.handleLoginMobileCaptchaReq(msg.UserID, v)
 	}
 
 	return nil
@@ -131,7 +127,7 @@ func (s *session) handleLoginKeepAliveReq(req *pblogin.KeepAliveReq) {
 	s.sendPb(rsp)
 }
 
-func (s *session) handleLoginMobileCaptchaReq(req *pblogin.MobileCaptchaReq) {
+func (s *session) handleLoginMobileCaptchaReq(userID uint64, req *pblogin.MobileCaptchaReq) {
 	rsp := &pblogin.MobileCaptchaRsp{}
 	if req.Head != nil {
 		rsp.Head = &pbcommon.RspHead{Seq: req.Head.Seq}
@@ -144,29 +140,42 @@ func (s *session) handleLoginMobileCaptchaReq(req *pblogin.MobileCaptchaReq) {
 		return
 	}
 
-	var err error
-	_, err = mgo.QueryUserByMobile(req.Mobile) // 提前是已经被绑定了
-	if err != nil {
-		rsp.Code = 3
+	if !mobileCaptchaReqLimit(req.Mobile) {
+		rsp.Code = 5
 		return
 	}
 
-	if !mobileCaptchaReqLimit(req.Mobile) {
-		rsp.Code = 4
-		return
+	var err error
+	var userInfo *pbcommon.UserInfo
+	isLoginSucced := userID != 0
+
+	userInfo, err = mgo.QueryUserByMobile(req.Mobile)
+
+	if !isLoginSucced {
+		// 登陆时，必须是已经被绑定过的
+		if err != nil {
+			rsp.Code = 3
+			return
+		}
+	} else {
+		// 重置时，必须没有被其他人绑定
+		if err == nil && userInfo.UserID != userID {
+			rsp.Code = 4
+			return
+		}
 	}
 
 	captcha := generateMobileCaptcha()
 
 	err = cache.MarkCaptcha(req.Mobile, captcha)
 	if err != nil {
-		rsp.Code = 5
+		rsp.Code = 6
 		return
 	}
 
 	err = sendMobileCaptcha(req.Mobile, captcha)
 	if err != nil {
-		rsp.Code = 6
+		rsp.Code = 7
 		return
 	}
 

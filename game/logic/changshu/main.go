@@ -1,7 +1,6 @@
 package main
 
 import (
-	"cy/game/cache"
 	"cy/game/db/mgo"
 	"cy/game/logic/tpl"
 	"cy/game/util"
@@ -21,13 +20,13 @@ const (
 )
 
 var (
-	consulAddr = flag.String("consulAddr", "localhost:8500", "consul address")
+	consulAddr = flag.String("consulAddr", "192.168.1.128:8500", "consul address")
 	basePath   = flag.String("base", "/cy_game", "consul prefix path")
 	addr       = flag.String("addr", "localhost:9601", "listen address")
 	release    = flag.Bool("release", false, "run mode")
-	redisAddr  = flag.String("redisAddr", "192.168.0.90:6379", "redis address")
+	redisAddr  = flag.String("redisAddr", "192.168.1.128:6379", "redis address")
 	redisDb    = flag.Int("redisDb", 1, "redis db select")
-	mgoURI     = flag.String("mgo", "mongodb://192.168.0.90:27017/game", "mongo connection URI")
+	mgoURI     = flag.String("mgo", "mongodb://192.168.1.128:27017/game", "mongo connection URI")
 
 	log *logrus.Entry
 )
@@ -59,7 +58,7 @@ func initLog() {
 	}
 
 	// hook, err := logrus_influxdb.NewInfluxDB(&logrus_influxdb.Config{
-	// 	Host:          "192.168.0.90", // TODO
+	// 	Host:          "192.168.1.128", // TODO
 	// 	Port:          8086,
 	// 	Database:      "cygame",
 	// 	Precision:     "ns",
@@ -92,19 +91,14 @@ func main() {
 
 	var cs mjcs
 	cs.Log = log
-	cs.RoundTpl.SetName(gameName, *addr)
 	cs.RoundTpl.InitRedis(*redisAddr, *redisDb)
+	cs.RoundTpl.SetName(gameName, *addr)
 	cs.SetPlugin(&cs)
 
 	var err error
 	err = loadArgTpl("../changshou.config")
 	if err != nil {
 		fmt.Println(err)
-	}
-
-	err = cache.Init(*redisAddr, *redisDb)
-	if err != nil {
-		return
 	}
 
 	err = mgo.Init(*mgoURI)

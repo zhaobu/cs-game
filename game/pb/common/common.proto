@@ -27,6 +27,7 @@ message DeskInfo {
 	uint64 ID = 2; // 桌子ID
 	uint64 CreateUserID = 3; // 创建人 0表示系统创建
 	int64 CreateTime = 4;
+	int64 CreateFee = 14; // 费用 创建时预扣的
 	string ArgName = 5;  // 具体游戏参数 如 pbgame_ddz.RoomArg
 	bytes ArgValue = 13;
 	string CreateUserName = 6;
@@ -35,7 +36,8 @@ message DeskInfo {
 	string GameID = 9; 
 	int64 ClubID = 11; // 所属俱乐部
 	int64 Kind = 12; // 桌子类型 1匹配 2好友 
-	repeated uint64 UserIDs = 10; // 桌子中的玩家		
+	repeated uint64 UserIDs = 10; // 桌子中的玩家
+	
 }
 
 // 会话信息
@@ -70,4 +72,8 @@ message UserInfo {
 	string IdentityCard = 15; // 身份证号码
 	string IdentityCardName = 16; // 身份证名称
 	string Password = 17; // 手机登陆密码
+	string IP = 18;
+	int32 PlayCount = 19; // 局数
+	int32 BindMobileCount = 20; // 绑定手机次数，第一次绑定有赠送
+	string Place = 21; // 通过IP或者经纬度得到的位置名称
 }

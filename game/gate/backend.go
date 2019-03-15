@@ -34,7 +34,7 @@ func onGameMsg(channel string, data []byte) error {
 			return
 		}
 
-		logrus.WithFields(logrus.Fields{"name": xx.Msg.Name, "to": xx.Uids}).Info("recv backend_to_gate")
+		logrus.WithFields(logrus.Fields{"name": xx.Msg.Name, "to": xx.Uids}).Info("recv backend")
 
 		for _, uid := range xx.Uids {
 			if sess, ok := mgr.GetSession(uid); ok {

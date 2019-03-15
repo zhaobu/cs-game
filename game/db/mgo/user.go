@@ -211,8 +211,36 @@ func updateUserOneField(uid uint64, fieldName string, newValue string) (info *pb
 	return
 }
 
-func UpdateBindMobile(uid uint64, newMobile string) (info *pbcommon.UserInfo, err error) {
-	return updateUserOneField(uid, "mobile", newMobile)
+func updateUserManyField(uid uint64, kv map[string]string) (info *pbcommon.UserInfo, err error) {
+	bm := bson.M{}
+	for k, v := range kv {
+		bm[k] = v
+	}
+
+	result := bson.M{}
+	_, err = mgoSess.DB("").C("userinfo").Find(bson.M{"userid": uid}).Apply(mgo.Change{
+		Upsert:    false,
+		ReturnNew: true,
+		Update:    bson.M{"$set": bm},
+	}, result)
+
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Printf("%+v\n", result)
+
+	info = &pbcommon.UserInfo{}
+	err = util.Bson2struct(result, info)
+	return
+}
+
+func UpdateIDCardAndName(uid uint64, idCard, cnName string) (info *pbcommon.UserInfo, err error) {
+	return updateUserManyField(uid, map[string]string{"identitycard": idCard, "identitycardname": cnName})
+}
+
+func UpdateBindMobile(uid uint64, mobile, password string) (info *pbcommon.UserInfo, err error) {
+	return updateUserManyField(uid, map[string]string{"mobile": mobile, "password": password})
 }
 
 func UpdateAgentID(uid uint64, agentID string) (info *pbcommon.UserInfo, err error) {

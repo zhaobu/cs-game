@@ -12,7 +12,7 @@ func MarkCaptcha(mobile string, captcha string) error {
 
 	key := fmt.Sprintf("captcha:%s", mobile)
 
-	_, err := c.Do("SETEX", key, 60, captcha)
+	_, err := c.Do("SETEX", key, 55, captcha)
 	return err
 }
 

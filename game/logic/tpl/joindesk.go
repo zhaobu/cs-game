@@ -4,8 +4,8 @@ import (
 	"context"
 	"cy/game/cache"
 	"cy/game/codec"
-	"cy/game/pb/common"
-	"cy/game/pb/game"
+	pbcommon "cy/game/pb/common"
+	pbgame "cy/game/pb/game"
 	"fmt"
 	"runtime/debug"
 
@@ -39,7 +39,10 @@ func (t *RoundTpl) JoinDeskReq(ctx context.Context, args *codec.Message, reply *
 	}
 
 	defer func() {
-		t.toGateNormal(rsp, args.UserID)
+		//为保证消息顺序,加入成功消息,游戏内部发送
+		if rsp.Code != pbgame.JoinDeskRspCode_JoinDeskSucc {
+			t.ToGateNormal(rsp, args.UserID)
+		}
 	}()
 
 	t.Log.WithFields(logrus.Fields{"uid": args.UserID}).Infof("tpl recv %s %+v ", args.Name, *req)

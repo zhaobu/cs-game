@@ -7,24 +7,22 @@ package pbclub;
 
 message ClubMemberInfo {
     uint64 UserID = 1;
-    string Profile = 2;
-    int32 Online = 3;
+    string UserName = 2;
+    string Profile = 3;
+    int32 Online = 4;    
+    int32 Identity = 5; // 身份 1 群主 2 管理员 3 普通成员
 }
 
 message ClubInfo {
     int64 ID = 1;
     string Name = 2;
-    uint64 CreateUserID = 3;
+    uint64 MasterUserID = 3; // 群主
     string Notice = 4;
     string Arg = 5;    
     repeated ClubMemberInfo Members = 6;
 }
 
-message ClubList {
-    repeated ClubInfo List = 1;
-}
-
-// c -> s
+// ID查询俱乐部信息 c -> s
 message QueryClubByIDReq {
     pbcommon.ReqHead Head = 1;
     int64 ClubID = 2;
@@ -34,6 +32,9 @@ message QueryClubByIDRsp {
     ClubInfo Info = 2;
 }
 
+message ClubList {
+    repeated ClubInfo List = 1;
+}
 // c -> s
 message QueryClubByMemberReq {
     pbcommon.ReqHead Head = 1;
@@ -49,7 +50,9 @@ message CreateClubReq {
     pbcommon.ReqHead Head = 1;
     string Name = 2;        
     string Notice = 3;
-    string Arg = 4;
+    string Arg = 4; // 
+    bool IsAutoCreate = 5;
+    bool IsCustomGameArg = 6;
 }
 message CreateClubRsp {
     pbcommon.RspHead Head = 1;
@@ -74,7 +77,9 @@ message UpdateClubReq {
     pbcommon.ReqHead Head = 1;
     int64 ClubID = 2;        
     string Notice = 3;
-    string Arg = 4;
+    string Arg = 4; // 
+    bool IsAutoCreate = 5;
+    bool IsCustomGameArg = 6;
 }
 message UpdateClubRsp {
     pbcommon.RspHead Head = 1;
@@ -93,7 +98,7 @@ message JoinClubRsp {
     int32 Code = 2;
 }
 
-// c -> s
+// 退出俱乐部 c -> s
 message ExitClubReq {
     pbcommon.ReqHead Head = 1;
     int64 ClubID = 2;
@@ -108,6 +113,7 @@ message ExitClubRsp {
 message QueryClubDeskReq {
     pbcommon.ReqHead Head = 1;
     int64 ClubID = 2;
+    int32 Option = 3; // 1 缺一人 2 等待中 3 游戏中
 }
 
 message QueryClubDeskRsp {  

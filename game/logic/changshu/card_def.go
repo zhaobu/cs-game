@@ -1,4 +1,4 @@
-package game_logic
+package main
 
 var normalCard = []uint8{
 	//  一万二万三万四万五万六万七八万九万
