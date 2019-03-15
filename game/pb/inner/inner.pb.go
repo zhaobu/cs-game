@@ -20,7 +20,7 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
-// UserLogin gate通知其他*服务玩家登陆
+// gate通知其他服务器 玩家登陆成功
 type UserLogin struct {
 	UserID               uint64   `protobuf:"varint,1,opt,name=UserID,proto3" json:"UserID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -99,6 +99,7 @@ func (m *UserLeave) GetUserID() uint64 {
 	return 0
 }
 
+// center -> games
 // 匹配成功
 type GameMatchSucc struct {
 	RoomId               uint32   `protobuf:"varint,1,opt,name=RoomId,proto3" json:"RoomId,omitempty"`

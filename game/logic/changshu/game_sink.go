@@ -1,7 +1,7 @@
 package main
 
 import (
-	pbgamemsg "cy/game/pb/game/mj/changshu"
+	pbgame_logic "cy/game/pb/game/mj/changshu"
 
 	"github.com/gogo/protobuf/proto"
 )
@@ -9,9 +9,9 @@ import (
 //游戏主逻辑
 type GameSink struct {
 	*Desk
-	GameConfig   *pbgamemsg.DeskArg //游戏参数
-	players      []playerInfo       //玩家游戏信息
-	onlinePlayer []bool             //在线玩家
+	GameConfig   *pbgame_logic.DeskArg //游戏参数
+	players      []playerInfo          //玩家游戏信息
+	onlinePlayer []bool                //在线玩家
 	isPlaying    bool
 	record       gameRecord
 }
@@ -21,7 +21,7 @@ func (self *GameSink) sendData(chairId uint16, msg proto.Message) {
 }
 
 //构建游戏
-func (self *GameSink) Ctor(config *pbgamemsg.DeskArg) error {
+func (self *GameSink) Ctor(config *pbgame_logic.DeskArg) error {
 	self.GameConfig = config
 	self.isPlaying = false
 	self.onlinePlayer = make([]bool, config.PlayerCount)

@@ -133,6 +133,7 @@ func (m *UpdateBindMobileRsp) GetCode() uint32 {
 	return 0
 }
 
+// 身份证绑定验证
 type UpdateIdCardReq struct {
 	Head                 *common.ReqHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
 	IdCard               string          `protobuf:"bytes,2,opt,name=IdCard,proto3" json:"IdCard,omitempty"`

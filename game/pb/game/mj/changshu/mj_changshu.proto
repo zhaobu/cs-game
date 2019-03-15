@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package pbgame_mj_changshou;
+package pbgame_logic;
 
 ///////////////////////////房间参数///////////////////////////
 message cyUint32 {

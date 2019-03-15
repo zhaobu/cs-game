@@ -4,8 +4,8 @@ import (
 	"context"
 	"cy/game/codec"
 	"cy/game/db/mgo"
-	"cy/game/pb/club"
-	"cy/game/pb/common"
+	pbclub "cy/game/pb/club"
+	pbcommon "cy/game/pb/common"
 	"fmt"
 
 	"github.com/sirupsen/logrus"
@@ -65,7 +65,7 @@ func clubDb2ClubInfo(clubDb *mgo.ClubDb) *pbclub.ClubInfo {
 	info := &pbclub.ClubInfo{
 		ID:           clubDb.ID,
 		Name:         clubDb.Name,
-		CreateUserID: clubDb.CreateUserID,
+		MasterUserID: clubDb.CreateUserID,
 		Notice:       clubDb.Notice,
 		Arg:          clubDb.Arg,
 	}

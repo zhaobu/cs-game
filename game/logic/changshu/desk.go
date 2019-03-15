@@ -5,7 +5,7 @@ import (
 
 	pbcommon "cy/game/pb/common"
 	pbgame "cy/game/pb/game"
-	cs "cy/game/pb/game/mj/changshu"
+	pbgame_logic "cy/game/pb/game/mj/changshu"
 	"sync"
 
 	"github.com/gogo/protobuf/proto"
@@ -35,14 +35,15 @@ type Desk struct {
 	gameSink    *GameSink                //游戏逻辑
 	deskPlayers map[uint64]*deskUserInfo //本桌玩家信息
 	// lookonPlayers map[uint64]*deskUserInfo //观察玩家信息
-	playChair  map[uint64]uint16 //玩家uid到chairid
-	deskConfig *cs.CreateArg     //桌子参数
+	playChair  map[uint64]uint16       //玩家uid到chairid
+	deskConfig *pbgame_logic.CreateArg //桌子参数
 }
 
-func makeDesk(arg *cs.CreateArg, masterId, deskID uint64) *Desk {
+func makeDesk(arg *pbgame_logic.CreateArg, masterId, deskID uint64) *Desk {
 	d := &Desk{id: deskID, masterId: masterId, deskConfig: arg}
 	d.gameSink = new(GameSink)
-	// d.gameSink.Ctor(arg)
+	var create pbgame_logic.DeskArg
+	d.gameSink.Ctor(&create)
 	d.playChair = make(map[uint64]uint16)
 	d.deskPlayers = make(map[uint64]*deskUserInfo)
 	return d

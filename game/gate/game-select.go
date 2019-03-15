@@ -4,7 +4,7 @@ import (
 	"context"
 	"cy/game/cache"
 	"cy/game/codec"
-	"cy/game/pb/game"
+	pbgame "cy/game/pb/game"
 	"fmt"
 	"sync"
 

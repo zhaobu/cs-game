@@ -1,13 +1,13 @@
 package main
 
 import (
-	cs "cy/game/pb/game/mj/changshu"
+	pbgame_logic "cy/game/pb/game/mj/changshu"
 	"encoding/json"
 	"io/ioutil"
 )
 
 var (
-	argTpl cs.CreateArgTpl
+	argTpl pbgame_logic.CreateArgTpl
 )
 
 func loadArgTpl(fn string) error {

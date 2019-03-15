@@ -3,13 +3,15 @@ package main
 import (
 	"cy/game/codec"
 	"cy/game/codec/protobuf"
-	"cy/game/pb/center"
-	"cy/game/pb/club"
-	"cy/game/pb/common"
-	"cy/game/pb/game"
-	"cy/game/pb/game/ddz"
-	"cy/game/pb/hall"
-	"cy/game/pb/login"
+	pbcenter "cy/game/pb/center"
+	pbclub "cy/game/pb/club"
+	pbcommon "cy/game/pb/common"
+	pbgame "cy/game/pb/game"
+
+	pbgame_ddz "cy/game/pb/game/ddz"
+	pbgame_changshu "cy/game/pb/game/mj/changshu"
+	pbhall "cy/game/pb/hall"
+	pblogin "cy/game/pb/login"
 	"flag"
 	"fmt"
 	"net"
@@ -104,9 +106,29 @@ func main() {
 
 	makeDeskReq := &pbgame.MakeDeskReq{
 		Head:     &pbcommon.ReqHead{UserID: userID, Seq: 1},
-		GameName: "mj-cs",
+		GameName: "11101",
 		ClubID:   0,
 	}
+	/*
+			  repeated cyUint32 Rule = 1;
+		  uint32 Barhead = 2;
+		  uint32 PlayerCount = 3;
+		  uint32 Dipiao = 4;
+		  RoundInfo RInfo = 5;
+		  uint32 PaymentType = 6;
+		  uint32 LimitIP = 7;
+		  uint32 Voice = 8;
+	*/
+	makeDeskReq.GameArgMsgName, makeDeskReq.GameArgMsgValue, _ = protobuf.Marshal(&pbgame_changshu.CreateArg{
+		Rule:        []*pbgame_changshu.CyUint32{},
+		Barhead:     5,
+		PlayerCount: 1,
+		Dipiao:      1,
+		RInfo:       &pbgame_changshu.RoundInfo{},
+		PaymentType: 3,
+		LimitIP:     1,
+		Voice:       0,
+	})
 	sendPb(makeDeskReq)
 
 	// 新建桌子

@@ -109,7 +109,7 @@ func main() {
 	s := server.NewServer()
 	addRegistryPlugin(s)
 
-	s.RegisterName("game/"+gameName, &cs, "")
+	s.RegisterName("game/"+gameName, &cs.RoundTpl, "")
 	err = s.Serve("tcp", *addr)
 	if err != nil {
 		fmt.Println(err)
