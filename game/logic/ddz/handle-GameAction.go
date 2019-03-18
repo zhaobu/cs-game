@@ -4,7 +4,7 @@ import (
 	"context"
 	"cy/game/codec"
 	"cy/game/logic/ddz/desk"
-	"cy/game/pb/game"
+	pbgame "cy/game/pb/game"
 	"fmt"
 	"runtime/debug"
 

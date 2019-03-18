@@ -1,6 +1,7 @@
 package main
 
 import (
+	"cy/game/codec/protobuf"
 	"cy/game/db/mgo"
 
 	pbcommon "cy/game/pb/common"
@@ -22,29 +23,29 @@ const (
 )
 
 type deskUserInfo struct {
+	chairId    int32
 	info       *pbcommon.UserInfo
 	desk_state desk_state
 }
 
 type Desk struct {
-	*mjcs
-	sync.Mutex
+	mu          sync.Mutex
+	gameNode    *mjcs
 	masterId    uint64                   //房主
 	id          uint64                   //桌子id
 	gameIndex   uint32                   //第几局
 	gameSink    *GameSink                //游戏逻辑
 	deskPlayers map[uint64]*deskUserInfo //本桌玩家信息
 	// lookonPlayers map[uint64]*deskUserInfo //观察玩家信息
-	playChair  map[uint64]uint16       //玩家uid到chairid
+	playChair  map[int32]*deskUserInfo //玩家chairid到deskPlayers
 	deskConfig *pbgame_logic.CreateArg //桌子参数
 }
 
 func makeDesk(arg *pbgame_logic.CreateArg, masterId, deskID uint64) *Desk {
 	d := &Desk{id: deskID, masterId: masterId, deskConfig: arg}
-	d.gameSink = new(GameSink)
-	var create pbgame_logic.DeskArg
-	d.gameSink.Ctor(&create)
-	d.playChair = make(map[uint64]uint16)
+	d.gameSink = &GameSink{}
+	d.gameSink.Ctor(arg)
+	d.playChair = make(map[int32]*deskUserInfo)
 	d.deskPlayers = make(map[uint64]*deskUserInfo)
 	return d
 }
@@ -56,22 +57,15 @@ func (d *Desk) doEnter(uid uint64) pbgame.JoinDeskRspCode {
 	return pbgame.JoinDeskRspCode_JoinDeskSucc
 }
 
-func (d *Desk) getFreeChair() (uint16, bool) {
-	var i uint32
-	for i = 0; i < d.deskConfig.PlayerCount; i++ {
-		var f bool = false
-		for _, chair := range d.playChair {
-			if chair == uint16(i) {
-				f = true
-				break
-			}
+//找到空闲座位号
+func (d *Desk) getFreeChair() (int32, bool) {
+	for i := int32(0); i < d.deskConfig.PlayerCount; i++ {
+		if _, ok := d.playChair[i]; ok {
+			continue
 		}
-		if f == false {
-			return uint16(i), true
-		}
-
+		return i, true
 	}
-	return 0, false
+	return -1, false
 }
 
 func (d *Desk) checkStart() bool {
@@ -79,8 +73,8 @@ func (d *Desk) checkStart() bool {
 		return false
 	}
 	//检查是否所有玩家都准备好
-	for uid, _ := range d.playChair {
-		if d.deskPlayers[uid].desk_state != SIT_DOWN {
+	for _, user_info := range d.playChair {
+		if user_info.desk_state != SIT_DOWN {
 			return false
 		}
 	}
@@ -94,17 +88,17 @@ func (d *Desk) doJoin(uid uint64) pbgame.JoinDeskRspCode {
 		return pbgame.JoinDeskRspCode_JoinDeskDeskFull
 	}
 	var err error
-	dUserInfo := &deskUserInfo{desk_state: SIT_DOWN}
+	dUserInfo := &deskUserInfo{desk_state: SIT_DOWN, chairId: chair}
 	userInfo, err := mgo.QueryUserInfo(uid)
 	if err != nil {
 		return pbgame.JoinDeskRspCode_JoinDeskUserStatusErr
 	}
 	dUserInfo.info = userInfo
 	d.deskPlayers[uid] = dUserInfo
-	d.playChair[uid] = chair
+	d.playChair[chair] = dUserInfo
 	d.gameSink.AddPlayer(chair, uid, userInfo.GetName())
 	//先发送加入成功消息
-	d.SendData(&pbgame.JoinDeskRsp{Code: pbgame.JoinDeskRspCode_JoinDeskSucc}, uid)
+	d.SendData(uid, &pbgame.JoinDeskRsp{Code: pbgame.JoinDeskRspCode_JoinDeskSucc})
 	//再判断游戏开始
 	if d.checkStart() {
 		d.gameSink.StartGame()
@@ -117,14 +111,76 @@ func (d *Desk) doExit(uid uint64) uint32 {
 	return 1 // 默认离开
 }
 
-func (d *Desk) doAction() {
+//游戏逻辑分发
+func (d *Desk) doAction(uid uint64, actionName string, actionValue []byte) {
+	pb, err := protobuf.Unmarshal(actionName, actionValue)
+	if err != nil {
+		log.Warnf("deskid %d invalid action %s", d.id, actionName)
+		return
+	}
+	d.mu.Lock()
+	defer d.mu.Unlock()
 
+	chairId := d.GetChairidByUid(uid)
+	if -1 == chairId {
+		log.Trace("can find chairId by uid%d", uid)
+		return
+	}
+	switch v := pb.(type) {
+	case *pbgame_logic.C2SThrowDice:
+		d.gameSink.ThrowDice(chairId, v)
+	default:
+		log.Warnf("invalid type %s", actionName)
+	}
 }
 
-func (d *Desk) SendData(pb proto.Message, uids ...uint64) {
-	d.mjcs.RoundTpl.ToGateNormal(pb, uids...)
+func (d *Desk) SendData(uid uint64, pb proto.Message) {
+	//发给所有人
+	if uid == 0 {
+		uids := make([]uint64, len(d.deskPlayers))
+		for uid, _ := range d.deskPlayers {
+			uids = append(uids, uid)
+		}
+		d.gameNode.RoundTpl.ToGateNormal(pb, uids...)
+	} else {
+		if _, ok := d.deskPlayers[uid]; ok {
+			d.gameNode.RoundTpl.ToGateNormal(pb, uid)
+		}
+	}
 }
 
-func (d *Desk) SendGameMessage(pb proto.Message, uids ...uint64) {
-	d.mjcs.RoundTpl.ToGate(pb, uids...)
+func (d *Desk) SendGameMessage(uid uint64, pb proto.Message) {
+	//发给所有人
+	if uid == 0 {
+		uids := make([]uint64, len(d.deskPlayers))
+		for uid, _ := range d.deskPlayers {
+			uids = append(uids, uid)
+		}
+		d.gameNode.RoundTpl.ToGate(pb, uids...)
+	} else {
+		if _, ok := d.deskPlayers[uid]; ok {
+			d.gameNode.RoundTpl.ToGate(pb, uid)
+		}
+	}
+}
+
+//根据uid查找chair_id
+func (d *Desk) GetChairidByUid(uid uint64) int32 {
+	// for k, v := range d.playChair {
+	// 	if v.info.UserID == uid {
+	// 		return k
+	// 	}
+	// }
+	if user_info, ok := d.deskPlayers[uid]; ok {
+		return user_info.chairId
+	}
+	return -1
+}
+
+//根据chairid查找uid
+func (d *Desk) GetUidByChairid(chairId int32) uint64 {
+	if user_info, ok := d.playChair[chairId]; ok {
+		return user_info.info.UserID
+	}
+	return 0
 }
