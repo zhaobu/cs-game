@@ -1,0 +1,16 @@
+
+mysql8.0安装
+
+1:mysql -u root -p
+然后输入密码
+2:use mysql,执行select host, user, authentication_string, plugin from user;查看root用户只能localhost登录
+//创建新用户
+3:CREATE USER 'lzmj'@'%' IDENTIFIED BY '12345';
+//给新用户设置远程连接
+//也可以给root用户设置为远程连接
+5:update user set host='%' where user='root';
+
+//直接创建新用户
+ALTER USER 'root'@'localhost' IDENTIFIED BY '12345' PASSWORD EXPIRE NEVER;
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '12345';
+FLUSH PRIVILEGES;

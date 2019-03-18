@@ -123,14 +123,14 @@ message S2CThrowDiceResult {
 }
 
 //游戏开始
-message UserInfo {
+message DiceInfo {
   int32 user_pos = 1;    //玩家方位(1:东2:南3:西4:北)
   int32 dice_value = 2;  //骰子值
 }
 
 message S2CStartGame {
   int32 banker_id = 1;  //庄家id
-  repeated UserInfo user_info = 2;
+  repeated DiceInfo dice_info = 2;
 }
 
 //发牌

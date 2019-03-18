@@ -13,19 +13,19 @@ import (
 )
 
 type (
-	desk_state uint8
+	deskState uint8
 )
 
 const (
-	LOOKON   desk_state = iota //观察者状态
-	SIT_DOWN                   //坐下准备状态
-	PLAYING                    //游戏状态
+	LOOKON   deskState = iota //观察者状态
+	SIT_DOWN                  //坐下准备状态
+	PLAYING                   //游戏状态
 )
 
 type deskUserInfo struct {
 	chairId    int32
 	info       *pbcommon.UserInfo
-	desk_state desk_state
+	desk_state deskState
 }
 
 type Desk struct {

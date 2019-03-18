@@ -11,7 +11,7 @@ import (
 
 //游戏公共信息
 type gameAllInfo struct {
-	throwDice [4][2]int32 //投色子结果
+	diceResult [4][2]int32 //投色子结果
 }
 
 //游戏私有信息
@@ -66,7 +66,7 @@ func (self *GameSink) reset() {
 //玩家投色子
 func (self *GameSink) ThrowDice(chairId int32, req *pbgame_logic.C2SThrowDice) {
 	//检查玩家是否已经投过
-	if self.game_all_info.throwDice[chairId][0] != 0 {
+	if self.game_all_info.diceResult[chairId][0] != 0 {
 		log.Warn("玩家%d已经投过色子", chairId)
 		return
 	}
@@ -77,13 +77,13 @@ func (self *GameSink) ThrowDice(chairId int32, req *pbgame_logic.C2SThrowDice) {
 	for i := 0; i < 2; i++ {
 		rnd := int32(rand.Intn(6-1) + 1)
 		msg.DiceValue[i] = &pbgame_logic.Cyint32{T: rnd}
-		self.game_all_info.throwDice[chairId][i] = rnd
+		self.game_all_info.diceResult[chairId][i] = rnd
 	}
 	//广播色子结果
 	self.sendData(-1, msg)
 	//判断是否所有人都投色子
 	for i := int32(0); i < self.game_config.PlayerCount; i++ {
-		if self.game_all_info.throwDice[i][0] == 0 {
+		if self.game_all_info.diceResult[i][0] == 0 {
 			//通知下一个玩家投色子
 			self.sendData(-1, &pbgame_logic.S2CThrowDice{ChairId: i})
 			return
@@ -94,16 +94,31 @@ func (self *GameSink) ThrowDice(chairId int32, req *pbgame_logic.C2SThrowDice) {
 
 //处理投色子结果
 func (self *GameSink) dealDiceResult() {
-	diceRes := make([][]int32, self.game_config.PlayerCount)
-	for i := 0; i < len(self.game_all_info.throwDice); i++ {
-		diceRes[i][0] = self.game_all_info.throwDice[i][0] + self.game_all_info.throwDice[i][1]
+	diceRes := make([]struct {
+		dice    int32
+		chairId int32
+	}, self.game_config.PlayerCount)
+	for i := 0; i < len(self.game_all_info.diceResult); i++ {
+		diceRes[i].dice = self.game_all_info.diceResult[i][0] + self.game_all_info.diceResult[i][1]
+		diceRes[i].chairId = int32(i)
 	}
 	//排序，实现比较方法即可
 	sort.Slice(diceRes, func(i, j int) bool {
-		return diceRes[i][0] > diceRes[j][0]
+		if diceRes[i].dice == diceRes[j].dice {
+			return diceRes[i].chairId < diceRes[j].dice
+		}
+		return diceRes[i].dice > diceRes[j].dice
 	})
+	//发送座位顺序
+	diceInfo := make([]*pbgame_logic.UserInfo, len(diceRes))
+	for i, res := range diceRes {
+		diceInfo[i] = &pbgame_logic.UserInfo{UserPos: res.chairId, DiceValue: res.dice}
+	}
+	msg := &pbgame_logic.S2CStartGame{BankerId: diceRes[0].chairId, UserInfo: diceInfo}
+	self.sendData(-1, msg)
 }
 
+//开始游戏
 func (self *GameSink) StartGame() {
 	self.isPlaying = true
 	//通知第一个玩家投色子
