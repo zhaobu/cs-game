@@ -83,7 +83,7 @@ func (d *desk) isFreeOut(uid uint64) bool {
 
 // 出牌超时timer
 func (d *desk) regTimeOutPlay(operTime int) {
-	d.reqTime = time.Now().UTC()
+	d.reqTimde = time.Now().UTC()
 	seq := d.seq
 	d.timer = tw.AfterFunc(time.Duration(operTime)*time.Second, func() {
 		d.mu.Lock()

@@ -5,21 +5,40 @@ import "cy/game/pb/common/common.proto";
 
 package pbclub;
 
-message ClubMemberInfo {
+
+
+// 成员信息
+message MemberInfo {
     uint64 UserID = 1;
-    string UserName = 2;
-    string Profile = 3;
-    int32 Online = 4;    
-    int32 Identity = 5; // 身份 1 群主 2 管理员 3 普通成员
+    // 身份 1 群主 2 管理员 3 普通成员
+    int32 Identity = 2;
+    string UserName = 3;
+    string Profile = 4;
+    // 1 在线 0 不在线
+    int32 Online = 5;    
+    bool Agree = 6;
+}
+
+// 基本信息
+message BaseInfo {   
+    string Name = 1;            
+    bool IsAutoCreate = 2; // 是否自动开房
+    bool IsCustomGameArg = 3; // 自定义房间
+    string Notice = 4; // 公告
+}
+
+// 建房参数
+message GameArg {
+
 }
 
 message ClubInfo {
     int64 ID = 1;
-    string Name = 2;
-    uint64 MasterUserID = 3; // 群主
-    string Notice = 4;
-    string Arg = 5;    
-    repeated ClubMemberInfo Members = 6;
+    uint64 CreateUserID = 2; // 创建人        
+    string Profile = 3;
+    BaseInfo Base = 4;
+    GameArg Arg = 5;
+    repeated pbcommon.DeskInfo Desks = 6;    
 }
 
 // ID查询俱乐部信息 c -> s
@@ -30,35 +49,43 @@ message QueryClubByIDReq {
 message QueryClubByIDRsp {
     pbcommon.RspHead Head = 1;
     ClubInfo Info = 2;
+    bool Agree = 3;
 }
 
+// 简单的信息
+message BriefInfo {
+    int64 ID = 1;    
+    string Name = 2;   
+    string Profile = 3;
+}
+
+// s -> c
 message ClubList {
-    repeated ClubInfo List = 1;
+    repeated BriefInfo List = 1;
 }
+
 // c -> s
-message QueryClubByMemberReq {
-    pbcommon.ReqHead Head = 1;
-    uint64 UserID = 2;
+message SubClubChange {
+    int32 SubOrUn = 1; // 1 订阅变动通知 2 取消订阅
 }
-message QueryClubByMemberRsp {
-    pbcommon.RspHead Head = 1;
-    ClubList Infos = 2;
+
+message ClubChangeInfo { 
+    // 1 加入 2 修改 3 离开 4 解散
+    int32 Typ = 1;
+    uint64 UserID = 2; // 加入 离开 的人
+    BriefInfo Info = 3;        
 }
 
 // c -> s
 message CreateClubReq {
-    pbcommon.ReqHead Head = 1;
-    string Name = 2;        
-    string Notice = 3;
-    string Arg = 4; // 
-    bool IsAutoCreate = 5;
-    bool IsCustomGameArg = 6;
+    pbcommon.ReqHead Head = 1;  
+    BaseInfo Base = 3;
+    GameArg Arg = 4;     
 }
 message CreateClubRsp {
     pbcommon.RspHead Head = 1;
-    // 1成功 2失败
-    int32 Code = 2;
-    ClubInfo Info = 3;
+    // 1成功 2数量限制 3内部服务错误
+    int32 Code = 2;   
 }
 
 // c -> s
@@ -76,10 +103,8 @@ message RemoveClubRsp {
 message UpdateClubReq {
     pbcommon.ReqHead Head = 1;
     int64 ClubID = 2;        
-    string Notice = 3;
-    string Arg = 4; // 
-    bool IsAutoCreate = 5;
-    bool IsCustomGameArg = 6;
+    BaseInfo Base = 3;
+    GameArg Arg = 4;  
 }
 message UpdateClubRsp {
     pbcommon.RspHead Head = 1;
@@ -110,13 +135,13 @@ message ExitClubRsp {
 }
 
 // c -> s
-message QueryClubDeskReq {
+message QueryClubMemberReq {
     pbcommon.ReqHead Head = 1;
     int64 ClubID = 2;
     int32 Option = 3; // 1 缺一人 2 等待中 3 游戏中
 }
 
-message QueryClubDeskRsp {  
+message QueryClubMemberRsp {  
     pbcommon.RspHead Head = 1;  
-    repeated pbcommon.DeskInfo Desks = 2;
+    repeated MemberInfo Members = 2;
 }

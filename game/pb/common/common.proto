@@ -37,7 +37,9 @@ message DeskInfo {
 	int64 ClubID = 11; // 所属俱乐部
 	int64 Kind = 12; // 桌子类型 1匹配 2好友 
 	repeated uint64 UserIDs = 10; // 桌子中的玩家
-	
+	repeated int64 UserDir = 15; // 玩家座位
+	int64 TotalLoop = 16; // 总局数
+	int64 CurrLoop = 17; // 当前局数
 }
 
 // 会话信息

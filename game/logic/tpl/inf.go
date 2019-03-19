@@ -6,7 +6,9 @@ import (
 	"cy/game/codec/protobuf"
 	pbgame "cy/game/pb/game"
 	"encoding/json"
+	"time"
 
+	"github.com/RussellLuo/timingwheel"
 	"github.com/golang/protobuf/proto"
 	"github.com/gomodule/redigo/redis"
 	"github.com/sirupsen/logrus"
@@ -36,18 +38,19 @@ type (
 )
 
 type RoundTpl struct {
-	Log      *logrus.Entry
-	plugin   GameLogicPlugin
-	gameName string
-	gameID   string
-
+	Log       *logrus.Entry
+	Timer     *timingwheel.TimingWheel
+	plugin    GameLogicPlugin
+	gameName  string
+	gameID    string
 	redisPool *redis.Pool
 }
 
 func (t *RoundTpl) SetName(gameName, gameID string) {
 	t.gameName = gameName
 	t.gameID = gameID
-
+	t.Timer = timingwheel.NewTimingWheel(time.Second, 60) //一个节点一个定时器
+	t.Timer.Start()
 	t.delInvalidDesk()
 	t.checkDeskLongTime()
 }

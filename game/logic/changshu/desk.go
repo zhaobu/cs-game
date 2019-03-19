@@ -3,17 +3,20 @@ package main
 import (
 	"cy/game/codec/protobuf"
 	"cy/game/db/mgo"
+	"time"
 
 	pbcommon "cy/game/pb/common"
 	pbgame "cy/game/pb/game"
 	pbgame_logic "cy/game/pb/game/mj/changshu"
 	"sync"
 
+	"github.com/RussellLuo/timingwheel"
 	"github.com/gogo/protobuf/proto"
 )
 
 type (
-	deskState uint8
+	deskState uint8 //桌子状态枚举
+	timerID   int32 //定时器枚举
 )
 
 const (
@@ -22,10 +25,21 @@ const (
 	PLAYING                   //游戏状态
 )
 
+const (
+	TIMERID_DESK_BEGIN      timerID = 0    //桌子内部定时器开始
+	TIMERID_GAME_SINK_BEGIN timerID = 1000 //游戏逻辑定时器开始
+)
+
 type deskUserInfo struct {
 	chairId    int32
 	info       *pbcommon.UserInfo
 	desk_state deskState
+}
+
+type timerInfo struct {
+	ID    timerID
+	timer *timingwheel.Timer
+	f     func()
 }
 
 type Desk struct {
@@ -33,12 +47,13 @@ type Desk struct {
 	gameNode    *mjcs
 	masterId    uint64                   //房主
 	id          uint64                   //桌子id
-	gameIndex   uint32                   //第几局
+	curInning   uint32                   //第几局
 	gameSink    *GameSink                //游戏逻辑
 	deskPlayers map[uint64]*deskUserInfo //本桌玩家信息
 	// lookonPlayers map[uint64]*deskUserInfo //观察玩家信息
-	playChair  map[int32]*deskUserInfo //玩家chairid到deskPlayers
-	deskConfig *pbgame_logic.CreateArg //桌子参数
+	playChair   map[int32]*deskUserInfo //玩家chairid到deskPlayers
+	deskConfig  *pbgame_logic.CreateArg //桌子参数
+	timerManger map[timerID]*timerInfo
 }
 
 func makeDesk(arg *pbgame_logic.CreateArg, masterId, deskID uint64) *Desk {
@@ -183,4 +198,16 @@ func (d *Desk) GetUidByChairid(chairId int32) uint64 {
 		return user_info.info.UserID
 	}
 	return 0
+}
+
+func (d *Desk) set_timer(tID timerID, dura time.Duration, f func()) {
+	// d.timerManger[tID] = d.gameNode.Timer.AfterFunc(dura, f)
+}
+
+func (d *Desk) time_out() {
+
+}
+
+func (d *Desk) cancel_timer(tID timerID) {
+
 }

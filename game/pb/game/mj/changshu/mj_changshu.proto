@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package pbgame_logic;
+package pbgame_mj_changshu;
 
 ///////////////////////////房间参数///////////////////////////
 message cyUint32 {
@@ -16,7 +16,7 @@ message RoundInfo {
 message CreateArg {
   repeated cyUint32 Rule = 1;  // 0:二摸三冲,1:豹子翻倍
   uint32 Barhead = 2;          // 4:扳4个 8:扳8个 1:独龙杠
-  int32 PlayerCount = 3;      //玩家人数
+  int32 PlayerCount = 3;       //玩家人数
   uint32 Dipiao = 4;           //底飘(0~10)
   RoundInfo RInfo = 5;         //局数
   uint32 PaymentType = 6;      //支付方式 1 房主支付 2 平局支付
@@ -118,19 +118,32 @@ message S2CThrowDice {
 
 //玩家投色子结果
 message S2CThrowDiceResult {
-  int32 chair_id = 1;    //当前投色子玩家
+  int32 chair_id = 1;               //当前投色子玩家
   repeated cyint32 dice_value = 2;  //色子大小
 }
 
-//游戏开始
-message DiceInfo {
+message ChangePosInfo {
   int32 user_pos = 1;    //玩家方位(1:东2:南3:西4:北)
   int32 dice_value = 2;  //骰子值
 }
 
+//换位结果
+message S2CChangePos {
+  repeated ChangePosInfo pos_info = 1;  //换位结果
+}
+
+message StartGameInfo {
+  //玩家手牌(每个玩家只能看到自己牌,其他人每张牌都为0表示背面牌)
+  repeated int32 hand_card = 1;
+}
+
+//游戏开始
 message S2CStartGame {
-  int32 banker_id = 1;  //庄家id
-  repeated DiceInfo dice_info = 2;
+  int32 banker_id = 1;                   //庄家id
+  int32 total_card_num = 2;              //总牌数
+  int32 left_card_num = 3;               //剩余牌数
+  int32 cur_inning = 4;                  //当前局
+  repeated StartGameInfo user_info = 5;  //每个玩家个人信息
 }
 
 //发牌

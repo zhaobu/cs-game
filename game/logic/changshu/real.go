@@ -97,6 +97,7 @@ func (self *mjcs) HandleMakeDeskReq(uid uint64, deskID uint64, req *pbgame.MakeD
 	}
 
 	newD := makeDesk(arg, uid, deskID)
+	newD.gameNode = self
 	newD.doJoin(uid)
 
 	updateID2desk(newD)
