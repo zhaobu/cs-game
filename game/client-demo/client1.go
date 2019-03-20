@@ -7,9 +7,12 @@ import (
 	pbclub "cy/game/pb/club"
 	pbcommon "cy/game/pb/common"
 	pbgame "cy/game/pb/game"
+	"encoding/json"
+	"io"
+	"os"
 
 	pbgame_ddz "cy/game/pb/game/ddz"
-	pbgame_changshu "cy/game/pb/game/mj/changshu"
+	pbgame_csmj "cy/game/pb/game/mj/changshu"
 	pbhall "cy/game/pb/hall"
 	pblogin "cy/game/pb/login"
 	"flag"
@@ -25,10 +28,42 @@ var (
 	addr = flag.String("addr", "localhost:9876", "tcp listen address")
 	c    net.Conn
 
-	userID    uint64
 	loginSucc = make(chan int, 1)
+	userID    uint64
+	desk      deskInfo
+	fileName  = flag.String("fileName", "./desk.json", "deskInfo readfileName")
 )
 
+type deskInfo struct {
+	DeskId uint64 `json:"DeskId"`
+}
+
+func login() {
+	sendPb(&pblogin.LoginReq{
+		Head:      &pbcommon.ReqHead{Seq: 1},
+		LoginType: pblogin.LoginType_WX,
+		ID:        *wxID,
+	})
+	<-loginSucc
+}
+
+func joindesk() {
+	login()
+	//从文件读取桌子号
+	err := json.Unmarshal(readFile(*fileName), &desk) //第二个参数要地址传递
+	if err != nil {
+		fmt.Println("err = ", err)
+		return
+	}
+	sendPb(&pbgame.JoinDeskReq{
+		Head:   &pbcommon.ReqHead{Seq: 1, UserID: userID},
+		DeskID: desk.DeskId,
+	})
+}
+
+func throwdice() {
+	sendPb(&pbgame_csmj.C2SThrowDice{})
+}
 func main() {
 	flag.Parse()
 
@@ -43,13 +78,33 @@ func main() {
 
 	go recv()
 
-	sendPb(&pblogin.LoginReq{
-		Head:      &pbcommon.ReqHead{Seq: 1},
-		LoginType: pblogin.LoginType_WX,
-		ID:        *wxID,
-	})
+	var a int //要发送的消息
+	for {
+		fmt.Printf("请输入座位号: ")
+		fmt.Scan(&a)
+		if a != 1 && a != 2 && a != 3 && a != 4 {
+			continue
+		}
+		name := map[int]string{1: "wx_1", 2: "wx_2", 3: "wx_3", 4: "wx_4"}
+		*wxID = name[a]
+		break
+	}
 
-	<-loginSucc
+	for {
+		fmt.Printf("请输入要发送的消息: ")
+		fmt.Scan(&a)
+		fmt.Println("发送消息 = ", a)
+		switch a {
+		case 1:
+			login()
+		case 2:
+			makedesk()
+		case 3:
+			joindesk()
+		case 4:
+			throwdice()
+		}
+	}
 
 	//sendPb(&pbhall.QueryGameListReq{Head: &pbcommon.ReqHead{Seq: 1, UserID: userID}})
 
@@ -104,11 +159,11 @@ func main() {
 	// 	Head: &pbcommon.ReqHead{UserID: userID},
 	// })
 
-	makeDeskReq := &pbgame.MakeDeskReq{
-		Head:     &pbcommon.ReqHead{UserID: userID, Seq: 1},
-		GameName: "11101",
-		ClubID:   0,
-	}
+	// makeDeskReq := &pbgame.MakeDeskReq{
+	// 	Head:     &pbcommon.ReqHead{UserID: userID, Seq: 1},
+	// 	GameName: "11101",
+	// 	ClubID:   0,
+	// }
 	/*
 			  repeated cyUint32 Rule = 1;
 		  uint32 Barhead = 2;
@@ -119,17 +174,17 @@ func main() {
 		  uint32 LimitIP = 7;
 		  uint32 Voice = 8;
 	*/
-	makeDeskReq.GameArgMsgName, makeDeskReq.GameArgMsgValue, _ = protobuf.Marshal(&pbgame_changshu.CreateArg{
-		Rule:        []*pbgame_changshu.CyUint32{},
-		Barhead:     5,
-		PlayerCount: 1,
-		Dipiao:      1,
-		RInfo:       &pbgame_changshu.RoundInfo{},
-		PaymentType: 3,
-		LimitIP:     1,
-		Voice:       0,
-	})
-	sendPb(makeDeskReq)
+	// makeDeskReq.GameArgMsgName, makeDeskReq.GameArgMsgValue, _ = protobuf.Marshal(&pbgame_csmj.CreateArg{
+	// 	Rule:        []*pbgame_csmj.CyUint32{},
+	// 	Barhead:     5,
+	// 	PlayerCount: 4,
+	// 	Dipiao:      1,
+	// 	RInfo:       &pbgame_csmj.RoundInfo{},
+	// 	PaymentType: 3,
+	// 	LimitIP:     1,
+	// 	Voice:       0,
+	// })
+	// sendPb(makeDeskReq)
 
 	// 新建桌子
 	// makeDeskReq := &pbgame.MakeDeskReq{
@@ -179,7 +234,26 @@ func main() {
 	// 	Head: &pbcommon.ReqHead{UserID: *userID},
 	// })
 
-	select {}
+}
+
+func makedesk() {
+	login()
+	makeDeskReq := &pbgame.MakeDeskReq{
+		Head:     &pbcommon.ReqHead{UserID: userID, Seq: 1},
+		GameName: "11101",
+		ClubID:   0,
+	}
+	makeDeskReq.GameArgMsgName, makeDeskReq.GameArgMsgValue, _ = protobuf.Marshal(&pbgame_csmj.CreateArg{
+		Rule:        []*pbgame_csmj.CyUint32{},
+		Barhead:     5,
+		PlayerCount: 4,
+		Dipiao:      1,
+		RInfo:       &pbgame_csmj.RoundInfo{},
+		PaymentType: 3,
+		LimitIP:     1,
+		Voice:       0,
+	})
+	sendPb(makeDeskReq)
 }
 
 func sendPb(pb proto.Message) {
@@ -233,7 +307,18 @@ func detailMsg(msg *codec.Message) {
 			userID = v.User.UserID
 			loginSucc <- 1
 		}
-	case *pbcommon.ErrorTip, *pbgame.MakeDeskRsp, *pbgame.JoinDeskRsp,
+
+	case *pbgame.MakeDeskRsp:
+		fmt.Printf("	%+v\n", v)
+		desk.DeskId = v.Info.ID
+		//写入到文件中
+		buf, err := json.MarshalIndent(desk, "", "	") //格式化编码
+		if err != nil {
+			fmt.Println("err = ", err)
+			return
+		}
+		writebuf(*fileName, string(buf))
+	case *pbcommon.ErrorTip, *pbgame.JoinDeskRsp,
 		*pbhall.QuerySessionInfoRsp, *pbgame.QueryDeskInfoRsp,
 		*pbcenter.MatchRsp, *pbcenter.CancelMatchRsp, *pbclub.QueryClubByIDRsp,
 		*pbclub.CreateClubRsp, *pbclub.RemoveClubRsp, *pbclub.UpdateClubRsp,
@@ -286,4 +371,42 @@ func detailMsg(msg *codec.Message) {
 		}
 	}
 
+}
+
+func writebuf(path string, wbuf string) {
+	//打开文件，新建文件
+	f, err := os.Create(path)
+	if err != nil {
+		fmt.Println("err = ", err)
+		return
+	}
+
+	//使用完毕，需要关闭文件
+	defer f.Close()
+	_, err = f.WriteString(wbuf) //n表示写入的字节数
+	if err != nil {
+		fmt.Println("err = ", err)
+	}
+}
+
+func readFile(path string) []byte {
+	//打开文件
+	f, err := os.Open(path)
+	if err != nil {
+		fmt.Println("err = ", err)
+		return nil
+	}
+
+	//关闭文件
+	defer f.Close()
+
+	buf := make([]byte, 1024*2) //2k大小
+
+	//n代表从文件读取内容的长度
+	_, err1 := f.Read(buf)
+	if err1 != nil && err1 != io.EOF { //文件出错，同时没有到结尾
+		fmt.Println("err1 = ", err1)
+		return nil
+	}
+	return buf
 }

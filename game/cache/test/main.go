@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	cache.Init("192.168.0.90:6380", 4)
+	cache.Init("192.168.1.128:6380", 4)
 
 	//fmt.Println(cache.MarkCaptcha("150", "666"))
 	fmt.Println(cache.GetCaptcha("150112"))

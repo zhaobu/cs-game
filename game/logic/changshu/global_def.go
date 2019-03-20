@@ -4,6 +4,17 @@ type (
 	emOperType     uint8
 	emRecordAction uint8
 	emHuScoreType  uint8
+	emtimerID      uint32 //定时器枚举
+)
+
+//定时器ID
+const (
+	TID_DESK_Begin emtimerID = 0 //桌子内部定时器开始
+	TID_Destory                  //销毁桌子
+
+	TID_GAMESINK_Begin emtimerID = 1000 //游戏逻辑定时器开始
+	TID_DealCard                        //发牌
+	TID_GameStartBuHua                  //开始补花
 )
 
 //杠类型

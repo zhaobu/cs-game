@@ -28,7 +28,7 @@ var (
 	release    = flag.Bool("release", false, "run mode release")
 	redisAddr  = flag.String("redisaddr", "192.168.1.128:6379", "redis address")
 	redisDb    = flag.Int("redisDb", 1, "redis db select")
-	mgoURI     = flag.String("mgo", "mongodb://192.168.0.90:27017/game", "mongo connection URI")
+	mgoURI     = flag.String("mgo", "mongodb://192.168.1.128:27017/game", "mongo connection URI")
 
 	redisPool *redis.Pool
 )

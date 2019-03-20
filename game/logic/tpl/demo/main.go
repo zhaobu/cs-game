@@ -26,7 +26,7 @@ var (
 	release    = flag.Bool("release", false, "run mode")
 	redisAddr  = flag.String("redisAddr", "192.168.1.128:6379", "redis address")
 	redisDb    = flag.Int("redisDb", 1, "redis db select")
-	mgoURI     = flag.String("mgo", "mongodb://192.168.0.90:27017/game", "mongo connection URI")
+	mgoURI     = flag.String("mgo", "mongodb://192.168.1.128:27017/game", "mongo connection URI")
 
 	log *logrus.Entry
 )
@@ -58,7 +58,7 @@ func initLog() {
 	}
 
 	// hook, err := logrus_influxdb.NewInfluxDB(&logrus_influxdb.Config{
-	// 	Host:          "192.168.0.90", // TODO
+	// 	Host:          "192.168.1.128", // TODO
 	// 	Port:          8086,
 	// 	Database:      "cygame",
 	// 	Precision:     "ns",

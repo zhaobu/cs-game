@@ -16,7 +16,6 @@ import (
 
 type (
 	deskState uint8 //桌子状态枚举
-	timerID   int32 //定时器枚举
 )
 
 const (
@@ -25,21 +24,10 @@ const (
 	PLAYING                   //游戏状态
 )
 
-const (
-	TIMERID_DESK_BEGIN      timerID = 0    //桌子内部定时器开始
-	TIMERID_GAME_SINK_BEGIN timerID = 1000 //游戏逻辑定时器开始
-)
-
 type deskUserInfo struct {
 	chairId    int32
 	info       *pbcommon.UserInfo
 	desk_state deskState
-}
-
-type timerInfo struct {
-	ID    timerID
-	timer *timingwheel.Timer
-	f     func()
 }
 
 type Desk struct {
@@ -49,17 +37,18 @@ type Desk struct {
 	id          uint64                   //桌子id
 	curInning   uint32                   //第几局
 	gameSink    *GameSink                //游戏逻辑
-	deskPlayers map[uint64]*deskUserInfo //本桌玩家信息
+	deskPlayers map[uint64]*deskUserInfo //本桌玩家信息,玩家uid到deskPlayers
 	// lookonPlayers map[uint64]*deskUserInfo //观察玩家信息
 	playChair   map[int32]*deskUserInfo //玩家chairid到deskPlayers
 	deskConfig  *pbgame_logic.CreateArg //桌子参数
-	timerManger map[timerID]*timerInfo
+	timerManger map[emtimerID]*timingwheel.Timer
 }
 
 func makeDesk(arg *pbgame_logic.CreateArg, masterId, deskID uint64) *Desk {
 	d := &Desk{id: deskID, masterId: masterId, deskConfig: arg}
 	d.gameSink = &GameSink{}
 	d.gameSink.Ctor(arg)
+	d.gameSink.desk = d
 	d.playChair = make(map[int32]*deskUserInfo)
 	d.deskPlayers = make(map[uint64]*deskUserInfo)
 	return d
@@ -84,7 +73,7 @@ func (d *Desk) getFreeChair() (int32, bool) {
 }
 
 func (d *Desk) checkStart() bool {
-	if len(d.playChair) < 3 {
+	if len(d.playChair) < int(d.deskConfig.PlayerCount) {
 		return false
 	}
 	//检查是否所有玩家都准备好
@@ -98,6 +87,7 @@ func (d *Desk) checkStart() bool {
 
 func (d *Desk) doJoin(uid uint64) pbgame.JoinDeskRspCode {
 	//判断人数满没满
+	log.Warnf("玩家%d加入房间%d", uid, d.id)
 	chair, ok := d.getFreeChair()
 	if false == ok {
 		return pbgame.JoinDeskRspCode_JoinDeskDeskFull
@@ -153,8 +143,10 @@ func (d *Desk) SendData(uid uint64, pb proto.Message) {
 	//发给所有人
 	if uid == 0 {
 		uids := make([]uint64, len(d.deskPlayers))
+		var i int = 0
 		for uid, _ := range d.deskPlayers {
-			uids = append(uids, uid)
+			uids[i] = uid
+			i++
 		}
 		d.gameNode.RoundTpl.ToGateNormal(pb, uids...)
 	} else {
@@ -168,8 +160,10 @@ func (d *Desk) SendGameMessage(uid uint64, pb proto.Message) {
 	//发给所有人
 	if uid == 0 {
 		uids := make([]uint64, len(d.deskPlayers))
+		var i int = 0
 		for uid, _ := range d.deskPlayers {
-			uids = append(uids, uid)
+			uids[i] = uid
+			i++
 		}
 		d.gameNode.RoundTpl.ToGate(pb, uids...)
 	} else {
@@ -200,14 +194,24 @@ func (d *Desk) GetUidByChairid(chairId int32) uint64 {
 	return 0
 }
 
-func (d *Desk) set_timer(tID timerID, dura time.Duration, f func()) {
-	// d.timerManger[tID] = d.gameNode.Timer.AfterFunc(dura, f)
+func (d *Desk) set_timer(tID emtimerID, dura time.Duration, f func()) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	exefun := func() {
+		d.mu.Lock()
+		defer d.mu.Unlock()
+		f()
+		delete(d.timerManger, tID)
+	}
+	d.timerManger[tID] = d.gameNode.Timer.AfterFunc(dura, exefun)
 }
 
-func (d *Desk) time_out() {
-
-}
-
-func (d *Desk) cancel_timer(tID timerID) {
+func (d *Desk) cancel_timer(tID emtimerID) {
+	if t, ok := d.timerManger[tID]; ok == false {
+		log.Tracef("取消定时器时定时器不存在")
+		return
+	} else {
+		t.Stop()
+	}
 
 }

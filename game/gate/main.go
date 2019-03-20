@@ -24,7 +24,7 @@ var (
 	release    = flag.Bool("release", false, "run mode")
 	redisAddr  = flag.String("redisAddr", "192.168.1.128:6379", "redis address")
 	redisDb    = flag.Int("redisDb", 1, "redis db select")
-	mgoURI     = flag.String("mgo", "mongodb://192.168.0.90:27017/game", "mongo connection URI")
+	mgoURI     = flag.String("mgo", "mongodb://192.168.1.128:27017/game", "mongo connection URI")
 	aliAppCode = flag.String("aliCode", `c091b052e9dd467fa1f49789be7add07`, "ali APPCODE")
 	mgr        = newManager()
 

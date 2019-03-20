@@ -133,17 +133,17 @@ message S2CChangePos {
 }
 
 message StartGameInfo {
-  //玩家手牌(每个玩家只能看到自己牌,其他人每张牌都为0表示背面牌)
+  //玩家手牌
   repeated int32 hand_card = 1;
 }
 
 //游戏开始
 message S2CStartGame {
-  int32 banker_id = 1;                   //庄家id
-  int32 total_card_num = 2;              //总牌数
-  int32 left_card_num = 3;               //剩余牌数
-  int32 cur_inning = 4;                  //当前局
-  repeated StartGameInfo user_info = 5;  //每个玩家个人信息
+  int32 banker_id = 1;          //庄家id
+  int32 total_card_num = 2;     //总牌数
+  int32 left_card_num = 3;      //剩余牌数
+  int32 cur_inning = 4;         //当前局
+  StartGameInfo user_info = 5;  //玩家个人信息
 }
 
 //发牌

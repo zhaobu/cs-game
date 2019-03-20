@@ -8,13 +8,13 @@ type playerInfo struct {
 }
 
 type playerCardInfo struct {
-	handCards  []uint8              //玩家手牌
-	outCards   []uint8              //出过的牌
-	pengCards  map[uint8]int32      // {card=chair_id,..}
-	gangCards  map[uint8]emOperType // {card=G_OP_TYPE类型,...}
-	stackCards map[uint8]int32      //玩家手牌数量统计 {card=num,...}
-	chiCards   []uint8              //{card1,card2,card3,card4,card5,card6}3个连续的能组成吃
-	huCard     uint8
+	handCards  []int32              //玩家手牌
+	outCards   []int32              //出过的牌
+	pengCards  map[int32]int32      // {card=chair_id,..}
+	gangCards  map[int32]emOperType // {card=G_OP_TYPE类型,...}
+	stackCards map[int32]int32      //玩家手牌数量统计 {card=num,...}
+	chiCards   []int32              //{card1,card2,card3,card4,card5,card6}3个连续的能组成吃
+	huCard     int32
 }
 
 //单局结算信息

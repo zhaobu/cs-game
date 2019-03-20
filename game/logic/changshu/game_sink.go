@@ -10,13 +10,13 @@ import (
 	"github.com/gogo/protobuf/proto"
 )
 
-var DebugCard []uint8
+var DebugCard []int32
 
 //游戏公共信息
 type gameAllInfo struct {
 	diceResult     [4][2]int32 //投色子结果
 	banker_id      int32       //庄家id
-	left_rand_card []uint8     //发完牌后剩余的牌
+	left_rand_card []int32     //发完牌后剩余的牌
 }
 
 //游戏私有信息
@@ -42,7 +42,7 @@ type GameSink struct {
 	game_privite_info gamePrivateInfo         //游戏私有信息
 	game_balance_info gameBalanceInfo         //游戏结束信息
 	onlinePlayer      []bool                  //在线玩家
-	baseCard          []uint8                 //基础牌库
+	baseCard          []int32                 //基础牌库
 	isPlaying         bool                    //是否在游戏中
 	makeCards         bool                    //是否做牌
 }
@@ -55,11 +55,6 @@ func (self *GameSink) sendData(chairId int32, msg proto.Message) {
 	} else {
 		self.desk.SendGameMessage(self.desk.GetUidByChairid(chairId), msg)
 	}
-}
-
-//游戏定时器
-func (self *GameSink) timeOut() {
-
 }
 
 ////////////////////////调用desk接口函数END/////////////////////////////
@@ -138,7 +133,9 @@ func (self *GameSink) dealDiceResult() {
 	msg := &pbgame_logic.S2CChangePos{PosInfo: posInfo}
 	self.sendData(-1, msg)
 	//1s后发送游戏开始消息
-	self.deal_card()
+	self.desk.set_timer(TID_DealCard, time.Second, func() {
+		self.deal_card()
+	})
 }
 
 //开始发牌
@@ -147,25 +144,27 @@ func (self *GameSink) deal_card() {
 	msg.TotalCardNum = int32(len(self.baseCard))
 	//洗牌
 	self.shuffle_cards()
-	var player_cards [][]uint8
+	var player_cards [][]int32
 	player_cards, self.game_all_info.left_rand_card = self.cardDef.DealCard(self.game_all_info.left_rand_card, self.game_config.PlayerCount, self.game_all_info.banker_id)
 	msg.LeftCardNum = int32(len(self.game_all_info.left_rand_card))
 	// var userInfo []*pbgame_logic.StartGameInfo
 	for k, v := range self.players {
 		v.cardInfo.handCards = player_cards[k]
+		msg.UserInfo.HandCard = player_cards[k]
 		log.Warnf("房间[%d] 玩家[%s,%d]手牌为:%v", self.desk.id, v.baseInfo.nickname, k, player_cards[k])
 		//统计每个玩家手牌数量
 		v.cardInfo.stackCards = self.cardDef.StackCards(player_cards[k])
 		//给每个玩家发送游戏开始消息
 		self.sendData(int32(k), msg)
 	}
-	/*
-			BankerId             int32
-		TotalCardNum         int32
-		LeftCardNum          int32
-		CurInning            int32
-		UserInfo             []*StartGameInfo
-	*/
+	self.desk.set_timer(TID_GameStartBuHua, time.Second*2, func() {
+		self.gameStartBuhu()
+	})
+}
+
+//游戏开始补花
+func (self *GameSink) gameStartBuhu() {
+
 }
 
 //洗牌
@@ -186,7 +185,8 @@ func (self *GameSink) StartGame() {
 
 //玩家加入游戏
 func (self *GameSink) AddPlayer(chairId int32, uid uint64, nickName string) bool {
-	if self.game_config.PlayerCount < chairId {
+	if self.game_config.PlayerCount <= chairId {
+		log.Errorf("人数已满,游戏开始人数为%d", self.game_config.PlayerCount)
 		return false
 	}
 

@@ -16,3 +16,10 @@ func Init(address string, db int) error {
 	}
 	return nil
 }
+
+func FlushDb(db int) error {
+	c := redisPool.Get()
+	defer c.Close()
+	c.Do("FLUSHDB")
+	return nil
+}

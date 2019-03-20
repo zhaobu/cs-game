@@ -1,6 +1,7 @@
 package main
 
 import (
+	"cy/game/cache"
 	"cy/game/db/mgo"
 	"cy/game/logic/tpl"
 	"cy/game/util"
@@ -94,6 +95,10 @@ func main() {
 	cs.RoundTpl.InitRedis(*redisAddr, *redisDb)
 	cs.RoundTpl.SetName(gameName, *addr)
 	cs.SetPlugin(&cs)
+
+	if !*release {
+		cache.FlushDb(*redisDb)
+	}
 
 	var err error
 	err = loadArgTpl("../changshou.config")
