@@ -61,9 +61,18 @@ func joindesk() {
 	})
 }
 
-func throwdice() {
-	sendPb(&pbgame_csmj.C2SThrowDice{})
+func sendGameAction(pb proto.Message) {
+	pbAction := &pbgame.GameAction{
+		Head: &pbcommon.ReqHead{UserID: userID},
+	}
+	pbAction.ActionName, pbAction.ActionValue, _ = protobuf.Marshal(pb)
+	sendPb(pbAction)
 }
+
+func throwdice() {
+	sendGameAction(&pbgame_csmj.C2SThrowDice{})
+}
+
 func main() {
 	flag.Parse()
 
@@ -403,10 +412,10 @@ func readFile(path string) []byte {
 	buf := make([]byte, 1024*2) //2k大小
 
 	//n代表从文件读取内容的长度
-	_, err1 := f.Read(buf)
+	n, err1 := f.Read(buf)
 	if err1 != nil && err1 != io.EOF { //文件出错，同时没有到结尾
 		fmt.Println("err1 = ", err1)
 		return nil
 	}
-	return buf
+	return buf[:n]
 }

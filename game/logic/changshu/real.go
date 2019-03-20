@@ -67,6 +67,8 @@ func (self *mjcs) HandleJoinDeskReq(uid uint64, req *pbgame.JoinDeskReq, rsp *pb
 		rsp.ErrMsg = fmt.Sprintf("mjcs Desk %d can not find", req.DeskID)
 		return
 	}
+	updateID2desk(d)
+	updateUser2desk(d, uid)
 	rsp.Code = d.doJoin(uid)
 	return
 }

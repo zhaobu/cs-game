@@ -43,7 +43,7 @@ func initLog() {
 			logrus.SetOutput(os.Stdout)
 		}
 	} else {
-		logName := fmt.Sprintf("gate.log")
+		logName := fmt.Sprintf("./log/gate.log")
 		file, err := os.OpenFile(logName, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
 		if err == nil {
 			logrus.SetOutput(file)

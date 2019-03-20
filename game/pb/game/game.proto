@@ -25,7 +25,8 @@ enum JoinDeskRspCode {
     JoinDeskInternalServerError = 4;
     JoinDeskUserStatusErr = 5;
     JoinDeskGameStatusErr = 6;
-    JoinDeskDistanceSoClose = 7;
+    JoinDeskDistanceSoClose = 7;//距离限制不允许加入
+    JoinDeskAlreadyInDesk = 8; //已结在桌子中
 }
 
 // 查询游戏配置 c -> s

@@ -71,14 +71,15 @@ func (MakeDeskRspCode) EnumDescriptor() ([]byte, []int) {
 type JoinDeskRspCode int32
 
 const (
-	JoinDeskRspCode_JoinDeskNotUse              JoinDeskRspCode = 0
-	JoinDeskRspCode_JoinDeskSucc                JoinDeskRspCode = 1
-	JoinDeskRspCode_JoinDeskNotExist            JoinDeskRspCode = 2
-	JoinDeskRspCode_JoinDeskDeskFull            JoinDeskRspCode = 3
-	JoinDeskRspCode_JoinDeskInternalServerError JoinDeskRspCode = 4
-	JoinDeskRspCode_JoinDeskUserStatusErr       JoinDeskRspCode = 5
-	JoinDeskRspCode_JoinDeskGameStatusErr       JoinDeskRspCode = 6
-	JoinDeskRspCode_JoinDeskDistanceSoClose     JoinDeskRspCode = 7
+	JoinDeskRspCode_JoinDeskNotUse              JoinDeskRspCode = iota
+	JoinDeskRspCode_JoinDeskSucc
+	JoinDeskRspCode_JoinDeskNotExist
+	JoinDeskRspCode_JoinDeskDeskFull
+	JoinDeskRspCode_JoinDeskInternalServerError
+	JoinDeskRspCode_JoinDeskUserStatusErr
+	JoinDeskRspCode_JoinDeskGameStatusErr
+	JoinDeskRspCode_JoinDeskDistanceSoClose
+	JoinDeskRspCode_JoinDeskAlreadyInDesk
 )
 
 var JoinDeskRspCode_name = map[int32]string{

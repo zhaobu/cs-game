@@ -195,8 +195,6 @@ func (d *Desk) GetUidByChairid(chairId int32) uint64 {
 }
 
 func (d *Desk) set_timer(tID emtimerID, dura time.Duration, f func()) {
-	d.mu.Lock()
-	defer d.mu.Unlock()
 	exefun := func() {
 		d.mu.Lock()
 		defer d.mu.Unlock()

@@ -88,6 +88,7 @@ func (self *GameSink) ThrowDice(chairId int32, req *pbgame_logic.C2SThrowDice) {
 	//给玩家随机2个色子
 	msg := &pbgame_logic.S2CThrowDiceResult{ChairId: chairId}
 	rand.Seed(time.Now().Unix())
+	msg.DiceValue = make([]*pbgame_logic.Cyint32, 2)
 	for i := 0; i < 2; i++ {
 		rnd := int32(rand.Intn(5) + 1)
 		msg.DiceValue[i] = &pbgame_logic.Cyint32{T: rnd}
@@ -133,7 +134,7 @@ func (self *GameSink) dealDiceResult() {
 	msg := &pbgame_logic.S2CChangePos{PosInfo: posInfo}
 	self.sendData(-1, msg)
 	//1s后发送游戏开始消息
-	self.desk.set_timer(TID_DealCard, time.Second, func() {
+	self.desk.set_timer(TID_DealCard, 4*time.Second, func() {
 		self.deal_card()
 	})
 }
@@ -150,7 +151,7 @@ func (self *GameSink) deal_card() {
 	// var userInfo []*pbgame_logic.StartGameInfo
 	for k, v := range self.players {
 		v.cardInfo.handCards = player_cards[k]
-		msg.UserInfo.HandCard = player_cards[k]
+		msg.UserInfo = &pbgame_logic.StartGameInfo{HandCard: player_cards[k]}
 		log.Warnf("房间[%d] 玩家[%s,%d]手牌为:%v", self.desk.id, v.baseInfo.nickname, k, player_cards[k])
 		//统计每个玩家手牌数量
 		v.cardInfo.stackCards = self.cardDef.StackCards(player_cards[k])
