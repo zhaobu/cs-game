@@ -1,7 +1,7 @@
 package main
 
 import (
-	majiang "cy/game/logic/changshu/majiang"
+	mj "cy/game/logic/changshu/majiang"
 	pbgame_logic "cy/game/pb/game/mj/changshu"
 	"math/rand"
 	"sort"
@@ -17,6 +17,7 @@ type gameAllInfo struct {
 	diceResult     [4][2]int32 //投色子结果
 	banker_id      int32       //庄家id
 	left_rand_card []int32     //发完牌后剩余的牌
+	curThrowDice   int32       //当前投色子的玩家
 }
 
 //游戏私有信息
@@ -27,18 +28,19 @@ type gamePrivateInfo struct {
 type gameBalanceInfo struct {
 }
 
-type majiangLib struct {
-	cardDef majiang.CardDef    //牌定义
-	record  majiang.GameRecord //游戏回放
+type mjLib struct {
+	cardDef mj.CardDef      //牌定义
+	record  mj.GameRecord   //游戏回放
+	huLib   mj.HuLib        //胡牌算法
+	players []mj.PlayerInfo //玩家游戏信息
 }
 
 //游戏主逻辑
 type GameSink struct {
-	majiangLib
+	mjLib
 	desk              *Desk
 	game_config       *pbgame_logic.CreateArg //游戏参数
-	players           []playerInfo            //玩家游戏信息
-	game_all_info     gameAllInfo             //游戏公共信息
+	all_info          gameAllInfo             //游戏公共信息
 	game_privite_info gamePrivateInfo         //游戏私有信息
 	game_balance_info gameBalanceInfo         //游戏结束信息
 	onlinePlayer      []bool                  //在线玩家
@@ -64,7 +66,7 @@ func (self *GameSink) Ctor(config *pbgame_logic.CreateArg) error {
 	self.game_config = config
 	self.isPlaying = false
 	self.onlinePlayer = make([]bool, config.PlayerCount)
-	self.players = make([]playerInfo, config.PlayerCount)
+	self.players = make([]mj.PlayerInfo, config.PlayerCount)
 	self.cardDef.Init(log)
 	self.baseCard = self.cardDef.GetBaseCard(config.PlayerCount)
 	self.reset()
@@ -73,15 +75,41 @@ func (self *GameSink) Ctor(config *pbgame_logic.CreateArg) error {
 
 //重置游戏
 func (self *GameSink) reset() {
-	//game_all_info
-	self.game_all_info = gameAllInfo{}
+	//all_info
+	self.all_info = gameAllInfo{}
+}
+
+//开始游戏
+func (self *GameSink) StartGame() {
+	self.isPlaying = true
+	//通知第一个玩家投色子
+	self.sendData(-1, &pbgame_logic.S2CThrowDice{ChairId: 0})
+	self.all_info.curThrowDice = 0
+}
+
+//玩家加入游戏
+func (self *GameSink) AddPlayer(chairId int32, uid uint64, nickName string) bool {
+	if self.game_config.PlayerCount <= chairId {
+		log.Errorf("人数已满,游戏开始人数为%d", self.game_config.PlayerCount)
+		return false
+	}
+
+	info := mj.PlayerInfo{BaseInfo: mj.PlayerBaseInfo{ChairId: chairId, Uid: uid, Nickname: nickName, Point: 0}}
+	self.players[chairId] = info
+	self.onlinePlayer[chairId] = true
+	return true
 }
 
 //玩家投色子
 func (self *GameSink) ThrowDice(chairId int32, req *pbgame_logic.C2SThrowDice) {
+	//检查是否当前投色子的玩家
+	if self.all_info.curThrowDice != chairId {
+		log.Warnf("当前应投色子玩家为%d,操作玩家为%d", self.all_info.curThrowDice, chairId)
+		return
+	}
 	//检查玩家是否已经投过
-	if self.game_all_info.diceResult[chairId][0] != 0 {
-		log.Warn("玩家%d已经投过色子", chairId)
+	if self.all_info.diceResult[chairId][0] != 0 {
+		log.Warnf("玩家%d已经投过色子", chairId)
 		return
 	}
 
@@ -92,13 +120,13 @@ func (self *GameSink) ThrowDice(chairId int32, req *pbgame_logic.C2SThrowDice) {
 	for i := 0; i < 2; i++ {
 		rnd := int32(rand.Intn(5) + 1)
 		msg.DiceValue[i] = &pbgame_logic.Cyint32{T: rnd}
-		self.game_all_info.diceResult[chairId][i] = rnd
+		self.all_info.diceResult[chairId][i] = rnd
 	}
 	//广播色子结果
 	self.sendData(-1, msg)
 	//判断是否所有人都投色子
 	for i := int32(0); i < self.game_config.PlayerCount; i++ {
-		if self.game_all_info.diceResult[i][0] == 0 {
+		if self.all_info.diceResult[i][0] == 0 {
 			//通知下一个玩家投色子
 			self.sendData(-1, &pbgame_logic.S2CThrowDice{ChairId: i})
 			return
@@ -113,8 +141,8 @@ func (self *GameSink) dealDiceResult() {
 		dice    int32
 		chairId int32
 	}, self.game_config.PlayerCount)
-	for i := 0; i < len(self.game_all_info.diceResult); i++ {
-		diceRes[i].dice = self.game_all_info.diceResult[i][0] + self.game_all_info.diceResult[i][1]
+	for i := 0; i < len(self.all_info.diceResult); i++ {
+		diceRes[i].dice = self.all_info.diceResult[i][0] + self.all_info.diceResult[i][1]
 		diceRes[i].chairId = int32(i)
 	}
 	//排序，实现比较方法即可
@@ -130,71 +158,132 @@ func (self *GameSink) dealDiceResult() {
 		posInfo[i] = &pbgame_logic.ChangePosInfo{UserPos: res.chairId, DiceValue: res.dice}
 	}
 	//记录庄家
-	self.game_all_info.banker_id = diceRes[0].chairId
+	self.all_info.banker_id = diceRes[0].chairId
 	msg := &pbgame_logic.S2CChangePos{PosInfo: posInfo}
 	self.sendData(-1, msg)
 	//1s后发送游戏开始消息
-	self.desk.set_timer(TID_DealCard, 4*time.Second, func() {
+	self.desk.set_timer(mj.TID_DealCard, 4*time.Second, func() {
 		self.deal_card()
 	})
 }
 
 //开始发牌
 func (self *GameSink) deal_card() {
-	msg := &pbgame_logic.S2CStartGame{BankerId: self.game_all_info.banker_id, CurInning: int32(self.desk.curInning)}
+	msg := &pbgame_logic.S2CStartGame{BankerId: self.all_info.banker_id, CurInning: int32(self.desk.curInning)}
 	msg.TotalCardNum = int32(len(self.baseCard))
 	//洗牌
 	self.shuffle_cards()
 	var player_cards [][]int32
-	player_cards, self.game_all_info.left_rand_card = self.cardDef.DealCard(self.game_all_info.left_rand_card, self.game_config.PlayerCount, self.game_all_info.banker_id)
-	msg.LeftCardNum = int32(len(self.game_all_info.left_rand_card))
-	// var userInfo []*pbgame_logic.StartGameInfo
+	player_cards, self.all_info.left_rand_card = self.cardDef.DealCard(self.all_info.left_rand_card, self.game_config.PlayerCount, self.all_info.banker_id)
+	msg.LeftCardNum = int32(len(self.all_info.left_rand_card))
 	for k, v := range self.players {
-		v.cardInfo.handCards = player_cards[k]
+		v.CardInfo.HandCards = player_cards[k]
 		msg.UserInfo = &pbgame_logic.StartGameInfo{HandCard: player_cards[k]}
-		log.Warnf("房间[%d] 玩家[%s,%d]手牌为:%v", self.desk.id, v.baseInfo.nickname, k, player_cards[k])
+		log.Warnf("房间[%d] 玩家[%s,%d]手牌为:%v", self.desk.id, v.BaseInfo.Nickname, k, player_cards[k])
 		//统计每个玩家手牌数量
-		v.cardInfo.stackCards = self.cardDef.StackCards(player_cards[k])
+		v.CardInfo.StackCards = self.cardDef.StackCards(player_cards[k])
 		//给每个玩家发送游戏开始消息
 		self.sendData(int32(k), msg)
 	}
-	self.desk.set_timer(TID_GameStartBuHua, time.Second*2, func() {
-		self.gameStartBuhu()
-	})
+	//庄家开始第一次补花
+	self.firstBuHua(self.all_info.banker_id)
+	//检查庄家能否胡
+	self.huLib.CheckHuType(&(self.players[self.all_info.banker_id].CardInfo))
 }
 
-//游戏开始补花
-func (self *GameSink) gameStartBuhu() {
+//玩家第一次补花
+func (self *GameSink) firstBuHua(chairId int32) {
+	cardInfo := self.players[chairId].CardInfo
+	leftCard := self.all_info.left_rand_card
+	huaIndex := make(map[int32]int32) //下次要补的花牌
+	leftCount := len(leftCard)
+
+	msg := pbgame_logic.S2CBuHua{ChairId: chairId}      //发送给补花玩家
+	msgOther := pbgame_logic.S2CBuHua{ChairId: chairId} //发送给其他玩家
+
+	//补一张花牌
+	operOnce := func(card int32) int32 {
+		//减一张花牌
+		self.cardDef.Sub_stack(cardInfo.StackCards, card)
+		cardInfo.StackCards[card]--
+		//从牌库摸一张牌
+		moCard := leftCard[leftCount-1]
+		leftCount--
+		//摸的牌加到手牌
+		self.cardDef.Add_stack(cardInfo.StackCards, moCard)
+		//记录到消息
+		msg.BuHuaResult = append(msg.BuHuaResult, &pbgame_logic.BuHuaOnce{HuaCard: card, BuCard: moCard})
+		msgOther.BuHuaResult = append(msgOther.BuHuaResult, &pbgame_logic.BuHuaOnce{HuaCard: card, BuCard: 0})
+		if self.cardDef.IsHuaCard(moCard) {
+			self.cardDef.Add_stack(huaIndex, moCard)
+		}
+		return moCard
+	}
+
+	//先遍历一次所有花牌
+	for huaCard := int32(51); huaCard <= 59; huaCard++ {
+		//遇到一张花牌,补一张
+		if huaCount, ok := cardInfo.StackCards[huaCard]; ok {
+			for j := int32(0); j < huaCount; j++ {
+				operOnce(huaCard)
+			}
+		}
+	}
+
+	//再从第一次结果补花
+	if len(huaIndex) > 0 {
+		bFin := true //补花结束
+		num := 0
+		for {
+			//遍历所有
+			for huaCard, huaCount := range huaIndex {
+				for j := int32(0); j < huaCount; j++ {
+					if self.cardDef.IsHuaCard(operOnce(huaCard)) {
+						bFin = false
+					}
+					//补一张减一张
+					self.cardDef.Sub_stack(huaIndex, huaCard)
+				}
+			}
+			if bFin {
+				break
+			}
+			num++
+			if num >= 12 {
+				log.Errorf("补花死循环")
+				return
+			}
+		}
+	}
+	for i := int32(0); i < self.game_config.PlayerCount; i++ {
+		if i == chairId {
+			self.sendData(i, &msg)
+		} else {
+			self.sendData(i, &msgOther)
+		}
+	}
+}
+
+//摸牌 last(-1摸最后一张 1第一次摸牌 0正常摸牌),lose_chair在明杠时为放杠玩家id,包赔
+func (self *GameSink) draw_card(chairId, last, lose_chair int32) {
+	//检查游戏是否结束
+	if len(self.all_info.left_rand_card) <= 0 {
+		self.gameEnd()
+	}
+	//
+}
+
+func (self *GameSink) gameEnd() {
 
 }
 
 //洗牌
 func (self *GameSink) shuffle_cards() {
 	if self.makeCards {
-		self.game_all_info.left_rand_card = DebugCard
+		self.all_info.left_rand_card = DebugCard
 		return
 	}
-	self.game_all_info.left_rand_card = self.cardDef.RandCards(self.baseCard)
-}
-
-//开始游戏
-func (self *GameSink) StartGame() {
-	self.isPlaying = true
-	//通知第一个玩家投色子
-	self.sendData(-1, &pbgame_logic.S2CThrowDice{ChairId: 0})
-}
-
-//玩家加入游戏
-func (self *GameSink) AddPlayer(chairId int32, uid uint64, nickName string) bool {
-	if self.game_config.PlayerCount <= chairId {
-		log.Errorf("人数已满,游戏开始人数为%d", self.game_config.PlayerCount)
-		return false
-	}
-
-	info := playerInfo{baseInfo: playerBaseInfo{chairId: chairId, uid: uid, nickname: nickName, point: 0}}
-	self.players[chairId] = info
-	self.onlinePlayer[chairId] = true
-	return true
+	self.all_info.left_rand_card = self.cardDef.RandCards(self.baseCard)
 }
 
 //吃

@@ -39,7 +39,6 @@ type mjcs struct {
 func initLog() {
 	l := logrus.New()
 	l.SetFormatter(&logrus.JSONFormatter{})
-
 	if *release {
 		logName := fmt.Sprintf("%s_%d_%d.log", gameName, os.Getpid(), time.Now().Unix())
 		file, err := os.OpenFile(logName, os.O_CREATE|os.O_WRONLY, 0666)
@@ -49,6 +48,8 @@ func initLog() {
 			panic(err)
 		}
 	} else {
+		l.SetLevel(logrus.TraceLevel)
+		l.SetOutput(os.Stdout)
 		logName := fmt.Sprintf("./log/%s.log", gameName)
 		file, err := os.OpenFile(logName, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
 		if err == nil {

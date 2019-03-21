@@ -3,6 +3,7 @@ package main
 import (
 	"cy/game/codec/protobuf"
 	"cy/game/db/mgo"
+	mj "cy/game/logic/changshu/majiang"
 	"time"
 
 	pbcommon "cy/game/pb/common"
@@ -41,7 +42,7 @@ type Desk struct {
 	// lookonPlayers map[uint64]*deskUserInfo //观察玩家信息
 	playChair   map[int32]*deskUserInfo //玩家chairid到deskPlayers
 	deskConfig  *pbgame_logic.CreateArg //桌子参数
-	timerManger map[emtimerID]*timingwheel.Timer
+	timerManger map[mj.EmtimerID]*timingwheel.Timer
 }
 
 func makeDesk(arg *pbgame_logic.CreateArg, masterId, deskID uint64) *Desk {
@@ -51,6 +52,7 @@ func makeDesk(arg *pbgame_logic.CreateArg, masterId, deskID uint64) *Desk {
 	d.gameSink.desk = d
 	d.playChair = make(map[int32]*deskUserInfo)
 	d.deskPlayers = make(map[uint64]*deskUserInfo)
+	d.timerManger = make(map[mj.EmtimerID]*timingwheel.Timer)
 	return d
 }
 
@@ -194,22 +196,23 @@ func (d *Desk) GetUidByChairid(chairId int32) uint64 {
 	return 0
 }
 
-func (d *Desk) set_timer(tID emtimerID, dura time.Duration, f func()) {
+func (d *Desk) set_timer(tID mj.EmtimerID, dura time.Duration, f func()) {
 	exefun := func() {
 		d.mu.Lock()
 		defer d.mu.Unlock()
 		f()
-		delete(d.timerManger, tID)
+		delete(d.timerManger, tID) //闭包,删除已经执行过的定时器
 	}
 	d.timerManger[tID] = d.gameNode.Timer.AfterFunc(dura, exefun)
 }
 
-func (d *Desk) cancel_timer(tID emtimerID) {
+func (d *Desk) cancel_timer(tID mj.EmtimerID) {
 	if t, ok := d.timerManger[tID]; ok == false {
 		log.Tracef("取消定时器时定时器不存在")
 		return
 	} else {
 		t.Stop()
+		//取消后删除该定时器
+		delete(d.timerManger, tID)
 	}
-
 }

@@ -417,5 +417,6 @@ func readFile(path string) []byte {
 		fmt.Println("err1 = ", err1)
 		return nil
 	}
+	fmt.Printf("read from%s:%s", path, string(buf[:n]))
 	return buf[:n]
 }

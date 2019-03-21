@@ -6,7 +6,8 @@ go build -tags consul -o bin/linux/center cy/game/center
 
 go build -tags consul -o bin/linux/club cy/game/club
 
-go build -tags consul -o bin/linux/ddz cy/game/logic/ddz
+REM go build -tags consul -o bin/linux/ddz cy/game/logic/ddz
 
+go build -tags consul -o bin/linux/changshu cy/game/logic/changshu
 
 pause

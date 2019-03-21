@@ -26,11 +26,11 @@ var fourPlayerCardDef = []int32{
 	31, 32, 33, 34, 35, 36, 37, 38, 39,
 	31, 32, 33, 34, 35, 36, 37, 38, 39,
 	31, 32, 33, 34, 35, 36, 37, 38, 39,
-	//  东 南 西  北 中 發 白
-	41, 42, 43, 44, 45, 46, 47,
-	41, 42, 43, 44, 45, 46, 47,
-	41, 42, 43, 44, 45, 46, 47,
-	41, 42, 43, 44, 45, 46, 47,
+	//  东 南 西  北 中 發   白(白板算花牌)
+	41, 42, 43, 44, 45, 46, 59,
+	41, 42, 43, 44, 45, 46, 59,
+	41, 42, 43, 44, 45, 46, 59,
+	41, 42, 43, 44, 45, 46, 59,
 
 	//春夏秋冬,梅兰竹菊
 	51, 52, 53, 54, 55, 56, 57, 58,
@@ -117,7 +117,7 @@ func (self *CardDef) DealCard(rawcards []int32, playercount, bankerID int32) (ha
 }
 
 //加
-func (self *CardDef) add_stack(m map[int32]int32, card int32) {
+func (self *CardDef) Add_stack(m map[int32]int32, card int32) {
 	if _, ok := m[card]; ok {
 		m[card] = m[card] + 1
 	} else {
@@ -126,7 +126,7 @@ func (self *CardDef) add_stack(m map[int32]int32, card int32) {
 }
 
 //减
-func (self *CardDef) sub_stack(m map[int32]int32, card int32) {
+func (self *CardDef) Sub_stack(m map[int32]int32, card int32) {
 	num, ok := m[card]
 	if ok == false {
 		log.Errorf("减牌%d时牌数量为0", card)
@@ -141,7 +141,11 @@ func (self *CardDef) sub_stack(m map[int32]int32, card int32) {
 func (self *CardDef) StackCards(rawcards []int32) map[int32]int32 {
 	var newcard = make(map[int32]int32)
 	for _, v := range rawcards {
-		self.add_stack(newcard, v)
+		self.Add_stack(newcard, v)
 	}
 	return newcard
+}
+
+func (self *CardDef) IsHuaCard(card int32) bool {
+	return card >= 51 && card <= 59
 }

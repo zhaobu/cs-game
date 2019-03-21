@@ -139,18 +139,18 @@ message StartGameInfo {
 
 //游戏开始
 message S2CStartGame {
-  int32 banker_id = 1;          //庄家id
+  int32 banker_id = 1;          //庄家id(也表示第一个可操作玩家)
   int32 total_card_num = 2;     //总牌数
   int32 left_card_num = 3;      //剩余牌数
   int32 cur_inning = 4;         //当前局
   StartGameInfo user_info = 5;  //玩家个人信息
 }
 
-//发牌
-message S2CDealCard {
-  int32 card_first = 1;        //第一个出牌的玩家id
-  repeated cyint32 cards = 2;  //玩家手牌数组
-}
+// //发牌
+// message S2CDealCard {
+//   int32 card_first = 1;        //第一个出牌的玩家id
+//   repeated cyint32 cards = 2;  //玩家手牌数组
+// }
 
 //玩家摸牌
 message S2CDrawCard {
@@ -161,7 +161,7 @@ message S2CDrawCard {
 
 message BuHuaOnce {
   int32 hua_card = 1;  //花牌值
-  int32 bu_card = 2;   //补到的牌
+  int32 bu_card = 2;   //补到的牌(补花玩家收到真实牌值,其他玩家收到0)
 }
 //补花
 message S2CBuHua {

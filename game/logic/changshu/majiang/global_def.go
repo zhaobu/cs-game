@@ -1,25 +1,25 @@
-package main
+package majiang
 
 type (
-	emOperType     uint8
-	emRecordAction uint8
-	emHuScoreType  uint8
-	emtimerID      uint32 //定时器枚举
+	EmOperType     uint8
+	EmRecordAction uint8
+	EmHuScoreType  uint8  //胡牌得分类型
+	EmtimerID      uint32 //定时器枚举
 )
 
 //定时器ID
 const (
-	TID_DESK_Begin emtimerID = 0 //桌子内部定时器开始
+	TID_DESK_Begin EmtimerID = 0 //桌子内部定时器开始
 	TID_Destory                  //销毁桌子
 
-	TID_GAMESINK_Begin emtimerID = 1000 //游戏逻辑定时器开始
+	TID_GAMESINK_Begin EmtimerID = 1000 //游戏逻辑定时器开始
 	TID_DealCard                        //发牌
 	TID_GameStartBuHua                  //开始补花
 )
 
 //杠类型
 const (
-	SUO_GANG  emOperType = iota //补杠
+	SUO_GANG  EmOperType = iota //补杠
 	AN_GANG                     //暗杠
 	MING_GANG                   //明杠
 	PENG                        //碰
@@ -28,7 +28,7 @@ const (
 
 //游戏记录相关
 const (
-	ACTION_DRAW emRecordAction = iota //摸牌
+	ACTION_DRAW EmRecordAction = iota //摸牌
 	ACTION_OUT                 = 2    //出牌
 	ACTION_PENG                = 3    //碰
 	ACTION_GANG                = 4    //杠
@@ -40,7 +40,7 @@ const (
 //胡分类型(客户端显示用)
 const (
 	//得分显示
-	Zi_Mo          emHuScoreType = iota //自摸
+	Zi_Mo          EmHuScoreType = iota //自摸
 	Jie_Pao                      = 2    //接炮
 	Qiang_GangHu                 = 3    //抢杠胡
 	Gang_Shang_Hua               = 4    //杠上花
