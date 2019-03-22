@@ -1,11 +1,12 @@
 package majiang
 
 type (
-	EmOperType     int32
-	EmRecordAction int32
-	EmHuScoreType  int32  //胡牌得分类型
+	EmOperType     uint8
+	EmRecordAction uint8
+	EmHuScoreType  uint8  //胡牌得分类型
 	EmtimerID      uint32 //定时器枚举
-	EmHuType       int32  //胡牌得分类型
+	EmHuType       uint8  //胡牌得分类型
+	EmHuMode       uint8  //胡牌方式
 )
 
 //定时器ID
@@ -36,6 +37,13 @@ const (
 	ACTION_CHI                        //吃
 	ACTION_HU                         //胡
 	ACTION_PASS                       //过
+)
+
+//胡牌方式
+const (
+	ZIMO    EmHuMode = iota //自摸胡
+	PAOHU                   //接炮胡
+	QIANGHU                 //抢杠胡
 )
 
 //胡分类型(客户端显示用)

@@ -3,13 +3,22 @@ package majiang
 //封装胡牌算法
 import (
 	mjhulib "cy/game/common/mjhulib"
+	"fmt"
 )
 
 type HuLib struct {
 }
 
+type HuTypeList []EmHuType
+
 func (self *HuLib) normal_hu(cardInfo *PlayerCardInfo) (bool, *EmHuType) {
 	if !mjhulib.HasInit {
+		defer func() {
+			if err := recover(); err != nil {
+				fmt.Println(err)
+			}
+
+		}()
 		mjhulib.Init()
 	}
 	var var2key = map[int32]int{
@@ -34,12 +43,15 @@ func (self *HuLib) normal_hu(cardInfo *PlayerCardInfo) (bool, *EmHuType) {
 }
 
 // 胡牌牌型
-func (self *HuLib) CheckHuType(cardInfo *PlayerCardInfo) (bool, []EmHuType) {
+func (self *HuLib) CheckHuType(cardInfo *PlayerCardInfo) (bool, HuTypeList) {
 
-	huTypeList := []EmHuType{}
+	huTypeList := HuTypeList{}
 
 	if ok, hutype := self.normal_hu(cardInfo); ok {
 		huTypeList = append(huTypeList, *hutype)
+	}
+	if len(huTypeList) > 0 {
+		return true, huTypeList
 	}
 	return false, nil
 }
