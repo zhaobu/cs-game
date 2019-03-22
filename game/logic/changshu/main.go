@@ -49,7 +49,6 @@ func initLog() {
 		}
 	} else {
 		l.SetLevel(logrus.TraceLevel)
-		l.SetOutput(os.Stdout)
 		logName := fmt.Sprintf("./log/%s.log", gameName)
 		file, err := os.OpenFile(logName, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
 		if err == nil {

@@ -5,12 +5,10 @@ import "cy/game/pb/common/common.proto";
 
 package pbclub;
 
-
-
 // 成员信息
 message MemberInfo {
     uint64 UserID = 1;
-    // 身份 1 群主 2 管理员 3 普通成员
+    // 身份  1 群主 2 管理员 3 普通成员 4 未通过 5黑名单
     int32 Identity = 2;
     string UserName = 3;
     string Profile = 4;
@@ -28,17 +26,20 @@ message BaseInfo {
 }
 
 // 建房参数
-message GameArg {
+message GameArg {   
 
 }
 
 message ClubInfo {
     int64 ID = 1;
-    uint64 CreateUserID = 2; // 创建人        
-    string Profile = 3;
-    BaseInfo Base = 4;
-    GameArg Arg = 5;
-    repeated pbcommon.DeskInfo Desks = 6;    
+    uint64 MasterUserID = 2; // 群主
+    string MasterName = 3;
+    string Profile = 4;
+    BaseInfo Base = 5;
+    int32 MemberCnt = 6;
+    int32 OnlineCnt = 7;
+    GameArg Arg = 8;
+    repeated pbcommon.DeskInfo Desks = 9;    
 }
 
 // ID查询俱乐部信息 c -> s
@@ -57,6 +58,7 @@ message BriefInfo {
     int64 ID = 1;    
     string Name = 2;   
     string Profile = 3;
+    uint64 MasterUserID = 4;
 }
 
 // s -> c
@@ -84,7 +86,7 @@ message CreateClubReq {
 }
 message CreateClubRsp {
     pbcommon.RspHead Head = 1;
-    // 1成功 2数量限制 3内部服务错误
+    // 1成功 2数量限制 3参数错误 4内部服务错误
     int32 Code = 2;   
 }
 
@@ -95,7 +97,7 @@ message RemoveClubReq {
 }
 message RemoveClubRsp {
     pbcommon.RspHead Head = 1;
-    // 1成功 2失败
+    // 1成功 2权限无效
     int32 Code = 2;
 }
 
@@ -108,7 +110,7 @@ message UpdateClubReq {
 }
 message UpdateClubRsp {
     pbcommon.RspHead Head = 1;
-    // 1成功 2失败
+    // 1成功 2参数错误 3无效ClubID 4权限
     int32 Code = 2;
 }
 
@@ -119,7 +121,21 @@ message JoinClubReq {
 }
 message JoinClubRsp {
     pbcommon.RspHead Head = 1;
-    // 1成功 2失败
+    // 1提交成功 2超过限制 3无效俱乐部 4已经在申请中 5内部服务错误
+    int32 Code = 2;
+}
+
+// 处理成员身份 c -> s 
+message DealMemberIdentityReq {
+    pbcommon.ReqHead Head = 1;
+    int64 ClubID = 2;
+    uint64 UserID = 3;
+    int32 Identity = 4;// 新的身份
+}
+
+message DealMemberIdentityRsp {
+    pbcommon.RspHead Head = 1;
+    // 1成功 2无效俱乐部ID 3无效玩家ID 4无效Identity
     int32 Code = 2;
 }
 
@@ -130,7 +146,7 @@ message ExitClubReq {
 }
 message ExitClubRsp {
     pbcommon.RspHead Head = 1;
-    // 1成功 2失败
+    // 1成功 2无效ClubID
     int32 Code = 2;
 }
 
@@ -138,10 +154,20 @@ message ExitClubRsp {
 message QueryClubMemberReq {
     pbcommon.ReqHead Head = 1;
     int64 ClubID = 2;
-    int32 Option = 3; // 1 缺一人 2 等待中 3 游戏中
 }
 
 message QueryClubMemberRsp {  
     pbcommon.RspHead Head = 1;  
     repeated MemberInfo Members = 2;
 }
+
+// c -> s 
+message AgreeClubLawReq {
+    pbcommon.ReqHead Head = 1;
+    int64 ClubID = 2;
+}
+
+message AgreeClubLawRsp {
+    pbcommon.RspHead Head = 1;
+}
+
