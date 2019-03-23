@@ -14,14 +14,14 @@ var DebugCard []int32
 
 //游戏公共信息
 type gameAllInfo struct {
-	game_player_operation PriorityOper    //最高优先级操作
-	CanOperInfo                           //玩家能做的操作
-	game_balance_info     gameBalanceInfo //游戏结束信息
-	diceResult            [4][2]int32     //投色子结果
-	banker_id             int32           //庄家id
-	left_rand_card        []int32         //发完牌后剩余的牌
-	curThrowDice          int32           //当前投色子的玩家
-	isdeuce               bool            //是否流局
+	higestOperInfo map[PriorityOrder]*PriorityOper           //最高优先级操作
+	canOperInfo           map[int32]*CanOperInfo //玩家能做的操作
+	game_balance_info     gameBalanceInfo        //游戏结束信息
+	diceResult            [4][2]int32            //投色子结果
+	banker_id             int32                  //庄家id
+	left_rand_card        []int32                //发完牌后剩余的牌
+	curThrowDice          int32                  //当前投色子的玩家
+	isdeuce               bool                   //是否流局
 }
 
 //游戏结束信息
@@ -48,9 +48,9 @@ type GameSink struct {
 }
 
 ////////////////////////调用desk接口函数START/////////////////////////////
-//发送消息给玩家(chairId为-1时发送给所有玩家)
+//发送消息给玩家(chairId为0时发送给所有玩家)
 func (self *GameSink) sendData(chairId int32, msg proto.Message) {
-	if -1 == chairId {
+	if 0 == chairId {
 		self.desk.SendGameMessage(0, msg)
 	} else {
 		self.desk.SendGameMessage(self.desk.GetUidByChairid(chairId), msg)
@@ -81,7 +81,7 @@ func (self *GameSink) reset() {
 func (self *GameSink) StartGame() {
 	self.isPlaying = true
 	//通知第一个玩家投色子
-	self.sendData(-1, &pbgame_logic.S2CThrowDice{ChairId: 0})
+	self.sendData(0, &pbgame_logic.S2CThrowDice{ChairId: 0})
 	self.curThrowDice = 0
 }
 
@@ -121,12 +121,12 @@ func (self *GameSink) ThrowDice(chairId int32, req *pbgame_logic.C2SThrowDice) {
 		self.diceResult[chairId][i] = rnd
 	}
 	//广播色子结果
-	self.sendData(-1, msg)
+	self.sendData(0, msg)
 	//判断是否所有人都投色子
 	for i := int32(0); i < self.game_config.PlayerCount; i++ {
 		if self.diceResult[i][0] == 0 {
 			//通知下一个玩家投色子
-			self.sendData(-1, &pbgame_logic.S2CThrowDice{ChairId: i})
+			self.sendData(0, &pbgame_logic.S2CThrowDice{ChairId: i})
 			return
 		}
 	}
@@ -158,7 +158,7 @@ func (self *GameSink) dealDiceResult() {
 	//记录庄家
 	self.banker_id = diceRes[0].chairId
 	msg := &pbgame_logic.S2CChangePos{PosInfo: posInfo}
-	self.sendData(-1, msg)
+	self.sendData(0, msg)
 	//1s后发送游戏开始消息
 	self.desk.set_timer(mj.TID_DealCard, 4*time.Second, func() {
 		self.deal_card()
@@ -187,7 +187,7 @@ func (self *GameSink) deal_card() {
 	self.firstBuHua(self.banker_id)
 	//检查庄家能否胡
 	if ok, huTypeList := self.huLib.CheckHuType(&(self.players[self.banker_id].CardInfo)); ok {
-		self.CanOperInfo.CanHu[self.banker_id] = &CanHuOper{HuList: huTypeList}
+		self.canOperInfo[self.banker_id] = &CanOperInfo{CanHu: CanHuOper{HuList: huTypeList}}
 	}
 	//检查能否杠
 }
@@ -273,11 +273,11 @@ func (self *GameSink) draw_card(chairId, last, lose_chair int32) error {
 		self.gameEnd()
 		return nil
 	}
-	self.CanOperInfo.ResetCanOper()
-	self.game_player_operation.ResetPriorityOper()
+	self.canOperInfo = map[int32]*CanOperInfo{}
+	self.higestOperInfo=
 
 	var card, index int32 = 0, 0
-	if last == -1 {
+	if last == -1 { //杠后摸最后一张牌
 		index = int32(len(self.left_rand_card)) - 1
 	}
 	card = self.left_rand_card[index]

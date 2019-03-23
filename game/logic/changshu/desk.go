@@ -40,7 +40,7 @@ type Desk struct {
 	gameSink    *GameSink                //游戏逻辑
 	deskPlayers map[uint64]*deskUserInfo //本桌玩家信息,玩家uid到deskPlayers
 	// lookonPlayers map[uint64]*deskUserInfo //观察玩家信息
-	playChair   map[int32]*deskUserInfo //玩家chairid到deskPlayers
+	playChair   map[int32]*deskUserInfo //玩家chairid到deskPlayers,座位号从1开始
 	deskConfig  *pbgame_logic.CreateArg //桌子参数
 	timerManger map[mj.EmtimerID]*timingwheel.Timer
 }
@@ -65,13 +65,13 @@ func (d *Desk) doEnter(uid uint64) pbgame.JoinDeskRspCode {
 
 //找到空闲座位号
 func (d *Desk) getFreeChair() (int32, bool) {
-	for i := int32(0); i < d.deskConfig.PlayerCount; i++ {
+	for i := int32(1); i <= d.deskConfig.PlayerCount; i++ {
 		if _, ok := d.playChair[i]; ok {
 			continue
 		}
 		return i, true
 	}
-	return -1, false
+	return 0, false
 }
 
 func (d *Desk) checkStart() bool {

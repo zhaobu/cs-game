@@ -14,7 +14,7 @@ type CanOperInfo struct {
 	CanChi  CanChiOper
 	CanPeng CanPengOper
 	CanGang CanGangOper
-	CanHu   map[int32]*CanHuOper
+	CanHu   CanHuOper
 }
 
 type CanChiOper struct {
@@ -42,35 +42,35 @@ type CanHuOper struct {
 }
 
 //默认创建函数
-func NewCanChiOper() *CanChiOper {
-	return &CanChiOper{
-		ChairId: -1,
-	}
-}
-func NewCanPengOper() *CanPengOper {
-	return &CanPengOper{
-		ChairId:   -1,
-		LoseChair: -1,
-	}
-}
-func NewCanGangOper() *CanGangOper {
-	return &CanGangOper{
-		ChairId: -1,
-	}
-}
-func NewCanHuOper() *CanHuOper {
-	return &CanHuOper{
-		LoseChair: -1,
-		OpChair:   -1,
-	}
-}
+// func NewCanChiOper() *CanChiOper {
+// 	return &CanChiOper{
+// 		ChairId: -1,
+// 	}
+// }
+// func NewCanPengOper() *CanPengOper {
+// 	return &CanPengOper{
+// 		ChairId:   -1,
+// 		LoseChair: -1,
+// 	}
+// }
+// func NewCanGangOper() *CanGangOper {
+// 	return &CanGangOper{
+// 		ChairId: -1,
+// 	}
+// }
+// func NewCanHuOper() *CanHuOper {
+// 	return &CanHuOper{
+// 		LoseChair: -1,
+// 		OpChair:   -1,
+// 	}
+// }
 
-func (self *CanOperInfo) ResetCanOper() {
-	self.CanChi = *NewCanChiOper()
-	self.CanPeng = *NewCanPengOper()
-	self.CanGang = *NewCanGangOper()
-	self.CanHu = make(map[int32]*CanHuOper)
-}
+// func (self *CanOperInfo) ResetCanOper() {
+// 	self.CanChi = *NewCanChiOper()
+// 	self.CanPeng = *NewCanPengOper()
+// 	self.CanGang = *NewCanGangOper()
+// 	self.CanHu = *NewCanHuOper()
+// }
 
 //操作优先级
 type PriorityOrder int
@@ -83,6 +83,14 @@ const (
 	HuOrder
 )
 
+type oper interface {
+	ChairId interface{}
+}
+
+type hu struct{
+	oper
+}
+
 //最高优先级的操作
 type PriorityOper struct {
 	ChairId  int32
@@ -92,10 +100,18 @@ type PriorityOper struct {
 	ChiCard  ChiCardTb
 }
 
-func (self *PriorityOper) ResetPriorityOper() {
-	self.ChairId = -1
-	self.Card = 0
-	self.GangType = ""
-	self.Op = NoneOrder
-	self.ChiCard = ChiCardTb{}
-}
+// type PriorityOper struct {
+// 	ChairId  int32
+// 	Card     int32
+// 	GangType string
+// 	Op       PriorityOrder
+// 	ChiCard  ChiCardTb
+// }
+
+// func (self *PriorityOper) ResetPriorityOper() {
+// 	self.ChairId = -1
+// 	self.Card = 0
+// 	self.GangType = ""
+// 	self.Op = NoneOrder
+// 	self.ChiCard = ChiCardTb{}
+// }
