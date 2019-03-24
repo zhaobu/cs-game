@@ -14,14 +14,14 @@ var DebugCard []int32
 
 //游戏公共信息
 type gameAllInfo struct {
-	higestOperInfo map[PriorityOrder]*PriorityOper           //最高优先级操作
-	canOperInfo           map[int32]*CanOperInfo //玩家能做的操作
-	game_balance_info     gameBalanceInfo        //游戏结束信息
-	diceResult            [4][2]int32            //投色子结果
-	banker_id             int32                  //庄家id
-	left_rand_card        []int32                //发完牌后剩余的牌
-	curThrowDice          int32                  //当前投色子的玩家
-	isdeuce               bool                   //是否流局
+	higestOperInfo    map[PriorityOrder]*PriorityOper //最高优先级操作
+	canOperInfo       map[int32]*CanOperInfo          //玩家能做的操作
+	game_balance_info gameBalanceInfo                 //游戏结束信息
+	diceResult        [4][2]int32                     //投色子结果
+	banker_id         int32                           //庄家id
+	left_rand_card    []int32                         //发完牌后剩余的牌
+	curThrowDice      int32                           //当前投色子的玩家
+	isdeuce           bool                            //是否流局
 }
 
 //游戏结束信息
@@ -274,7 +274,7 @@ func (self *GameSink) draw_card(chairId, last, lose_chair int32) error {
 		return nil
 	}
 	self.canOperInfo = map[int32]*CanOperInfo{}
-	self.higestOperInfo=
+	// self.higestOperInfo=
 
 	var card, index int32 = 0, 0
 	if last == -1 { //杠后摸最后一张牌

@@ -1,20 +1,40 @@
 package mjlib
 
+import (
+	"fmt"
+	"sync"
+)
+
 const MAX_CARD = 34
 
 var (
-	MTableMgr *TableMgr
-	MHuLib    *HuLib
-	HasInit   bool
+	mTableMgr *TableMgr
+	sin       *HulibSingleton
+
+	// 同步Once,保证每次调用时，只有第一次生效
+	once sync.Once
 )
 
-func Init() bool {
-	MTableMgr = &TableMgr{}
-	MTableMgr.Init()
-	MTableMgr.LoadTable()
-	MTableMgr.LoadFengTable()
-	MHuLib = &HuLib{}
-	HasInit = true
+// 全局实例者
+type HulibSingleton struct {
+	*HuLib
+}
+
+//单例模式保证全局只加载一次表
+func GetSingleton() *HulibSingleton {
+	once.Do(func() {
+		sin = &HulibSingleton{}
+		inittbl()
+		fmt.Printf("麻将胡牌表加载成功")
+	})
+	return sin
+}
+
+func inittbl() bool {
+	mTableMgr = &TableMgr{}
+	mTableMgr.Init()
+	mTableMgr.LoadTable()
+	mTableMgr.LoadFengTable()
 	return true
 }
 
@@ -128,7 +148,7 @@ func (this *HuLib) _split(cards []int, gui_num int, min int, max int, chi bool, 
 			continue
 		}
 		eye := (yu == 2)
-		if MTableMgr.check(key, i, eye, chi) {
+		if mTableMgr.check(key, i, eye, chi) {
 			if eye {
 				eye_num++
 			}
