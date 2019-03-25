@@ -161,7 +161,7 @@ message S2CDrawCard {
 
 message BuHuaOnce {
   int32 hua_card = 1;  //花牌值
-  int32 bu_card = 2;   //补到的牌(补花玩家收到真实牌值,其他玩家收到0)
+  int32 bu_card = 2;  //补到的牌(补花玩家收到真实牌值,其他玩家收到0)
 }
 //补花
 message S2CBuHua {
@@ -175,16 +175,40 @@ message S2COutCard {
   int32 card = 2;      //出的牌
 }
 
+enum CanOperMask {
+  OperMaskNone = 0;
+  OperMaskChi = 0x000F;
+  OperMaskPeng = 0x00F0;
+  OperMaskGang = 0x0F00;
+  OperMaskHu = 0xF000;
+}
+
+enum CanChiMask {
+  NoneChiMask = 0;
+  LeftChiMask = 0x000F;    //左吃
+  MiddleChiMask = 0x00F0;  //中吃
+  RightChiMask = 0x0F00;   //右吃
+}
+//吃
+message CanChiMsg {
+  uint32 chiMask = 1;  //吃的类型掩码
+}
+
+//杠
+message CanGangMsg {
+  repeated int32 cards = 1;  //能杠的牌
+}
+
+//胡
+// message CanHuMsg {
+// }
+
 //玩家该轮的操作
 message S2CHaveOperation {
-  string operation = 1;
-  /*
-  json:{canChitb:{{11,12},{14,15},..},能吃
-        canPeng:card,  能碰
-        canGangtb={11=11,13=13,..},  能杠
-        canHutb:{1,2,3}  能胡
-       }
-  */
+  uint32 oper_mask = 1;     //操作的掩码
+  int32 card = 2;           //操作的牌
+  CanChiMsg can_chi = 3;    //吃信息
+  CanGangMsg can_gang = 4;  //杠信息
 }
 
 //玩家碰牌
@@ -216,7 +240,8 @@ message S2CHuCard {
 
 //倒计时显示在谁头上
 message S2CTimeoutChair {
-  int32 chair_id = 1;
+  int32 chair_id = 1;  //倒计时玩家
+  int32 time = 2;      //倒计时时间
 }
 
 message PlayerBalanceInfo {

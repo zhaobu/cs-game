@@ -117,7 +117,7 @@ func (self *CardDef) DealCard(rawcards []int32, playercount, bankerID int32) (ha
 }
 
 //加
-func (self *CardDef) Add_stack(m map[int32]int32, card int32) {
+func Add_stack(m map[int32]int32, card int32) {
 	if _, ok := m[card]; ok {
 		m[card] = m[card] + 1
 	} else {
@@ -126,7 +126,7 @@ func (self *CardDef) Add_stack(m map[int32]int32, card int32) {
 }
 
 //减
-func (self *CardDef) Sub_stack(m map[int32]int32, card int32) {
+func Sub_stack(m map[int32]int32, card int32) {
 	num, ok := m[card]
 	if ok == false {
 		log.Errorf("减牌%d时牌数量为0", card)
@@ -141,7 +141,7 @@ func (self *CardDef) Sub_stack(m map[int32]int32, card int32) {
 func (self *CardDef) StackCards(rawcards []int32) map[int32]int32 {
 	var newcard = make(map[int32]int32)
 	for _, v := range rawcards {
-		self.Add_stack(newcard, v)
+		Add_stack(newcard, v)
 	}
 	return newcard
 }
