@@ -83,15 +83,7 @@ const (
 	HuOrder
 )
 
-type oper interface {
-	ChairId interface{}
-}
-
-type hu struct{
-	oper
-}
-
-//最高优先级的操作
+//优先级的操作
 type PriorityOper struct {
 	ChairId  int32
 	Card     int32

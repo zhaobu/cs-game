@@ -20,7 +20,7 @@ type HulibSingleton struct {
 	*HuLib
 }
 
-//单例模式保证全局只加载一次表
+//单例保证全局只加载一次表
 func GetSingleton() *HulibSingleton {
 	once.Do(func() {
 		sin = &HulibSingleton{}

@@ -18,7 +18,7 @@ func init() {
 
 type HuTypeList []EmHuType
 
-func (self *HuLib) normal_hu(cardInfo *PlayerCardInfo) (bool, *EmHuType) {
+func (self *HuLib) normal_hu(cardInfo *PlayerCardInfo) (bool, EmHuType) {
 	var var2key = map[int32]int{
 		11: 1, 12: 2, 13: 3, 14: 4, 15: 5, 16: 6, 17: 7, 18: 8, 19: 9,
 		21: 10, 22: 11, 23: 12, 24: 13, 25: 14, 26: 15, 27: 16, 28: 17, 29: 18,
@@ -35,9 +35,9 @@ func (self *HuLib) normal_hu(cardInfo *PlayerCardInfo) (bool, *EmHuType) {
 	}
 
 	if MHuLib.GetHuInfo(checkcard, 0) {
-
+		return true, NORMAL
 	}
-	return false, nil
+	return false, 0
 }
 
 // 胡牌牌型
@@ -46,7 +46,7 @@ func (self *HuLib) CheckHuType(cardInfo *PlayerCardInfo) (bool, HuTypeList) {
 	huTypeList := HuTypeList{}
 
 	if ok, hutype := self.normal_hu(cardInfo); ok {
-		huTypeList = append(huTypeList, *hutype)
+		huTypeList = append(huTypeList, hutype)
 	}
 	if len(huTypeList) > 0 {
 		return true, huTypeList
