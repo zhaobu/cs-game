@@ -177,21 +177,20 @@ message S2COutCard {
 
 enum CanOperMask {
   OperMaskNone = 0;
-  OperMaskChi = 0x000F;
-  OperMaskPeng = 0x00F0;
-  OperMaskGang = 0x0F00;
-  OperMaskHu = 0xF000;
+  OperMaskChi = 1;
+  OperMaskPeng = 2;
+  OperMaskGang = 4;
+  OperMaskHu = 8;
 }
 
-enum CanChiMask {
-  NoneChiMask = 0;
-  LeftChiMask = 0x000F;    //左吃
-  MiddleChiMask = 0x00F0;  //中吃
-  RightChiMask = 0x0F00;   //右吃
+message ChiComb {
+  int32 card1 = 1;  //用来吃的第1张牌
+  int32 card2 = 2;  //用来吃的第2张牌
 }
+
 //吃
 message CanChiMsg {
-  uint32 chiMask = 1;  //吃的类型掩码
+  repeated ChiComb cards = 1;  //能用来吃的组合
 }
 
 //杠

@@ -71,7 +71,7 @@ func (d *Desk) getFreeChair() (int32, bool) {
 		}
 		return i, true
 	}
-	return 0, false
+	return -1, false
 }
 
 func (d *Desk) checkStart() bool {

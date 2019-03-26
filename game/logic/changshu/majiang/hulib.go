@@ -35,7 +35,7 @@ func (self *HuLib) normal_hu(cardInfo *PlayerCardInfo) (bool, EmHuType) {
 	}
 
 	if MHuLib.GetHuInfo(checkcard, 0) {
-		return true, NORMAL
+		return true, HuType_NORMAL
 	}
 	return false, 0
 }
