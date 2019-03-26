@@ -419,11 +419,6 @@ func (self *GameSink) countCanOper(ret *CanOperInfo, chairId int32, huMode mj.Em
 	}
 }
 
-//游戏结束
-func (self *GameSink) gameEnd() {
-
-}
-
 //洗牌
 func (self *GameSink) shuffle_cards() {
 	if self.makeCards {
@@ -434,12 +429,46 @@ func (self *GameSink) shuffle_cards() {
 }
 
 //吃
-func (self *GameSink) chiCard(chairId int32) error {
-	//TODO 1:一些检查
-	//TODO 2:构建玩家信息,并保存到self.players
-	//TODO 3:执行游戏记录的初始化
-	//TODO 4:设置玩家在线
+func (self *GameSink) chiCard(chairId, card int32, chiComb []int32) error {
+	//检查是否在游戏中
+	if !self.isPlaying {
+		log.Errorf("%s 吃牌失败,不在游戏中", self.logHeadUser(chairId))
+		return nil
+	}
+
+	//检测是否能吃
+	if self.canOperInfo[chairId] == nil || self.canOperInfo[chairId].CanChi.Empty() {
+		log.Errorf("%s 吃牌失败,没有该操作", self.logHeadUser(chairId))
+		return nil
+	}
+	//校验吃牌
+	exist := false
+	for _, v := range self.canOperInfo[chairId].CanChi.ChiList {
+		if v[:] == chiComb {
+
+		}
+	}
 	return nil
+}
+
+//碰
+func (self *GameSink) pengCard(chairId, card int32) error {
+
+	return nil
+}
+
+//杠
+func (self *GameSink) gangCard(chairId, card int32) error {
+	return nil
+}
+
+//胡
+func (self *GameSink) huCard(chairId int32) error {
+	return nil
+}
+
+//游戏结束
+func (self *GameSink) gameEnd() {
 
 }
 
