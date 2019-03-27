@@ -2,6 +2,7 @@ package util
 
 import (
 	"math/rand"
+	"sort"
 	"time"
 	"unsafe"
 )
@@ -27,4 +28,27 @@ func GenerateRangeNum(min, max int) int {
 	rand.Seed(time.Now().Unix())
 	randNum := rand.Intn(max-min) + min
 	return randNum
+}
+
+//order为true:两个slice对应值都一样,为false:只要求a中有的元素,b中都存在
+func IntSliceEqualBCE(a, b []int, order bool) bool {
+	if len(a) != len(b) {
+		return false
+	}
+
+	if (a == nil) != (b == nil) {
+		return false
+	}
+	if !order { //只要求值相等
+		sort.Ints(a)
+		sort.Ints(b)
+	}
+	b = b[:len(a)]
+	for i, v := range a {
+		if v != b[i] {
+			return false
+		}
+	}
+
+	return true
 }

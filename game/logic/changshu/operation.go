@@ -25,12 +25,13 @@ func (self *CanOperInfo) Empty() bool {
 }
 
 type CanChiOper struct {
-	ChairId int32
-	ChiList []ChiCardTb
+	Card    int32  //被吃的牌
+	ChairId int32  //吃牌玩家
+	ChiType uint32 //吃牌类型
 }
 
 func (self *CanChiOper) Empty() bool {
-	return len(self.ChiList) == 0
+	return self.ChiType == 0
 }
 
 type CanPengOper struct {
@@ -106,16 +107,17 @@ const (
 	HuOrder
 )
 
-//优先级的操作
-type PriorityOper struct {
-	ChairId  int32
-	Card     int32
-	GangType string
-	Op       PriorityOrder
-	ChiCard  ChiCardTb
+//操作优先级
+type OperPriority struct {
+	ChairId int32
+	Op      PriorityOrder
+	Info    interface{} //操作信息
+	// Card     int32
+	// GangType string
+	// ChiCard  ChiCardTb
 }
 
-// type PriorityOper struct {
+// type OperPriority struct {
 // 	ChairId  int32
 // 	Card     int32
 // 	GangType string
@@ -123,7 +125,7 @@ type PriorityOper struct {
 // 	ChiCard  ChiCardTb
 // }
 
-// func (self *PriorityOper) ResetPriorityOper() {
+// func (self *OperPriority) ResetOperPriority() {
 // 	self.ChairId = -1
 // 	self.Card = 0
 // 	self.GangType = ""
@@ -190,26 +192,26 @@ func GetNextChair(chairId, playerCount int32) int32 {
 }
 
 //能否吃
-func (self *OperAtion) checkChi(stackCards map[int32]int32, outCard, chairId, outChair int32) (bool, []ChiCardTb) {
+func (self *OperAtion) checkChi(stackCards map[int32]int32, outCard, chairId, outChair int32) (bool, uint32) {
 	//下家才能吃
 	if GetNextChair(outChair, self.game_config.PlayerCount) != chairId {
-		return false, nil
+		return false, 0
 	}
 	//检测是否癞子,字牌
 	if _, ok := self.laiziCard[outCard]; ok || outCard >= 41 {
-		return false, nil
+		return false, 0
 	}
-	ret := []ChiCardTb{}
-	if stackCards[outCard+1] > 0 && stackCards[outCard+2] > 0 {
-		ret = append(ret, ChiCardTb{outCard + 1, outCard + 2})
+	var ret uint32 = 0
+	if stackCards[outCard+1] > 0 && stackCards[outCard+2] > 0 { //左吃(11,12,13,其中11为被吃的牌)
+		ret = ret | uint32(pbgame_logic.ChiTypeMask_ChiMaskLeft)
 	}
-	if stackCards[outCard-1] > 0 && stackCards[outCard+1] > 0 {
-		ret = append(ret, ChiCardTb{outCard - 1, outCard + 1})
+	if stackCards[outCard-1] > 0 && stackCards[outCard+1] > 0 { //中吃(11,12,13,其中12为被吃的牌)
+		ret = ret | uint32(pbgame_logic.ChiTypeMask_ChiMaskMiddle)
 	}
-	if stackCards[outCard-2] > 0 && stackCards[outCard-1] > 0 {
-		ret = append(ret, ChiCardTb{outCard - 2, outCard - 1})
+	if stackCards[outCard-2] > 0 && stackCards[outCard-1] > 0 { //右吃(11,12,13,其中13为被吃的牌)
+		ret = ret | uint32(pbgame_logic.ChiTypeMask_ChiMaskRight)
 	}
-	return len(ret) > 0, ret
+	return ret != 0, ret
 }
 
 //能否碰
@@ -234,7 +236,7 @@ func (self *OperAtion) OutCardAnalysis(cardInfo *mj.PlayerCardInfo, outCard, cha
 	ret := &CanOperInfo{}
 	if leftCardNum > 0 {
 		if ok, chi := self.checkChi(cardInfo.StackCards, outCard, chairId, outChair); ok {
-			ret.CanChi.ChiList = chi
+			ret.CanChi.ChiType = chi
 		}
 		if self.checkPeng(cardInfo.StackCards, outCard) {
 			ret.CanPeng.Card = outCard

@@ -94,8 +94,8 @@ message C2SGangCard {
 
 //吃牌
 message C2SChiCard {
-  int32 card = 1;                  //上家打出的牌
-  repeated cyint32 will_card = 2;  //用来吃的手牌
+  int32 card = 1;       //上家打出的牌
+  uint32 chi_type = 2;  //吃牌类型
 }
 
 //胡牌
@@ -177,20 +177,22 @@ message S2COutCard {
 
 enum CanOperMask {
   OperMaskNone = 0;
-  OperMaskChi = 1;
-  OperMaskPeng = 2;
-  OperMaskGang = 4;
-  OperMaskHu = 8;
+  OperMaskChi = 1;   //吃标记
+  OperMaskPeng = 2;  //碰标记
+  OperMaskGang = 4;  //杠标记
+  OperMaskHu = 8;    //胡标记
 }
 
-message ChiComb {
-  int32 card1 = 1;  //用来吃的第1张牌
-  int32 card2 = 2;  //用来吃的第2张牌
+enum ChiTypeMask {
+  ChiMaskNone = 0;
+  ChiMaskLeft = 1;    //左吃(11,12,13,其中11为被吃的牌)
+  ChiMaskMiddle = 2;  //中吃(11,12,13,其中12为被吃的牌)
+  ChiMaskRight = 4;   //右吃(11,12,13,其中13为被吃的牌)
 }
 
 //吃
 message CanChiMsg {
-  repeated ChiComb cards = 1;  //能用来吃的组合
+  uint32 ChiType = 1;  //能吃的类型
 }
 
 //杠
