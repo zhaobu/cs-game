@@ -467,8 +467,30 @@ func (self *GameSink) checkPlayerOperationNeedWait(chairId int32, curOrder Prior
 	return 0
 }
 
+//删除玩家所有能做的操作
 func (self *GameSink) deletePlayerCanOper(chairId int32) {
+	delete(self.canOperInfo, chairId)
+	for i := HuOrder; i >= ChiOrder; i-- {
+		if curOper, ok := self.operOrder[i]; ok {
+			for index, v := range curOper {
+				if v.ChairId == chairId { //每种操作最多只可能有一个
+					curOper = append(curOper[:index], curOper[index+1:]...)
+					break
+				}
+			}
+		}
+	}
+}
 
+//判断是否存在需要等待的操作,存在则返回false,不存在则返回true
+func (self *GameSink) checkCanOperEmpty() bool {
+	if len(self.operOrder[HuOrder]) > 0 { //还有人能胡
+		return false
+	}
+	// if  {
+
+	// }
+	return true
 }
 
 //吃
@@ -495,8 +517,16 @@ func (self *GameSink) chiCard(chairId, card int32, chiType uint32) error {
 		if self.hasHu { //已经有人胡牌
 			log.Debugf("%s 吃牌时已经有人选择胡牌", self.logHeadUser(chairId))
 			self.deletePlayerCanOper(chairId)
+			if self.checkCanOperEmpty() {
+				log.Debugf("%s 吃牌时已经有人选择胡牌,并且不需要再等待其他人操作,游戏结束", self.logHeadUser(chairId))
+				self.gameEnd()
+			}
+			return nil
+		} else { //没有其他人操作胡
+
 		}
 	}
+
 	//检查玩家当前操作是否需要等待
 	res := self.checkPlayerOperationNeedWait(chairId, ChiOrder)
 	if res == 1 {
