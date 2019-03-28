@@ -21,6 +21,7 @@ type gameAllInfo struct {
 	waitHigestOper    *OperPriority                     //当前等待中的最高优先级的操作
 	operOrder         map[PriorityOrder][]*OperPriority //操作优先级
 	canOperInfo       map[int32]*CanOperInfo            //玩家能做的操作
+	haswaitOper       [4]bool                           //玩家是否有等待中的操作
 	game_balance_info gameBalanceInfo                   //游戏结束信息
 	diceResult        [4][2]int32                       //投色子结果
 	banker_id         int32                             //庄家id
@@ -283,7 +284,7 @@ func (self *GameSink) firstBuHua(chairId int32) {
 func (self *GameSink) resetOper() {
 	self.canOperInfo = map[int32]*CanOperInfo{}
 	self.waitHigestOper = nil
-	self.operOrder = map[PriorityOrder][]OperPriority{}
+	self.operOrder = map[PriorityOrder][]*OperPriority{}
 }
 
 //摸牌 last(-1摸最后一张 1第一次摸牌 0正常摸牌),lose_chair在明杠时为放杠玩家id,包赔
@@ -464,33 +465,71 @@ func (self *GameSink) checkPlayerOperationNeedWait(chairId int32, curOrder Prior
 		waitOrder = self.waitHigestOper.Op
 	}
 	//比较当前操作,当前等待中的最高优先级的操作,和其他人能做的最高优先级操作
+	maxOrder := self.operAction.GetMaxOrder(self.operAction.GetMaxOrder(otherOrder, waitOrder), curOrder)
+	if maxOrder == curOrder {
+		return 1
+	} else if maxOrder == otherOrder {
+		return 2
+	} else if maxOrder == waitOrder {
+		return 3
+	}
+	log.Errorf("异常操作优先结果")
 	return 0
 }
 
 //删除玩家所有能做的操作
 func (self *GameSink) deletePlayerCanOper(chairId int32) {
 	delete(self.canOperInfo, chairId)
-	for i := HuOrder; i >= ChiOrder; i-- {
-		if curOper, ok := self.operOrder[i]; ok {
-			for index, v := range curOper {
-				if v.ChairId == chairId { //每种操作最多只可能有一个
-					curOper = append(curOper[:index], curOper[index+1:]...)
-					break
-				}
+	for order, allOper := range self.operOrder {
+		for i, oneOper := range allOper {
+			if oneOper.ChairId == chairId { //每种操作最多只可能有一个
+				self.operOrder[order] = append(allOper[:i], allOper[i+1:]...)
 			}
 		}
 	}
 }
 
 //判断是否存在需要等待的操作,存在则返回false,不存在则返回true
-func (self *GameSink) checkCanOperEmpty() bool {
-	if len(self.operOrder[HuOrder]) > 0 { //还有人能胡
-		return false
-	}
-	// if  {
+// func (self *GameSink) checkCanOperEmpty() bool {
+// 	if len(self.operOrder[HuOrder]) > 0 { //还有人能胡
+// 		return false
+// 	}
+// 	return true
+// }
 
-	// }
-	return true
+//插入等待中的操作(info为指针)
+func (self *GameSink) insertWaitOper(chairId int32, op PriorityOrder, info interface{}) {
+	if self.waitHigestOper != nil && op < self.waitHigestOper.Op {
+		return
+	}
+	if self.waitHigestOper != nil {
+		log.Debugf("%s 高优先级操作%v替换掉低优先级操作%v", self.logHeadUser(chairId), op, self.waitHigestOper.Op)
+	}
+	self.waitHigestOper = &OperPriority{ChairId: chairId, Op: op, Info: info}
+}
+
+//唤醒等待中的操作
+func (self *GameSink) dealWaitOper(chairId int32) {
+	if self.waitHigestOper == nil {
+		log.Errorf("%s 唤醒操作时self.waitHigestOper == nil", self.logHeadUser(chairId))
+	}
+	switch info := self.waitHigestOper.Info.(type) {
+	case *CanChiOper:
+		log.Debugf("%s 唤醒操作吃", self.logHeadUser(chairId))
+		self.chiCard(info.ChairId, info.Card, info.ChiType)
+	case *CanPengOper:
+		log.Debugf("%s 唤醒操作碰", self.logHeadUser(chairId))
+	case *CanGangOper:
+		log.Debugf("%s 唤醒操作杠", self.logHeadUser(chairId))
+
+	case *CanHuOper:
+		log.Debugf("%s 唤醒操作胡", self.logHeadUser(chairId))
+
+	default:
+		log.Debugf("%s 唤醒操作时,类型转换失败", self.logHeadUser(chairId))
+		return
+	}
+	self.waitHigestOper = nil
 }
 
 //吃
@@ -507,31 +546,63 @@ func (self *GameSink) chiCard(chairId, card int32, chiType uint32) error {
 		return nil
 	}
 
-	//校验吃牌
+	//校验操作参数合法性
 	if chiType == 0 || card != self.canOperInfo[chairId].CanChi.Card || chiType != (self.canOperInfo[chairId].CanChi.ChiType&chiType) {
 		log.Errorf("%s 吃牌失败,没有该吃类型,或者吃的牌不对,CanChi=%+v", self.logHeadUser(chairId), self.canOperInfo[chairId].CanChi)
 		return nil
 	}
 
-	if self.canOperInfo[chairId] != nil && !self.canOperInfo[chairId].CanHu.Empty() { //玩家能胡
-		if self.hasHu { //已经有人胡牌
-			log.Debugf("%s 吃牌时已经有人选择胡牌", self.logHeadUser(chairId))
-			self.deletePlayerCanOper(chairId)
-			if self.checkCanOperEmpty() {
-				log.Debugf("%s 吃牌时已经有人选择胡牌,并且不需要再等待其他人操作,游戏结束", self.logHeadUser(chairId))
-				self.gameEnd()
-			}
-			return nil
-		} else { //没有其他人操作胡
+	// if self.canOperInfo[chairId] != nil && !self.canOperInfo[chairId].CanHu.Empty() { //玩家能胡,(可能出现唤醒操作)
+	// 	if self.hasHu { //已经有人胡牌
+	// 		log.Debugf("%s 吃牌时已经有人选择胡牌", self.logHeadUser(chairId))
+	// 		self.deletePlayerCanOper(chairId)
+	// 		if self.checkCanOperEmpty() {
+	// 			log.Debugf("%s 吃牌时已经有人选择胡牌,并且不需要再等待其他人操作,游戏结束", self.logHeadUser(chairId))
+	// 			self.gameEnd()
+	// 		}
+	// 		return nil
+	// 	} else { //没有其他人操作胡
 
-		}
-	}
+	// 	}
+	// }
 
 	//检查玩家当前操作是否需要等待
 	res := self.checkPlayerOperationNeedWait(chairId, ChiOrder)
-	if res == 1 {
-
+	if res == 2 { //需要等待其他人操作
+		log.Debugf("%s 操作碰需要等待其他人", self.logHeadUser(chairId))
+		self.insertWaitOper(chairId, ChiOrder, &self.canOperInfo[chairId].CanChi)
+		self.haswaitOper[chairId] = true
+		return nil
+	} else if res == 3 { //唤醒等待中的操作
+		log.Debugf("%s 操作碰,唤醒等待中的操作", self.logHeadUser(chairId))
+		self.dealWaitOper(chairId)
+		return nil
 	}
+
+	self.deletePlayerCanOper(chairId)
+
+	//判断是否已经胡
+	if self.hasHu {
+		log.Debugf("%s 操作碰,因为已经有人胡牌,游戏结束", self.logHeadUser(chairId))
+		self.gameEnd()
+		return nil
+	}
+
+	//更新吃牌玩家card_info表
+	self.operAction.HandleChiCard(&self.players[chairId].CardInfo, card, chiType)
+
+	//更新出牌玩家card_info表
+	self.players[self.lastOutChair].CardInfo.OutCards = mj.RemoveCard(self.players[self.lastOutChair].CardInfo.OutCards, card, false)
+
+	//回放记录
+
+	self.sendData(-1, &pbgame_logic.S2CChiCard{ChairId: chairId, Card: card, ChiType: chiType})
+	self.sendData(-1, &pbgame_logic.S2CTimeoutChair{ChairId: chairId, Time: 15})
+
+	//变量维护
+	self.curOutChair = chairId
+	self.haswaitOper[chairId] = false
+
 	return nil
 }
 

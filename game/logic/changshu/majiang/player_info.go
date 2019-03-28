@@ -13,7 +13,7 @@ type PlayerCardInfo struct {
 	PengCards  map[int32]int32      // {card=chair_id,..}
 	GangCards  map[int32]EmOperType // {card=G_OP_TYPE类型,...}
 	StackCards map[int32]int32      //玩家手牌数量统计 {card=num,...}
-	ChiCards   []int32              //{card1,card2,card3,card4,card5,card6}3个连续的能组成吃
+	ChiCards   [][3]int32           //{card1,card2,card3,card4,card5,card6}3个连续的能组成吃,吃的牌放第一个
 	HuCard     int32
 }
 

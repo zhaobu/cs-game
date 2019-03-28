@@ -138,6 +138,14 @@ func (self *OperAtion) Init(config *pbgame_logic.CreateArg, laizi map[int32]int3
 	self.laiziCard = laizi
 }
 
+//获取两个优先级中的较大者
+func (self *OperAtion) GetMaxOrder(a, b PriorityOrder) PriorityOrder {
+	if a > b {
+		return a
+	}
+	return b
+}
+
 // /返回摸到牌后所有能杠的牌值
 func (self *OperAtion) moCanGang(stackCards map[int32]int32, pengCards map[int32]int32, card int32) (bool, map[int32]int32) {
 	ret := map[int32]int32{}
@@ -263,4 +271,21 @@ func (self *OperAtion) HandleDrawCard(cardInfo *mj.PlayerCardInfo, card int32) {
 func (self *OperAtion) HandleOutCard(cardInfo *mj.PlayerCardInfo, card int32) {
 	self.updateCardInfo(cardInfo, 0, card)
 	cardInfo.OutCards = append(cardInfo.OutCards, card)
+}
+
+//处理吃牌
+func (self *OperAtion) HandleChiCard(cardInfo *mj.PlayerCardInfo, card int32, chiType uint32) {
+	eatGroup := [3]int32{}
+	//根据吃牌类型生成组合
+	if chiType == chiType&uint32(pbgame_logic.ChiTypeMask_ChiMaskLeft) {
+		eatGroup = [3]int32{card, card + 1, card + 2}
+	} else if chiType == chiType&uint32(pbgame_logic.ChiTypeMask_ChiMaskMiddle) {
+		eatGroup = [3]int32{card, card - 1, card + 1}
+	} else if chiType == chiType&uint32(pbgame_logic.ChiTypeMask_ChiMaskRight) {
+		eatGroup = [3]int32{card, card - 2, card - 1}
+	}
+	for i := 1; i < 3; i++ {
+		self.updateCardInfo(cardInfo, 0, eatGroup[i])
+	}
+	cardInfo.ChiCards = append(cardInfo.ChiCards, eatGroup)
 }

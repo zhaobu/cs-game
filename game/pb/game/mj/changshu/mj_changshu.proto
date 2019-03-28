@@ -192,7 +192,7 @@ enum ChiTypeMask {
 
 //吃
 message CanChiMsg {
-  uint32 ChiType = 1;  //能吃的类型
+  uint32 chi_type = 1;  //能吃的类型
 }
 
 //杠
@@ -228,9 +228,9 @@ message S2CGangCard {
 
 //玩家吃牌
 message S2CChiCard {
-  int32 chair_id = 1;               //吃牌玩家
-  int32 card = 2;                   //要吃的牌:22
-  repeated cyint32 card_table = 3;  //待吃的牌:{21,23}
+  int32 chair_id = 1;   //吃牌玩家
+  int32 card = 2;       //要吃的牌:22
+  uint32 chi_type = 3;  //吃类型掩码
 }
 
 //玩家胡牌
