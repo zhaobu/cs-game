@@ -218,12 +218,18 @@ message S2CPengCard {
   int32 card = 2;      //要碰的牌
 }
 
+enum GangType {
+  GangType_None = 0;
+  GangType_Bu = 1;    //补杠
+  GangType_AN = 2;    //暗杠
+  GangType_Ming = 3;  //明杠
+}
 //玩家杠牌
 message S2CGangCard {
-  int32 chair_id = 1;    //杠牌玩家
-  int32 card = 2;        //要杠的牌
-  int32 gang_type = 3;   // 1.梭杠2.暗杠3.明杠
-  int32 lose_chair = 4;  //放杠的玩家
+  int32 chair_id = 1;  //杠牌玩家
+  int32 card = 2;      //要杠的牌
+  GangType type = 3;
+  int32 lose_chair = 4;  //放杠的玩家,暗杠为-1,补杠时为碰牌时被碰玩家,明杠时为出牌玩家
 }
 
 //玩家吃牌
