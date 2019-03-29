@@ -739,6 +739,50 @@ func (self *GameSink) afterGangCard(chairId, card int32, gangType mj.EmOperType)
 
 //胡
 func (self *GameSink) huCard(chairId int32) error {
+	log.Debugf("%s,胡牌操作,card=%d", self.logHeadUser(chairId))
+	//检查是否在游戏中
+	if !self.isPlaying {
+		log.Errorf("%s 胡牌失败,不在游戏中", self.logHeadUser(chairId))
+		return nil
+	}
+	//检测是否能胡
+	if self.canOperInfo[chairId] == nil || self.canOperInfo[chairId].CanHu.Empty() {
+		log.Errorf("%s 胡牌失败,没有该操作", self.logHeadUser(chairId))
+		return nil
+	}
+	self.deletePlayerOperOrder(chairId)
+	//检查玩家当前操作是否需要等待
+	res := self.checkPlayerOperationNeedWait(chairId, HuOrder)
+	if res == 2 { //需要等待其他人操作
+		log.Debugf("%s 操作胡需要等待其他人", self.logHeadUser(chairId))
+		self.insertWaitOper(chairId, HuOrder, &self.canOperInfo[chairId].CanGang)
+		self.haswaitOper[chairId] = true
+		return nil
+	} else if res == 3 { //唤醒等待中的操作
+		log.Errorf("%s 操作胡执行了唤醒操作,checking!!!!", self.logHeadUser(chairId))
+		return nil
+	}
+
+	huInfo := &self.canOperInfo[chairId].CanHu
+
+	//回放记录
+
+	self.hasHu = true
+	self.players[chairId].CardInfo.HuCard = huInfo.Card
+
+	//接炮 or 抢杠胡 把胡的牌加到手牌里
+	if huInfo.LoseChair != -1 && huInfo.HuMode != mj.HuMode_QIANGHU {
+		self.operAction.updateCardInfo(&self.players[chairId].CardInfo, []int32{huInfo.Card}, nil)
+	}
+
+	//记录胡牌牌型
+	self.gameBalance.loseChair = huInfo.LoseChair
+	self.gameBalance.huCard = huInfo.Card
+	self.gameBalance.huMode = huInfo.HuMode
+	self.gameBalance.huChairs = huInfo.L
+	//变量维护
+	self.haswaitOper[chairId] = false
+
 	return nil
 }
 

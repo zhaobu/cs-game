@@ -6,6 +6,7 @@ type (
 	EmHuScoreType  uint8  //胡牌得分类型
 	EmtimerID      uint32 //定时器枚举
 	EmHuType       uint8  //胡牌番型
+	EmExtraHuType  uint8  //附属胡牌番型
 	EmHuMode       uint8  //胡牌方式
 	EmScoreTimes   uint8  //结算计分次数统计
 )
