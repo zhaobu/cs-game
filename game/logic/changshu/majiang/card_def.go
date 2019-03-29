@@ -117,23 +117,27 @@ func (self *CardDef) DealCard(rawcards []int32, playercount, bankerID int32) (ha
 }
 
 //加
-func Add_stack(m map[int32]int32, card int32) {
-	if _, ok := m[card]; ok {
-		m[card] = m[card] + 1
-	} else {
-		m[card] = 1
+func Add_stack(m map[int32]int32, cards ...int32) {
+	for _, card := range cards {
+		if _, ok := m[card]; ok {
+			m[card] = m[card] + 1
+		} else {
+			m[card] = 1
+		}
 	}
 }
 
 //减
-func Sub_stack(m map[int32]int32, card int32) {
-	num, ok := m[card]
-	if ok == false {
-		log.Errorf("减牌%d时牌数量为0", card)
-	} else if num == 1 {
-		delete(m, card)
-	} else {
-		m[card] = num - 1
+func Sub_stack(m map[int32]int32, cards ...int32) {
+	for _, card := range cards {
+		if num, ok := m[card]; ok {
+			m[card] = num - 1
+			if num == 1 {
+				delete(m, card)
+			}
+		} else {
+			log.Errorf("减牌%d时牌数量为0", card)
+		}
 	}
 }
 

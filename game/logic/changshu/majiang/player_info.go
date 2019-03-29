@@ -2,9 +2,9 @@ package majiang
 
 type PlayerInfo struct {
 	CardInfo      PlayerCardInfo
-	BalanceInfo   PlayserBalanceInfo
+	BalanceInfo   PlayserBalanceInfo //局结算
 	BaseInfo      PlayerBaseInfo
-	BalanceResult PlayerBalanceResult
+	BalanceResult PlayerBalanceResult //总结算
 }
 
 type PlayerCardInfo struct {
@@ -24,6 +24,7 @@ type PlayserBalanceInfo struct {
 	HuType    []EmHuScoreType //emHuScoreType类型参数
 }
 
+//玩家基础信息
 type PlayerBaseInfo struct {
 	ChairId  int32
 	Uid      uint64
@@ -33,13 +34,8 @@ type PlayerBaseInfo struct {
 
 //总结算
 type PlayerBalanceResult struct {
-	HuPai     int32
-	DianPao   int32
-	AnGang    int32
-	MingGang  int32
-	Point     int32
-	Wintimes  int32 //赢的次数
-	Losetimes int32 //输的次数
+	ScoreTimes map[EmScoreTimes]int32 //统计次数
+	Point      int32                  //总得分
 }
 
 //删除手牌中的某张牌,delAll为true时删除所有的delcard

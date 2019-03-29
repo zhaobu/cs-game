@@ -5,8 +5,9 @@ type (
 	EmRecordAction uint8  //战绩回放
 	EmHuScoreType  uint8  //胡牌得分类型
 	EmtimerID      uint32 //定时器枚举
-	EmHuType       uint8  //胡牌得分类型
+	EmHuType       uint8  //胡牌番型
 	EmHuMode       uint8  //胡牌方式
+	EmScoreTimes   uint8  //结算计分次数统计
 )
 
 //定时器ID
@@ -90,4 +91,16 @@ const (
 	HuType_YAOJIU_CZMQ                          //潮州门清幺九
 	HuType_MIX_YAOJIU_CZMQ                      //潮州门清混幺九
 	HuType_QUANQIUREN                           //全求人
+)
+
+//统计次数
+const (
+	ScoreTimes_None EmScoreTimes = iota
+	ScoreTimes_HuPai
+	ScoreTimes_DianPao
+	ScoreTimes_AnGang
+	ScoreTimes_MingGang
+	ScoreTimes_BuGang
+	ScoreTimes_Win
+	ScoreTimes_Lose
 )
