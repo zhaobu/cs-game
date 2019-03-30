@@ -10,7 +10,7 @@ type HuScoreInfo struct {
 	HuTypeExtra   []mj.EmExtraHuType //附属胡牌类型
 }
 type GameBalance struct {
-	isdeuce      bool                   //是否流局
+	lastHuChair  int32                  //最后一个胡牌玩家
 	gameIndex    int32                  //第几局
 	banker       int32                  //庄家
 	loseChair    int32                  //丢分玩家
@@ -19,6 +19,14 @@ type GameBalance struct {
 	gangPaoHu    bool                   //杠上炮
 	huCard       int32                  //胡的牌
 	huChairs     map[int32]*HuScoreInfo //胡牌玩家信息
+}
+
+func (self *GameBalance) Reset() {
+	self.lastHuChair = -1
+	self.banker = -1
+	self.loseChair = -1
+	self.gangHuaChair = -1
+	self.huChairs = map[int32]*HuScoreInfo{}
 }
 
 func (self *GameBalance) AddScoreTimes(balanceResult *mj.PlayerBalanceResult, op mj.EmScoreTimes) {

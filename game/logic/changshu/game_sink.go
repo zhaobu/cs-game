@@ -24,7 +24,7 @@ type gameAllInfo struct {
 	haswaitOper    [4]bool                           //玩家是否有等待中的操作
 	gameBalance    GameBalance                       //游戏结束信息
 	diceResult     [4][2]int32                       //投色子结果
-	banker_id      int32                             //庄家id
+	bankerId       int32                             //庄家id
 	leftCard       []int32                           //发完牌后剩余的牌
 	curThrowDice   int32                             //当前投色子的玩家
 	curOutChair    int32                             //当前出牌玩家
@@ -85,7 +85,13 @@ func (self *GameSink) Ctor(config *pbgame_logic.CreateArg) error {
 func (self *GameSink) reset() {
 	//all_info
 	self.gameAllInfo = gameAllInfo{}
-	self.gameBalance.huChairs = map[int32]*HuScoreInfo{}
+	self.operOrder = map[PriorityOrder][]*OperPriority{}
+	self.canOperInfo = map[int32]*CanOperInfo{}
+	self.bankerId = -1
+	self.curThrowDice = -1
+	self.curOutChair = -1
+	self.lastOutChair = -1
+	self.gameBalance.Reset()
 	self.laiziCard = map[int32]int32{}
 }
 
@@ -168,7 +174,7 @@ func (self *GameSink) dealDiceResult() {
 		posInfo[i] = &pbgame_logic.ChangePosInfo{UserPos: res.chairId, DiceValue: res.dice}
 	}
 	//记录庄家
-	self.banker_id = diceRes[0].chairId
+	self.bankerId = diceRes[0].chairId
 	msg := &pbgame_logic.S2CChangePos{PosInfo: posInfo}
 	self.sendData(-1, msg)
 	//1s后发送游戏开始消息
@@ -179,12 +185,12 @@ func (self *GameSink) dealDiceResult() {
 
 //开始发牌
 func (self *GameSink) deal_card() {
-	msg := &pbgame_logic.S2CStartGame{BankerId: self.banker_id, CurInning: int32(self.desk.curInning)}
+	msg := &pbgame_logic.S2CStartGame{BankerId: self.bankerId, CurInning: self.desk.curInning}
 	msg.TotalCardNum = int32(len(self.baseCard))
 	//洗牌
 	self.shuffle_cards()
 	var player_cards [][]int32
-	player_cards, self.leftCard = cardDef.DealCard(self.leftCard, self.game_config.PlayerCount, self.banker_id)
+	player_cards, self.leftCard = cardDef.DealCard(self.leftCard, self.game_config.PlayerCount, self.bankerId)
 	msg.LeftCardNum = int32(len(self.leftCard))
 	for k, v := range self.players {
 		v.CardInfo.HandCards = player_cards[k]
@@ -196,10 +202,10 @@ func (self *GameSink) deal_card() {
 		self.sendData(int32(k), msg)
 	}
 	//庄家开始第一次补花
-	self.firstBuHua(self.banker_id)
+	self.firstBuHua(self.bankerId)
 	//检查庄家能否胡
-	if ok, huTypeList := huLib.CheckHuType(&(self.players[self.banker_id].CardInfo)); ok {
-		self.canOperInfo[self.banker_id] = &CanOperInfo{CanHu: CanHuOper{HuList: huTypeList}}
+	if ok, huTypeList := huLib.CheckHuType(&(self.players[self.bankerId].CardInfo)); ok {
+		self.canOperInfo[self.bankerId] = &CanOperInfo{CanHu: CanHuOper{HuList: huTypeList}}
 	}
 	//检查能否杠
 }
@@ -288,7 +294,6 @@ func (self *GameSink) drawCard(chairId, last, lose_chair int32) error {
 	log.Debugf("%s,摸牌操作,last=%d, lose_chair=%d", self.logHeadUser(chairId), last, lose_chair)
 	//检查游戏是否结束
 	if len(self.leftCard) <= 0 {
-		self.gameBalance.isdeuce = true
 		self.gameEnd()
 		return nil
 	}
@@ -769,7 +774,7 @@ func (self *GameSink) huCard(chairId int32) error {
 	//回放记录
 
 	self.hasHu = true
-	cardInfo.HuCard = huInfo.Card
+	self.players[chairId].BalanceInfo.HuCard = huInfo.Card
 
 	//接炮 or 抢杠胡 把胡的牌加到手牌里
 	if huInfo.LoseChair != -1 && huInfo.HuMode != mj.HuMode_QIANGHU {
@@ -810,6 +815,7 @@ func (self *GameSink) huCard(chairId int32) error {
 	self.deletePlayerOperOrder(chairId)
 
 	if len(self.operOrder[HuOrder]) == 0 {
+		self.gameBalance.lastHuChair = chairId
 		self.gameEnd()
 	}
 	return nil
@@ -860,10 +866,39 @@ func (self *GameSink) cancelOper(chairId int32) error {
 }
 
 //游戏结束
-func (self *GameSink) gameEnd(chairId int32) {
-	log.Debugf("%s 胡牌后第%d局游戏结束", self.logHeadUser(chairId), self.desk.curInning)
+func (self *GameSink) gameEnd() {
+	log.Debugf("%s 第%d局游戏结束", self.logHeadUser(self.gameBalance.lastHuChair), self.desk.curInning)
+	self.isPlaying = false
+	self.dealGameBalance()
+
+	msg := &pbgame_logic.S2CGameEnd{CurInning: self.desk.curInning, Banker: self.bankerId, Isdeuce: self.gameBalance.lastHuChair == -1}
+	msg.PlayerBalance = []*pbgame_logic.PlayerBalanceInfo{}
+	for _, v := range self.players {
+		Info := &pbgame_logic.PlayerBalanceInfo{}
+		Info.HandCards = v.CardInfo.HandCards
+		Info.HuCard = v.BalanceInfo.HuCard
+		Info.Point = v.BalanceInfo.HuPoint
+	}
+
+	//游戏记录
+	self.sendData(-1, msg)
+	self.afterGameEnd()
+}
+
+//处理算分
+func (self *GameSink) dealGameBalance() {
+
+}
+
+//小局结束后数据清理
+func (self *GameSink) afterGameEnd() {
+
 }
 
 func (self *GameSink) logHeadUser(chairId int32) string {
-	return fmt.Sprintf("房间[%d] 玩家[%s,%d]:", self.desk.id, self.players[chairId].BaseInfo.Nickname, chairId)
+	if chairId == -1 {
+		return fmt.Sprintf("房间[%d] :", self.desk.id)
+	} else {
+		return fmt.Sprintf("房间[%d] 玩家[%s,%d]:", self.desk.id, self.players[chairId].BaseInfo.Nickname, chairId)
+	}
 }
