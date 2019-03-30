@@ -67,6 +67,14 @@ const (
 	HuScoreType_Bei_Qiang_Gang                          //被抢杠
 )
 
+//附属胡牌类型
+const (
+	ExtraHuType_QiangGang    EmExtraHuType = iota + 1 //抢杠胡
+	ExtraHuType_GangShangHua                          //杠上花
+	ExtraHuType_GangShangPao                          //杠上炮
+	ExtraHuType_MenQing                               //门清
+)
+
 // 胡牌类型(胡牌番型)
 const (
 	HuType_NORMAL           EmHuType = iota + 1 //普通胡
@@ -98,10 +106,12 @@ const (
 const (
 	ScoreTimes_None EmScoreTimes = iota
 	ScoreTimes_HuPai
+	ScoreTimes_JiePao
 	ScoreTimes_DianPao
 	ScoreTimes_AnGang
 	ScoreTimes_MingGang
 	ScoreTimes_BuGang
 	ScoreTimes_Win
 	ScoreTimes_Lose
+	ScoreTimes_ZiMo
 )

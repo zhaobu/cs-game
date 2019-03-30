@@ -10,14 +10,15 @@ type HuScoreInfo struct {
 	HuTypeExtra   []mj.EmExtraHuType //附属胡牌类型
 }
 type GameBalance struct {
-	isdeuce   bool                   //是否流局
-	gameIndex int32                  //第几局
-	huChair   []int32                //胡牌的玩家
-	banker    int32                  //庄家
-	loseChair int32                  //丢分玩家
-	huMode    mj.EmHuMode            //胡牌方式
-	huCard    int32                  //胡的牌
-	huChairs  map[int32]*HuScoreInfo //胡牌玩家信息
+	isdeuce      bool                   //是否流局
+	gameIndex    int32                  //第几局
+	banker       int32                  //庄家
+	loseChair    int32                  //丢分玩家
+	huMode       mj.EmHuMode            //胡牌方式
+	gangHuaChair int32                  //杠上花玩家
+	gangPaoHu    bool                   //杠上炮
+	huCard       int32                  //胡的牌
+	huChairs     map[int32]*HuScoreInfo //胡牌玩家信息
 }
 
 func (self *GameBalance) AddScoreTimes(balanceResult *mj.PlayerBalanceResult, op mj.EmScoreTimes) {

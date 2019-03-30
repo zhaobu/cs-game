@@ -85,6 +85,7 @@ func (self *GameSink) Ctor(config *pbgame_logic.CreateArg) error {
 func (self *GameSink) reset() {
 	//all_info
 	self.gameAllInfo = gameAllInfo{}
+	self.gameBalance.huChairs = map[int32]*HuScoreInfo{}
 	self.laiziCard = map[int32]int32{}
 }
 
@@ -187,7 +188,7 @@ func (self *GameSink) deal_card() {
 	msg.LeftCardNum = int32(len(self.leftCard))
 	for k, v := range self.players {
 		v.CardInfo.HandCards = player_cards[k]
-		msg.UserInfo = &pbgame_logic.StartGameInfo{HandCard: player_cards[k]}
+		msg.UserInfo = &pbgame_logic.StartGameInfo{HandCards: player_cards[k]}
 		log.Warnf("%s手牌为:%v", self.logHeadUser(int32(k)), player_cards[k])
 		//统计每个玩家手牌数量
 		v.CardInfo.StackCards = cardDef.StackCards(player_cards[k])
@@ -764,25 +765,53 @@ func (self *GameSink) huCard(chairId int32) error {
 	}
 
 	huInfo := &self.canOperInfo[chairId].CanHu
-
+	cardInfo := &self.players[chairId].CardInfo
 	//回放记录
 
 	self.hasHu = true
-	self.players[chairId].CardInfo.HuCard = huInfo.Card
+	cardInfo.HuCard = huInfo.Card
 
 	//接炮 or 抢杠胡 把胡的牌加到手牌里
 	if huInfo.LoseChair != -1 && huInfo.HuMode != mj.HuMode_QIANGHU {
-		self.operAction.updateCardInfo(&self.players[chairId].CardInfo, []int32{huInfo.Card}, nil)
+		self.operAction.updateCardInfo(cardInfo, []int32{huInfo.Card}, nil)
 	}
 
 	//记录胡牌牌型
 	self.gameBalance.loseChair = huInfo.LoseChair
 	self.gameBalance.huCard = huInfo.Card
 	self.gameBalance.huMode = huInfo.HuMode
-	self.gameBalance.huChairs = huInfo.L
+	//判断附属胡牌类型
+	huTypeExtra := []mj.EmExtraHuType{}
+	if huInfo.HuMode == mj.HuMode_QIANGHU { //抢杠胡
+		huTypeExtra = append(huTypeExtra, mj.ExtraHuType_QiangGang)
+		if huInfo.LoseChair != -1 {
+			self.operAction.updateCardInfo(&self.players[huInfo.LoseChair].CardInfo, nil, []int32{huInfo.Card})
+		}
+	} else if self.gameBalance.gangHuaChair == chairId { //杠上花
+		huTypeExtra = append(huTypeExtra, mj.ExtraHuType_GangShangHua)
+	}
+
+	if huInfo.HuMode == mj.HuMode_PAOHU && self.gameBalance.gangPaoHu { //杠上炮
+		huTypeExtra = append(huTypeExtra, mj.ExtraHuType_GangShangPao)
+	}
+	self.gameBalance.huChairs[chairId] = &HuScoreInfo{HuTypeList: huInfo.HuList, HuTypeExtra: huTypeExtra}
+
+	//统计总结算次数
+	if huInfo.LoseChair == -1 {
+		self.gameBalance.AddScoreTimes(&self.players[chairId].BalanceResult, mj.ScoreTimes_ZiMo)
+	} else {
+		self.gameBalance.AddScoreTimes(&self.players[chairId].BalanceResult, mj.ScoreTimes_JiePao)
+		self.gameBalance.AddScoreTimes(&self.players[huInfo.LoseChair].BalanceResult, mj.ScoreTimes_JiePao)
+	}
+
+	self.sendData(-1, &pbgame_logic.S2CHuCard{ChairId: chairId, HandCards: cardInfo.HandCards})
 	//变量维护
 	self.haswaitOper[chairId] = false
+	self.deletePlayerOperOrder(chairId)
 
+	if len(self.operOrder[HuOrder]) == 0 {
+		self.gameEnd()
+	}
 	return nil
 }
 
@@ -831,8 +860,8 @@ func (self *GameSink) cancelOper(chairId int32) error {
 }
 
 //游戏结束
-func (self *GameSink) gameEnd() {
-
+func (self *GameSink) gameEnd(chairId int32) {
+	log.Debugf("%s 胡牌后第%d局游戏结束", self.logHeadUser(chairId), self.desk.curInning)
 }
 
 func (self *GameSink) logHeadUser(chairId int32) string {

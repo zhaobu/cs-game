@@ -134,7 +134,7 @@ message S2CChangePos {
 
 message StartGameInfo {
   //玩家手牌
-  repeated int32 hand_card = 1;
+  repeated int32 hand_cards = 1;
 }
 
 //游戏开始
@@ -242,7 +242,7 @@ message S2CChiCard {
 //玩家胡牌
 message S2CHuCard {
   int32 chair_id = 1;               //胡牌玩家chair_id
-  repeated cyint32 card_table = 2;  //胡牌手牌
+  repeated int32 hand_cards = 2;  //胡牌手牌
 }
 
 //倒计时显示在谁头上
@@ -256,7 +256,7 @@ message PlayerBalanceInfo {
   // json {anGang:1,jieGang:1,fangGang:1,mingGang:1},暗杠数,接杠数,放杠数,明杠数
   string gang_type = 2;
   int32 hu_card = 3;               //显示胡的牌
-  repeated cyint32 hand_card = 4;  //手牌
+  repeated cyint32 hand_cards = 4;  //手牌
   int32 point = 5;                 //当局获得分数
   int32 total_point = 6;           //玩家当前总分数
 }
