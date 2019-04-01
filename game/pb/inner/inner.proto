@@ -3,14 +3,6 @@ syntax = "proto3";
 
 package pbinner;
 
-// gate通知其他服务器 玩家登陆成功
-message UserLogin {
-	uint64 UserID = 1;
-}
-
-message UserLeave {
-	uint64 UserID = 1;
-}
 
 // center -> games
 // 匹配成功 
@@ -19,6 +11,7 @@ message GameMatchSucc {
 	repeated uint64 UserIDs = 2;
 }
 
+// center -> games
 message GameMatchArgsCheckReq {
 	uint32 RoomId = 1;  // 房间ID
 	uint64 UserID = 2;
@@ -31,4 +24,21 @@ message GameMatchArgsCheckRsp {
     bytes GameArgMsgValue = 3; // 具体游戏message value   
 }
 
+// gates -> *
+enum UserChangeType {	
+	NotUse  = 0; 
+	Online  = 1; 
+	Offline = 2; 	
+}
 
+message UserChangeNotif {
+	uint64 UserID = 1;
+	UserChangeType Typ = 2;
+}
+
+message DeskChangeNotif {
+	int64 ClubID = 1;
+	uint64 DeskID = 2;
+	// 1create 2update 3delete
+	int32 ChangeTyp = 3;
+}

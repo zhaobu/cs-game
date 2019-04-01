@@ -37,6 +37,14 @@ func calcFee(arg *cs.CreateArg) int64 {
 }
 
 func (cs *mjcs) HandleDestroyDeskReq(uid uint64, req *pbgame.DestroyDeskReq, rsp *pbgame.DestroyDeskRsp) {
+	d := getDeskByID(req.DeskID)
+	if d == nil {
+		return
+	}
+	rsp.Code = 1
+	if d.clubID != 0 {
+		cs.SendDeskChangeNotif(d.clubID, d.id, 3)
+	}
 	return
 }
 
@@ -47,6 +55,7 @@ func (cs *mjcs) HandleExitDeskReq(uid uint64, req *pbgame.ExitDeskReq, rsp *pbga
 		return
 	}
 	rsp.Code = d.doExit(uid)
+
 	return
 }
 
@@ -62,6 +71,7 @@ func (cs *mjcs) HandleJoinDeskReq(uid uint64, req *pbgame.JoinDeskReq, rsp *pbga
 		return
 	}
 	rsp.Code = d.doJoin(uid)
+
 	return
 }
 
@@ -90,11 +100,8 @@ func (cs *mjcs) HandleMakeDeskReq(uid uint64, deskID uint64, req *pbgame.MakeDes
 		}()
 	}
 
-	newD := makeDesk(arg, uid, deskID)
-	newD.doJoin(uid)
-
+	newD := makeDesk(arg, uid, deskID, req.ClubID)
 	updateID2desk(newD)
-	updateUser2desk(newD, uid)
 
 	rsp.Code = pbgame.MakeDeskRspCode_MakeDeskSucc
 	return

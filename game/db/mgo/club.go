@@ -5,16 +5,33 @@ import (
 	"github.com/globalsign/mgo/bson"
 )
 
-type ClubDb struct {
-	ID           int64    `json:"ID"`
-	Name         string   `json:"Name"`
-	CreateUserID uint64   `json:"CreateUserID"`
-	Notice       string   `json:"Notice"`
-	Arg          string   `json:"Arg"`
-	Members      []uint64 `json:"Members"`
+type ClubMember struct {
+	UserID   uint64
+	Identity int32
+	Agree    bool
 }
 
-func incClubID() (int64, error) {
+type DeskSetting struct {
+	GameName        string
+	GameArgMsgName  string
+	GameArgMsgValue []byte
+	Enable          bool
+}
+
+type Club struct {
+	ID              int64
+	MasterUserID    uint64
+	Profile         string
+	Name            string
+	IsAutoCreate    bool
+	IsCustomGameArg bool
+	IsMasterPay     bool
+	Notice          string
+	Members         map[uint64]*ClubMember
+	GameArgs        []*DeskSetting
+}
+
+func IncClubID() (int64, error) {
 	result := bson.M{}
 	_, err := mgoSess.DB("").C("clubid").Find(nil).Apply(mgo.Change{
 		Upsert:    true,
@@ -29,64 +46,23 @@ func incClubID() (int64, error) {
 	return r, nil
 }
 
-func CreateClub(name string, createUserID uint64, notice, arg string) (club *ClubDb, err error) {
-	club = &ClubDb{}
-	club.ID, err = incClubID()
-	if err != nil {
-		return
-	}
-
-	club.Name = name
-	club.CreateUserID = createUserID
-	club.Notice = notice
-	club.Arg = arg
-
-	err = mgoSess.DB("").C("clubinfo").Insert(club)
-	return
-}
-
-func UpdateClub(id int64, notice string, arg string) (club *ClubDb, err error) {
-	club = &ClubDb{}
-	_, err = mgoSess.DB("").C("clubinfo").Find(bson.M{"id": id}).Apply(mgo.Change{
-		Upsert:    false,
-		ReturnNew: true,
-		Update:    bson.M{"$set": bson.M{"notice": notice, "arg": arg}},
-	}, club)
-	return
-}
-
 func RemoveClub(id int64) error {
 	return mgoSess.DB("").C("clubinfo").Remove(bson.M{"id": id})
 }
 
-func JoinClub(clubID int64, userID uint64) (club *ClubDb, err error) {
-	club = &ClubDb{}
-	_, err = mgoSess.DB("").C("clubinfo").Find(bson.M{"id": clubID}).Apply(mgo.Change{
-		Upsert:    false,
-		ReturnNew: true,
-		Update:    bson.M{"$addToSet": bson.M{"members": userID}},
-	}, club)
+func SaveClub(req *Club) (err error) {
+	_, err = mgoSess.DB("").C("clubinfo").Upsert(bson.M{"id": req.ID}, req)
 	return
 }
 
-func ExitClub(clubID int64, userID uint64) (club *ClubDb, err error) {
-	club = &ClubDb{}
-	_, err = mgoSess.DB("").C("clubinfo").Find(bson.M{"id": clubID}).Apply(mgo.Change{
-		Upsert:    false,
-		ReturnNew: true,
-		Update:    bson.M{"$pull": bson.M{"members": userID}},
-	}, club)
+func QueryAllClub() (rsp []*Club, err error) {
+	rsp = make([]*Club, 0)
+	err = mgoSess.DB("").C("clubinfo").Find(nil).Sort("id").All(&rsp)
 	return
 }
 
-func QueryClubByID(id int64) (club *ClubDb, err error) {
-	club = &ClubDb{}
-	err = mgoSess.DB("").C("clubinfo").Find(bson.M{"id": id}).One(club)
-	return
-}
-
-func QueryClubByMember(userID uint64) (list []*ClubDb, err error) {
-	list = make([]*ClubDb, 0)
-	err = mgoSess.DB("").C("clubinfo").Find(bson.M{"members": bson.M{"$all": []uint64{userID}}}).All(&list)
+func QueryClubByID(id int64) (c *Club, err error) {
+	c = &Club{}
+	err = mgoSess.DB("").C("clubinfo").Find(bson.M{"id": id}).One(c)
 	return
 }

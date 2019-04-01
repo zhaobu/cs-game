@@ -4,11 +4,9 @@ import (
 	"context"
 	"cy/game/cache"
 	"cy/game/codec"
-	"cy/game/pb/game"
+	pbgame "cy/game/pb/game"
 	"fmt"
 	"runtime/debug"
-
-	"github.com/sirupsen/logrus"
 )
 
 func (t *RoundTpl) DestroyDeskReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
@@ -27,12 +25,12 @@ func (t *RoundTpl) DestroyDeskReq(ctx context.Context, args *codec.Message, repl
 
 	rsp := &pbgame.DestroyDeskRsp{}
 
-	t.Log.WithFields(logrus.Fields{"uid": args.UserID}).Infof("recv %s %+v ", args.Name, *req)
+	t.Log.Infof("uid%d recv %s %+v", args.UserID, args.Name, *req)
 
 	defer func() {
 		r := recover()
 		if r != nil {
-			t.Log.WithFields(logrus.Fields{"uid": args.UserID}).Warnf("r:%v stack:%s", r, string(debug.Stack()))
+			t.Log.Warnf("uid%d recover:%v stack:%s", args.UserID, r, string(debug.Stack()))
 		}
 	}()
 

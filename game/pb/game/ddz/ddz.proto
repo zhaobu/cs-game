@@ -76,7 +76,7 @@ enum OperMask {
 }
 
 enum UserGameStatus {
-    UGSNotUse  = 0; // 没有使用    
+    UGSNotUse  = 0; // 没有使用
     UGSSitDown = 1;
     UGSReady   = 2;
     UGSFree    = 3;

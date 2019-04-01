@@ -16,13 +16,15 @@ type desk struct {
 	createUserID uint64
 	id           uint64
 	currLoop     int
+	clubID       int64
 
 	sitDown map[int]*playerGameInfo
 }
 
-func makeDesk(arg *cs.CreateArg, createUserID, deskID uint64) *desk {
+func makeDesk(arg *cs.CreateArg, createUserID, deskID uint64, clubID int64) *desk {
 	d := &desk{}
 	d.id = deskID
+	d.clubID = clubID
 	return d
 }
 

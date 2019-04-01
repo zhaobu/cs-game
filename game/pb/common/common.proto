@@ -2,9 +2,9 @@ syntax = "proto3";
 
 package pbcommon;
 
-enum UserStatus {	
+enum UserStatus {
 	NotLogin = 0; // 没有登陆 没有使用
-	InHall = 1; // 在大厅 没有使用	
+	InHall = 1; // 在大厅 没有使用
 	InMatching = 2; // 匹配中
 	InGameing = 3; // 游戏中
 }
@@ -21,23 +21,31 @@ message ErrorTip {
     string Msg = 1;
 }
 
+message SiteDownPlayerInfo {
+	uint64 UserID = 1;
+	int64 Dir = 2;
+	string Name = 3;
+    string Profile = 4;
+}
+
 // 桌子信息
-message DeskInfo { 
+message DeskInfo {
 	uint64 Uuid = 1; // 版本号
 	uint64 ID = 2; // 桌子ID
 	uint64 CreateUserID = 3; // 创建人 0表示系统创建
-	int64 CreateTime = 4;
-	int64 CreateFee = 14; // 费用 创建时预扣的
-	string ArgName = 5;  // 具体游戏参数 如 pbgame_ddz.RoomArg
-	bytes ArgValue = 13;
-	string CreateUserName = 6;
-	string Status = 7; // 
-	string GameName = 8; 
-	string GameID = 9; 
-	int64 ClubID = 11; // 所属俱乐部
-	int64 Kind = 12; // 桌子类型 1匹配 2好友 
-	repeated uint64 UserIDs = 10; // 桌子中的玩家
-	repeated int64 UserDir = 15; // 玩家座位
+	string CreateUserName = 4;
+	string CreateUserProfile = 5;
+	int64 CreateTime = 6;
+	int64 CreateFee = 7; // 费用 创建时预扣的
+	string ArgName = 8;  // 具体游戏参数 如 pbgame_ddz.RoomArg
+	bytes ArgValue = 9;
+	// 1 等待中 2 开始了
+	string Status = 10;
+	string GameName = 11;
+	string GameID = 12;
+	int64 ClubID = 13; // 所属俱乐部
+	int64 Kind = 14; // 桌子类型 1匹配 2好友
+	repeated SiteDownPlayerInfo SdInfos = 15; // 桌子中坐下的玩家
 	int64 TotalLoop = 16; // 总局数
 	int64 CurrLoop = 17; // 当前局数
 }
@@ -46,8 +54,8 @@ message DeskInfo {
 message SessionInfo {
 	uint64 Uuid = 1;
 	uint64 UserID = 2;
-	string SessionID = 3;	
-	UserStatus Status = 4;	
+	string SessionID = 3;
+	UserStatus Status = 4;
 	uint64 AtDeskID = 5;
 	string GameName = 6;
 	string GameID = 7;
@@ -57,15 +65,15 @@ message SessionInfo {
 
 // 用户信息
 message UserInfo {
-	uint64 UserID = 1;	
-	string SessionID = 2;	
+	uint64 UserID = 1;
+	string SessionID = 2;
 	string WxID = 3; // 微信id
 	double Longitude = 4;
-	double Latitude = 5;   
+	double Latitude = 5;
     string Name = 6; // 昵称
     string Sex = 7;
     string Profile = 8;
-	string Mobile = 9;		
+	string Mobile = 9;
 	uint64 Gold = 10; // 金币
 	uint64 Masonry = 11; // 砖石
 	uint64 GoldPre = 12; // 预扣金币

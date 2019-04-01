@@ -5,13 +5,14 @@ import (
 	"cy/game/codec"
 	"cy/game/codec/protobuf"
 	pbgame "cy/game/pb/game"
+	pbinner "cy/game/pb/inner"
 	"encoding/json"
 	"time"
 
 	"github.com/RussellLuo/timingwheel"
 	"github.com/golang/protobuf/proto"
 	"github.com/gomodule/redigo/redis"
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 )
 
 const (
@@ -38,7 +39,8 @@ type (
 )
 
 type RoundTpl struct {
-	Log       *logrus.Entry
+	Tlog      *zap.Logger
+	Log       *zap.SugaredLogger
 	Timer     *timingwheel.TimingWheel
 	plugin    GameLogicPlugin
 	gameName  string
@@ -119,4 +121,20 @@ func (t *RoundTpl) ToGate(pb proto.Message, uids ...uint64) error {
 		return err
 	}
 	return t.ToGateNormal(notif, uids...)
+}
+
+func (t *RoundTpl) SendDeskChangeNotif(cid int64, did uint64, changeTyp int32) {
+	m := &codec.Message{}
+	dcn := &pbinner.DeskChangeNotif{
+		ClubID: cid,
+		DeskID: did,
+		ChangeTyp: changeTyp,
+	}
+	err := codec.Pb2Msg(dcn, m)
+	if err == nil {
+		data, err := json.Marshal(m)
+		if err == nil {
+			cache.Pub("inner_broadcast", data)
+		}
+	}
 }

@@ -2,9 +2,9 @@ package cache
 
 import (
 	"cy/game/pb/common"
+	"encoding/json"
 	"fmt"
 	"strconv"
-	"strings"
 
 	"github.com/gomodule/redigo/redis"
 )
@@ -14,16 +14,13 @@ var addDeskInfoScript = redis.NewScript(1, `
 	then
 		return 2
 	else
-		redis.call('HMSET', KEYS[1], 'Uuid', ARGV[1], 'ID', ARGV[2], 'CreateUserID', ARGV[3], 'CreateUserName', ARGV[4], 'CreateTime', ARGV[5], 'ArgName',  ARGV[6], 'ArgValue',  ARGV[7], 'Status', ARGV[8], 'GameName', ARGV[9], 'GameID', ARGV[10], 'UserIDs', ARGV[11], 'ClubID', ARGV[12], 'Kind', ARGV[13] )
+		redis.call('HMSET', KEYS[1], 'Uuid', ARGV[1], 'ID', ARGV[2], 'CreateUserID', ARGV[3], 'CreateUserName', ARGV[4], 'CreateUserProfile', ARGV[5], 'CreateTime', ARGV[6], 'CreateFee', ARGV[7], 'ArgName',  ARGV[8], 'ArgValue',  ARGV[9], 'Status', ARGV[10], 'GameName', ARGV[11], 'GameID', ARGV[12], 'ClubID', ARGV[13], 'Kind', ARGV[14], 'SdInfos', ARGV[15], 'TotalLoop', ARGV[16], 'CurrLoop', ARGV[17])
 		return 1
 	end
 	`)
 
 func AddDeskInfo(info *pbcommon.DeskInfo) (err error) {
-	var uids []string
-	for _, v := range info.UserIDs {
-		uids = append(uids, strconv.FormatUint(v, 10))
-	}
+	sdInfo, _ := json.Marshal(info.SdInfos)
 
 	c := redisPool.Get()
 	defer c.Close()
@@ -34,16 +31,21 @@ func AddDeskInfo(info *pbcommon.DeskInfo) (err error) {
 		strconv.FormatUint(info.ID, 10),
 		strconv.FormatUint(info.CreateUserID, 10),
 		info.CreateUserName,
-		info.CreateTime,
+		info.CreateUserProfile,
+		strconv.FormatInt(info.CreateTime, 10),
+		strconv.FormatInt(info.CreateFee, 10),
 		info.ArgName,
 		info.ArgValue,
 		info.Status,
 		info.GameName,
 		info.GameID,
-		strings.Join(uids, ","),
 		strconv.FormatInt(info.ClubID, 10),
 		strconv.FormatInt(info.Kind, 10),
+		sdInfo,
+		strconv.FormatInt(info.TotalLoop, 10),
+		strconv.FormatInt(info.CurrLoop, 10),
 	))
+
 	if err != nil {
 		return err
 	}
@@ -64,18 +66,15 @@ var updateDeskInfoScript = redis.NewScript(1, `
 	if (redis.call('HGET', KEYS[1], 'Uuid')==ARGV[1])
 	then
 		redis.call('HINCRBY', KEYS[1], 'Uuid', 1)
-		redis.call('HMSET', KEYS[1], 'ID', ARGV[2], 'CreateUserID', ARGV[3], 'CreateUserName', ARGV[4], 'CreateTime', ARGV[5], 'ArgName',  ARGV[6], 'ArgValue',  ARGV[7], 'Status', ARGV[8], 'GameName', ARGV[9], 'GameID', ARGV[10], 'UserIDs', ARGV[11], 'ClubID', ARGV[12] )
+		redis.call('HMSET', KEYS[1], 'ID', ARGV[2], 'CreateUserID', ARGV[3], 'CreateUserName', ARGV[4], 'CreateUserProfile', ARGV[5], 'CreateTime', ARGV[6], 'CreateFee', ARGV[7], 'ArgName',  ARGV[8], 'ArgValue',  ARGV[9], 'Status', ARGV[10], 'GameName', ARGV[11], 'GameID', ARGV[12], 'ClubID', ARGV[13], 'Kind', ARGV[14], 'SdInfos', ARGV[15], 'TotalLoop', ARGV[16], 'CurrLoop', ARGV[17])
 		return 1
 	else
 		return 2
-	end	
+	end
 	`)
 
 func UpdateDeskInfo(info *pbcommon.DeskInfo) error {
-	var uids []string
-	for _, v := range info.UserIDs {
-		uids = append(uids, strconv.FormatUint(v, 10))
-	}
+	sdInfo, _ := json.Marshal(info.SdInfos)
 
 	c := redisPool.Get()
 	defer c.Close()
@@ -86,14 +85,22 @@ func UpdateDeskInfo(info *pbcommon.DeskInfo) error {
 		strconv.FormatUint(info.ID, 10),
 		strconv.FormatUint(info.CreateUserID, 10),
 		info.CreateUserName,
-		info.CreateTime,
+		info.CreateUserProfile,
+
+		strconv.FormatInt(info.CreateTime, 10),
+		strconv.FormatInt(info.CreateFee, 10),
 		info.ArgName,
 		info.ArgValue,
 		info.Status,
+
 		info.GameName,
 		info.GameID,
-		strings.Join(uids, ","),
 		strconv.FormatInt(info.ClubID, 10),
+		strconv.FormatInt(info.Kind, 10),
+		sdInfo,
+
+		strconv.FormatInt(info.TotalLoop, 10),
+		strconv.FormatInt(info.CurrLoop, 10),
 	)
 	return err
 }
@@ -117,7 +124,9 @@ func QueryDeskInfo(deskID uint64) (*pbcommon.DeskInfo, error) {
 	info.ID, _ = strconv.ParseUint(reply["ID"], 10, 64)
 	info.CreateUserID, _ = strconv.ParseUint(reply["CreateUserID"], 10, 64)
 	info.CreateUserName = reply["CreateUserName"]
+	info.CreateUserProfile = reply["CreateUserProfile"]
 	info.CreateTime, _ = strconv.ParseInt(reply["CreateTime"], 10, 64)
+	info.CreateFee, _ = strconv.ParseInt(reply["CreateFee"], 10, 64)
 	info.ArgName = reply["ArgName"]
 	info.ArgValue = []byte(reply["ArgValue"])
 	info.Status = reply["Status"]
@@ -125,12 +134,10 @@ func QueryDeskInfo(deskID uint64) (*pbcommon.DeskInfo, error) {
 	info.GameID = reply["GameID"]
 	info.ClubID, _ = strconv.ParseInt(reply["ClubID"], 10, 64)
 	info.Kind, _ = strconv.ParseInt(reply["Kind"], 10, 64)
-
-	for _, v := range strings.Split(reply["UserIDs"], ",") {
-		if uid, err := strconv.ParseUint(v, 10, 64); err == nil {
-			info.UserIDs = append(info.UserIDs, uid)
-		}
-	}
+	info.SdInfos = make([]*pbcommon.SiteDownPlayerInfo, 0)
+	json.Unmarshal([]byte(reply["SdInfos"]), &info.SdInfos)
+	info.TotalLoop, _ = strconv.ParseInt(reply["TotalLoop"], 10, 64)
+	info.CurrLoop, _ = strconv.ParseInt(reply["CurrLoop"], 10, 64)
 
 	return info, nil
 }

@@ -7,15 +7,13 @@ import (
 	pbgame "cy/game/pb/game"
 	"fmt"
 	"runtime/debug"
-
-	"github.com/sirupsen/logrus"
 )
 
 func (t *RoundTpl) QueryGameConfigReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
 	defer func() {
 		r := recover()
 		if r != nil {
-			t.Log.WithFields(logrus.Fields{"uid": args.UserID}).Warnf("r:%v stack:%s", r, string(debug.Stack()))
+			t.Log.Warnf("recover:uid=%d,stack=%s", args.UserID, string(debug.Stack()))
 		}
 	}()
 
@@ -41,7 +39,7 @@ func (t *RoundTpl) QueryGameConfigReq(ctx context.Context, args *codec.Message, 
 		t.ToGateNormal(rsp, args.UserID)
 	}()
 
-	t.Log.WithFields(logrus.Fields{"uid": args.UserID}).Infof("tpl recv %s %+v ", args.Name, *req)
+	t.Log.Infof("tpl recv:uid=%d,args.Name=%s,reg=%+v", args.UserID, args.Name, *req)
 
 	t.plugin.HandleQueryGameConfigReq(args.UserID, req, rsp)
 

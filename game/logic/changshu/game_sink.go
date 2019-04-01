@@ -381,7 +381,7 @@ func (self *GameSink) outCard(chairId, card int32) error {
 				self.countCanOper(ret, int32(k), mj.HuMode_PAOHU, chairId, card, chairId, msg)
 				willWait = true
 				//发送玩家可进行的操作
-				log.Tracef("%s 可进行的操作%+v", self.logHeadUser(int32(k)), ret)
+				log.Infof("%s 可进行的操作%+v", self.logHeadUser(int32(k)), ret)
 				self.sendData(chairId, msg)
 			}
 		}
@@ -696,7 +696,7 @@ func (self *GameSink) gangCard(chairId, card int32) error {
 					self.countCanOper(ret, int32(k), mj.HuMode_QIANGHU, chairId, card, chairId, msg)
 					willWait = true
 					//发送玩家可进行的操作
-					log.Tracef("%s 可进行的操作%+v", self.logHeadUser(int32(k)), ret)
+					log.Infof("%s 可进行的操作%+v", self.logHeadUser(int32(k)), ret)
 					self.sendData(int32(k), msg)
 				}
 			}

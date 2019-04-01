@@ -21,94 +21,236 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
-type ClubMemberInfo struct {
-	UserID               uint64   `protobuf:"varint,1,opt,name=UserID,proto3" json:"UserID,omitempty"`
-	UserName             string   `protobuf:"bytes,2,opt,name=UserName,proto3" json:"UserName,omitempty"`
-	Profile              string   `protobuf:"bytes,3,opt,name=Profile,proto3" json:"Profile,omitempty"`
-	Online               int32    `protobuf:"varint,4,opt,name=Online,proto3" json:"Online,omitempty"`
-	Identity             int32    `protobuf:"varint,5,opt,name=Identity,proto3" json:"Identity,omitempty"`
+// 成员信息
+type MemberInfo struct {
+	UserID uint64 `protobuf:"varint,1,opt,name=UserID,proto3" json:"UserID,omitempty"`
+	// 身份  1 群主 2 管理员 3 普通成员 4 审核中 5 黑名单中
+	Identity int32  `protobuf:"varint,2,opt,name=Identity,proto3" json:"Identity,omitempty"`
+	Agree    bool   `protobuf:"varint,6,opt,name=Agree,proto3" json:"Agree,omitempty"`
+	UserName string `protobuf:"bytes,3,opt,name=UserName,proto3" json:"UserName,omitempty"`
+	Profile  string `protobuf:"bytes,4,opt,name=Profile,proto3" json:"Profile,omitempty"`
+	// 在线状态 1 在线 0 不在线
+	Online               int32    `protobuf:"varint,5,opt,name=Online,proto3" json:"Online,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *ClubMemberInfo) Reset()         { *m = ClubMemberInfo{} }
-func (m *ClubMemberInfo) String() string { return proto.CompactTextString(m) }
-func (*ClubMemberInfo) ProtoMessage()    {}
-func (*ClubMemberInfo) Descriptor() ([]byte, []int) {
+func (m *MemberInfo) Reset()         { *m = MemberInfo{} }
+func (m *MemberInfo) String() string { return proto.CompactTextString(m) }
+func (*MemberInfo) ProtoMessage()    {}
+func (*MemberInfo) Descriptor() ([]byte, []int) {
 	return fileDescriptor_47c5ad7bb8a580e2, []int{0}
 }
 
-func (m *ClubMemberInfo) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_ClubMemberInfo.Unmarshal(m, b)
+func (m *MemberInfo) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_MemberInfo.Unmarshal(m, b)
 }
-func (m *ClubMemberInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_ClubMemberInfo.Marshal(b, m, deterministic)
+func (m *MemberInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_MemberInfo.Marshal(b, m, deterministic)
 }
-func (m *ClubMemberInfo) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ClubMemberInfo.Merge(m, src)
+func (m *MemberInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MemberInfo.Merge(m, src)
 }
-func (m *ClubMemberInfo) XXX_Size() int {
-	return xxx_messageInfo_ClubMemberInfo.Size(m)
+func (m *MemberInfo) XXX_Size() int {
+	return xxx_messageInfo_MemberInfo.Size(m)
 }
-func (m *ClubMemberInfo) XXX_DiscardUnknown() {
-	xxx_messageInfo_ClubMemberInfo.DiscardUnknown(m)
+func (m *MemberInfo) XXX_DiscardUnknown() {
+	xxx_messageInfo_MemberInfo.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_ClubMemberInfo proto.InternalMessageInfo
+var xxx_messageInfo_MemberInfo proto.InternalMessageInfo
 
-func (m *ClubMemberInfo) GetUserID() uint64 {
+func (m *MemberInfo) GetUserID() uint64 {
 	if m != nil {
 		return m.UserID
 	}
 	return 0
 }
 
-func (m *ClubMemberInfo) GetUserName() string {
-	if m != nil {
-		return m.UserName
-	}
-	return ""
-}
-
-func (m *ClubMemberInfo) GetProfile() string {
-	if m != nil {
-		return m.Profile
-	}
-	return ""
-}
-
-func (m *ClubMemberInfo) GetOnline() int32 {
-	if m != nil {
-		return m.Online
-	}
-	return 0
-}
-
-func (m *ClubMemberInfo) GetIdentity() int32 {
+func (m *MemberInfo) GetIdentity() int32 {
 	if m != nil {
 		return m.Identity
 	}
 	return 0
 }
 
+func (m *MemberInfo) GetAgree() bool {
+	if m != nil {
+		return m.Agree
+	}
+	return false
+}
+
+func (m *MemberInfo) GetUserName() string {
+	if m != nil {
+		return m.UserName
+	}
+	return ""
+}
+
+func (m *MemberInfo) GetProfile() string {
+	if m != nil {
+		return m.Profile
+	}
+	return ""
+}
+
+func (m *MemberInfo) GetOnline() int32 {
+	if m != nil {
+		return m.Online
+	}
+	return 0
+}
+
+// 基本信息
+type BaseInfo struct {
+	Name                 string   `protobuf:"bytes,1,opt,name=Name,proto3" json:"Name,omitempty"`
+	IsAutoCreate         bool     `protobuf:"varint,2,opt,name=IsAutoCreate,proto3" json:"IsAutoCreate,omitempty"`
+	IsCustomGameArg      bool     `protobuf:"varint,3,opt,name=IsCustomGameArg,proto3" json:"IsCustomGameArg,omitempty"`
+	IsMasterPay          bool     `protobuf:"varint,4,opt,name=IsMasterPay,proto3" json:"IsMasterPay,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *BaseInfo) Reset()         { *m = BaseInfo{} }
+func (m *BaseInfo) String() string { return proto.CompactTextString(m) }
+func (*BaseInfo) ProtoMessage()    {}
+func (*BaseInfo) Descriptor() ([]byte, []int) {
+	return fileDescriptor_47c5ad7bb8a580e2, []int{1}
+}
+
+func (m *BaseInfo) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_BaseInfo.Unmarshal(m, b)
+}
+func (m *BaseInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_BaseInfo.Marshal(b, m, deterministic)
+}
+func (m *BaseInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_BaseInfo.Merge(m, src)
+}
+func (m *BaseInfo) XXX_Size() int {
+	return xxx_messageInfo_BaseInfo.Size(m)
+}
+func (m *BaseInfo) XXX_DiscardUnknown() {
+	xxx_messageInfo_BaseInfo.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_BaseInfo proto.InternalMessageInfo
+
+func (m *BaseInfo) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *BaseInfo) GetIsAutoCreate() bool {
+	if m != nil {
+		return m.IsAutoCreate
+	}
+	return false
+}
+
+func (m *BaseInfo) GetIsCustomGameArg() bool {
+	if m != nil {
+		return m.IsCustomGameArg
+	}
+	return false
+}
+
+func (m *BaseInfo) GetIsMasterPay() bool {
+	if m != nil {
+		return m.IsMasterPay
+	}
+	return false
+}
+
+type DeskSetting struct {
+	GameName             string   `protobuf:"bytes,1,opt,name=GameName,proto3" json:"GameName,omitempty"`
+	GameArgMsgName       string   `protobuf:"bytes,2,opt,name=GameArgMsgName,proto3" json:"GameArgMsgName,omitempty"`
+	GameArgMsgValue      []byte   `protobuf:"bytes,3,opt,name=GameArgMsgValue,proto3" json:"GameArgMsgValue,omitempty"`
+	Enable               bool     `protobuf:"varint,4,opt,name=Enable,proto3" json:"Enable,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *DeskSetting) Reset()         { *m = DeskSetting{} }
+func (m *DeskSetting) String() string { return proto.CompactTextString(m) }
+func (*DeskSetting) ProtoMessage()    {}
+func (*DeskSetting) Descriptor() ([]byte, []int) {
+	return fileDescriptor_47c5ad7bb8a580e2, []int{2}
+}
+
+func (m *DeskSetting) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_DeskSetting.Unmarshal(m, b)
+}
+func (m *DeskSetting) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_DeskSetting.Marshal(b, m, deterministic)
+}
+func (m *DeskSetting) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeskSetting.Merge(m, src)
+}
+func (m *DeskSetting) XXX_Size() int {
+	return xxx_messageInfo_DeskSetting.Size(m)
+}
+func (m *DeskSetting) XXX_DiscardUnknown() {
+	xxx_messageInfo_DeskSetting.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DeskSetting proto.InternalMessageInfo
+
+func (m *DeskSetting) GetGameName() string {
+	if m != nil {
+		return m.GameName
+	}
+	return ""
+}
+
+func (m *DeskSetting) GetGameArgMsgName() string {
+	if m != nil {
+		return m.GameArgMsgName
+	}
+	return ""
+}
+
+func (m *DeskSetting) GetGameArgMsgValue() []byte {
+	if m != nil {
+		return m.GameArgMsgValue
+	}
+	return nil
+}
+
+func (m *DeskSetting) GetEnable() bool {
+	if m != nil {
+		return m.Enable
+	}
+	return false
+}
+
 type ClubInfo struct {
-	ID                   int64             `protobuf:"varint,1,opt,name=ID,proto3" json:"ID,omitempty"`
-	Name                 string            `protobuf:"bytes,2,opt,name=Name,proto3" json:"Name,omitempty"`
-	MasterUserID         uint64            `protobuf:"varint,3,opt,name=MasterUserID,proto3" json:"MasterUserID,omitempty"`
-	Notice               string            `protobuf:"bytes,4,opt,name=Notice,proto3" json:"Notice,omitempty"`
-	Arg                  string            `protobuf:"bytes,5,opt,name=Arg,proto3" json:"Arg,omitempty"`
-	Members              []*ClubMemberInfo `protobuf:"bytes,6,rep,name=Members,proto3" json:"Members,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
-	XXX_unrecognized     []byte            `json:"-"`
-	XXX_sizecache        int32             `json:"-"`
+	ID                   int64              `protobuf:"varint,1,opt,name=ID,proto3" json:"ID,omitempty"`
+	MasterUserID         uint64             `protobuf:"varint,2,opt,name=MasterUserID,proto3" json:"MasterUserID,omitempty"`
+	MasterName           string             `protobuf:"bytes,3,opt,name=MasterName,proto3" json:"MasterName,omitempty"`
+	Profile              string             `protobuf:"bytes,4,opt,name=Profile,proto3" json:"Profile,omitempty"`
+	Base                 *BaseInfo          `protobuf:"bytes,5,opt,name=Base,proto3" json:"Base,omitempty"`
+	Notice               string             `protobuf:"bytes,6,opt,name=Notice,proto3" json:"Notice,omitempty"`
+	MemberCnt            int32              `protobuf:"varint,7,opt,name=MemberCnt,proto3" json:"MemberCnt,omitempty"`
+	OnlineCnt            int32              `protobuf:"varint,8,opt,name=OnlineCnt,proto3" json:"OnlineCnt,omitempty"`
+	GameArgs             []*DeskSetting     `protobuf:"bytes,9,rep,name=GameArgs,proto3" json:"GameArgs,omitempty"`
+	Desks                []*common.DeskInfo `protobuf:"bytes,10,rep,name=Desks,proto3" json:"Desks,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}           `json:"-"`
+	XXX_unrecognized     []byte             `json:"-"`
+	XXX_sizecache        int32              `json:"-"`
 }
 
 func (m *ClubInfo) Reset()         { *m = ClubInfo{} }
 func (m *ClubInfo) String() string { return proto.CompactTextString(m) }
 func (*ClubInfo) ProtoMessage()    {}
 func (*ClubInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_47c5ad7bb8a580e2, []int{1}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{3}
 }
 
 func (m *ClubInfo) XXX_Unmarshal(b []byte) error {
@@ -136,18 +278,32 @@ func (m *ClubInfo) GetID() int64 {
 	return 0
 }
 
-func (m *ClubInfo) GetName() string {
-	if m != nil {
-		return m.Name
-	}
-	return ""
-}
-
 func (m *ClubInfo) GetMasterUserID() uint64 {
 	if m != nil {
 		return m.MasterUserID
 	}
 	return 0
+}
+
+func (m *ClubInfo) GetMasterName() string {
+	if m != nil {
+		return m.MasterName
+	}
+	return ""
+}
+
+func (m *ClubInfo) GetProfile() string {
+	if m != nil {
+		return m.Profile
+	}
+	return ""
+}
+
+func (m *ClubInfo) GetBase() *BaseInfo {
+	if m != nil {
+		return m.Base
+	}
+	return nil
 }
 
 func (m *ClubInfo) GetNotice() string {
@@ -157,127 +313,151 @@ func (m *ClubInfo) GetNotice() string {
 	return ""
 }
 
-func (m *ClubInfo) GetArg() string {
+func (m *ClubInfo) GetMemberCnt() int32 {
 	if m != nil {
-		return m.Arg
-	}
-	return ""
-}
-
-func (m *ClubInfo) GetMembers() []*ClubMemberInfo {
-	if m != nil {
-		return m.Members
-	}
-	return nil
-}
-
-// ID查询俱乐部信息 c -> s
-type QueryClubByIDReq struct {
-	Head                 *common.ReqHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
-	ClubID               int64           `protobuf:"varint,2,opt,name=ClubID,proto3" json:"ClubID,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
-	XXX_unrecognized     []byte          `json:"-"`
-	XXX_sizecache        int32           `json:"-"`
-}
-
-func (m *QueryClubByIDReq) Reset()         { *m = QueryClubByIDReq{} }
-func (m *QueryClubByIDReq) String() string { return proto.CompactTextString(m) }
-func (*QueryClubByIDReq) ProtoMessage()    {}
-func (*QueryClubByIDReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_47c5ad7bb8a580e2, []int{2}
-}
-
-func (m *QueryClubByIDReq) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_QueryClubByIDReq.Unmarshal(m, b)
-}
-func (m *QueryClubByIDReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_QueryClubByIDReq.Marshal(b, m, deterministic)
-}
-func (m *QueryClubByIDReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryClubByIDReq.Merge(m, src)
-}
-func (m *QueryClubByIDReq) XXX_Size() int {
-	return xxx_messageInfo_QueryClubByIDReq.Size(m)
-}
-func (m *QueryClubByIDReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryClubByIDReq.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryClubByIDReq proto.InternalMessageInfo
-
-func (m *QueryClubByIDReq) GetHead() *common.ReqHead {
-	if m != nil {
-		return m.Head
-	}
-	return nil
-}
-
-func (m *QueryClubByIDReq) GetClubID() int64 {
-	if m != nil {
-		return m.ClubID
+		return m.MemberCnt
 	}
 	return 0
 }
 
-type QueryClubByIDRsp struct {
-	Head                 *common.RspHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
-	Info                 *ClubInfo       `protobuf:"bytes,2,opt,name=Info,proto3" json:"Info,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
-	XXX_unrecognized     []byte          `json:"-"`
-	XXX_sizecache        int32           `json:"-"`
-}
-
-func (m *QueryClubByIDRsp) Reset()         { *m = QueryClubByIDRsp{} }
-func (m *QueryClubByIDRsp) String() string { return proto.CompactTextString(m) }
-func (*QueryClubByIDRsp) ProtoMessage()    {}
-func (*QueryClubByIDRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_47c5ad7bb8a580e2, []int{3}
-}
-
-func (m *QueryClubByIDRsp) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_QueryClubByIDRsp.Unmarshal(m, b)
-}
-func (m *QueryClubByIDRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_QueryClubByIDRsp.Marshal(b, m, deterministic)
-}
-func (m *QueryClubByIDRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryClubByIDRsp.Merge(m, src)
-}
-func (m *QueryClubByIDRsp) XXX_Size() int {
-	return xxx_messageInfo_QueryClubByIDRsp.Size(m)
-}
-func (m *QueryClubByIDRsp) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryClubByIDRsp.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryClubByIDRsp proto.InternalMessageInfo
-
-func (m *QueryClubByIDRsp) GetHead() *common.RspHead {
+func (m *ClubInfo) GetOnlineCnt() int32 {
 	if m != nil {
-		return m.Head
+		return m.OnlineCnt
+	}
+	return 0
+}
+
+func (m *ClubInfo) GetGameArgs() []*DeskSetting {
+	if m != nil {
+		return m.GameArgs
 	}
 	return nil
 }
 
-func (m *QueryClubByIDRsp) GetInfo() *ClubInfo {
+func (m *ClubInfo) GetDesks() []*common.DeskInfo {
 	if m != nil {
-		return m.Info
+		return m.Desks
 	}
 	return nil
 }
 
+// 订阅俱乐部信息 c -> s
+type SubClubChange struct {
+	SubOrUn              int32    `protobuf:"varint,1,opt,name=SubOrUn,proto3" json:"SubOrUn,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *SubClubChange) Reset()         { *m = SubClubChange{} }
+func (m *SubClubChange) String() string { return proto.CompactTextString(m) }
+func (*SubClubChange) ProtoMessage()    {}
+func (*SubClubChange) Descriptor() ([]byte, []int) {
+	return fileDescriptor_47c5ad7bb8a580e2, []int{4}
+}
+
+func (m *SubClubChange) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_SubClubChange.Unmarshal(m, b)
+}
+func (m *SubClubChange) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_SubClubChange.Marshal(b, m, deterministic)
+}
+func (m *SubClubChange) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SubClubChange.Merge(m, src)
+}
+func (m *SubClubChange) XXX_Size() int {
+	return xxx_messageInfo_SubClubChange.Size(m)
+}
+func (m *SubClubChange) XXX_DiscardUnknown() {
+	xxx_messageInfo_SubClubChange.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_SubClubChange proto.InternalMessageInfo
+
+func (m *SubClubChange) GetSubOrUn() int32 {
+	if m != nil {
+		return m.SubOrUn
+	}
+	return 0
+}
+
+// 列表中的信息
+type BriefInfo struct {
+	ID                   int64    `protobuf:"varint,1,opt,name=ID,proto3" json:"ID,omitempty"`
+	Name                 string   `protobuf:"bytes,2,opt,name=Name,proto3" json:"Name,omitempty"`
+	Profile              string   `protobuf:"bytes,3,opt,name=Profile,proto3" json:"Profile,omitempty"`
+	MasterUserID         uint64   `protobuf:"varint,4,opt,name=MasterUserID,proto3" json:"MasterUserID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *BriefInfo) Reset()         { *m = BriefInfo{} }
+func (m *BriefInfo) String() string { return proto.CompactTextString(m) }
+func (*BriefInfo) ProtoMessage()    {}
+func (*BriefInfo) Descriptor() ([]byte, []int) {
+	return fileDescriptor_47c5ad7bb8a580e2, []int{5}
+}
+
+func (m *BriefInfo) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_BriefInfo.Unmarshal(m, b)
+}
+func (m *BriefInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_BriefInfo.Marshal(b, m, deterministic)
+}
+func (m *BriefInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_BriefInfo.Merge(m, src)
+}
+func (m *BriefInfo) XXX_Size() int {
+	return xxx_messageInfo_BriefInfo.Size(m)
+}
+func (m *BriefInfo) XXX_DiscardUnknown() {
+	xxx_messageInfo_BriefInfo.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_BriefInfo proto.InternalMessageInfo
+
+func (m *BriefInfo) GetID() int64 {
+	if m != nil {
+		return m.ID
+	}
+	return 0
+}
+
+func (m *BriefInfo) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *BriefInfo) GetProfile() string {
+	if m != nil {
+		return m.Profile
+	}
+	return ""
+}
+
+func (m *BriefInfo) GetMasterUserID() uint64 {
+	if m != nil {
+		return m.MasterUserID
+	}
+	return 0
+}
+
+// 俱乐部列表，订阅成功后发送 s -> c
 type ClubList struct {
-	List                 []*ClubInfo `protobuf:"bytes,1,rep,name=List,proto3" json:"List,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
-	XXX_unrecognized     []byte      `json:"-"`
-	XXX_sizecache        int32       `json:"-"`
+	List                 []*BriefInfo `protobuf:"bytes,1,rep,name=List,proto3" json:"List,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}     `json:"-"`
+	XXX_unrecognized     []byte       `json:"-"`
+	XXX_sizecache        int32        `json:"-"`
 }
 
 func (m *ClubList) Reset()         { *m = ClubList{} }
 func (m *ClubList) String() string { return proto.CompactTextString(m) }
 func (*ClubList) ProtoMessage()    {}
 func (*ClubList) Descriptor() ([]byte, []int) {
-	return fileDescriptor_47c5ad7bb8a580e2, []int{4}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{6}
 }
 
 func (m *ClubList) XXX_Unmarshal(b []byte) error {
@@ -298,116 +478,76 @@ func (m *ClubList) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_ClubList proto.InternalMessageInfo
 
-func (m *ClubList) GetList() []*ClubInfo {
+func (m *ClubList) GetList() []*BriefInfo {
 	if m != nil {
 		return m.List
 	}
 	return nil
 }
 
-// c -> s
-type QueryClubByMemberReq struct {
-	Head                 *common.ReqHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
-	UserID               uint64          `protobuf:"varint,2,opt,name=UserID,proto3" json:"UserID,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
-	XXX_unrecognized     []byte          `json:"-"`
-	XXX_sizecache        int32           `json:"-"`
+// 俱乐部变化信息 s -> c
+type ClubChangeInfo struct {
+	// 1 有人加入 3 有人离开 2 俱乐部被修改 4 俱乐部被解散
+	Typ int32 `protobuf:"varint,1,opt,name=Typ,proto3" json:"Typ,omitempty"`
+	// 方便客户端俱乐部列表的刷新
+	UserID               uint64     `protobuf:"varint,2,opt,name=UserID,proto3" json:"UserID,omitempty"`
+	Info                 *BriefInfo `protobuf:"bytes,3,opt,name=Info,proto3" json:"Info,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}   `json:"-"`
+	XXX_unrecognized     []byte     `json:"-"`
+	XXX_sizecache        int32      `json:"-"`
 }
 
-func (m *QueryClubByMemberReq) Reset()         { *m = QueryClubByMemberReq{} }
-func (m *QueryClubByMemberReq) String() string { return proto.CompactTextString(m) }
-func (*QueryClubByMemberReq) ProtoMessage()    {}
-func (*QueryClubByMemberReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_47c5ad7bb8a580e2, []int{5}
+func (m *ClubChangeInfo) Reset()         { *m = ClubChangeInfo{} }
+func (m *ClubChangeInfo) String() string { return proto.CompactTextString(m) }
+func (*ClubChangeInfo) ProtoMessage()    {}
+func (*ClubChangeInfo) Descriptor() ([]byte, []int) {
+	return fileDescriptor_47c5ad7bb8a580e2, []int{7}
 }
 
-func (m *QueryClubByMemberReq) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_QueryClubByMemberReq.Unmarshal(m, b)
+func (m *ClubChangeInfo) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ClubChangeInfo.Unmarshal(m, b)
 }
-func (m *QueryClubByMemberReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_QueryClubByMemberReq.Marshal(b, m, deterministic)
+func (m *ClubChangeInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ClubChangeInfo.Marshal(b, m, deterministic)
 }
-func (m *QueryClubByMemberReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryClubByMemberReq.Merge(m, src)
+func (m *ClubChangeInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ClubChangeInfo.Merge(m, src)
 }
-func (m *QueryClubByMemberReq) XXX_Size() int {
-	return xxx_messageInfo_QueryClubByMemberReq.Size(m)
+func (m *ClubChangeInfo) XXX_Size() int {
+	return xxx_messageInfo_ClubChangeInfo.Size(m)
 }
-func (m *QueryClubByMemberReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryClubByMemberReq.DiscardUnknown(m)
+func (m *ClubChangeInfo) XXX_DiscardUnknown() {
+	xxx_messageInfo_ClubChangeInfo.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryClubByMemberReq proto.InternalMessageInfo
+var xxx_messageInfo_ClubChangeInfo proto.InternalMessageInfo
 
-func (m *QueryClubByMemberReq) GetHead() *common.ReqHead {
+func (m *ClubChangeInfo) GetTyp() int32 {
 	if m != nil {
-		return m.Head
+		return m.Typ
 	}
-	return nil
+	return 0
 }
 
-func (m *QueryClubByMemberReq) GetUserID() uint64 {
+func (m *ClubChangeInfo) GetUserID() uint64 {
 	if m != nil {
 		return m.UserID
 	}
 	return 0
 }
 
-type QueryClubByMemberRsp struct {
-	Head                 *common.RspHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
-	Infos                *ClubList       `protobuf:"bytes,2,opt,name=Infos,proto3" json:"Infos,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
-	XXX_unrecognized     []byte          `json:"-"`
-	XXX_sizecache        int32           `json:"-"`
-}
-
-func (m *QueryClubByMemberRsp) Reset()         { *m = QueryClubByMemberRsp{} }
-func (m *QueryClubByMemberRsp) String() string { return proto.CompactTextString(m) }
-func (*QueryClubByMemberRsp) ProtoMessage()    {}
-func (*QueryClubByMemberRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_47c5ad7bb8a580e2, []int{6}
-}
-
-func (m *QueryClubByMemberRsp) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_QueryClubByMemberRsp.Unmarshal(m, b)
-}
-func (m *QueryClubByMemberRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_QueryClubByMemberRsp.Marshal(b, m, deterministic)
-}
-func (m *QueryClubByMemberRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryClubByMemberRsp.Merge(m, src)
-}
-func (m *QueryClubByMemberRsp) XXX_Size() int {
-	return xxx_messageInfo_QueryClubByMemberRsp.Size(m)
-}
-func (m *QueryClubByMemberRsp) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryClubByMemberRsp.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryClubByMemberRsp proto.InternalMessageInfo
-
-func (m *QueryClubByMemberRsp) GetHead() *common.RspHead {
+func (m *ClubChangeInfo) GetInfo() *BriefInfo {
 	if m != nil {
-		return m.Head
+		return m.Info
 	}
 	return nil
 }
 
-func (m *QueryClubByMemberRsp) GetInfos() *ClubList {
-	if m != nil {
-		return m.Infos
-	}
-	return nil
-}
-
-// c -> s
+// 创建俱乐部 c -> s
 type CreateClubReq struct {
 	Head                 *common.ReqHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
-	Name                 string          `protobuf:"bytes,2,opt,name=Name,proto3" json:"Name,omitempty"`
-	Notice               string          `protobuf:"bytes,3,opt,name=Notice,proto3" json:"Notice,omitempty"`
-	Arg                  string          `protobuf:"bytes,4,opt,name=Arg,proto3" json:"Arg,omitempty"`
-	IsAutoCreate         bool            `protobuf:"varint,5,opt,name=IsAutoCreate,proto3" json:"IsAutoCreate,omitempty"`
-	IsCustomGameArg      bool            `protobuf:"varint,6,opt,name=IsCustomGameArg,proto3" json:"IsCustomGameArg,omitempty"`
+	Base                 *BaseInfo       `protobuf:"bytes,2,opt,name=Base,proto3" json:"Base,omitempty"`
+	GameArgs             []*DeskSetting  `protobuf:"bytes,3,rep,name=GameArgs,proto3" json:"GameArgs,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
 	XXX_unrecognized     []byte          `json:"-"`
 	XXX_sizecache        int32           `json:"-"`
@@ -417,7 +557,7 @@ func (m *CreateClubReq) Reset()         { *m = CreateClubReq{} }
 func (m *CreateClubReq) String() string { return proto.CompactTextString(m) }
 func (*CreateClubReq) ProtoMessage()    {}
 func (*CreateClubReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_47c5ad7bb8a580e2, []int{7}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{8}
 }
 
 func (m *CreateClubReq) XXX_Unmarshal(b []byte) error {
@@ -445,56 +585,34 @@ func (m *CreateClubReq) GetHead() *common.ReqHead {
 	return nil
 }
 
-func (m *CreateClubReq) GetName() string {
+func (m *CreateClubReq) GetBase() *BaseInfo {
 	if m != nil {
-		return m.Name
+		return m.Base
 	}
-	return ""
+	return nil
 }
 
-func (m *CreateClubReq) GetNotice() string {
+func (m *CreateClubReq) GetGameArgs() []*DeskSetting {
 	if m != nil {
-		return m.Notice
+		return m.GameArgs
 	}
-	return ""
-}
-
-func (m *CreateClubReq) GetArg() string {
-	if m != nil {
-		return m.Arg
-	}
-	return ""
-}
-
-func (m *CreateClubReq) GetIsAutoCreate() bool {
-	if m != nil {
-		return m.IsAutoCreate
-	}
-	return false
-}
-
-func (m *CreateClubReq) GetIsCustomGameArg() bool {
-	if m != nil {
-		return m.IsCustomGameArg
-	}
-	return false
+	return nil
 }
 
 type CreateClubRsp struct {
 	Head *common.RspHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
-	// 1成功 2失败
-	Code                 int32     `protobuf:"varint,2,opt,name=Code,proto3" json:"Code,omitempty"`
-	Info                 *ClubInfo `protobuf:"bytes,3,opt,name=Info,proto3" json:"Info,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
-	XXX_unrecognized     []byte    `json:"-"`
-	XXX_sizecache        int32     `json:"-"`
+	// 1 成功 2 数量限制 3 参数错误 4 内部服务错误
+	Code                 int32    `protobuf:"varint,2,opt,name=Code,proto3" json:"Code,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
 func (m *CreateClubRsp) Reset()         { *m = CreateClubRsp{} }
 func (m *CreateClubRsp) String() string { return proto.CompactTextString(m) }
 func (*CreateClubRsp) ProtoMessage()    {}
 func (*CreateClubRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_47c5ad7bb8a580e2, []int{8}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{9}
 }
 
 func (m *CreateClubRsp) XXX_Unmarshal(b []byte) error {
@@ -529,14 +647,223 @@ func (m *CreateClubRsp) GetCode() int32 {
 	return 0
 }
 
-func (m *CreateClubRsp) GetInfo() *ClubInfo {
+// 更新俱乐部信息 c -> s
+type UpdateClubReq struct {
+	Head                 *common.ReqHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
+	ClubID               int64           `protobuf:"varint,2,opt,name=ClubID,proto3" json:"ClubID,omitempty"`
+	Base                 *BaseInfo       `protobuf:"bytes,3,opt,name=Base,proto3" json:"Base,omitempty"`
+	GameArgs             []*DeskSetting  `protobuf:"bytes,4,rep,name=GameArgs,proto3" json:"GameArgs,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
+	XXX_unrecognized     []byte          `json:"-"`
+	XXX_sizecache        int32           `json:"-"`
+}
+
+func (m *UpdateClubReq) Reset()         { *m = UpdateClubReq{} }
+func (m *UpdateClubReq) String() string { return proto.CompactTextString(m) }
+func (*UpdateClubReq) ProtoMessage()    {}
+func (*UpdateClubReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_47c5ad7bb8a580e2, []int{10}
+}
+
+func (m *UpdateClubReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_UpdateClubReq.Unmarshal(m, b)
+}
+func (m *UpdateClubReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_UpdateClubReq.Marshal(b, m, deterministic)
+}
+func (m *UpdateClubReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateClubReq.Merge(m, src)
+}
+func (m *UpdateClubReq) XXX_Size() int {
+	return xxx_messageInfo_UpdateClubReq.Size(m)
+}
+func (m *UpdateClubReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_UpdateClubReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UpdateClubReq proto.InternalMessageInfo
+
+func (m *UpdateClubReq) GetHead() *common.ReqHead {
 	if m != nil {
-		return m.Info
+		return m.Head
 	}
 	return nil
 }
 
-// c -> s
+func (m *UpdateClubReq) GetClubID() int64 {
+	if m != nil {
+		return m.ClubID
+	}
+	return 0
+}
+
+func (m *UpdateClubReq) GetBase() *BaseInfo {
+	if m != nil {
+		return m.Base
+	}
+	return nil
+}
+
+func (m *UpdateClubReq) GetGameArgs() []*DeskSetting {
+	if m != nil {
+		return m.GameArgs
+	}
+	return nil
+}
+
+type UpdateClubRsp struct {
+	Head *common.RspHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
+	// 1 成功 2 参数错误 3 ClubID无效 4 权限无效
+	Code                 int32    `protobuf:"varint,2,opt,name=Code,proto3" json:"Code,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *UpdateClubRsp) Reset()         { *m = UpdateClubRsp{} }
+func (m *UpdateClubRsp) String() string { return proto.CompactTextString(m) }
+func (*UpdateClubRsp) ProtoMessage()    {}
+func (*UpdateClubRsp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_47c5ad7bb8a580e2, []int{11}
+}
+
+func (m *UpdateClubRsp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_UpdateClubRsp.Unmarshal(m, b)
+}
+func (m *UpdateClubRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_UpdateClubRsp.Marshal(b, m, deterministic)
+}
+func (m *UpdateClubRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateClubRsp.Merge(m, src)
+}
+func (m *UpdateClubRsp) XXX_Size() int {
+	return xxx_messageInfo_UpdateClubRsp.Size(m)
+}
+func (m *UpdateClubRsp) XXX_DiscardUnknown() {
+	xxx_messageInfo_UpdateClubRsp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UpdateClubRsp proto.InternalMessageInfo
+
+func (m *UpdateClubRsp) GetHead() *common.RspHead {
+	if m != nil {
+		return m.Head
+	}
+	return nil
+}
+
+func (m *UpdateClubRsp) GetCode() int32 {
+	if m != nil {
+		return m.Code
+	}
+	return 0
+}
+
+// 更新俱乐部公告 c -> s
+type UpdateClubNoticeReq struct {
+	Head                 *common.ReqHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
+	ClubID               int64           `protobuf:"varint,2,opt,name=ClubID,proto3" json:"ClubID,omitempty"`
+	Notice               string          `protobuf:"bytes,3,opt,name=Notice,proto3" json:"Notice,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
+	XXX_unrecognized     []byte          `json:"-"`
+	XXX_sizecache        int32           `json:"-"`
+}
+
+func (m *UpdateClubNoticeReq) Reset()         { *m = UpdateClubNoticeReq{} }
+func (m *UpdateClubNoticeReq) String() string { return proto.CompactTextString(m) }
+func (*UpdateClubNoticeReq) ProtoMessage()    {}
+func (*UpdateClubNoticeReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_47c5ad7bb8a580e2, []int{12}
+}
+
+func (m *UpdateClubNoticeReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_UpdateClubNoticeReq.Unmarshal(m, b)
+}
+func (m *UpdateClubNoticeReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_UpdateClubNoticeReq.Marshal(b, m, deterministic)
+}
+func (m *UpdateClubNoticeReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateClubNoticeReq.Merge(m, src)
+}
+func (m *UpdateClubNoticeReq) XXX_Size() int {
+	return xxx_messageInfo_UpdateClubNoticeReq.Size(m)
+}
+func (m *UpdateClubNoticeReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_UpdateClubNoticeReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UpdateClubNoticeReq proto.InternalMessageInfo
+
+func (m *UpdateClubNoticeReq) GetHead() *common.ReqHead {
+	if m != nil {
+		return m.Head
+	}
+	return nil
+}
+
+func (m *UpdateClubNoticeReq) GetClubID() int64 {
+	if m != nil {
+		return m.ClubID
+	}
+	return 0
+}
+
+func (m *UpdateClubNoticeReq) GetNotice() string {
+	if m != nil {
+		return m.Notice
+	}
+	return ""
+}
+
+type UpdateClubNoticeRsp struct {
+	Head *common.RspHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
+	// 1 成功 2 ClubID无效 3 权限无效
+	Code                 int32    `protobuf:"varint,2,opt,name=Code,proto3" json:"Code,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *UpdateClubNoticeRsp) Reset()         { *m = UpdateClubNoticeRsp{} }
+func (m *UpdateClubNoticeRsp) String() string { return proto.CompactTextString(m) }
+func (*UpdateClubNoticeRsp) ProtoMessage()    {}
+func (*UpdateClubNoticeRsp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_47c5ad7bb8a580e2, []int{13}
+}
+
+func (m *UpdateClubNoticeRsp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_UpdateClubNoticeRsp.Unmarshal(m, b)
+}
+func (m *UpdateClubNoticeRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_UpdateClubNoticeRsp.Marshal(b, m, deterministic)
+}
+func (m *UpdateClubNoticeRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateClubNoticeRsp.Merge(m, src)
+}
+func (m *UpdateClubNoticeRsp) XXX_Size() int {
+	return xxx_messageInfo_UpdateClubNoticeRsp.Size(m)
+}
+func (m *UpdateClubNoticeRsp) XXX_DiscardUnknown() {
+	xxx_messageInfo_UpdateClubNoticeRsp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UpdateClubNoticeRsp proto.InternalMessageInfo
+
+func (m *UpdateClubNoticeRsp) GetHead() *common.RspHead {
+	if m != nil {
+		return m.Head
+	}
+	return nil
+}
+
+func (m *UpdateClubNoticeRsp) GetCode() int32 {
+	if m != nil {
+		return m.Code
+	}
+	return 0
+}
+
+// 解散俱乐部 c -> s
 type RemoveClubReq struct {
 	Head                 *common.ReqHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
 	ClubID               int64           `protobuf:"varint,2,opt,name=ClubID,proto3" json:"ClubID,omitempty"`
@@ -549,7 +876,7 @@ func (m *RemoveClubReq) Reset()         { *m = RemoveClubReq{} }
 func (m *RemoveClubReq) String() string { return proto.CompactTextString(m) }
 func (*RemoveClubReq) ProtoMessage()    {}
 func (*RemoveClubReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_47c5ad7bb8a580e2, []int{9}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{14}
 }
 
 func (m *RemoveClubReq) XXX_Unmarshal(b []byte) error {
@@ -586,7 +913,7 @@ func (m *RemoveClubReq) GetClubID() int64 {
 
 type RemoveClubRsp struct {
 	Head *common.RspHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
-	// 1成功 2失败
+	// 1 成功 2 权限无效 3 ClubID无效
 	Code                 int32    `protobuf:"varint,2,opt,name=Code,proto3" json:"Code,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -597,7 +924,7 @@ func (m *RemoveClubRsp) Reset()         { *m = RemoveClubRsp{} }
 func (m *RemoveClubRsp) String() string { return proto.CompactTextString(m) }
 func (*RemoveClubRsp) ProtoMessage()    {}
 func (*RemoveClubRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_47c5ad7bb8a580e2, []int{10}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{15}
 }
 
 func (m *RemoveClubRsp) XXX_Unmarshal(b []byte) error {
@@ -632,136 +959,8 @@ func (m *RemoveClubRsp) GetCode() int32 {
 	return 0
 }
 
-// c -> s
-type UpdateClubReq struct {
-	Head                 *common.ReqHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
-	ClubID               int64           `protobuf:"varint,2,opt,name=ClubID,proto3" json:"ClubID,omitempty"`
-	Notice               string          `protobuf:"bytes,3,opt,name=Notice,proto3" json:"Notice,omitempty"`
-	Arg                  string          `protobuf:"bytes,4,opt,name=Arg,proto3" json:"Arg,omitempty"`
-	IsAutoCreate         bool            `protobuf:"varint,5,opt,name=IsAutoCreate,proto3" json:"IsAutoCreate,omitempty"`
-	IsCustomGameArg      bool            `protobuf:"varint,6,opt,name=IsCustomGameArg,proto3" json:"IsCustomGameArg,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
-	XXX_unrecognized     []byte          `json:"-"`
-	XXX_sizecache        int32           `json:"-"`
-}
-
-func (m *UpdateClubReq) Reset()         { *m = UpdateClubReq{} }
-func (m *UpdateClubReq) String() string { return proto.CompactTextString(m) }
-func (*UpdateClubReq) ProtoMessage()    {}
-func (*UpdateClubReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_47c5ad7bb8a580e2, []int{11}
-}
-
-func (m *UpdateClubReq) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_UpdateClubReq.Unmarshal(m, b)
-}
-func (m *UpdateClubReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_UpdateClubReq.Marshal(b, m, deterministic)
-}
-func (m *UpdateClubReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_UpdateClubReq.Merge(m, src)
-}
-func (m *UpdateClubReq) XXX_Size() int {
-	return xxx_messageInfo_UpdateClubReq.Size(m)
-}
-func (m *UpdateClubReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_UpdateClubReq.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_UpdateClubReq proto.InternalMessageInfo
-
-func (m *UpdateClubReq) GetHead() *common.ReqHead {
-	if m != nil {
-		return m.Head
-	}
-	return nil
-}
-
-func (m *UpdateClubReq) GetClubID() int64 {
-	if m != nil {
-		return m.ClubID
-	}
-	return 0
-}
-
-func (m *UpdateClubReq) GetNotice() string {
-	if m != nil {
-		return m.Notice
-	}
-	return ""
-}
-
-func (m *UpdateClubReq) GetArg() string {
-	if m != nil {
-		return m.Arg
-	}
-	return ""
-}
-
-func (m *UpdateClubReq) GetIsAutoCreate() bool {
-	if m != nil {
-		return m.IsAutoCreate
-	}
-	return false
-}
-
-func (m *UpdateClubReq) GetIsCustomGameArg() bool {
-	if m != nil {
-		return m.IsCustomGameArg
-	}
-	return false
-}
-
-type UpdateClubRsp struct {
-	Head *common.RspHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
-	// 1成功 2失败
-	Code                 int32    `protobuf:"varint,2,opt,name=Code,proto3" json:"Code,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *UpdateClubRsp) Reset()         { *m = UpdateClubRsp{} }
-func (m *UpdateClubRsp) String() string { return proto.CompactTextString(m) }
-func (*UpdateClubRsp) ProtoMessage()    {}
-func (*UpdateClubRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_47c5ad7bb8a580e2, []int{12}
-}
-
-func (m *UpdateClubRsp) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_UpdateClubRsp.Unmarshal(m, b)
-}
-func (m *UpdateClubRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_UpdateClubRsp.Marshal(b, m, deterministic)
-}
-func (m *UpdateClubRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_UpdateClubRsp.Merge(m, src)
-}
-func (m *UpdateClubRsp) XXX_Size() int {
-	return xxx_messageInfo_UpdateClubRsp.Size(m)
-}
-func (m *UpdateClubRsp) XXX_DiscardUnknown() {
-	xxx_messageInfo_UpdateClubRsp.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_UpdateClubRsp proto.InternalMessageInfo
-
-func (m *UpdateClubRsp) GetHead() *common.RspHead {
-	if m != nil {
-		return m.Head
-	}
-	return nil
-}
-
-func (m *UpdateClubRsp) GetCode() int32 {
-	if m != nil {
-		return m.Code
-	}
-	return 0
-}
-
-// c -> s
-type JoinClubReq struct {
+// 查询俱乐部 c -> s
+type QueryClubByIDReq struct {
 	Head                 *common.ReqHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
 	ClubID               int64           `protobuf:"varint,2,opt,name=ClubID,proto3" json:"ClubID,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
@@ -769,91 +968,298 @@ type JoinClubReq struct {
 	XXX_sizecache        int32           `json:"-"`
 }
 
-func (m *JoinClubReq) Reset()         { *m = JoinClubReq{} }
-func (m *JoinClubReq) String() string { return proto.CompactTextString(m) }
-func (*JoinClubReq) ProtoMessage()    {}
-func (*JoinClubReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_47c5ad7bb8a580e2, []int{13}
+func (m *QueryClubByIDReq) Reset()         { *m = QueryClubByIDReq{} }
+func (m *QueryClubByIDReq) String() string { return proto.CompactTextString(m) }
+func (*QueryClubByIDReq) ProtoMessage()    {}
+func (*QueryClubByIDReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_47c5ad7bb8a580e2, []int{16}
 }
 
-func (m *JoinClubReq) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_JoinClubReq.Unmarshal(m, b)
+func (m *QueryClubByIDReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_QueryClubByIDReq.Unmarshal(m, b)
 }
-func (m *JoinClubReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_JoinClubReq.Marshal(b, m, deterministic)
+func (m *QueryClubByIDReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_QueryClubByIDReq.Marshal(b, m, deterministic)
 }
-func (m *JoinClubReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_JoinClubReq.Merge(m, src)
+func (m *QueryClubByIDReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryClubByIDReq.Merge(m, src)
 }
-func (m *JoinClubReq) XXX_Size() int {
-	return xxx_messageInfo_JoinClubReq.Size(m)
+func (m *QueryClubByIDReq) XXX_Size() int {
+	return xxx_messageInfo_QueryClubByIDReq.Size(m)
 }
-func (m *JoinClubReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_JoinClubReq.DiscardUnknown(m)
+func (m *QueryClubByIDReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryClubByIDReq.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_JoinClubReq proto.InternalMessageInfo
+var xxx_messageInfo_QueryClubByIDReq proto.InternalMessageInfo
 
-func (m *JoinClubReq) GetHead() *common.ReqHead {
+func (m *QueryClubByIDReq) GetHead() *common.ReqHead {
 	if m != nil {
 		return m.Head
 	}
 	return nil
 }
 
-func (m *JoinClubReq) GetClubID() int64 {
+func (m *QueryClubByIDReq) GetClubID() int64 {
 	if m != nil {
 		return m.ClubID
 	}
 	return 0
 }
 
-type JoinClubRsp struct {
+type QueryClubByIDRsp struct {
 	Head *common.RspHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
 	// 1成功 2失败
-	Code                 int32    `protobuf:"varint,2,opt,name=Code,proto3" json:"Code,omitempty"`
+	Code int32     `protobuf:"varint,2,opt,name=Code,proto3" json:"Code,omitempty"`
+	Info *ClubInfo `protobuf:"bytes,3,opt,name=Info,proto3" json:"Info,omitempty"`
+	// 查询的人是否同意法律 此处是为了方便客户端判断
+	Agree                bool     `protobuf:"varint,4,opt,name=Agree,proto3" json:"Agree,omitempty"`
+	Identity             int32    `protobuf:"varint,5,opt,name=Identity,proto3" json:"Identity,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *JoinClubRsp) Reset()         { *m = JoinClubRsp{} }
-func (m *JoinClubRsp) String() string { return proto.CompactTextString(m) }
-func (*JoinClubRsp) ProtoMessage()    {}
-func (*JoinClubRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_47c5ad7bb8a580e2, []int{14}
+func (m *QueryClubByIDRsp) Reset()         { *m = QueryClubByIDRsp{} }
+func (m *QueryClubByIDRsp) String() string { return proto.CompactTextString(m) }
+func (*QueryClubByIDRsp) ProtoMessage()    {}
+func (*QueryClubByIDRsp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_47c5ad7bb8a580e2, []int{17}
 }
 
-func (m *JoinClubRsp) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_JoinClubRsp.Unmarshal(m, b)
+func (m *QueryClubByIDRsp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_QueryClubByIDRsp.Unmarshal(m, b)
 }
-func (m *JoinClubRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_JoinClubRsp.Marshal(b, m, deterministic)
+func (m *QueryClubByIDRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_QueryClubByIDRsp.Marshal(b, m, deterministic)
 }
-func (m *JoinClubRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_JoinClubRsp.Merge(m, src)
+func (m *QueryClubByIDRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryClubByIDRsp.Merge(m, src)
 }
-func (m *JoinClubRsp) XXX_Size() int {
-	return xxx_messageInfo_JoinClubRsp.Size(m)
+func (m *QueryClubByIDRsp) XXX_Size() int {
+	return xxx_messageInfo_QueryClubByIDRsp.Size(m)
 }
-func (m *JoinClubRsp) XXX_DiscardUnknown() {
-	xxx_messageInfo_JoinClubRsp.DiscardUnknown(m)
+func (m *QueryClubByIDRsp) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryClubByIDRsp.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_JoinClubRsp proto.InternalMessageInfo
+var xxx_messageInfo_QueryClubByIDRsp proto.InternalMessageInfo
 
-func (m *JoinClubRsp) GetHead() *common.RspHead {
+func (m *QueryClubByIDRsp) GetHead() *common.RspHead {
 	if m != nil {
 		return m.Head
 	}
 	return nil
 }
 
-func (m *JoinClubRsp) GetCode() int32 {
+func (m *QueryClubByIDRsp) GetCode() int32 {
 	if m != nil {
 		return m.Code
 	}
 	return 0
+}
+
+func (m *QueryClubByIDRsp) GetInfo() *ClubInfo {
+	if m != nil {
+		return m.Info
+	}
+	return nil
+}
+
+func (m *QueryClubByIDRsp) GetAgree() bool {
+	if m != nil {
+		return m.Agree
+	}
+	return false
+}
+
+func (m *QueryClubByIDRsp) GetIdentity() int32 {
+	if m != nil {
+		return m.Identity
+	}
+	return 0
+}
+
+// 查询俱乐部成员 c -> s
+type QueryClubMemberReq struct {
+	Head                 *common.ReqHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
+	ClubID               int64           `protobuf:"varint,2,opt,name=ClubID,proto3" json:"ClubID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
+	XXX_unrecognized     []byte          `json:"-"`
+	XXX_sizecache        int32           `json:"-"`
+}
+
+func (m *QueryClubMemberReq) Reset()         { *m = QueryClubMemberReq{} }
+func (m *QueryClubMemberReq) String() string { return proto.CompactTextString(m) }
+func (*QueryClubMemberReq) ProtoMessage()    {}
+func (*QueryClubMemberReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_47c5ad7bb8a580e2, []int{18}
+}
+
+func (m *QueryClubMemberReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_QueryClubMemberReq.Unmarshal(m, b)
+}
+func (m *QueryClubMemberReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_QueryClubMemberReq.Marshal(b, m, deterministic)
+}
+func (m *QueryClubMemberReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryClubMemberReq.Merge(m, src)
+}
+func (m *QueryClubMemberReq) XXX_Size() int {
+	return xxx_messageInfo_QueryClubMemberReq.Size(m)
+}
+func (m *QueryClubMemberReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryClubMemberReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryClubMemberReq proto.InternalMessageInfo
+
+func (m *QueryClubMemberReq) GetHead() *common.ReqHead {
+	if m != nil {
+		return m.Head
+	}
+	return nil
+}
+
+func (m *QueryClubMemberReq) GetClubID() int64 {
+	if m != nil {
+		return m.ClubID
+	}
+	return 0
+}
+
+type QueryClubMemberRsp struct {
+	Head                 *common.RspHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
+	Members              []*MemberInfo   `protobuf:"bytes,2,rep,name=Members,proto3" json:"Members,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
+	XXX_unrecognized     []byte          `json:"-"`
+	XXX_sizecache        int32           `json:"-"`
+}
+
+func (m *QueryClubMemberRsp) Reset()         { *m = QueryClubMemberRsp{} }
+func (m *QueryClubMemberRsp) String() string { return proto.CompactTextString(m) }
+func (*QueryClubMemberRsp) ProtoMessage()    {}
+func (*QueryClubMemberRsp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_47c5ad7bb8a580e2, []int{19}
+}
+
+func (m *QueryClubMemberRsp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_QueryClubMemberRsp.Unmarshal(m, b)
+}
+func (m *QueryClubMemberRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_QueryClubMemberRsp.Marshal(b, m, deterministic)
+}
+func (m *QueryClubMemberRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryClubMemberRsp.Merge(m, src)
+}
+func (m *QueryClubMemberRsp) XXX_Size() int {
+	return xxx_messageInfo_QueryClubMemberRsp.Size(m)
+}
+func (m *QueryClubMemberRsp) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryClubMemberRsp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryClubMemberRsp proto.InternalMessageInfo
+
+func (m *QueryClubMemberRsp) GetHead() *common.RspHead {
+	if m != nil {
+		return m.Head
+	}
+	return nil
+}
+
+func (m *QueryClubMemberRsp) GetMembers() []*MemberInfo {
+	if m != nil {
+		return m.Members
+	}
+	return nil
+}
+
+// 同意法律 c -> s
+type AgreeClubLawReq struct {
+	Head                 *common.ReqHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
+	ClubID               int64           `protobuf:"varint,2,opt,name=ClubID,proto3" json:"ClubID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
+	XXX_unrecognized     []byte          `json:"-"`
+	XXX_sizecache        int32           `json:"-"`
+}
+
+func (m *AgreeClubLawReq) Reset()         { *m = AgreeClubLawReq{} }
+func (m *AgreeClubLawReq) String() string { return proto.CompactTextString(m) }
+func (*AgreeClubLawReq) ProtoMessage()    {}
+func (*AgreeClubLawReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_47c5ad7bb8a580e2, []int{20}
+}
+
+func (m *AgreeClubLawReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_AgreeClubLawReq.Unmarshal(m, b)
+}
+func (m *AgreeClubLawReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_AgreeClubLawReq.Marshal(b, m, deterministic)
+}
+func (m *AgreeClubLawReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AgreeClubLawReq.Merge(m, src)
+}
+func (m *AgreeClubLawReq) XXX_Size() int {
+	return xxx_messageInfo_AgreeClubLawReq.Size(m)
+}
+func (m *AgreeClubLawReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_AgreeClubLawReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AgreeClubLawReq proto.InternalMessageInfo
+
+func (m *AgreeClubLawReq) GetHead() *common.ReqHead {
+	if m != nil {
+		return m.Head
+	}
+	return nil
+}
+
+func (m *AgreeClubLawReq) GetClubID() int64 {
+	if m != nil {
+		return m.ClubID
+	}
+	return 0
+}
+
+type AgreeClubLawRsp struct {
+	Head                 *common.RspHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
+	XXX_unrecognized     []byte          `json:"-"`
+	XXX_sizecache        int32           `json:"-"`
+}
+
+func (m *AgreeClubLawRsp) Reset()         { *m = AgreeClubLawRsp{} }
+func (m *AgreeClubLawRsp) String() string { return proto.CompactTextString(m) }
+func (*AgreeClubLawRsp) ProtoMessage()    {}
+func (*AgreeClubLawRsp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_47c5ad7bb8a580e2, []int{21}
+}
+
+func (m *AgreeClubLawRsp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_AgreeClubLawRsp.Unmarshal(m, b)
+}
+func (m *AgreeClubLawRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_AgreeClubLawRsp.Marshal(b, m, deterministic)
+}
+func (m *AgreeClubLawRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AgreeClubLawRsp.Merge(m, src)
+}
+func (m *AgreeClubLawRsp) XXX_Size() int {
+	return xxx_messageInfo_AgreeClubLawRsp.Size(m)
+}
+func (m *AgreeClubLawRsp) XXX_DiscardUnknown() {
+	xxx_messageInfo_AgreeClubLawRsp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AgreeClubLawRsp proto.InternalMessageInfo
+
+func (m *AgreeClubLawRsp) GetHead() *common.RspHead {
+	if m != nil {
+		return m.Head
+	}
+	return nil
 }
 
 // 退出俱乐部 c -> s
@@ -869,7 +1275,7 @@ func (m *ExitClubReq) Reset()         { *m = ExitClubReq{} }
 func (m *ExitClubReq) String() string { return proto.CompactTextString(m) }
 func (*ExitClubReq) ProtoMessage()    {}
 func (*ExitClubReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_47c5ad7bb8a580e2, []int{15}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{22}
 }
 
 func (m *ExitClubReq) XXX_Unmarshal(b []byte) error {
@@ -906,7 +1312,7 @@ func (m *ExitClubReq) GetClubID() int64 {
 
 type ExitClubRsp struct {
 	Head *common.RspHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
-	// 1成功 2失败
+	// 1成功 2无效ClubID
 	Code                 int32    `protobuf:"varint,2,opt,name=Code,proto3" json:"Code,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -917,7 +1323,7 @@ func (m *ExitClubRsp) Reset()         { *m = ExitClubRsp{} }
 func (m *ExitClubRsp) String() string { return proto.CompactTextString(m) }
 func (*ExitClubRsp) ProtoMessage()    {}
 func (*ExitClubRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_47c5ad7bb8a580e2, []int{16}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{23}
 }
 
 func (m *ExitClubRsp) XXX_Unmarshal(b []byte) error {
@@ -952,171 +1358,941 @@ func (m *ExitClubRsp) GetCode() int32 {
 	return 0
 }
 
-// c -> s
-type QueryClubDeskReq struct {
+// 不需要确认的 <转管理员 转黑名单>
+// 成员身份变更 c -> s
+type DealMemberIdentityReq struct {
 	Head                 *common.ReqHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
 	ClubID               int64           `protobuf:"varint,2,opt,name=ClubID,proto3" json:"ClubID,omitempty"`
-	Option               int32           `protobuf:"varint,3,opt,name=Option,proto3" json:"Option,omitempty"`
+	UserID               uint64          `protobuf:"varint,3,opt,name=UserID,proto3" json:"UserID,omitempty"`
+	Identity             int32           `protobuf:"varint,4,opt,name=Identity,proto3" json:"Identity,omitempty"`
+	Del                  bool            `protobuf:"varint,5,opt,name=Del,proto3" json:"Del,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
 	XXX_unrecognized     []byte          `json:"-"`
 	XXX_sizecache        int32           `json:"-"`
 }
 
-func (m *QueryClubDeskReq) Reset()         { *m = QueryClubDeskReq{} }
-func (m *QueryClubDeskReq) String() string { return proto.CompactTextString(m) }
-func (*QueryClubDeskReq) ProtoMessage()    {}
-func (*QueryClubDeskReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_47c5ad7bb8a580e2, []int{17}
+func (m *DealMemberIdentityReq) Reset()         { *m = DealMemberIdentityReq{} }
+func (m *DealMemberIdentityReq) String() string { return proto.CompactTextString(m) }
+func (*DealMemberIdentityReq) ProtoMessage()    {}
+func (*DealMemberIdentityReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_47c5ad7bb8a580e2, []int{24}
 }
 
-func (m *QueryClubDeskReq) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_QueryClubDeskReq.Unmarshal(m, b)
+func (m *DealMemberIdentityReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_DealMemberIdentityReq.Unmarshal(m, b)
 }
-func (m *QueryClubDeskReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_QueryClubDeskReq.Marshal(b, m, deterministic)
+func (m *DealMemberIdentityReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_DealMemberIdentityReq.Marshal(b, m, deterministic)
 }
-func (m *QueryClubDeskReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryClubDeskReq.Merge(m, src)
+func (m *DealMemberIdentityReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DealMemberIdentityReq.Merge(m, src)
 }
-func (m *QueryClubDeskReq) XXX_Size() int {
-	return xxx_messageInfo_QueryClubDeskReq.Size(m)
+func (m *DealMemberIdentityReq) XXX_Size() int {
+	return xxx_messageInfo_DealMemberIdentityReq.Size(m)
 }
-func (m *QueryClubDeskReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryClubDeskReq.DiscardUnknown(m)
+func (m *DealMemberIdentityReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_DealMemberIdentityReq.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryClubDeskReq proto.InternalMessageInfo
+var xxx_messageInfo_DealMemberIdentityReq proto.InternalMessageInfo
 
-func (m *QueryClubDeskReq) GetHead() *common.ReqHead {
+func (m *DealMemberIdentityReq) GetHead() *common.ReqHead {
 	if m != nil {
 		return m.Head
 	}
 	return nil
 }
 
-func (m *QueryClubDeskReq) GetClubID() int64 {
+func (m *DealMemberIdentityReq) GetClubID() int64 {
 	if m != nil {
 		return m.ClubID
 	}
 	return 0
 }
 
-func (m *QueryClubDeskReq) GetOption() int32 {
+func (m *DealMemberIdentityReq) GetUserID() uint64 {
 	if m != nil {
-		return m.Option
+		return m.UserID
 	}
 	return 0
 }
 
-type QueryClubDeskRsp struct {
-	Head                 *common.RspHead    `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
-	Desks                []*common.DeskInfo `protobuf:"bytes,2,rep,name=Desks,proto3" json:"Desks,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}           `json:"-"`
-	XXX_unrecognized     []byte             `json:"-"`
-	XXX_sizecache        int32              `json:"-"`
+func (m *DealMemberIdentityReq) GetIdentity() int32 {
+	if m != nil {
+		return m.Identity
+	}
+	return 0
 }
 
-func (m *QueryClubDeskRsp) Reset()         { *m = QueryClubDeskRsp{} }
-func (m *QueryClubDeskRsp) String() string { return proto.CompactTextString(m) }
-func (*QueryClubDeskRsp) ProtoMessage()    {}
-func (*QueryClubDeskRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_47c5ad7bb8a580e2, []int{18}
+func (m *DealMemberIdentityReq) GetDel() bool {
+	if m != nil {
+		return m.Del
+	}
+	return false
 }
 
-func (m *QueryClubDeskRsp) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_QueryClubDeskRsp.Unmarshal(m, b)
-}
-func (m *QueryClubDeskRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_QueryClubDeskRsp.Marshal(b, m, deterministic)
-}
-func (m *QueryClubDeskRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryClubDeskRsp.Merge(m, src)
-}
-func (m *QueryClubDeskRsp) XXX_Size() int {
-	return xxx_messageInfo_QueryClubDeskRsp.Size(m)
-}
-func (m *QueryClubDeskRsp) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryClubDeskRsp.DiscardUnknown(m)
+type DealMemberIdentityRsp struct {
+	Head *common.RspHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
+	// 1成功 2无效俱乐部ID 3无效玩家ID 4无效Identity 5权限不够
+	Code                 int32    `protobuf:"varint,2,opt,name=Code,proto3" json:"Code,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
-var xxx_messageInfo_QueryClubDeskRsp proto.InternalMessageInfo
+func (m *DealMemberIdentityRsp) Reset()         { *m = DealMemberIdentityRsp{} }
+func (m *DealMemberIdentityRsp) String() string { return proto.CompactTextString(m) }
+func (*DealMemberIdentityRsp) ProtoMessage()    {}
+func (*DealMemberIdentityRsp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_47c5ad7bb8a580e2, []int{25}
+}
 
-func (m *QueryClubDeskRsp) GetHead() *common.RspHead {
+func (m *DealMemberIdentityRsp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_DealMemberIdentityRsp.Unmarshal(m, b)
+}
+func (m *DealMemberIdentityRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_DealMemberIdentityRsp.Marshal(b, m, deterministic)
+}
+func (m *DealMemberIdentityRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DealMemberIdentityRsp.Merge(m, src)
+}
+func (m *DealMemberIdentityRsp) XXX_Size() int {
+	return xxx_messageInfo_DealMemberIdentityRsp.Size(m)
+}
+func (m *DealMemberIdentityRsp) XXX_DiscardUnknown() {
+	xxx_messageInfo_DealMemberIdentityRsp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DealMemberIdentityRsp proto.InternalMessageInfo
+
+func (m *DealMemberIdentityRsp) GetHead() *common.RspHead {
 	if m != nil {
 		return m.Head
 	}
 	return nil
 }
 
-func (m *QueryClubDeskRsp) GetDesks() []*common.DeskInfo {
+func (m *DealMemberIdentityRsp) GetCode() int32 {
 	if m != nil {
-		return m.Desks
+		return m.Code
+	}
+	return 0
+}
+
+// 需要确认的
+// 请求加入俱乐部 c -> s
+type JoinClubReq struct {
+	Head                 *common.ReqHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
+	ClubID               int64           `protobuf:"varint,2,opt,name=ClubID,proto3" json:"ClubID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
+	XXX_unrecognized     []byte          `json:"-"`
+	XXX_sizecache        int32           `json:"-"`
+}
+
+func (m *JoinClubReq) Reset()         { *m = JoinClubReq{} }
+func (m *JoinClubReq) String() string { return proto.CompactTextString(m) }
+func (*JoinClubReq) ProtoMessage()    {}
+func (*JoinClubReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_47c5ad7bb8a580e2, []int{26}
+}
+
+func (m *JoinClubReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_JoinClubReq.Unmarshal(m, b)
+}
+func (m *JoinClubReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_JoinClubReq.Marshal(b, m, deterministic)
+}
+func (m *JoinClubReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_JoinClubReq.Merge(m, src)
+}
+func (m *JoinClubReq) XXX_Size() int {
+	return xxx_messageInfo_JoinClubReq.Size(m)
+}
+func (m *JoinClubReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_JoinClubReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_JoinClubReq proto.InternalMessageInfo
+
+func (m *JoinClubReq) GetHead() *common.ReqHead {
+	if m != nil {
+		return m.Head
+	}
+	return nil
+}
+
+func (m *JoinClubReq) GetClubID() int64 {
+	if m != nil {
+		return m.ClubID
+	}
+	return 0
+}
+
+type JoinClubRsp struct {
+	Head *common.RspHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
+	// 1提交成功 2超过加入人自身限制 3无效ClubID 4已经在申请中 5已经是此俱乐部成员 6人满了<最多30个>
+	Code                 int32    `protobuf:"varint,2,opt,name=Code,proto3" json:"Code,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *JoinClubRsp) Reset()         { *m = JoinClubRsp{} }
+func (m *JoinClubRsp) String() string { return proto.CompactTextString(m) }
+func (*JoinClubRsp) ProtoMessage()    {}
+func (*JoinClubRsp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_47c5ad7bb8a580e2, []int{27}
+}
+
+func (m *JoinClubRsp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_JoinClubRsp.Unmarshal(m, b)
+}
+func (m *JoinClubRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_JoinClubRsp.Marshal(b, m, deterministic)
+}
+func (m *JoinClubRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_JoinClubRsp.Merge(m, src)
+}
+func (m *JoinClubRsp) XXX_Size() int {
+	return xxx_messageInfo_JoinClubRsp.Size(m)
+}
+func (m *JoinClubRsp) XXX_DiscardUnknown() {
+	xxx_messageInfo_JoinClubRsp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_JoinClubRsp proto.InternalMessageInfo
+
+func (m *JoinClubRsp) GetHead() *common.RspHead {
+	if m != nil {
+		return m.Head
+	}
+	return nil
+}
+
+func (m *JoinClubRsp) GetCode() int32 {
+	if m != nil {
+		return m.Code
+	}
+	return 0
+}
+
+// 需要确认的
+// 邀请某人加入俱乐部 c -> s
+type InviteJoinClubReq struct {
+	Head                 *common.ReqHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
+	ClubID               int64           `protobuf:"varint,2,opt,name=ClubID,proto3" json:"ClubID,omitempty"`
+	Invitee              uint64          `protobuf:"varint,3,opt,name=Invitee,proto3" json:"Invitee,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
+	XXX_unrecognized     []byte          `json:"-"`
+	XXX_sizecache        int32           `json:"-"`
+}
+
+func (m *InviteJoinClubReq) Reset()         { *m = InviteJoinClubReq{} }
+func (m *InviteJoinClubReq) String() string { return proto.CompactTextString(m) }
+func (*InviteJoinClubReq) ProtoMessage()    {}
+func (*InviteJoinClubReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_47c5ad7bb8a580e2, []int{28}
+}
+
+func (m *InviteJoinClubReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_InviteJoinClubReq.Unmarshal(m, b)
+}
+func (m *InviteJoinClubReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_InviteJoinClubReq.Marshal(b, m, deterministic)
+}
+func (m *InviteJoinClubReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_InviteJoinClubReq.Merge(m, src)
+}
+func (m *InviteJoinClubReq) XXX_Size() int {
+	return xxx_messageInfo_InviteJoinClubReq.Size(m)
+}
+func (m *InviteJoinClubReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_InviteJoinClubReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_InviteJoinClubReq proto.InternalMessageInfo
+
+func (m *InviteJoinClubReq) GetHead() *common.ReqHead {
+	if m != nil {
+		return m.Head
+	}
+	return nil
+}
+
+func (m *InviteJoinClubReq) GetClubID() int64 {
+	if m != nil {
+		return m.ClubID
+	}
+	return 0
+}
+
+func (m *InviteJoinClubReq) GetInvitee() uint64 {
+	if m != nil {
+		return m.Invitee
+	}
+	return 0
+}
+
+type InviteJoinClubRsp struct {
+	Head *common.RspHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
+	// 1提交成功 2被邀请人加入俱乐部数量限制 3无效clubid  4clud人数满 5已经是成员或者在黑名单中 6在进行中
+	Code                 int32    `protobuf:"varint,2,opt,name=Code,proto3" json:"Code,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *InviteJoinClubRsp) Reset()         { *m = InviteJoinClubRsp{} }
+func (m *InviteJoinClubRsp) String() string { return proto.CompactTextString(m) }
+func (*InviteJoinClubRsp) ProtoMessage()    {}
+func (*InviteJoinClubRsp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_47c5ad7bb8a580e2, []int{29}
+}
+
+func (m *InviteJoinClubRsp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_InviteJoinClubRsp.Unmarshal(m, b)
+}
+func (m *InviteJoinClubRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_InviteJoinClubRsp.Marshal(b, m, deterministic)
+}
+func (m *InviteJoinClubRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_InviteJoinClubRsp.Merge(m, src)
+}
+func (m *InviteJoinClubRsp) XXX_Size() int {
+	return xxx_messageInfo_InviteJoinClubRsp.Size(m)
+}
+func (m *InviteJoinClubRsp) XXX_DiscardUnknown() {
+	xxx_messageInfo_InviteJoinClubRsp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_InviteJoinClubRsp proto.InternalMessageInfo
+
+func (m *InviteJoinClubRsp) GetHead() *common.RspHead {
+	if m != nil {
+		return m.Head
+	}
+	return nil
+}
+
+func (m *InviteJoinClubRsp) GetCode() int32 {
+	if m != nil {
+		return m.Code
+	}
+	return 0
+}
+
+// 需要确认的
+// 转让群主 c -> s
+type TransferMasterReq struct {
+	Head                 *common.ReqHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
+	ClubID               int64           `protobuf:"varint,2,opt,name=ClubID,proto3" json:"ClubID,omitempty"`
+	NewMasterUserID      uint64          `protobuf:"varint,3,opt,name=NewMasterUserID,proto3" json:"NewMasterUserID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
+	XXX_unrecognized     []byte          `json:"-"`
+	XXX_sizecache        int32           `json:"-"`
+}
+
+func (m *TransferMasterReq) Reset()         { *m = TransferMasterReq{} }
+func (m *TransferMasterReq) String() string { return proto.CompactTextString(m) }
+func (*TransferMasterReq) ProtoMessage()    {}
+func (*TransferMasterReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_47c5ad7bb8a580e2, []int{30}
+}
+
+func (m *TransferMasterReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_TransferMasterReq.Unmarshal(m, b)
+}
+func (m *TransferMasterReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_TransferMasterReq.Marshal(b, m, deterministic)
+}
+func (m *TransferMasterReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TransferMasterReq.Merge(m, src)
+}
+func (m *TransferMasterReq) XXX_Size() int {
+	return xxx_messageInfo_TransferMasterReq.Size(m)
+}
+func (m *TransferMasterReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_TransferMasterReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TransferMasterReq proto.InternalMessageInfo
+
+func (m *TransferMasterReq) GetHead() *common.ReqHead {
+	if m != nil {
+		return m.Head
+	}
+	return nil
+}
+
+func (m *TransferMasterReq) GetClubID() int64 {
+	if m != nil {
+		return m.ClubID
+	}
+	return 0
+}
+
+func (m *TransferMasterReq) GetNewMasterUserID() uint64 {
+	if m != nil {
+		return m.NewMasterUserID
+	}
+	return 0
+}
+
+type TransferMasterRsp struct {
+	Head *common.RspHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
+	// 1提交成功 2参数无效 3无效ClubID 4权限 5无效NewMasterUserID 6在进行中
+	Code                 int32    `protobuf:"varint,2,opt,name=Code,proto3" json:"Code,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *TransferMasterRsp) Reset()         { *m = TransferMasterRsp{} }
+func (m *TransferMasterRsp) String() string { return proto.CompactTextString(m) }
+func (*TransferMasterRsp) ProtoMessage()    {}
+func (*TransferMasterRsp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_47c5ad7bb8a580e2, []int{31}
+}
+
+func (m *TransferMasterRsp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_TransferMasterRsp.Unmarshal(m, b)
+}
+func (m *TransferMasterRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_TransferMasterRsp.Marshal(b, m, deterministic)
+}
+func (m *TransferMasterRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TransferMasterRsp.Merge(m, src)
+}
+func (m *TransferMasterRsp) XXX_Size() int {
+	return xxx_messageInfo_TransferMasterRsp.Size(m)
+}
+func (m *TransferMasterRsp) XXX_DiscardUnknown() {
+	xxx_messageInfo_TransferMasterRsp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TransferMasterRsp proto.InternalMessageInfo
+
+func (m *TransferMasterRsp) GetHead() *common.RspHead {
+	if m != nil {
+		return m.Head
+	}
+	return nil
+}
+
+func (m *TransferMasterRsp) GetCode() int32 {
+	if m != nil {
+		return m.Code
+	}
+	return 0
+}
+
+// 确认邮件回复
+type AckClubEmailReq struct {
+	Head                 *common.ReqHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
+	EmailMsgID           int64           `protobuf:"varint,2,opt,name=EmailMsgID,proto3" json:"EmailMsgID,omitempty"`
+	Agree                bool            `protobuf:"varint,3,opt,name=Agree,proto3" json:"Agree,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
+	XXX_unrecognized     []byte          `json:"-"`
+	XXX_sizecache        int32           `json:"-"`
+}
+
+func (m *AckClubEmailReq) Reset()         { *m = AckClubEmailReq{} }
+func (m *AckClubEmailReq) String() string { return proto.CompactTextString(m) }
+func (*AckClubEmailReq) ProtoMessage()    {}
+func (*AckClubEmailReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_47c5ad7bb8a580e2, []int{32}
+}
+
+func (m *AckClubEmailReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_AckClubEmailReq.Unmarshal(m, b)
+}
+func (m *AckClubEmailReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_AckClubEmailReq.Marshal(b, m, deterministic)
+}
+func (m *AckClubEmailReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AckClubEmailReq.Merge(m, src)
+}
+func (m *AckClubEmailReq) XXX_Size() int {
+	return xxx_messageInfo_AckClubEmailReq.Size(m)
+}
+func (m *AckClubEmailReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_AckClubEmailReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AckClubEmailReq proto.InternalMessageInfo
+
+func (m *AckClubEmailReq) GetHead() *common.ReqHead {
+	if m != nil {
+		return m.Head
+	}
+	return nil
+}
+
+func (m *AckClubEmailReq) GetEmailMsgID() int64 {
+	if m != nil {
+		return m.EmailMsgID
+	}
+	return 0
+}
+
+func (m *AckClubEmailReq) GetAgree() bool {
+	if m != nil {
+		return m.Agree
+	}
+	return false
+}
+
+type AckClubEmailRsp struct {
+	Head *common.RspHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
+	// 1成功 2找不到EmailMsgID 3flag!=0 4typ not in(1,2,3) 5找不到俱乐部
+	Code                 int32    `protobuf:"varint,2,opt,name=Code,proto3" json:"Code,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *AckClubEmailRsp) Reset()         { *m = AckClubEmailRsp{} }
+func (m *AckClubEmailRsp) String() string { return proto.CompactTextString(m) }
+func (*AckClubEmailRsp) ProtoMessage()    {}
+func (*AckClubEmailRsp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_47c5ad7bb8a580e2, []int{33}
+}
+
+func (m *AckClubEmailRsp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_AckClubEmailRsp.Unmarshal(m, b)
+}
+func (m *AckClubEmailRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_AckClubEmailRsp.Marshal(b, m, deterministic)
+}
+func (m *AckClubEmailRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AckClubEmailRsp.Merge(m, src)
+}
+func (m *AckClubEmailRsp) XXX_Size() int {
+	return xxx_messageInfo_AckClubEmailRsp.Size(m)
+}
+func (m *AckClubEmailRsp) XXX_DiscardUnknown() {
+	xxx_messageInfo_AckClubEmailRsp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AckClubEmailRsp proto.InternalMessageInfo
+
+func (m *AckClubEmailRsp) GetHead() *common.RspHead {
+	if m != nil {
+		return m.Head
+	}
+	return nil
+}
+
+func (m *AckClubEmailRsp) GetCode() int32 {
+	if m != nil {
+		return m.Code
+	}
+	return 0
+}
+
+type CyI64 struct {
+	EmailMsgID           int64    `protobuf:"varint,1,opt,name=EmailMsgID,proto3" json:"EmailMsgID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *CyI64) Reset()         { *m = CyI64{} }
+func (m *CyI64) String() string { return proto.CompactTextString(m) }
+func (*CyI64) ProtoMessage()    {}
+func (*CyI64) Descriptor() ([]byte, []int) {
+	return fileDescriptor_47c5ad7bb8a580e2, []int{34}
+}
+
+func (m *CyI64) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_CyI64.Unmarshal(m, b)
+}
+func (m *CyI64) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_CyI64.Marshal(b, m, deterministic)
+}
+func (m *CyI64) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CyI64.Merge(m, src)
+}
+func (m *CyI64) XXX_Size() int {
+	return xxx_messageInfo_CyI64.Size(m)
+}
+func (m *CyI64) XXX_DiscardUnknown() {
+	xxx_messageInfo_CyI64.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CyI64 proto.InternalMessageInfo
+
+func (m *CyI64) GetEmailMsgID() int64 {
+	if m != nil {
+		return m.EmailMsgID
+	}
+	return 0
+}
+
+// 批量确认已读邮件
+type BatchAckClubEmail struct {
+	Ids                  []*CyI64 `protobuf:"bytes,1,rep,name=Ids,proto3" json:"Ids,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *BatchAckClubEmail) Reset()         { *m = BatchAckClubEmail{} }
+func (m *BatchAckClubEmail) String() string { return proto.CompactTextString(m) }
+func (*BatchAckClubEmail) ProtoMessage()    {}
+func (*BatchAckClubEmail) Descriptor() ([]byte, []int) {
+	return fileDescriptor_47c5ad7bb8a580e2, []int{35}
+}
+
+func (m *BatchAckClubEmail) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_BatchAckClubEmail.Unmarshal(m, b)
+}
+func (m *BatchAckClubEmail) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_BatchAckClubEmail.Marshal(b, m, deterministic)
+}
+func (m *BatchAckClubEmail) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_BatchAckClubEmail.Merge(m, src)
+}
+func (m *BatchAckClubEmail) XXX_Size() int {
+	return xxx_messageInfo_BatchAckClubEmail.Size(m)
+}
+func (m *BatchAckClubEmail) XXX_DiscardUnknown() {
+	xxx_messageInfo_BatchAckClubEmail.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_BatchAckClubEmail proto.InternalMessageInfo
+
+func (m *BatchAckClubEmail) GetIds() []*CyI64 {
+	if m != nil {
+		return m.Ids
+	}
+	return nil
+}
+
+// 俱乐部邮件 s -> c
+type ClubEmail struct {
+	ID       int64 `protobuf:"varint,1,opt,name=ID,proto3" json:"ID,omitempty"`
+	SendTime int64 `protobuf:"varint,2,opt,name=SendTime,proto3" json:"SendTime,omitempty"`
+	// 邮件类型
+	// 0 普通邮件 1JoinClub  2InviteJoinClub 3TransferMaster
+	Typ     int32  `protobuf:"varint,3,opt,name=Typ,proto3" json:"Typ,omitempty"`
+	Content string `protobuf:"bytes,4,opt,name=Content,proto3" json:"Content,omitempty"`
+	// 0未处理 1已处理
+	Flag                 int32    `protobuf:"varint,5,opt,name=Flag,proto3" json:"Flag,omitempty"`
+	ClubID               int64    `protobuf:"varint,6,opt,name=ClubID,proto3" json:"ClubID,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *ClubEmail) Reset()         { *m = ClubEmail{} }
+func (m *ClubEmail) String() string { return proto.CompactTextString(m) }
+func (*ClubEmail) ProtoMessage()    {}
+func (*ClubEmail) Descriptor() ([]byte, []int) {
+	return fileDescriptor_47c5ad7bb8a580e2, []int{36}
+}
+
+func (m *ClubEmail) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ClubEmail.Unmarshal(m, b)
+}
+func (m *ClubEmail) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ClubEmail.Marshal(b, m, deterministic)
+}
+func (m *ClubEmail) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ClubEmail.Merge(m, src)
+}
+func (m *ClubEmail) XXX_Size() int {
+	return xxx_messageInfo_ClubEmail.Size(m)
+}
+func (m *ClubEmail) XXX_DiscardUnknown() {
+	xxx_messageInfo_ClubEmail.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ClubEmail proto.InternalMessageInfo
+
+func (m *ClubEmail) GetID() int64 {
+	if m != nil {
+		return m.ID
+	}
+	return 0
+}
+
+func (m *ClubEmail) GetSendTime() int64 {
+	if m != nil {
+		return m.SendTime
+	}
+	return 0
+}
+
+func (m *ClubEmail) GetTyp() int32 {
+	if m != nil {
+		return m.Typ
+	}
+	return 0
+}
+
+func (m *ClubEmail) GetContent() string {
+	if m != nil {
+		return m.Content
+	}
+	return ""
+}
+
+func (m *ClubEmail) GetFlag() int32 {
+	if m != nil {
+		return m.Flag
+	}
+	return 0
+}
+
+func (m *ClubEmail) GetClubID() int64 {
+	if m != nil {
+		return m.ClubID
+	}
+	return 0
+}
+
+type ClubEmailChangeInfo struct {
+	Emails               []*ClubEmail `protobuf:"bytes,1,rep,name=Emails,proto3" json:"Emails,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}     `json:"-"`
+	XXX_unrecognized     []byte       `json:"-"`
+	XXX_sizecache        int32        `json:"-"`
+}
+
+func (m *ClubEmailChangeInfo) Reset()         { *m = ClubEmailChangeInfo{} }
+func (m *ClubEmailChangeInfo) String() string { return proto.CompactTextString(m) }
+func (*ClubEmailChangeInfo) ProtoMessage()    {}
+func (*ClubEmailChangeInfo) Descriptor() ([]byte, []int) {
+	return fileDescriptor_47c5ad7bb8a580e2, []int{37}
+}
+
+func (m *ClubEmailChangeInfo) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ClubEmailChangeInfo.Unmarshal(m, b)
+}
+func (m *ClubEmailChangeInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ClubEmailChangeInfo.Marshal(b, m, deterministic)
+}
+func (m *ClubEmailChangeInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ClubEmailChangeInfo.Merge(m, src)
+}
+func (m *ClubEmailChangeInfo) XXX_Size() int {
+	return xxx_messageInfo_ClubEmailChangeInfo.Size(m)
+}
+func (m *ClubEmailChangeInfo) XXX_DiscardUnknown() {
+	xxx_messageInfo_ClubEmailChangeInfo.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ClubEmailChangeInfo proto.InternalMessageInfo
+
+func (m *ClubEmailChangeInfo) GetEmails() []*ClubEmail {
+	if m != nil {
+		return m.Emails
+	}
+	return nil
+}
+
+// 查询玩家俱乐部邮件 c -> s
+type ClubEmailReq struct {
+	Head                 *common.ReqHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
+	XXX_unrecognized     []byte          `json:"-"`
+	XXX_sizecache        int32           `json:"-"`
+}
+
+func (m *ClubEmailReq) Reset()         { *m = ClubEmailReq{} }
+func (m *ClubEmailReq) String() string { return proto.CompactTextString(m) }
+func (*ClubEmailReq) ProtoMessage()    {}
+func (*ClubEmailReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_47c5ad7bb8a580e2, []int{38}
+}
+
+func (m *ClubEmailReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ClubEmailReq.Unmarshal(m, b)
+}
+func (m *ClubEmailReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ClubEmailReq.Marshal(b, m, deterministic)
+}
+func (m *ClubEmailReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ClubEmailReq.Merge(m, src)
+}
+func (m *ClubEmailReq) XXX_Size() int {
+	return xxx_messageInfo_ClubEmailReq.Size(m)
+}
+func (m *ClubEmailReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_ClubEmailReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ClubEmailReq proto.InternalMessageInfo
+
+func (m *ClubEmailReq) GetHead() *common.ReqHead {
+	if m != nil {
+		return m.Head
+	}
+	return nil
+}
+
+type ClubEmailRsp struct {
+	Head                 *common.RspHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
+	Emails               []*ClubEmail    `protobuf:"bytes,2,rep,name=Emails,proto3" json:"Emails,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
+	XXX_unrecognized     []byte          `json:"-"`
+	XXX_sizecache        int32           `json:"-"`
+}
+
+func (m *ClubEmailRsp) Reset()         { *m = ClubEmailRsp{} }
+func (m *ClubEmailRsp) String() string { return proto.CompactTextString(m) }
+func (*ClubEmailRsp) ProtoMessage()    {}
+func (*ClubEmailRsp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_47c5ad7bb8a580e2, []int{39}
+}
+
+func (m *ClubEmailRsp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ClubEmailRsp.Unmarshal(m, b)
+}
+func (m *ClubEmailRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ClubEmailRsp.Marshal(b, m, deterministic)
+}
+func (m *ClubEmailRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ClubEmailRsp.Merge(m, src)
+}
+func (m *ClubEmailRsp) XXX_Size() int {
+	return xxx_messageInfo_ClubEmailRsp.Size(m)
+}
+func (m *ClubEmailRsp) XXX_DiscardUnknown() {
+	xxx_messageInfo_ClubEmailRsp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ClubEmailRsp proto.InternalMessageInfo
+
+func (m *ClubEmailRsp) GetHead() *common.RspHead {
+	if m != nil {
+		return m.Head
+	}
+	return nil
+}
+
+func (m *ClubEmailRsp) GetEmails() []*ClubEmail {
+	if m != nil {
+		return m.Emails
 	}
 	return nil
 }
 
 func init() {
-	proto.RegisterType((*ClubMemberInfo)(nil), "pbclub.ClubMemberInfo")
+	proto.RegisterType((*MemberInfo)(nil), "pbclub.MemberInfo")
+	proto.RegisterType((*BaseInfo)(nil), "pbclub.BaseInfo")
+	proto.RegisterType((*DeskSetting)(nil), "pbclub.DeskSetting")
 	proto.RegisterType((*ClubInfo)(nil), "pbclub.ClubInfo")
-	proto.RegisterType((*QueryClubByIDReq)(nil), "pbclub.QueryClubByIDReq")
-	proto.RegisterType((*QueryClubByIDRsp)(nil), "pbclub.QueryClubByIDRsp")
+	proto.RegisterType((*SubClubChange)(nil), "pbclub.SubClubChange")
+	proto.RegisterType((*BriefInfo)(nil), "pbclub.BriefInfo")
 	proto.RegisterType((*ClubList)(nil), "pbclub.ClubList")
-	proto.RegisterType((*QueryClubByMemberReq)(nil), "pbclub.QueryClubByMemberReq")
-	proto.RegisterType((*QueryClubByMemberRsp)(nil), "pbclub.QueryClubByMemberRsp")
+	proto.RegisterType((*ClubChangeInfo)(nil), "pbclub.ClubChangeInfo")
 	proto.RegisterType((*CreateClubReq)(nil), "pbclub.CreateClubReq")
 	proto.RegisterType((*CreateClubRsp)(nil), "pbclub.CreateClubRsp")
-	proto.RegisterType((*RemoveClubReq)(nil), "pbclub.RemoveClubReq")
-	proto.RegisterType((*RemoveClubRsp)(nil), "pbclub.RemoveClubRsp")
 	proto.RegisterType((*UpdateClubReq)(nil), "pbclub.UpdateClubReq")
 	proto.RegisterType((*UpdateClubRsp)(nil), "pbclub.UpdateClubRsp")
-	proto.RegisterType((*JoinClubReq)(nil), "pbclub.JoinClubReq")
-	proto.RegisterType((*JoinClubRsp)(nil), "pbclub.JoinClubRsp")
+	proto.RegisterType((*UpdateClubNoticeReq)(nil), "pbclub.UpdateClubNoticeReq")
+	proto.RegisterType((*UpdateClubNoticeRsp)(nil), "pbclub.UpdateClubNoticeRsp")
+	proto.RegisterType((*RemoveClubReq)(nil), "pbclub.RemoveClubReq")
+	proto.RegisterType((*RemoveClubRsp)(nil), "pbclub.RemoveClubRsp")
+	proto.RegisterType((*QueryClubByIDReq)(nil), "pbclub.QueryClubByIDReq")
+	proto.RegisterType((*QueryClubByIDRsp)(nil), "pbclub.QueryClubByIDRsp")
+	proto.RegisterType((*QueryClubMemberReq)(nil), "pbclub.QueryClubMemberReq")
+	proto.RegisterType((*QueryClubMemberRsp)(nil), "pbclub.QueryClubMemberRsp")
+	proto.RegisterType((*AgreeClubLawReq)(nil), "pbclub.AgreeClubLawReq")
+	proto.RegisterType((*AgreeClubLawRsp)(nil), "pbclub.AgreeClubLawRsp")
 	proto.RegisterType((*ExitClubReq)(nil), "pbclub.ExitClubReq")
 	proto.RegisterType((*ExitClubRsp)(nil), "pbclub.ExitClubRsp")
-	proto.RegisterType((*QueryClubDeskReq)(nil), "pbclub.QueryClubDeskReq")
-	proto.RegisterType((*QueryClubDeskRsp)(nil), "pbclub.QueryClubDeskRsp")
+	proto.RegisterType((*DealMemberIdentityReq)(nil), "pbclub.DealMemberIdentityReq")
+	proto.RegisterType((*DealMemberIdentityRsp)(nil), "pbclub.DealMemberIdentityRsp")
+	proto.RegisterType((*JoinClubReq)(nil), "pbclub.JoinClubReq")
+	proto.RegisterType((*JoinClubRsp)(nil), "pbclub.JoinClubRsp")
+	proto.RegisterType((*InviteJoinClubReq)(nil), "pbclub.InviteJoinClubReq")
+	proto.RegisterType((*InviteJoinClubRsp)(nil), "pbclub.InviteJoinClubRsp")
+	proto.RegisterType((*TransferMasterReq)(nil), "pbclub.TransferMasterReq")
+	proto.RegisterType((*TransferMasterRsp)(nil), "pbclub.TransferMasterRsp")
+	proto.RegisterType((*AckClubEmailReq)(nil), "pbclub.AckClubEmailReq")
+	proto.RegisterType((*AckClubEmailRsp)(nil), "pbclub.AckClubEmailRsp")
+	proto.RegisterType((*CyI64)(nil), "pbclub.cyI64")
+	proto.RegisterType((*BatchAckClubEmail)(nil), "pbclub.BatchAckClubEmail")
+	proto.RegisterType((*ClubEmail)(nil), "pbclub.ClubEmail")
+	proto.RegisterType((*ClubEmailChangeInfo)(nil), "pbclub.ClubEmailChangeInfo")
+	proto.RegisterType((*ClubEmailReq)(nil), "pbclub.ClubEmailReq")
+	proto.RegisterType((*ClubEmailRsp)(nil), "pbclub.ClubEmailRsp")
 }
 
 func init() { proto.RegisterFile("club/club.proto", fileDescriptor_47c5ad7bb8a580e2) }
 
 var fileDescriptor_47c5ad7bb8a580e2 = []byte{
-	// 597 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xc4, 0x95, 0xd1, 0x6e, 0xda, 0x30,
-	0x14, 0x86, 0x15, 0x12, 0x28, 0x1c, 0x4a, 0xcb, 0xac, 0xa9, 0x8a, 0xd0, 0x34, 0x21, 0x6b, 0x9b,
-	0x72, 0x05, 0x15, 0x7b, 0x82, 0x0e, 0xa6, 0x35, 0xa8, 0xa5, 0xab, 0x25, 0xae, 0xa7, 0x04, 0xdc,
-	0x2e, 0x1a, 0x89, 0xd3, 0xc4, 0x4c, 0xe3, 0x35, 0xf6, 0x20, 0x7b, 0x88, 0x5d, 0xec, 0xb9, 0xa6,
-	0x63, 0xa7, 0x90, 0x30, 0x5a, 0x81, 0x40, 0xda, 0x0d, 0xf1, 0xf1, 0xb1, 0xff, 0x7c, 0xe7, 0xf8,
-	0xc7, 0x81, 0xd3, 0xc9, 0x6c, 0xee, 0x77, 0xf1, 0xa7, 0x13, 0x27, 0x42, 0x0a, 0x52, 0x89, 0x7d,
-	0x8c, 0x5a, 0xaf, 0x26, 0x8b, 0xee, 0xbd, 0x17, 0xf2, 0x6e, 0xec, 0x77, 0x27, 0x22, 0x0c, 0x45,
-	0xd4, 0xfd, 0xca, 0xbd, 0xa9, 0x5e, 0xd5, 0x7a, 0xfd, 0x6f, 0x56, 0x3f, 0x74, 0x9e, 0xfe, 0x34,
-	0xe0, 0xa4, 0x3f, 0x9b, 0xfb, 0xd7, 0x3c, 0xf4, 0x79, 0xe2, 0x46, 0x77, 0x82, 0x9c, 0x41, 0x65,
-	0x9c, 0xf2, 0xc4, 0x1d, 0xd8, 0x46, 0xdb, 0x70, 0x2c, 0x96, 0x45, 0xa4, 0x05, 0x55, 0x1c, 0x8d,
-	0xbc, 0x90, 0xdb, 0xa5, 0xb6, 0xe1, 0xd4, 0xd8, 0x32, 0x26, 0x36, 0x1c, 0x7d, 0x4e, 0xc4, 0x5d,
-	0x30, 0xe3, 0xb6, 0xa9, 0x52, 0x8f, 0x21, 0xaa, 0xdd, 0x44, 0xb3, 0x20, 0xe2, 0xb6, 0xd5, 0x36,
-	0x9c, 0x32, 0xcb, 0x22, 0x54, 0x73, 0xa7, 0x3c, 0x92, 0x81, 0x5c, 0xd8, 0x65, 0x95, 0x59, 0xc6,
-	0xf4, 0x97, 0x01, 0x55, 0x84, 0x52, 0x38, 0x27, 0x50, 0xca, 0x50, 0x4c, 0x56, 0x72, 0x07, 0x84,
-	0x80, 0x95, 0x43, 0x50, 0x63, 0x42, 0xe1, 0xf8, 0xda, 0x4b, 0x25, 0x4f, 0x32, 0x70, 0x53, 0x81,
-	0x17, 0xe6, 0x10, 0x64, 0x24, 0x64, 0x30, 0xd1, 0x20, 0x35, 0x96, 0x45, 0xa4, 0x09, 0xe6, 0x45,
-	0x72, 0xaf, 0x18, 0x6a, 0x0c, 0x87, 0xe4, 0x1c, 0x8e, 0x74, 0x3b, 0x52, 0xbb, 0xd2, 0x36, 0x9d,
-	0x7a, 0xef, 0xac, 0xa3, 0x7b, 0xdd, 0x29, 0x76, 0x8a, 0x3d, 0x2e, 0xa3, 0xb7, 0xd0, 0xbc, 0x9d,
-	0xf3, 0x64, 0x81, 0xf9, 0x0f, 0x0b, 0x77, 0xc0, 0xf8, 0x03, 0x79, 0x0b, 0xd6, 0x25, 0xf7, 0xa6,
-	0x8a, 0xbc, 0xde, 0x7b, 0x81, 0x12, 0xba, 0xf1, 0x8c, 0x3f, 0x60, 0x82, 0xa9, 0x34, 0x62, 0xa9,
-	0x52, 0x07, 0xaa, 0x20, 0x93, 0x65, 0x11, 0xfd, 0xb2, 0x2e, 0x99, 0xc6, 0xcf, 0x48, 0xa6, 0x71,
-	0x4e, 0xf2, 0x0d, 0x58, 0x88, 0xa7, 0x04, 0xeb, 0xbd, 0x66, 0x1e, 0x5e, 0x61, 0xab, 0x2c, 0x3d,
-	0xd7, 0x3d, 0xbe, 0x0a, 0x52, 0x89, 0x3b, 0xf0, 0x69, 0x1b, 0xaa, 0xdc, 0x0d, 0x3b, 0x30, 0x4b,
-	0xc7, 0xf0, 0x32, 0x87, 0xa4, 0x6b, 0xdf, 0xad, 0xd2, 0xec, 0x78, 0x4a, 0x79, 0x5f, 0x51, 0xbe,
-	0x49, 0x76, 0xfb, 0x6a, 0xdf, 0x41, 0x19, 0x19, 0xd3, 0x4d, 0xe5, 0x22, 0x36, 0xd3, 0x69, 0xfa,
-	0xdb, 0x80, 0x46, 0x3f, 0xe1, 0x9e, 0xe4, 0x98, 0xd9, 0x81, 0x7b, 0x93, 0xe1, 0x56, 0x66, 0x32,
-	0x37, 0x99, 0xc9, 0x5a, 0x99, 0x89, 0xc2, 0xb1, 0x9b, 0x5e, 0xcc, 0xa5, 0xd0, 0xef, 0x56, 0x3e,
-	0xab, 0xb2, 0xc2, 0x1c, 0x71, 0xe0, 0xd4, 0x4d, 0xfb, 0xf3, 0x54, 0x8a, 0xf0, 0x93, 0x17, 0x72,
-	0x54, 0xa8, 0xa8, 0x65, 0xeb, 0xd3, 0x34, 0x2e, 0xd4, 0xb0, 0x7d, 0x93, 0x08, 0x58, 0x7d, 0x31,
-	0xd5, 0x35, 0x94, 0x99, 0x1a, 0x2f, 0x6d, 0x62, 0x3e, 0x6b, 0x93, 0x11, 0x34, 0x18, 0x0f, 0xc5,
-	0xf7, 0x5d, 0xbb, 0xf6, 0x94, 0xaf, 0x87, 0x05, 0xbd, 0xbd, 0x2a, 0xa0, 0x7f, 0x0c, 0x68, 0x8c,
-	0xe3, 0xe9, 0xee, 0x47, 0xfa, 0x04, 0xdc, 0x7f, 0x3b, 0xd6, 0x61, 0xa1, 0x8e, 0xfd, 0x9a, 0x72,
-	0x05, 0xf5, 0xa1, 0x08, 0xa2, 0x03, 0x1d, 0xd7, 0x65, 0x4e, 0x6d, 0x6f, 0xae, 0x8f, 0x3f, 0x02,
-	0x79, 0x38, 0xae, 0xa5, 0xda, 0x7e, 0x5c, 0x41, 0xee, 0xa2, 0x1d, 0xf0, 0xf4, 0xdb, 0x61, 0x6c,
-	0x74, 0x13, 0xcb, 0x40, 0x44, 0xca, 0x46, 0xf8, 0xcd, 0x53, 0x11, 0x9d, 0xac, 0xbf, 0x6a, 0x7b,
-	0x72, 0x07, 0xca, 0xb8, 0x03, 0x6f, 0x39, 0xbc, 0xa2, 0xc9, 0x6a, 0x1d, 0x4e, 0xab, 0xff, 0xab,
-	0x5e, 0xe0, 0x57, 0xd4, 0x87, 0xfd, 0xfd, 0xdf, 0x00, 0x00, 0x00, 0xff, 0xff, 0x9e, 0x17, 0xa4,
-	0x09, 0x31, 0x08, 0x00, 0x00,
+	// 1106 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x58, 0x4b, 0x6f, 0xdb, 0x46,
+	0x10, 0x06, 0x1f, 0x92, 0xa9, 0x51, 0xfc, 0xa2, 0xdb, 0x80, 0x30, 0x02, 0x57, 0x58, 0x34, 0xad,
+	0x02, 0x14, 0x16, 0x9a, 0xa6, 0x45, 0x8f, 0x95, 0x25, 0xb7, 0x61, 0x60, 0x2b, 0xce, 0xca, 0xee,
+	0xb9, 0x94, 0xb4, 0x96, 0x89, 0xf0, 0xa1, 0x70, 0xa9, 0xa4, 0x02, 0xfa, 0x17, 0xda, 0x1e, 0x7a,
+	0xed, 0xb1, 0xf9, 0x39, 0xfd, 0x4f, 0xc5, 0x3e, 0x48, 0xae, 0x68, 0xd7, 0x55, 0x4a, 0x5e, 0x2c,
+	0xce, 0xcc, 0xee, 0xcc, 0xf7, 0xcd, 0xcc, 0xee, 0x4e, 0x02, 0xbb, 0xd3, 0x60, 0x39, 0xe9, 0xb1,
+	0x3f, 0xc7, 0x8b, 0x24, 0x4e, 0x63, 0xbb, 0xb9, 0x98, 0x30, 0xe9, 0xf0, 0xd1, 0x74, 0xd5, 0x9b,
+	0x7b, 0x21, 0xe9, 0x2d, 0x26, 0xbd, 0x69, 0x1c, 0x86, 0x71, 0xd4, 0xbb, 0x21, 0xde, 0x4c, 0xac,
+	0x3a, 0x3c, 0xba, 0x6d, 0x15, 0x3f, 0xc2, 0x8e, 0xfe, 0xd2, 0x00, 0xce, 0x49, 0x38, 0x21, 0x89,
+	0x1b, 0x5d, 0xc7, 0xf6, 0x43, 0x68, 0x5e, 0x51, 0x92, 0xb8, 0x43, 0x47, 0xeb, 0x68, 0x5d, 0x13,
+	0x4b, 0xc9, 0x3e, 0x04, 0xcb, 0x9d, 0x91, 0x28, 0xf5, 0xd3, 0x95, 0xa3, 0x77, 0xb4, 0x6e, 0x03,
+	0xe7, 0xb2, 0xfd, 0x11, 0x34, 0xfa, 0xf3, 0x84, 0x10, 0xa7, 0xd9, 0xd1, 0xba, 0x16, 0x16, 0x02,
+	0xdb, 0xc1, 0xf6, 0x8e, 0xbc, 0x90, 0x38, 0x46, 0x47, 0xeb, 0xb6, 0x70, 0x2e, 0xdb, 0x0e, 0x6c,
+	0x5d, 0x24, 0xf1, 0xb5, 0x1f, 0x10, 0xc7, 0xe4, 0xa6, 0x4c, 0x64, 0xf1, 0x5f, 0x46, 0x81, 0x1f,
+	0x11, 0xa7, 0xc1, 0xa3, 0x48, 0x09, 0xfd, 0xa6, 0x81, 0x75, 0xe2, 0x51, 0xc2, 0x41, 0xda, 0x60,
+	0x72, 0xb7, 0x1a, 0xdf, 0xcb, 0xbf, 0x6d, 0x04, 0x0f, 0x5c, 0xda, 0x5f, 0xa6, 0xf1, 0x20, 0x21,
+	0x5e, 0x4a, 0x38, 0x48, 0x0b, 0xaf, 0xe9, 0xec, 0x2e, 0xec, 0xba, 0x74, 0xb0, 0xa4, 0x69, 0x1c,
+	0xfe, 0xe0, 0x85, 0xa4, 0x9f, 0xcc, 0x39, 0x32, 0x0b, 0x97, 0xd5, 0x76, 0x07, 0xda, 0x2e, 0x3d,
+	0xf7, 0x68, 0x4a, 0x92, 0x0b, 0x6f, 0xc5, 0x41, 0x5a, 0x58, 0x55, 0xa1, 0x3f, 0x34, 0x68, 0x0f,
+	0x09, 0x7d, 0x3d, 0x26, 0x69, 0xea, 0x47, 0x73, 0x46, 0x97, 0x6d, 0x56, 0x70, 0xe5, 0xb2, 0xfd,
+	0x19, 0xec, 0x48, 0xc7, 0xe7, 0x74, 0xce, 0x57, 0xe8, 0x7c, 0x45, 0x49, 0xcb, 0xf0, 0x15, 0x9a,
+	0x1f, 0xbd, 0x60, 0x29, 0x32, 0xf7, 0x00, 0x97, 0xd5, 0x2c, 0x4d, 0xa7, 0x91, 0x37, 0x91, 0xf9,
+	0xb3, 0xb0, 0x94, 0xd0, 0xdf, 0x3a, 0x58, 0x83, 0x60, 0x39, 0xe1, 0x69, 0xda, 0x01, 0x5d, 0xd6,
+	0xd1, 0xc0, 0xba, 0x3b, 0x64, 0x29, 0x12, 0xf8, 0x65, 0x85, 0x75, 0x5e, 0xe1, 0x35, 0x9d, 0x7d,
+	0x04, 0x20, 0x64, 0xa5, 0x6e, 0x8a, 0xe6, 0x9e, 0xca, 0x7d, 0x0a, 0x26, 0x2b, 0x10, 0xaf, 0x5b,
+	0xfb, 0xe9, 0xde, 0xb1, 0xe8, 0xce, 0xe3, 0xac, 0x68, 0x98, 0x5b, 0x19, 0xf0, 0x51, 0x9c, 0xfa,
+	0x53, 0xd1, 0x2c, 0x2d, 0x2c, 0x25, 0xfb, 0x11, 0xb4, 0x44, 0x17, 0x0e, 0xa2, 0xd4, 0xd9, 0xe2,
+	0xa5, 0x2f, 0x14, 0xcc, 0x2a, 0xfa, 0x80, 0x59, 0x2d, 0x61, 0xcd, 0x15, 0x76, 0x4f, 0xa4, 0xbe,
+	0x9f, 0xcc, 0xa9, 0xd3, 0xea, 0x18, 0xdd, 0xf6, 0xd3, 0x83, 0x2c, 0xba, 0x52, 0x21, 0x9c, 0x2f,
+	0xb2, 0xbb, 0xd0, 0x60, 0x06, 0xea, 0x00, 0x5f, 0x6d, 0xb3, 0xd5, 0xe2, 0x4c, 0x30, 0x35, 0x47,
+	0x2b, 0x16, 0xa0, 0x27, 0xb0, 0x3d, 0x5e, 0x4e, 0x58, 0x46, 0x07, 0x37, 0x5e, 0x34, 0xe7, 0xfc,
+	0xc7, 0xcb, 0xc9, 0xcb, 0xe4, 0x2a, 0xe2, 0x89, 0x6d, 0xe0, 0x4c, 0x44, 0x21, 0xb4, 0x4e, 0x12,
+	0x9f, 0x5c, 0xdf, 0x99, 0xfa, 0xac, 0x63, 0x75, 0xa5, 0x63, 0x95, 0x54, 0x1a, 0xeb, 0xa9, 0x2c,
+	0x17, 0xca, 0xbc, 0x5d, 0x28, 0xf4, 0xa5, 0x28, 0xf4, 0x99, 0x4f, 0x53, 0xfb, 0x31, 0x98, 0xec,
+	0xd7, 0xd1, 0x38, 0x9d, 0xfd, 0x3c, 0xf5, 0x19, 0x1c, 0xcc, 0xcd, 0xc8, 0x83, 0x9d, 0x82, 0x09,
+	0x87, 0xb9, 0x07, 0xc6, 0xe5, 0x6a, 0x21, 0x99, 0xb0, 0x4f, 0xe5, 0xfc, 0xeb, 0x6b, 0xe7, 0xff,
+	0x31, 0x98, 0x6c, 0x07, 0x47, 0x7a, 0x77, 0x08, 0xf6, 0x17, 0xfd, 0xaa, 0xc1, 0xb6, 0x38, 0x6c,
+	0x2c, 0x12, 0x26, 0x6f, 0xd8, 0xc6, 0xe7, 0xc4, 0x9b, 0xf1, 0x18, 0x72, 0xa3, 0x48, 0x35, 0x26,
+	0x6f, 0x98, 0x01, 0x73, 0x73, 0xde, 0x3d, 0xfa, 0xbd, 0xdd, 0xa3, 0x56, 0xda, 0xd8, 0xa0, 0xd2,
+	0xe8, 0xc5, 0x1a, 0x1c, 0xba, 0xb8, 0x07, 0x0e, 0x5d, 0x28, 0x70, 0x6c, 0x30, 0x07, 0xf1, 0x8c,
+	0xc8, 0xab, 0x8e, 0x7f, 0xa3, 0xf7, 0x1a, 0x6c, 0x5f, 0x2d, 0x66, 0x1f, 0xce, 0xed, 0x21, 0x34,
+	0xf9, 0x99, 0x14, 0x39, 0x35, 0xb0, 0x94, 0x72, 0xce, 0xc6, 0xc6, 0x9c, 0xcd, 0x0d, 0x39, 0x2b,
+	0x30, 0xab, 0x71, 0x0e, 0xe0, 0xa0, 0xf0, 0x25, 0x8e, 0x6a, 0x0d, 0xc4, 0x8b, 0x4b, 0xc0, 0x50,
+	0x2f, 0x01, 0x74, 0x71, 0x47, 0xb4, 0x6a, 0xf8, 0x47, 0xb0, 0x8d, 0x49, 0x18, 0xbf, 0xad, 0xa9,
+	0x64, 0x2c, 0xb7, 0x8a, 0xbf, 0x6a, 0xd8, 0x5e, 0xc1, 0xde, 0xab, 0x25, 0x49, 0x56, 0xcc, 0xd5,
+	0xc9, 0xca, 0x1d, 0xd6, 0x00, 0xef, 0xbd, 0x56, 0xf6, 0x59, 0x09, 0x22, 0xeb, 0x50, 0xe5, 0xd4,
+	0xe7, 0x1d, 0x9a, 0xbd, 0x30, 0xe2, 0xd0, 0x17, 0xef, 0xbf, 0x59, 0x7a, 0xff, 0xf3, 0x89, 0xa1,
+	0xb1, 0x3e, 0x31, 0xa0, 0x31, 0xd8, 0x39, 0x4c, 0x71, 0xcb, 0xd7, 0x40, 0xde, 0xbf, 0xed, 0x74,
+	0x73, 0xf6, 0x5f, 0xc0, 0x96, 0xd8, 0x43, 0x1d, 0xbd, 0x78, 0x14, 0x18, 0xd9, 0x62, 0x38, 0xc2,
+	0xd9, 0x12, 0x74, 0x01, 0xbb, 0x9c, 0x24, 0xbf, 0x81, 0xbd, 0x77, 0x35, 0x80, 0xff, 0xb6, 0xe4,
+	0x71, 0x63, 0xe4, 0xe8, 0x0c, 0xda, 0xa7, 0x3f, 0xfb, 0x69, 0x4d, 0x0d, 0xfe, 0x5c, 0xf1, 0x56,
+	0xad, 0xbd, 0xff, 0xd4, 0xe0, 0xe3, 0x21, 0xf1, 0x02, 0x99, 0x3f, 0x59, 0xfa, 0x7a, 0x6e, 0x0f,
+	0xf9, 0x44, 0x19, 0xff, 0x3a, 0xa2, 0x9a, 0xa5, 0x11, 0x75, 0x0f, 0x8c, 0x21, 0x09, 0x78, 0x1f,
+	0x5a, 0x98, 0x7d, 0x22, 0x7c, 0x27, 0xba, 0x6a, 0x94, 0xcf, 0xa0, 0xfd, 0x22, 0xf6, 0xa3, 0xfa,
+	0x4a, 0x91, 0x7b, 0xab, 0x7a, 0x8b, 0xef, 0xbb, 0xd1, 0x5b, 0x3f, 0x25, 0xf5, 0xa1, 0x63, 0xd3,
+	0x8b, 0xf0, 0x49, 0x64, 0x19, 0x32, 0x11, 0x8d, 0x6e, 0x45, 0xab, 0x86, 0xfe, 0x17, 0xd8, 0xbf,
+	0x4c, 0xbc, 0x88, 0x5e, 0x93, 0x44, 0x4c, 0x40, 0x35, 0xa0, 0xef, 0xc2, 0xee, 0x88, 0xbc, 0x5b,
+	0x1b, 0xb2, 0x04, 0x8b, 0xb2, 0x9a, 0xb1, 0x29, 0x45, 0xaf, 0xc6, 0x26, 0x82, 0xdd, 0xfe, 0xf4,
+	0x35, 0x83, 0x71, 0x1a, 0x7a, 0x7e, 0xf0, 0x01, 0x5c, 0x8e, 0x00, 0xf8, 0x96, 0x73, 0x3a, 0xcf,
+	0xf9, 0x28, 0x9a, 0xe2, 0x1a, 0x36, 0x94, 0x6b, 0x18, 0x9d, 0x95, 0xe2, 0x55, 0x43, 0xff, 0x39,
+	0x34, 0xa6, 0x2b, 0xf7, 0x9b, 0x67, 0x25, 0x30, 0x5a, 0x19, 0x0c, 0x7a, 0x06, 0xfb, 0x27, 0x5e,
+	0x3a, 0xbd, 0x51, 0x63, 0xdb, 0x9f, 0x80, 0xe1, 0xce, 0xa8, 0x1c, 0x53, 0xb7, 0xb3, 0x0b, 0x96,
+	0x3b, 0xc4, 0xcc, 0x82, 0x7e, 0xd7, 0xa0, 0x55, 0x2c, 0x2f, 0x0f, 0xd1, 0x87, 0x60, 0x8d, 0x49,
+	0x34, 0xbb, 0xf4, 0xe5, 0x20, 0x6d, 0xe0, 0x5c, 0xce, 0x26, 0x59, 0xa3, 0x98, 0x64, 0x1d, 0xd8,
+	0x1a, 0xc4, 0x51, 0x4a, 0xa2, 0x34, 0xfb, 0x97, 0x8a, 0x14, 0x19, 0xb1, 0xef, 0x03, 0x6f, 0x2e,
+	0x5f, 0x25, 0xfe, 0xad, 0x34, 0x4a, 0x73, 0xed, 0x10, 0x7e, 0x07, 0x07, 0x39, 0x20, 0x65, 0x70,
+	0x7e, 0x02, 0x4d, 0xae, 0xa2, 0xe5, 0x99, 0xbb, 0x48, 0xb4, 0x5c, 0x80, 0xbe, 0x86, 0x07, 0xff,
+	0xa3, 0xda, 0xe8, 0x27, 0x75, 0xdb, 0xe6, 0x45, 0x2b, 0x80, 0xe9, 0xff, 0x01, 0x6c, 0xd2, 0xe4,
+	0xff, 0x01, 0xf0, 0xd5, 0x3f, 0x01, 0x00, 0x00, 0xff, 0xff, 0x2b, 0x89, 0x0f, 0xf9, 0x59, 0x10,
+	0x00, 0x00,
 }

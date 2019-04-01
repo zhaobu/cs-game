@@ -130,7 +130,7 @@ func (d *Desk) doAction(uid uint64, actionName string, actionValue []byte) {
 
 	chairId := d.GetChairidByUid(uid)
 	if -1 == chairId {
-		log.Trace("can find chairId by uid%d", uid)
+		log.Infof("can find chairId by uid%d", uid)
 		return
 	}
 	switch v := pb.(type) {
@@ -208,7 +208,7 @@ func (d *Desk) set_timer(tID mj.EmtimerID, dura time.Duration, f func()) {
 
 func (d *Desk) cancel_timer(tID mj.EmtimerID) {
 	if t, ok := d.timerManger[tID]; ok == false {
-		log.Tracef("取消定时器时定时器不存在")
+		log.Infof("取消定时器时定时器不存在")
 		return
 	} else {
 		t.Stop()

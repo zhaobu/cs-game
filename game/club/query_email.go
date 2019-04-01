@@ -11,23 +11,23 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func (p *club) QueryClubByMemberReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
+func (p *club) ClubEmailReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
 		logrus.Error(err.Error())
 		return err
 	}
 
-	req, ok := pb.(*pbclub.QueryClubByMemberReq)
+	req, ok := pb.(*pbclub.ClubEmailReq)
 	if !ok {
-		err = fmt.Errorf("not *pbclub.QueryClubByMemberReq")
+		err = fmt.Errorf("not *pbclub.ClubEmailReq")
 		logrus.Error(err.Error())
 		return
 	}
 
 	logrus.Infof("recv %s %+v", args.Name, req)
 
-	rsp := &pbclub.QueryClubByMemberRsp{}
+	rsp := &pbclub.ClubEmailRsp{}
 	if req.Head != nil {
 		rsp.Head = &pbcommon.RspHead{Seq: req.Head.Seq}
 	}
@@ -37,16 +37,23 @@ func (p *club) QueryClubByMemberReq(ctx context.Context, args *codec.Message, re
 		if err != nil {
 			logrus.Error(err.Error())
 		}
+
 	}()
 
-	clubDbs, err := mgo.QueryClubByMember(req.UserID)
+	ces, err := mgo.QueryUserEmail(args.UserID)
 	if err != nil {
-		return
+		return nil
 	}
-	rsp.Infos = &pbclub.ClubList{}
 
-	for _, v := range clubDbs {
-		rsp.Infos.List = append(rsp.Infos.List, clubDb2ClubInfo(v))
+	for _, ce := range ces {
+		rsp.Emails = append(rsp.Emails, &pbclub.ClubEmail{
+			ID:       ce.ID,
+			SendTime: ce.SendTime,
+			Typ:      ce.Typ,
+			Content:  ce.Content,
+			Flag:     ce.Flag,
+			ClubID:   ce.ClubID,
+		})
 	}
 
 	return

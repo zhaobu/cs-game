@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"cy/game/codec"
-	"cy/game/db/mgo"
 	"cy/game/pb/club"
 	"cy/game/pb/common"
 	"fmt"
@@ -11,27 +10,26 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func (p *club) ExitClubReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
+func (p *club) AgreeClubLawReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
 		logrus.Error(err.Error())
 		return err
 	}
 
-	req, ok := pb.(*pbclub.ExitClubReq)
+	req, ok := pb.(*pbclub.AgreeClubLawReq)
 	if !ok {
-		err = fmt.Errorf("not *pbclub.ExitClubReq")
+		err = fmt.Errorf("not *pbclub.AgreeClubLawReq")
 		logrus.Error(err.Error())
 		return
 	}
 
 	logrus.Infof("recv %s %+v", args.Name, req)
 
-	rsp := &pbclub.ExitClubRsp{}
+	rsp := &pbclub.AgreeClubLawRsp{}
 	if req.Head != nil {
 		rsp.Head = &pbcommon.RspHead{Seq: req.Head.Seq}
 	}
-	rsp.Code = 2
 
 	defer func() {
 		err = toGateNormal(rsp, args.UserID)
@@ -40,11 +38,17 @@ func (p *club) ExitClubReq(ctx context.Context, args *codec.Message, reply *code
 		}
 	}()
 
-	_, err = mgo.ExitClub(req.ClubID, args.UserID)
-	if err != nil {
+	cc := getClub(req.ClubID)
+	if cc == nil {
 		return
 	}
-	rsp.Code = 1
+
+	cc.Lock()
+	if v, find := cc.Members[args.UserID]; find {
+		v.Agree = true
+	}
+	cc.noCommit = true
+	cc.Unlock()
 
 	return
 }

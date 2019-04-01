@@ -4,7 +4,7 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 )
 
 //card_def文件写对牌的定义
@@ -43,13 +43,13 @@ var threePlayerCardDef = []int32{}
 var twoPlayerCardDef = []int32{}
 
 var (
-	log *logrus.Entry //majiang package的log
+	log *zap.SugaredLogger //majiang package的log
 )
 
 type CardDef struct {
 }
 
-func (self *CardDef) Init(logptr *logrus.Entry) {
+func (self *CardDef) Init(logptr *zap.SugaredLogger) {
 	log = logptr
 }
 

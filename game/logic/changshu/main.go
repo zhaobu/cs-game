@@ -2,6 +2,7 @@ package main
 
 import (
 	"cy/game/cache"
+	zaplog "cy/game/common/logger"
 	"cy/game/db/mgo"
 	"cy/game/logic/tpl"
 	"cy/game/util"
@@ -11,9 +12,9 @@ import (
 	"time"
 
 	metrics "github.com/rcrowley/go-metrics"
-	"github.com/sirupsen/logrus"
 	"github.com/smallnest/rpcx/server"
 	"github.com/smallnest/rpcx/serverplugin"
+	"go.uber.org/zap"
 )
 
 const (
@@ -21,61 +22,74 @@ const (
 )
 
 var (
-	consulAddr = flag.String("consulAddr", "192.168.1.128:8500", "consul address")
+	consulAddr = flag.String("consulAddr", "192.168.0.90:8500", "consul address")
 	basePath   = flag.String("base", "/cy_game", "consul prefix path")
 	addr       = flag.String("addr", "localhost:9601", "listen address")
 	release    = flag.Bool("release", false, "run mode")
-	redisAddr  = flag.String("redisAddr", "192.168.1.128:6379", "redis address")
+	redisAddr  = flag.String("redisAddr", "192.168.0.90:6379", "redis address")
 	redisDb    = flag.Int("redisDb", 1, "redis db select")
-	mgoURI     = flag.String("mgo", "mongodb://192.168.1.128:27017/game", "mongo connection URI")
+	mgoURI     = flag.String("mgo", "mongodb://192.168.0.90:27017/game", "mongo connection URI")
 
-	log *logrus.Entry
+	log  *zap.SugaredLogger //printf风格
+	tlog *zap.Logger        //field风格
 )
 
 type mjcs struct {
 	tpl.RoundTpl
 }
 
+// func initLogrus() {
+// 	l := logrus.New()
+// 	l.SetFormatter(&logrus.JSONFormatter{})
+// 	if *release {
+// 		logName := fmt.Sprintf("%s_%d_%d.log", gameName, os.Getpid(), time.Now().Unix())
+// 		file, err := os.OpenFile(logName, os.O_CREATE|os.O_WRONLY, 0666)
+// 		if err == nil {
+// 			l.SetOutput(file)
+// 		} else {
+// 			panic(err)
+// 		}
+// 	} else {
+// 		l.SetLevel(logrus.TraceLevel)
+// 		logName := fmt.Sprintf("./log/%s.log", gameName)
+// 		file, err := os.OpenFile(logName, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
+// 		if err == nil {
+// 			l.SetOutput(file)
+// 		} else {
+// 			panic(err)
+// 		}
+// 	}
+
+// 	// hook, err := logrus_influxdb.NewInfluxDB(&logrus_influxdb.Config{
+// 	// 	Host:          "192.168.0.90", // TODO
+// 	// 	Port:          8086,
+// 	// 	Database:      "cygame",
+// 	// 	Precision:     "ns",
+// 	// 	Tags:          []string{"serverid", "deskid", "uid"},
+// 	// 	BatchInterval: (5 * time.Second),
+// 	// 	Measurement:   gameName,
+// 	// 	BatchCount:    0, // set to "0" to disable batching
+// 	// })
+
+// 	// if err == nil {
+// 	// 	l.Hooks.Add(hook)
+// 	// }
+
+// 	log = l.WithFields(logrus.Fields{})
+// }
+
 func initLog() {
-	l := logrus.New()
-	l.SetFormatter(&logrus.JSONFormatter{})
+	var logName, logLevel string
 	if *release {
-		logName := fmt.Sprintf("%s_%d_%d.log", gameName, os.Getpid(), time.Now().Unix())
-		file, err := os.OpenFile(logName, os.O_CREATE|os.O_WRONLY, 0666)
-		if err == nil {
-			l.SetOutput(file)
-		} else {
-			panic(err)
-		}
+		logLevel = "info"
+		logName = fmt.Sprintf("%s_%d_%d.log", gameName, os.Getpid(), time.Now().Unix())
 	} else {
-		l.SetLevel(logrus.TraceLevel)
-		logName := fmt.Sprintf("./log/%s.log", gameName)
-		file, err := os.OpenFile(logName, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
-		if err == nil {
-			l.SetOutput(file)
-		} else {
-			panic(err)
-		}
+		logLevel = "debug"
+		logName = fmt.Sprintf("./log/%s.log", gameName)
 	}
-
-	// hook, err := logrus_influxdb.NewInfluxDB(&logrus_influxdb.Config{
-	// 	Host:          "192.168.1.128", // TODO
-	// 	Port:          8086,
-	// 	Database:      "cygame",
-	// 	Precision:     "ns",
-	// 	Tags:          []string{"serverid", "deskid", "uid"},
-	// 	BatchInterval: (5 * time.Second),
-	// 	Measurement:   gameName,
-	// 	BatchCount:    0, // set to "0" to disable batching
-	// })
-
-	// if err == nil {
-	// 	l.Hooks.Add(hook)
-	// }
-
-	log = l.WithFields(logrus.Fields{})
+	tlog = zaplog.InitLogger(logName, logLevel, !*release)
+	log = tlog.Sugar()
 }
-
 func main() {
 	flag.Parse()
 
@@ -92,6 +106,7 @@ func main() {
 
 	var cs mjcs
 	cs.Log = log
+	cs.Tlog = tlog
 	cs.RoundTpl.InitRedis(*redisAddr, *redisDb)
 	cs.RoundTpl.SetName(gameName, *addr)
 	cs.SetPlugin(&cs)
@@ -113,6 +128,7 @@ func main() {
 
 	s := server.NewServer()
 	addRegistryPlugin(s)
+	log.Infof("gameserver %s 启动成功", gameName)
 
 	s.RegisterName("game/"+gameName, &cs.RoundTpl, "")
 	err = s.Serve("tcp", *addr)

@@ -34,7 +34,7 @@ message QueryGameConfigReq {
 	pbcommon.ReqHead Head = 1;
     string GameName = 2;
     // 1匹配 2好友 3比赛
-    int32 Type = 3; 
+    int32 Type = 3;
 }
 
 message QueryGameConfigRsp {
@@ -117,7 +117,7 @@ message ExitDeskRsp {
 
 // 游戏动作 c -> s
 message GameAction {
-    pbcommon.ReqHead Head = 1;    
+    pbcommon.ReqHead Head = 1;
     string ActionName = 2; // 具体游戏子命令
     bytes ActionValue = 3;
 }

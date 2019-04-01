@@ -10,6 +10,7 @@ import (
 	"cy/game/pb/hall"
 	"cy/game/pb/inner"
 	"cy/game/pb/login"
+	"encoding/json"
 	"fmt"
 	"net"
 	"runtime/debug"
@@ -136,6 +137,8 @@ func (s *session) handleInput() (err error) {
 		}
 
 		s.stop()
+
+		s.notifBackendOnline(false)
 	}()
 
 	var errorTip *pbcommon.ErrorTip
@@ -220,23 +223,25 @@ func (s *session) afterLoginRsp(loginRsp *pblogin.LoginRsp) {
 	s.sendPb(loginRsp) // 客户端要求这个顺序 我也没办法 2
 
 	if s.isLoginSucc {
-		// 通知游戏服，玩家进入游戏
-		if sessInfo.Status == pbcommon.UserStatus_InGameing {
-			cli, err := getGameCli(sessInfo.GameName)
-			if err != nil {
-				return
-			}
+		s.notifBackendOnline(true)
+	}
+}
 
-			ctx := context.Background()
-			ctx = context.WithValue(ctx, "game_id", sessInfo.GameID)
-
-			msg := &codec.Message{}
-			msg.UserID = s.uid
-			msg.Name, msg.Payload, err = protobuf.Marshal(&pbinner.UserLogin{UserID: msg.UserID})
-			if err != nil {
-				return
-			}
-			cli.Call(ctx, "UserLogin", msg, nil)
+func (s *session) notifBackendOnline(online bool) {
+	m := &codec.Message{}
+	ucn := &pbinner.UserChangeNotif{
+		UserID: s.uid,
+	}
+	if online {
+		ucn.Typ = pbinner.UserChangeType_Online
+	} else {
+		ucn.Typ = pbinner.UserChangeType_Offline
+	}
+	err := codec.Pb2Msg(ucn, m)
+	if err == nil {
+		data, err := json.Marshal(m)
+		if err == nil {
+			cache.Pub("inner_broadcast", data)
 		}
 	}
 }

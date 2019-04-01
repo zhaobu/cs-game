@@ -3,7 +3,9 @@ package main
 import (
 	"cy/game/cache"
 	"cy/game/codec"
+	"cy/game/codec/protobuf"
 	"cy/game/db/mgo"
+	"cy/game/pb/inner"
 	"cy/game/util"
 	"encoding/json"
 	"flag"
@@ -22,13 +24,13 @@ import (
 )
 
 var (
-	consulAddr = flag.String("consulAddr", "192.168.1.128:8500", "consul address")
+	consulAddr = flag.String("consulAddr", "192.168.0.90:8500", "consul address")
 	basePath   = flag.String("base", "/cy_game", "consul prefix path")
 	addr       = flag.String("addr", "localhost:9301", "listen address")
 	release    = flag.Bool("release", false, "run mode release")
-	redisAddr  = flag.String("redisaddr", "192.168.1.128:6379", "redis address")
+	redisAddr  = flag.String("redisaddr", "192.168.0.90:6379", "redis address")
 	redisDb    = flag.Int("redisDb", 1, "redis db select")
-	mgoURI     = flag.String("mgo", "mongodb://192.168.1.128:27017/game", "mongo connection URI")
+	mgoURI     = flag.String("mgo", "mongodb://192.168.0.90:27017/game", "mongo connection URI")
 
 	redisPool *redis.Pool
 )
@@ -75,6 +77,8 @@ func main() {
 		return
 	}
 
+	go util.Subscribe(*redisAddr, *redisDb, "inner_broadcast", onMessage)
+
 	redisPool = &redis.Pool{
 		Dial: func() (redis.Conn, error) {
 			c, err := redis.Dial("tcp", *redisAddr)
@@ -94,6 +98,9 @@ func main() {
 		logrus.Error(err.Error())
 		return
 	}
+
+	loadDB()
+	syncDB()
 
 	if *release && *addr == "" {
 		taddr, err := util.AllocListenAddr()
@@ -131,6 +138,10 @@ func addRegistryPlugin(s *server.Server) {
 }
 
 func toGateNormal(pb proto.Message, uids ...uint64) error {
+	if len(uids) == 0 {
+		return nil
+	}
+
 	logrus.WithFields(logrus.Fields{"pb": pb, "to": uids, "name": proto.MessageName(pb)}).Info("send")
 
 	msg := &codec.Message{}
@@ -159,4 +170,33 @@ func toGateNormal(pb proto.Message, uids ...uint64) error {
 		logrus.Error(err.Error())
 	}
 	return err
+}
+
+func onMessage(channel string, data []byte) error {
+	m := &codec.Message{}
+	err := json.Unmarshal(data, m)
+	if err != nil {
+		return err
+	}
+
+	pb, err := protobuf.Unmarshal(m.Name, m.Payload)
+	if err != nil {
+		return err
+	}
+
+	switch v := pb.(type) {
+	case *pbinner.UserChangeNotif:
+		cu := mustGetUserOther(v.UserID)
+		cu.Lock()
+		if v.Typ == pbinner.UserChangeType_Online {
+			cu.Online = 1
+		} else if v.Typ == pbinner.UserChangeType_Offline {
+			cu.Online = 0
+		}
+		cu.Unlock()
+	case *pbinner.DeskChangeNotif:
+		flashDesk(v)
+	}
+
+	return nil
 }

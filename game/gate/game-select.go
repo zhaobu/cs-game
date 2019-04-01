@@ -25,7 +25,7 @@ func (s *gameSelector) Select(ctx context.Context, servicePath, serviceMethod st
 	switch serviceMethod {
 	case "MakeDeskReq", "QueryGameConfigReq":
 		return s.randomSelect()
-	case "QueryDeskInfoReq", "JoinDeskReq", "DestroyDeskReq", "ExitDeskReq", "GameAction", "UserLogin":
+	case "QueryDeskInfoReq", "JoinDeskReq", "DestroyDeskReq", "ExitDeskReq", "GameAction":
 		gameID := ctx.Value("game_id").(string)
 		return gameID
 	default:

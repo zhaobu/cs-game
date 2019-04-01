@@ -4,15 +4,19 @@ import (
 	"cy/game/codec"
 	"cy/game/util"
 	"encoding/json"
+	"time"
 
 	"github.com/sirupsen/logrus"
 )
 
 func subscribeBackend(addr string, db int) {
 	go func() {
-		err := util.Subscribe(addr, db, "backend_to_gate", onGameMsg)
-		if err != nil {
-			logrus.Errorf("subscribe %s", err.Error())
+		for {
+			err := util.Subscribe(addr, db, "backend_to_gate", onGameMsg)
+			if err != nil {
+				logrus.Errorf("subscribe %s", err.Error())
+			}
+			time.Sleep(time.Second * 10)
 		}
 	}()
 }

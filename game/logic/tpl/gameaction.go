@@ -3,18 +3,16 @@ package tpl
 import (
 	"context"
 	"cy/game/codec"
-	"cy/game/pb/game"
+	pbgame "cy/game/pb/game"
 	"fmt"
 	"runtime/debug"
-
-	"github.com/sirupsen/logrus"
 )
 
 func (t *RoundTpl) GameAction(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
 	defer func() {
 		r := recover()
 		if r != nil {
-			t.Log.WithFields(logrus.Fields{"uid": args.UserID}).Warnf("r:%v stack:%s", r, string(debug.Stack()))
+			t.Log.Warnf("recover:uid=%d,stack=%s", args.UserID, string(debug.Stack()))
 		}
 	}()
 

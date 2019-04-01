@@ -8,135 +8,150 @@ package pbclub;
 // 成员信息
 message MemberInfo {
     uint64 UserID = 1;
-    // 身份  1 群主 2 管理员 3 普通成员 4 未通过 5黑名单
+    // 身份  1 群主 2 管理员 3 普通成员 4 审核中 5 黑名单中
     int32 Identity = 2;
+    bool Agree = 6; // 是否同意法律
     string UserName = 3;
     string Profile = 4;
-    // 1 在线 0 不在线
-    int32 Online = 5;    
-    bool Agree = 6;
+    // 在线状态 1 在线 0 不在线
+    int32 Online = 5;
 }
 
 // 基本信息
-message BaseInfo {   
-    string Name = 1;            
+message BaseInfo {
+    string Name = 1;
     bool IsAutoCreate = 2; // 是否自动开房
     bool IsCustomGameArg = 3; // 自定义房间
-    string Notice = 4; // 公告
+    bool IsMasterPay = 4; // 是否群主支付    
 }
 
-// 建房参数
-message GameArg {   
-
+message DeskSetting {
+    string GameName = 1;
+    string GameArgMsgName = 2; // 具体游戏参数 如 pbgame_ddz.RoomArg & pbgame_mj_changshu.CreateArg
+    bytes GameArgMsgValue = 3;
+    bool Enable = 4;
 }
 
 message ClubInfo {
     int64 ID = 1;
     uint64 MasterUserID = 2; // 群主
-    string MasterName = 3;
-    string Profile = 4;
+    string MasterName = 3; // 群主名称
+    string Profile = 4; // 群主头像
     BaseInfo Base = 5;
-    int32 MemberCnt = 6;
-    int32 OnlineCnt = 7;
-    GameArg Arg = 8;
-    repeated pbcommon.DeskInfo Desks = 9;    
+    string Notice = 6; // 公告
+    int32 MemberCnt = 7; // 不适合在这里
+    int32 OnlineCnt = 8; // 不适合在这里
+    repeated DeskSetting GameArgs = 9;
+    repeated pbcommon.DeskInfo Desks = 10;
 }
 
-// ID查询俱乐部信息 c -> s
-message QueryClubByIDReq {
-    pbcommon.ReqHead Head = 1;
-    int64 ClubID = 2;
-}
-message QueryClubByIDRsp {
-    pbcommon.RspHead Head = 1;
-    ClubInfo Info = 2;
-    bool Agree = 3;
-}
-
-// 简单的信息
-message BriefInfo {
-    int64 ID = 1;    
-    string Name = 2;   
-    string Profile = 3;
-    uint64 MasterUserID = 4;
-}
-
-// s -> c
-message ClubList {
-    repeated BriefInfo List = 1;
-}
-
-// c -> s
+// 订阅俱乐部信息 c -> s
 message SubClubChange {
     int32 SubOrUn = 1; // 1 订阅变动通知 2 取消订阅
 }
 
-message ClubChangeInfo { 
-    // 1 加入 2 修改 3 离开 4 解散
-    int32 Typ = 1;
-    uint64 UserID = 2; // 加入 离开 的人
-    BriefInfo Info = 3;        
+// 列表中的信息
+message BriefInfo {
+    int64 ID = 1;
+    string Name = 2;
+    string Profile = 3;
+    uint64 MasterUserID = 4; // 为了方便客户端做颜色区分
 }
 
-// c -> s
+// 俱乐部列表，订阅成功后发送 s -> c
+message ClubList {
+    repeated BriefInfo List = 1;
+}
+
+// 俱乐部变化信息 s -> c
+message ClubChangeInfo {
+    // 1 有人加入 3 有人离开 2 俱乐部被修改 4 俱乐部被解散
+    int32 Typ = 1;
+    // 方便客户端俱乐部列表的刷新
+    uint64 UserID = 2; // 加入或者离开的人
+    BriefInfo Info = 3;
+}
+
+// 创建俱乐部 c -> s
 message CreateClubReq {
-    pbcommon.ReqHead Head = 1;  
-    BaseInfo Base = 3;
-    GameArg Arg = 4;     
+    pbcommon.ReqHead Head = 1;
+    BaseInfo Base = 2;
+    repeated DeskSetting GameArgs = 3;
 }
 message CreateClubRsp {
     pbcommon.RspHead Head = 1;
-    // 1成功 2数量限制 3参数错误 4内部服务错误
-    int32 Code = 2;   
+    // 1 成功 2 数量限制 3 参数错误 4 内部服务错误
+    int32 Code = 2;
 }
 
-// c -> s
+// 更新俱乐部信息 c -> s
+message UpdateClubReq {
+    pbcommon.ReqHead Head = 1;
+    int64 ClubID = 2;
+    BaseInfo Base = 3;
+    repeated DeskSetting GameArgs = 4;
+}
+message UpdateClubRsp {
+    pbcommon.RspHead Head = 1;
+    // 1 成功 2 参数错误 3 ClubID无效 4 权限无效
+    int32 Code = 2;
+}
+
+// 更新俱乐部公告 c -> s
+message UpdateClubNoticeReq {
+    pbcommon.ReqHead Head = 1;
+    int64 ClubID = 2;
+    string Notice = 3;
+}
+message UpdateClubNoticeRsp {
+    pbcommon.RspHead Head = 1;
+    // 1 成功 2 ClubID无效 3 权限无效
+    int32 Code = 2;
+}
+
+// 解散俱乐部 c -> s
 message RemoveClubReq {
     pbcommon.ReqHead Head = 1;
     int64 ClubID = 2;
 }
 message RemoveClubRsp {
     pbcommon.RspHead Head = 1;
-    // 1成功 2权限无效
+    // 1 成功 2 权限无效 3 ClubID无效
     int32 Code = 2;
 }
 
-// c -> s
-message UpdateClubReq {
-    pbcommon.ReqHead Head = 1;
-    int64 ClubID = 2;        
-    BaseInfo Base = 3;
-    GameArg Arg = 4;  
-}
-message UpdateClubRsp {
-    pbcommon.RspHead Head = 1;
-    // 1成功 2参数错误 3无效ClubID 4权限
-    int32 Code = 2;
-}
-
-// c -> s
-message JoinClubReq {
+// 查询俱乐部 c -> s
+message QueryClubByIDReq {
     pbcommon.ReqHead Head = 1;
     int64 ClubID = 2;
 }
-message JoinClubRsp {
+message QueryClubByIDRsp {
     pbcommon.RspHead Head = 1;
-    // 1提交成功 2超过限制 3无效俱乐部 4已经在申请中 5内部服务错误
+    // 1成功 2失败
     int32 Code = 2;
+    ClubInfo Info = 3;
+    // 查询的人是否同意法律 此处是为了方便客户端判断
+    bool Agree = 4; // 查询人的
+    int32 Identity = 5; // 查询人的
 }
 
-// 处理成员身份 c -> s 
-message DealMemberIdentityReq {
+// 查询俱乐部成员 c -> s
+message QueryClubMemberReq {
     pbcommon.ReqHead Head = 1;
     int64 ClubID = 2;
-    uint64 UserID = 3;
-    int32 Identity = 4;// 新的身份
+}
+message QueryClubMemberRsp {
+    pbcommon.RspHead Head = 1;
+    repeated MemberInfo Members = 2;
 }
 
-message DealMemberIdentityRsp {
+// 同意法律 c -> s
+message AgreeClubLawReq {
+    pbcommon.ReqHead Head = 1;
+    int64 ClubID = 2;
+}
+message AgreeClubLawRsp {
     pbcommon.RspHead Head = 1;
-    // 1成功 2无效俱乐部ID 3无效玩家ID 4无效Identity
-    int32 Code = 2;
 }
 
 // 退出俱乐部 c -> s
@@ -150,24 +165,102 @@ message ExitClubRsp {
     int32 Code = 2;
 }
 
-// c -> s
-message QueryClubMemberReq {
+// 不需要确认的 <转管理员 转黑名单>
+// 成员身份变更 c -> s
+message DealMemberIdentityReq {
     pbcommon.ReqHead Head = 1;
     int64 ClubID = 2;
+    uint64 UserID = 3;
+    int32 Identity = 4; // 新的身份
+    bool Del = 5; // 为true时，表示删除该成员
 }
-
-message QueryClubMemberRsp {  
-    pbcommon.RspHead Head = 1;  
-    repeated MemberInfo Members = 2;
-}
-
-// c -> s 
-message AgreeClubLawReq {
-    pbcommon.ReqHead Head = 1;
-    int64 ClubID = 2;
-}
-
-message AgreeClubLawRsp {
+message DealMemberIdentityRsp {
     pbcommon.RspHead Head = 1;
+    // 1成功 2无效俱乐部ID 3无效玩家ID 4无效Identity 5权限不够
+    int32 Code = 2;
 }
 
+// 需要确认的
+// 请求加入俱乐部 c -> s
+message JoinClubReq {
+    pbcommon.ReqHead Head = 1;
+    int64 ClubID = 2;
+}
+message JoinClubRsp {
+    pbcommon.RspHead Head = 1;
+    // 1提交成功 2超过加入人自身限制 3无效ClubID 4已经在申请中 5已经是此俱乐部成员 6人满了<最多30个>
+    int32 Code = 2;
+}
+
+// 需要确认的
+// 邀请某人加入俱乐部 c -> s
+message InviteJoinClubReq {
+    pbcommon.ReqHead Head = 1;
+    int64 ClubID = 2;
+    uint64 Invitee = 3; // 被邀请人
+}
+message InviteJoinClubRsp {
+    pbcommon.RspHead Head = 1;
+    // 1提交成功 2被邀请人加入俱乐部数量限制 3无效clubid  4clud人数满 5已经是成员或者在黑名单中 6在进行中
+    int32 Code = 2;
+}
+
+// 需要确认的
+// 转让群主 c -> s
+message TransferMasterReq {
+    pbcommon.ReqHead Head = 1;
+    int64 ClubID = 2;
+    uint64 NewMasterUserID = 3;
+}
+message TransferMasterRsp {
+    pbcommon.RspHead Head = 1;
+    // 1提交成功 2参数无效 3无效ClubID 4权限 5无效NewMasterUserID 6在进行中
+    int32 Code = 2;
+}
+
+// 确认邮件回复
+message AckClubEmailReq {
+    pbcommon.ReqHead Head = 1;
+    int64 EmailMsgID = 2;
+    bool Agree = 3;
+}
+message AckClubEmailRsp {
+    pbcommon.RspHead Head = 1;
+    // 1成功 2找不到EmailMsgID 3flag!=0 4typ not in(1,2,3) 5找不到俱乐部
+    int32 Code = 2;
+}
+
+message cyI64 {
+    int64 EmailMsgID = 1;
+}
+
+// 批量确认已读邮件
+message BatchAckClubEmail {
+    repeated cyI64 Ids = 1;
+}
+
+// 俱乐部邮件 s -> c
+message ClubEmail {
+    int64 ID = 1;
+    int64 SendTime = 2; // 发件时间
+    // 邮件类型
+    // 0 普通邮件 1JoinClub  2InviteJoinClub 3TransferMaster
+    int32 Typ = 3;
+    string Content = 4;
+    // 0未处理 1已处理
+    int32 Flag = 5;
+    int64 ClubID = 6;
+}
+
+message ClubEmailChangeInfo {
+    repeated ClubEmail Emails = 1;
+}
+
+// 查询玩家俱乐部邮件 c -> s
+message ClubEmailReq {
+    pbcommon.ReqHead Head = 1;
+}
+message ClubEmailRsp {
+    pbcommon.RspHead Head = 1;
+    repeated ClubEmail Emails = 2;
+}

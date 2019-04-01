@@ -55,7 +55,7 @@ func (self *mjcs) HandleGameAction(uid uint64, req *pbgame.GameAction) {
 	if d != nil {
 		d.doAction(uid, req.ActionName, req.ActionValue)
 	} else {
-		log.Trace("can not find desk by uid %d", uid)
+		log.Infof("can not find desk by uid %d", uid)
 	}
 	return
 }
