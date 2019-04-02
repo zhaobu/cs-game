@@ -13,7 +13,7 @@ import (
 
 	metrics "github.com/rcrowley/go-metrics"
 	"github.com/smallnest/rpcx/server"
-	"github.com/smallnest/rpcx/serverplugin"
+	serverplugin "github.com/smallnest/rpcx/serverplugin"
 	"go.uber.org/zap"
 )
 
@@ -22,16 +22,16 @@ const (
 )
 
 var (
-	consulAddr = flag.String("consulAddr", "192.168.1.128:8500", "consul address")
+	consulAddr = flag.String("consulAddr", "192.168.0.90:8500", "consul address")
 	basePath   = flag.String("base", "/cy_game", "consul prefix path")
 	addr       = flag.String("addr", "localhost:9601", "listen address")
 	release    = flag.Bool("release", false, "run mode")
-	redisAddr  = flag.String("redisAddr", "192.168.1.128:6379", "redis address")
+	redisAddr  = flag.String("redisAddr", "192.168.0.90:6379", "redis address")
 	redisDb    = flag.Int("redisDb", 1, "redis db select")
-	mgoURI     = flag.String("mgo", "mongodb://192.168.1.128:27017/game", "mongo connection URI")
+	mgoURI     = flag.String("mgo", "mongodb://192.168.0.90:27017/game", "mongo connection URI")
 
 	log  *zap.SugaredLogger //printf风格
-	tlog *zap.Logger        //field风格
+	tlog *zap.Logger        //structured 风格
 )
 
 type roomHandle struct {
@@ -61,7 +61,7 @@ type roomHandle struct {
 // 	}
 
 // 	// hook, err := logrus_influxdb.NewInfluxDB(&logrus_influxdb.Config{
-// 	// 	Host:          "192.168.1.128", // TODO
+// 	// 	Host:          "192.168.0.90", // TODO
 // 	// 	Port:          8086,
 // 	// 	Database:      "cygame",
 // 	// 	Precision:     "ns",
@@ -105,10 +105,7 @@ func main() {
 		*addr = taddr.String()
 	}
 	roomService := &tpl.RoomServie{}
-	roomService.Log = log
-	roomService.Tlog = tlog
-	roomService.InitRedis(*redisAddr, *redisDb)
-	roomService.SetName(gameName, *addr)
+	roomService.Init(gameName, *addr, tlog, *redisAddr, *redisDb)
 	roomService.RegisterHandle(&roomHandle{roomService})
 
 	if !*release {
@@ -116,7 +113,7 @@ func main() {
 	}
 
 	var err error
-	err = loadArgTpl("../changshou.config")
+	err = loadArgTpl("../changshou.json")
 	if err != nil {
 		fmt.Println(err)
 	}

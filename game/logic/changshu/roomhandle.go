@@ -6,6 +6,8 @@ import (
 	pbgame "cy/game/pb/game"
 	pbgame_logic "cy/game/pb/game/mj/changshu"
 	"fmt"
+
+	"go.uber.org/zap"
 )
 
 const (
@@ -82,17 +84,19 @@ func (self *roomHandle) HandleJoinDeskReq(uid uint64, req *pbgame.JoinDeskReq, r
 func (self *roomHandle) HandleMakeDeskReq(uid uint64, deskID uint64, req *pbgame.MakeDeskReq, rsp *pbgame.MakeDeskRsp) {
 	arg, err := checkArg(req)
 	if err != nil {
+		tlog.Error("err checkArg()", zap.Error(err))
 		rsp.Code = pbgame.MakeDeskRspCode_MakeDeskArgsErr
 		return
 	}
 
-	self.Log.Infof("arg %+v\n", arg)
+	tlog.Info("HandleMakeDeskReq", zap.Any("CreateArg", arg))
 
 	fee := calcFee(arg)
 
 	if fee != 0 {
 		_, err = mgo.UpdateWealthPre(uid, feeTypeMasonry, fee)
 		if err != nil {
+			tlog.Error("err mgo.UpdateWealthPre()", zap.Error(err))
 			rsp.Code = pbgame.MakeDeskRspCode_MakeDeskNotEnoughMoney
 			return
 		}

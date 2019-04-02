@@ -9,7 +9,7 @@ echo "club start success" &
 ./center >/dev/null &
 echo "center start success" &
 
-./gate -addr 192.168.1.128:9876 >/dev/null &
+./gate -addr 192.168.0.90:9876 >/dev/null &
 echo "gate start success" &
 
 # ./ddz >/dev/null &

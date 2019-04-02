@@ -40,27 +40,29 @@ type IRoomHandle interface {
 }
 
 type RoomServie struct {
-	roomHandle IRoomHandle
-	rpcHandle  RpcHandle
-	Tlog       *zap.Logger
-	Log        *zap.SugaredLogger
-	Timer      *timingwheel.TimingWheel
-	gameName   string
-	gameID     string
+	roomHandle IRoomHandle              //房间请求处理
+	rpcHandle  RpcHandle                //rpc请求
+	tlog       *zap.Logger              //structured 风格
+	log        *zap.SugaredLogger       //printf风格
+	Timer      *timingwheel.TimingWheel //定时器
+	gameName   string                   //游戏编号
+	gameID     string                   //游戏ip+port
 	redisPool  *redis.Pool
 }
 
-func (self *RoomServie) SetName(gameName, gameID string) {
-
+func (self *RoomServie) Init(gameName, gameID string, _tlog *zap.Logger, redisAddr string, redisDb int) {
+	self.initRedis(redisAddr, redisDb)
 	self.gameName = gameName
 	self.gameID = gameID
+	self.tlog = _tlog
+	self.log = _tlog.Sugar()
 	self.Timer = timingwheel.NewTimingWheel(time.Second, 60) //一个节点一个定时器
 	self.Timer.Start()
 	self.delInvalidDesk()
 	self.checkDeskLongTime()
 }
 
-func (self *RoomServie) InitRedis(redisAddr string, redisDb int) {
+func (self *RoomServie) initRedis(redisAddr string, redisDb int) {
 	err := cache.Init(redisAddr, redisDb)
 	if err != nil {
 		panic(err.Error())
@@ -91,7 +93,7 @@ func (self *RoomServie) GetRpcHandle() *RpcHandle {
 }
 
 func (self *RoomServie) ToGateNormal(pb proto.Message, uids ...uint64) error {
-	self.Tlog.Info("send to gate", zap.Any("uids", uids), zap.String("msgName", proto.MessageName(pb)), zap.Any("msgValue", pb))
+	self.tlog.Info("send to gate", zap.Any("uids", uids), zap.String("msgName", proto.MessageName(pb)), zap.Any("msgValue", pb))
 	msg := &codec.Message{}
 	err := codec.Pb2Msg(pb, msg)
 	if err != nil {
@@ -115,7 +117,7 @@ func (self *RoomServie) ToGateNormal(pb proto.Message, uids ...uint64) error {
 
 	_, err = rc.Do("PUBLISH", "backend_to_gate", data)
 	if err != nil {
-		self.Log.Error(err.Error())
+		self.log.Error(err.Error())
 	}
 	return err
 }

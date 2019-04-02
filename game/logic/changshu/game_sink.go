@@ -142,7 +142,7 @@ func (self *GameSink) ThrowDice(chairId int32, req *pbgame_logic.C2SThrowDice) {
 		if self.diceResult[i][0] == 0 {
 			//通知下一个玩家投色子
 			self.sendData(-1, &pbgame_logic.S2CThrowDice{ChairId: i})
-			self.curThrowDice=i
+			self.curThrowDice = i
 			return
 		}
 	}

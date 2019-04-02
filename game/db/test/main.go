@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	if err := mgo.Init("mongodb://192.168.1.128:27017/game"); err != nil {
+	if err := mgo.Init("mongodb://192.168.0.90:27017/game"); err != nil {
 		fmt.Println(err)
 		return
 	}

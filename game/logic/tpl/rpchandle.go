@@ -32,26 +32,26 @@ func (self *RpcHandle) DestroyDeskReq(ctx context.Context, args *codec.Message, 
 	defer func() {
 		r := recover()
 		if r != nil {
-			self.service.Tlog.Error("recover info", zap.Uint64("uid", args.UserID), zap.Any("stack", debug.Stack()))
+			self.service.tlog.Error("recover info", zap.Uint64("uid", args.UserID), zap.Any("stack", debug.Stack()))
 		}
 	}()
 
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
-		self.service.Tlog.Error("error info", zap.Error(err))
+		self.service.tlog.Error("error info", zap.Error(err))
 		return err
 	}
 
 	req, ok := pb.(*pbgame.DestroyDeskReq)
 	if !ok {
 		err = fmt.Errorf("not *pbgame.DestroyDeskReq")
-		self.service.Tlog.Error("error info", zap.Error(err))
+		self.service.tlog.Error("error info", zap.Error(err))
 		return
 	}
 
 	rsp := &pbgame.DestroyDeskRsp{}
 
-	self.service.Tlog.Info("recv from gate", zap.Uint64("uid", args.UserID), zap.String("msgName", args.Name), zap.Any("msgValue", *req))
+	self.service.tlog.Info("recv from gate", zap.Uint64("uid", args.UserID), zap.String("msgName", args.Name), zap.Any("msgValue", *req))
 	self.service.roomHandle.HandleDestroyDeskReq(args.UserID, req, rsp)
 
 	if rsp.Code == 1 {
@@ -67,20 +67,20 @@ func (self *RpcHandle) ExitDeskReq(ctx context.Context, args *codec.Message, rep
 	defer func() {
 		r := recover()
 		if r != nil {
-			self.service.Tlog.Error("recover info", zap.Uint64("uid", args.UserID), zap.Any("stack", debug.Stack()))
+			self.service.tlog.Error("recover info", zap.Uint64("uid", args.UserID), zap.Any("stack", debug.Stack()))
 		}
 	}()
 
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
-		self.service.Tlog.Error("error info", zap.Error(err))
+		self.service.tlog.Error("error info", zap.Error(err))
 		return err
 	}
 
 	req, ok := pb.(*pbgame.ExitDeskReq)
 	if !ok {
 		err = fmt.Errorf("not *pbgame.ExitDeskReq")
-		self.service.Tlog.Error("error info", zap.Error(err))
+		self.service.tlog.Error("error info", zap.Error(err))
 		return
 	}
 
@@ -94,7 +94,7 @@ func (self *RpcHandle) ExitDeskReq(ctx context.Context, args *codec.Message, rep
 		self.service.ToGateNormal(rsp, args.UserID)
 	}()
 
-	self.service.Tlog.Info("recv from gate", zap.Uint64("uid", args.UserID), zap.String("msgName", args.Name), zap.Any("msgValue", *req))
+	self.service.tlog.Info("recv from gate", zap.Uint64("uid", args.UserID), zap.String("msgName", args.Name), zap.Any("msgValue", *req))
 
 	sessInfo, err := cache.QuerySessionInfo(args.UserID)
 	if err != nil {
@@ -122,20 +122,20 @@ func (self *RpcHandle) GameAction(ctx context.Context, args *codec.Message, repl
 	defer func() {
 		r := recover()
 		if r != nil {
-			self.service.Tlog.Error("recover info", zap.Uint64("uid", args.UserID), zap.Any("stack", debug.Stack()))
+			self.service.tlog.Error("recover info", zap.Uint64("uid", args.UserID), zap.Any("stack", debug.Stack()))
 		}
 	}()
 
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
-		self.service.Tlog.Error("error info", zap.Error(err))
+		self.service.tlog.Error("error info", zap.Error(err))
 		return err
 	}
 
 	req, ok := pb.(*pbgame.GameAction)
 	if !ok {
 		err = fmt.Errorf("not *pbgame.GameAction")
-		self.service.Tlog.Error("error info", zap.Error(err))
+		self.service.tlog.Error("error info", zap.Error(err))
 		return
 	}
 
@@ -149,20 +149,20 @@ func (self *RpcHandle) JoinDeskReq(ctx context.Context, args *codec.Message, rep
 	defer func() {
 		r := recover()
 		if r != nil {
-			self.service.Tlog.Error("recover info", zap.Uint64("uid", args.UserID), zap.Any("stack", debug.Stack()))
+			self.service.tlog.Error("recover info", zap.Uint64("uid", args.UserID), zap.Any("stack", debug.Stack()))
 		}
 	}()
 
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
-		self.service.Tlog.Error("error info", zap.Error(err))
+		self.service.tlog.Error("error info", zap.Error(err))
 		return err
 	}
 
 	req, ok := pb.(*pbgame.JoinDeskReq)
 	if !ok {
 		err = fmt.Errorf("not *pbgame.JoinDeskReq")
-		self.service.Tlog.Error("error info", zap.Error(err))
+		self.service.tlog.Error("error info", zap.Error(err))
 		return
 	}
 
@@ -178,7 +178,7 @@ func (self *RpcHandle) JoinDeskReq(ctx context.Context, args *codec.Message, rep
 		}
 	}()
 
-	self.service.Tlog.Info("recv from gate", zap.Uint64("uid", args.UserID), zap.String("msgName", args.Name), zap.Any("msgValue", *req))
+	self.service.tlog.Info("recv from gate", zap.Uint64("uid", args.UserID), zap.String("msgName", args.Name), zap.Any("msgValue", *req))
 
 	rsp.Info, err = cache.QueryDeskInfo(req.DeskID)
 	if err != nil {
@@ -189,7 +189,7 @@ func (self *RpcHandle) JoinDeskReq(ctx context.Context, args *codec.Message, rep
 
 	succ, err := cache.EnterGame(args.UserID, self.service.gameName, self.service.gameID, req.DeskID, false)
 	if err != nil {
-		self.service.Tlog.Error("error info", zap.Error(err))
+		self.service.tlog.Error("error info", zap.Error(err))
 		rsp.Code = pbgame.JoinDeskRspCode_JoinDeskInternalServerError
 		rsp.ErrMsg = err.Error()
 		return nil
@@ -216,19 +216,19 @@ func (self *RpcHandle) MakeDeskReq(ctx context.Context, args *codec.Message, rep
 	defer func() {
 		r := recover()
 		if r != nil {
-			self.service.Tlog.Error("recover info", zap.Uint64("uid", args.UserID), zap.Any("stack", debug.Stack()))
+			self.service.tlog.Error("recover info", zap.Uint64("uid", args.UserID), zap.Any("stack", debug.Stack()))
 		}
 	}()
 
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
-		self.service.Tlog.Error("err codec.Msg2Pb(args)", zap.Error(err))
+		self.service.tlog.Error("err codec.Msg2Pb(args)", zap.Error(err))
 		return
 	}
 
 	req, ok := pb.(*pbgame.MakeDeskReq)
 	if !ok {
-		self.service.Tlog.Error("err pb.(*pbgame.MakeDeskReq)")
+		self.service.tlog.Error("err pb.(*pbgame.MakeDeskReq)")
 		return
 	}
 
@@ -247,11 +247,11 @@ func (self *RpcHandle) MakeDeskReq(ctx context.Context, args *codec.Message, rep
 		}
 	}()
 
-	self.service.Tlog.Info("recv from gate", zap.Uint64("uid", args.UserID), zap.String("msgName", args.Name), zap.Any("msgValue", *req))
+	self.service.tlog.Info("recv from gate", zap.Uint64("uid", args.UserID), zap.String("msgName", args.Name), zap.Any("msgValue", *req))
 	// 1> 分配桌子ID
 	newDeskID, err = cache.AllocDeskID()
 	if err != nil {
-		self.service.Tlog.Error("err cache.AllocDeskID()", zap.Error(err))
+		self.service.tlog.Error("err cache.AllocDeskID()", zap.Error(err))
 		rsp.Code = pbgame.MakeDeskRspCode_MakeDeskNotEnoughDesk
 		return nil
 	}
@@ -267,6 +267,7 @@ func (self *RpcHandle) MakeDeskReq(ctx context.Context, args *codec.Message, rep
 	if req.ClubID != 0 {
 		clubInfo, err = mgo.QueryClubByID(req.ClubID)
 		if err != nil {
+			self.service.tlog.Error("err mgo.QueryClubByID()", zap.Error(err))
 			rsp.Code = pbgame.MakeDeskRspCode_MakeDeskCanNotFindClubID
 			return nil
 		}
@@ -317,7 +318,7 @@ func (self *RpcHandle) MakeDeskReq(ctx context.Context, args *codec.Message, rep
 
 	err = cache.AddDeskInfo(deskInfo) // 2> 保存桌子信息
 	if err != nil {
-		self.service.Tlog.Error("error info", zap.Error(err))
+		self.service.tlog.Error("err cache.AddDeskInfo", zap.Error(err))
 		rsp.Code = pbgame.MakeDeskRspCode_MakeDeskInternalServerError
 		return nil
 	}
@@ -327,25 +328,6 @@ func (self *RpcHandle) MakeDeskReq(ctx context.Context, args *codec.Message, rep
 			cache.DelDeskInfo(newDeskID)
 		}
 	}()
-
-	// 4> 进入游戏
-	// succ, err := cache.EnterGame(args.UserID, self.service.gameName, self.service.gameID, newDeskID, false)
-	// if err != nil {
-	// 	self.service.Tlog.Error("error info", zap.Error(err))
-	// 	rsp.Code = pbgame.MakeDeskRspCode_MakeDeskUserStatusErr
-	// 	return nil
-	// }
-
-	// if !succ {
-	// 	rsp.Code = pbgame.MakeDeskRspCode_MakeDeskUserStatusErr
-	// 	return nil
-	// }
-
-	// defer func() {
-	// 	if rsp.Code != pbgame.MakeDeskRspCode_MakeDeskSucc {
-	// 		cache.ExitGame(args.UserID, self.service.gameName, self.service.gameID, newDeskID)
-	// 	}
-	// }()
 
 	rsp.Info = deskInfo
 
@@ -358,20 +340,20 @@ func (self *RpcHandle) QueryDeskInfoReq(ctx context.Context, args *codec.Message
 	defer func() {
 		r := recover()
 		if r != nil {
-			self.service.Tlog.Error("recover info", zap.Uint64("uid", args.UserID), zap.Any("stack", debug.Stack()))
+			self.service.tlog.Error("recover info", zap.Uint64("uid", args.UserID), zap.Any("stack", debug.Stack()))
 		}
 	}()
 
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
-		self.service.Tlog.Error("error info", zap.Error(err))
+		self.service.tlog.Error("error info", zap.Error(err))
 		return err
 	}
 
 	req, ok := pb.(*pbgame.QueryDeskInfoReq)
 	if !ok {
 		err = fmt.Errorf("not *pbgame.QueryDeskInfoReq")
-		self.service.Tlog.Error("error info", zap.Error(err))
+		self.service.tlog.Error("error info", zap.Error(err))
 		return
 	}
 
@@ -384,7 +366,7 @@ func (self *RpcHandle) QueryDeskInfoReq(ctx context.Context, args *codec.Message
 		self.service.ToGateNormal(rsp, args.UserID)
 	}()
 
-	self.service.Tlog.Info("recv from gate", zap.Uint64("uid", args.UserID), zap.String("msgName", args.Name), zap.Any("msgValue", *req))
+	self.service.tlog.Info("recv from gate", zap.Uint64("uid", args.UserID), zap.String("msgName", args.Name), zap.Any("msgValue", *req))
 
 	rsp.Info, err = cache.QueryDeskInfo(req.DeskID)
 
@@ -397,20 +379,20 @@ func (self *RpcHandle) QueryGameConfigReq(ctx context.Context, args *codec.Messa
 	defer func() {
 		r := recover()
 		if r != nil {
-			self.service.Tlog.Error("recover info", zap.Uint64("uid", args.UserID), zap.Any("stack", debug.Stack()))
+			self.service.tlog.Error("recover info", zap.Uint64("uid", args.UserID), zap.Any("stack", debug.Stack()))
 		}
 	}()
 
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
-		self.service.Tlog.Error("error info", zap.Error(err))
+		self.service.tlog.Error("error info", zap.Error(err))
 		return err
 	}
 
 	req, ok := pb.(*pbgame.QueryGameConfigReq)
 	if !ok {
 		err = fmt.Errorf("not *pbgame.QueryGameConfigReq")
-		self.service.Tlog.Error("error info", zap.Error(err))
+		self.service.tlog.Error("error info", zap.Error(err))
 		return
 	}
 
@@ -423,7 +405,7 @@ func (self *RpcHandle) QueryGameConfigReq(ctx context.Context, args *codec.Messa
 		self.service.ToGateNormal(rsp, args.UserID)
 	}()
 
-	self.service.Tlog.Info("recv from gate", zap.Uint64("uid", args.UserID), zap.String("msgName", args.Name), zap.Any("msgValue", *req))
+	self.service.tlog.Info("recv from gate", zap.Uint64("uid", args.UserID), zap.String("msgName", args.Name), zap.Any("msgValue", *req))
 
 	self.service.roomHandle.HandleQueryGameConfigReq(args.UserID, req, rsp)
 

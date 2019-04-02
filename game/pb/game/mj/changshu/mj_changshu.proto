@@ -16,7 +16,7 @@ message RoundInfo {
 message CreateArg {
   repeated cyU32String Rule = 1;
   uint32 Barhead = 2;
-  uint32 PlayerCount = 3;
+  int32 PlayerCount = 3;
   uint32 Dipiao = 4;
   RoundInfo RInfo = 5;
   uint32 PaymentType = 6;
