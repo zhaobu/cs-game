@@ -7,9 +7,12 @@ import (
 	"cy/game/db/mgo"
 	"cy/game/pb/common"
 	"cy/game/pb/login"
+	"encoding/json"
 	"fmt"
 	"math/rand"
 
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk"
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/pkg/errors"
 	"github.com/satori/go.uuid"
 	"github.com/sirupsen/logrus"
@@ -206,5 +209,41 @@ func generateMobileCaptcha() string {
 }
 
 func sendMobileCaptcha(mobile string, captcha string) error {
-	return nil
+	client, err := sdk.NewClientWithAccessKey("default", "LTAIlctikPyE8yy1", "dFrHFwwiWZ8bMlGt63sybVCJ0Su9zg")
+	if err != nil {
+		return err
+	}
+
+	request := requests.NewCommonRequest()
+	request.Method = "POST"
+	request.Scheme = "https" // https | http
+	request.Domain = "dysmsapi.aliyuncs.com"
+	request.Version = "2017-05-25"
+	request.ApiName = "SendSms"
+	request.QueryParams["PhoneNumbers"] = mobile
+	request.QueryParams["SignName"] = "三格软件"
+	request.QueryParams["TemplateCode"] = "SMS_137655450"
+	request.QueryParams["TemplateParam"] = "{\"code\":\"" + captcha + "\"}"
+
+	response, err := client.ProcessCommonRequest(request)
+	if err != nil {
+		return err
+	}
+
+	var xx struct {
+		Message   string `json:"Message"`
+		RequestID string `json:"RequestId"`
+		BizID     string `json:"BizId"`
+		Code      string `json:"Code"`
+	}
+
+	rspStr := response.GetHttpContentString()
+	err = json.Unmarshal([]byte(rspStr), &xx)
+	if err != nil {
+		return err
+	}
+	if xx.Message == "OK" && xx.Code == "OK" {
+		return nil
+	}
+	return fmt.Errorf("aliyun sdk err %v", xx)
 }

@@ -22,20 +22,20 @@ const (
 )
 
 var (
-	consulAddr = flag.String("consulAddr", "192.168.0.90:8500", "consul address")
+	consulAddr = flag.String("consulAddr", "192.168.1.128:8500", "consul address")
 	basePath   = flag.String("base", "/cy_game", "consul prefix path")
 	addr       = flag.String("addr", "localhost:9601", "listen address")
 	release    = flag.Bool("release", false, "run mode")
-	redisAddr  = flag.String("redisAddr", "192.168.0.90:6379", "redis address")
+	redisAddr  = flag.String("redisAddr", "192.168.1.128:6379", "redis address")
 	redisDb    = flag.Int("redisDb", 1, "redis db select")
-	mgoURI     = flag.String("mgo", "mongodb://192.168.0.90:27017/game", "mongo connection URI")
+	mgoURI     = flag.String("mgo", "mongodb://192.168.1.128:27017/game", "mongo connection URI")
 
 	log  *zap.SugaredLogger //printf风格
 	tlog *zap.Logger        //field风格
 )
 
-type mjcs struct {
-	tpl.RoundTpl
+type roomHandle struct {
+	*tpl.RoomServie
 }
 
 // func initLogrus() {
@@ -61,7 +61,7 @@ type mjcs struct {
 // 	}
 
 // 	// hook, err := logrus_influxdb.NewInfluxDB(&logrus_influxdb.Config{
-// 	// 	Host:          "192.168.0.90", // TODO
+// 	// 	Host:          "192.168.1.128", // TODO
 // 	// 	Port:          8086,
 // 	// 	Database:      "cygame",
 // 	// 	Precision:     "ns",
@@ -90,6 +90,7 @@ func initLog() {
 	tlog = zaplog.InitLogger(logName, logLevel, !*release)
 	log = tlog.Sugar()
 }
+
 func main() {
 	flag.Parse()
 
@@ -103,13 +104,12 @@ func main() {
 		}
 		*addr = taddr.String()
 	}
-
-	var cs mjcs
-	cs.Log = log
-	cs.Tlog = tlog
-	cs.RoundTpl.InitRedis(*redisAddr, *redisDb)
-	cs.RoundTpl.SetName(gameName, *addr)
-	cs.SetPlugin(&cs)
+	roomService := &tpl.RoomServie{}
+	roomService.Log = log
+	roomService.Tlog = tlog
+	roomService.InitRedis(*redisAddr, *redisDb)
+	roomService.SetName(gameName, *addr)
+	roomService.RegisterHandle(&roomHandle{roomService})
 
 	if !*release {
 		cache.FlushDb(*redisDb)
@@ -130,7 +130,7 @@ func main() {
 	addRegistryPlugin(s)
 	log.Infof("gameserver %s 启动成功", gameName)
 
-	s.RegisterName("game/"+gameName, &cs.RoundTpl, "")
+	s.RegisterName("game/"+gameName, roomService.GetRpcHandle(), "")
 	err = s.Serve("tcp", *addr)
 	if err != nil {
 		fmt.Println(err)

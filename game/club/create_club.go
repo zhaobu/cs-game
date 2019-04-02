@@ -8,7 +8,6 @@ import (
 	"cy/game/pb/common"
 	"fmt"
 	"runtime/debug"
-	"time"
 
 	"github.com/sirupsen/logrus"
 )
@@ -97,16 +96,13 @@ func (p *club) CreateClubReq(ctx context.Context, args *codec.Message, reply *co
 		})
 	}
 
+	cc.f = func() { checkAutoCreate(newID) }
 	cc.noCommit = true
 
 	addClub(cc)
 	addUserJoinClub(createUserID, cc.ID)
 
 	rsp.Code = 1
-
-	if req.Base.IsAutoCreate {
-		time.AfterFunc(time.Second*2, func() { checkAutoCreate(newID) })
-	}
 
 	return
 }

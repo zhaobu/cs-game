@@ -53,10 +53,6 @@ type GameSink struct {
 	isPlaying    bool                    //是否在游戏中
 }
 
-func init() {
-	cardDef.Init(log)
-}
-
 ////////////////////////调用desk接口函数START/////////////////////////////
 //发送消息给玩家(chairId为-1时发送给所有玩家)
 func (self *GameSink) sendData(chairId int32, msg proto.Message) {
@@ -72,6 +68,7 @@ func (self *GameSink) sendData(chairId int32, msg proto.Message) {
 //构建游戏
 func (self *GameSink) Ctor(config *pbgame_logic.CreateArg) error {
 	self.game_config = config
+	cardDef.Init(log)
 	self.isPlaying = false
 	self.onlinePlayer = make([]bool, config.PlayerCount)
 	self.players = make([]mj.PlayerInfo, config.PlayerCount)
@@ -145,6 +142,7 @@ func (self *GameSink) ThrowDice(chairId int32, req *pbgame_logic.C2SThrowDice) {
 		if self.diceResult[i][0] == 0 {
 			//通知下一个玩家投色子
 			self.sendData(-1, &pbgame_logic.S2CThrowDice{ChairId: i})
+			self.curThrowDice=i
 			return
 		}
 	}

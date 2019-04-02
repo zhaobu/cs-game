@@ -2,9 +2,9 @@ syntax = "proto3";
 
 package pbgame_mj_changshu;
 
-///////////////////////////房间参数///////////////////////////
-message cyUint32 {
-  uint32 T = 1;
+message cyU32String {
+  uint32 Val = 1;
+  string Name = 2;
 }
 
 message RoundInfo {
@@ -14,34 +14,34 @@ message RoundInfo {
 
 // 创建房间参数
 message CreateArg {
-  repeated cyUint32 Rule = 1;  // 0:二摸三冲,1:豹子翻倍
-  uint32 Barhead = 2;          // 4:扳4个 8:扳8个 1:独龙杠
-  int32 PlayerCount = 3;       //玩家人数
-  uint32 Dipiao = 4;           //底飘(0~10)
-  RoundInfo RInfo = 5;         //局数
-  uint32 PaymentType = 6;      //支付方式 1 房主支付 2 平局支付
-  uint32 LimitIP = 7;          // ip以及位置限制
-  uint32 Voice = 8;            //语音房
+  repeated cyU32String Rule = 1;
+  uint32 Barhead = 2;
+  uint32 PlayerCount = 3;
+  uint32 Dipiao = 4;
+  RoundInfo RInfo = 5;
+  uint32 PaymentType = 6;
+  uint32 Voice = 7;
+  uint32 LimitIP = 8;
 }
 
 // 创建房间参数模板
 message CreateArgTpl {
-  // 玩法  二摸三冲 豹子翻倍
-  repeated cyUint32 Rule = 1;
-  // 杠头  板4个 板8个 独龙杠
-  repeated cyUint32 Barhead = 2;
-  // 人数
-  repeated cyint32 PlayerCount = 3;
-  // 底飘 0~10
-  repeated cyUint32 Dipiao = 4;
+  // 玩法  1 二摸三冲 2 豹子翻倍
+  repeated cyU32String Rule = 1;
+  // 杠头  1 扳4个 2 扳8个 3 独龙杠
+  repeated cyU32String Barhead = 2;
+  // 人数 2人 3人 4人
+  repeated cyU32String PlayerCount = 3;
+  // 底飘 0 ~ 10
+  repeated cyU32String Dipiao = 4;
   // 局数
   repeated RoundInfo RInfo = 5;
-  // 支付方式 1 房主支付 2 平局支付
-  repeated cyUint32 PaymentType = 6;
-  // IP以及位置限制 1 都不选 2 IP以及位置限制 3 IP以及位置限制+强制定位
-  uint32 LimitIP = 7;
+  // 支付方式 1 个人支付 2 平局支付
+  repeated cyU32String PaymentType = 6;
   // 语音 1 普通场 2 语音场
-  uint32 Voice = 8;
+  repeated cyU32String Voice = 7;
+  // IP以及位置限制 1 都不选 2 IP以及位置限制 3 IP以及位置限制+强制定位
+  uint32 LimitIP = 8;
   // 默认参数
   CreateArg Def = 9;
 }
@@ -49,7 +49,7 @@ message CreateArgTpl {
 // 桌子参数
 message DeskArg {
   // 创建房间参数
-  repeated cyUint32 Rule = 1;
+  repeated cyU32String Rule = 1;
   uint32 Barhead = 2;
   uint32 PlayerCount = 3;
   uint32 Dipiao = 4;
@@ -256,11 +256,11 @@ message PlayerBalanceInfo {
   string hu_type = 1;  // json G_HuScore_Type类型参数
   // json {anGang:1,jieGang:1,fangGang:1,mingGang:1},暗杠数,接杠数,放杠数,明杠数
   string gang_type = 2;
-  int32 hu_card = 3;                //显示胡的牌
+  int32 hu_card = 3;              //显示胡的牌
   repeated int32 hand_cards = 4;  //手牌
-  int32 point = 5;                  //当局获得分数
-  int32 total_point = 6;            //玩家当前总分数
-  bool is_hu = 7;                   //是否胡牌
+  int32 point = 5;                //当局获得分数
+  int32 total_point = 6;          //玩家当前总分数
+  bool is_hu = 7;                 //是否胡牌
 }
 //单局游戏结束
 message S2CGameEnd {

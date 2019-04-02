@@ -36,22 +36,22 @@ func QuerySessionInfo(userID uint64) (*pbcommon.SessionInfo, error) {
 var enterMatchScript = redis.NewScript(1, `
 	local key = KEYS[1]
 	local game_name = ARGV[1]
-	local room_id = ARGV[2]		
+	local room_id = ARGV[2]
 	local last_active_time = ARGV[3]
 
 	local xx = redis.call('HMGET', key, 'Status', 'GameName', 'RoomID')
-	
+
 	if(xx[1]==false)
 	then
-		redis.call('HMSET', KEYS[1], 'Status', 'InMatching', 'GameName', game_name, 'RoomID', room_id, 'LastActiveTime', last_active_time, 'Uuid', 1)		
+		redis.call('HMSET', KEYS[1], 'Status', 'InMatching', 'GameName', game_name, 'RoomID', room_id, 'LastActiveTime', last_active_time, 'Uuid', 1)
 		return {1, 'InMatching', game_name, room_id}
 	end
-	
+
 	if(xx[1]=='InMatching' and xx[2]==game_name and xx[3]==room_id)
-	then		
+	then
 		return {2, 'InMatching', game_name, room_id}
 	end
-	
+
 	return {3, xx[1], xx[2], xx[3]}
 	`)
 
@@ -111,30 +111,30 @@ func ExitMatch(userID uint64) (succ bool, err error) {
 
 var enterGameScript = redis.NewScript(1, `
 	local key = KEYS[1]
-	local from_match = ARGV[1]		
+	local from_match = ARGV[1]
 	local game_name = ARGV[2]
 	local game_id = ARGV[3]
 	local desk_id = ARGV[4]
 	local last_active_time = ARGV[5]
 
-	if(from_match=='1') 
+	if(from_match=='1')
 	then
 		if(redis.call('HGET', key, 'Status')=='InMatching')
 		then
 			redis.call('HMSET', key, 'Status', 'InGameing', 'GameName', game_name, 'GameID', game_id, 'AtDeskID', desk_id, 'LastActiveTime', last_active_time)
 			return 1
 		end
-		return -1 		
-	else		
+		return -1
+	else
 		local xx = redis.call('HMGET', key, 'Status', 'GameName', 'GameID', 'AtDeskID')
 		if(xx[1]=='InGameing' and xx[2]==game_name and xx[3]==game_id and xx[4]==desk_id)
-		then				
+		then
 			return 3
 		else
 			if(xx[1]==false)
 			then
-				redis.call('HMSET', key, 'Uuid', 1, 'Status', 'InGameing', 'GameName', game_name, 'GameID', game_id, 'AtDeskID', desk_id, 'LastActiveTime', last_active_time)		
-				return 2			 
+				redis.call('HMSET', key, 'Uuid', 1, 'Status', 'InGameing', 'GameName', game_name, 'GameID', game_id, 'AtDeskID', desk_id, 'LastActiveTime', last_active_time)
+				return 2
 			end
 		end
 		return -2

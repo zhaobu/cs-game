@@ -17,7 +17,7 @@ import (
 )
 
 var (
-	consulAddr = flag.String("consulAddr", "192.168.0.90:8500", "consul address")
+	consulAddr = flag.String("consulAddr", "192.168.1.128:8500", "consul address")
 	basePath   = flag.String("base", "/cy_game", "consul prefix path")
 	addr       = flag.String("addr", "localhost:9301", "listen address")
 	release    = flag.Bool("release", false, "run mode release")

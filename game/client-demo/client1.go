@@ -25,7 +25,8 @@ import (
 
 var (
 	wxID = flag.String("wxid", "wx_1", "wx id")
-	addr = flag.String("addr", "localhost:9876", "tcp listen address")
+	// addr = flag.String("addr", "localhost:9876", "tcp listen address")
+	addr = flag.String("addr", "192.168.1.128:9876", "tcp listen address")
 	c    net.Conn
 
 	loginSucc = make(chan int, 1)
@@ -47,8 +48,10 @@ func login() {
 	<-loginSucc
 }
 
-func joindesk() {
-	login()
+func joindesk(hasLogin bool) {
+	if !hasLogin {
+		login()
+	}
 	//从文件读取桌子号
 	err := json.Unmarshal(readFile(*fileName), &desk) //第二个参数要地址传递
 	if err != nil {
@@ -109,7 +112,7 @@ func main() {
 		case 2:
 			makedesk()
 		case 3:
-			joindesk()
+			joindesk(false)
 		case 4:
 			throwdice()
 		}
@@ -263,6 +266,8 @@ func makedesk() {
 		Voice:       0,
 	})
 	sendPb(makeDeskReq)
+	<-loginSucc
+	joindesk(true)
 }
 
 func sendPb(pb proto.Message) {
@@ -327,11 +332,12 @@ func detailMsg(msg *codec.Message) {
 			return
 		}
 		writebuf(*fileName, string(buf))
+		loginSucc <- 1
 	case *pbcommon.ErrorTip, *pbgame.JoinDeskRsp,
 		*pbhall.QuerySessionInfoRsp, *pbgame.QueryDeskInfoRsp,
 		*pbcenter.MatchRsp, *pbcenter.CancelMatchRsp, *pbclub.QueryClubByIDRsp,
 		*pbclub.CreateClubRsp, *pbclub.RemoveClubRsp, *pbclub.UpdateClubRsp,
-		*pbclub.JoinClubRsp, *pbclub.ExitClubRsp, *pbclub.QueryClubByMemberRsp:
+		*pbclub.JoinClubRsp, *pbclub.ExitClubRsp:
 
 		fmt.Printf("	%+v\n", v)
 	case *pbgame.GameNotif:

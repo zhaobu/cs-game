@@ -46,12 +46,13 @@ func InitLogger(logpath string, loglevel string, debugmode bool) *zap.Logger {
 	if debugmode {
 		encoderConfig = zap.NewDevelopmentEncoderConfig()
 		encoderConfig.EncodeTime = timeFormat
-		allCore = append(allCore, zapcore.NewCore(zapcore.NewJSONEncoder(encoderConfig), consoleDebugging, level))
+		allCore = append(allCore, zapcore.NewCore(zapcore.NewConsoleEncoder(encoderConfig), consoleDebugging, level))
+		// allCore = append(allCore, zapcore.NewCore(zapcore.NewJSONEncoder(encoderConfig), consoleDebugging, level))
 	} else {
 		encoderConfig = zap.NewProductionEncoderConfig()
 		encoderConfig.EncodeTime = timeFormat
 	}
-	allCore = append(allCore, zapcore.NewCore(zapcore.NewJSONEncoder(encoderConfig), fileWriter, level))
+	allCore = append(allCore, zapcore.NewCore(zapcore.NewConsoleEncoder(encoderConfig), fileWriter, level))
 
 	core := zapcore.NewTee(allCore...)
 

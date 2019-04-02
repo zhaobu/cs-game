@@ -10,6 +10,7 @@ type cacheClub struct {
 	sync.RWMutex
 	*mgo.Club
 	desks    map[uint64]*pbcommon.DeskInfo
+	f        func()
 	noCommit bool
 }
 

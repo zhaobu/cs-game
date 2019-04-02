@@ -4,6 +4,7 @@ import (
 	"cy/game/codec/protobuf"
 	"cy/game/db/mgo"
 	mj "cy/game/logic/changshu/majiang"
+	"cy/game/logic/tpl"
 	"time"
 
 	pbcommon "cy/game/pb/common"
@@ -33,7 +34,7 @@ type deskUserInfo struct {
 
 type Desk struct {
 	mu          sync.Mutex
-	gameNode    *mjcs
+	gameNode    *tpl.RoomServie
 	masterId    uint64                   //房主
 	id          uint64                   //桌子id
 	curInning   uint32                   //第几局
@@ -87,6 +88,7 @@ func (d *Desk) checkStart() bool {
 	return true
 }
 
+//玩家加入桌子后变成观察者
 func (d *Desk) doJoin(uid uint64) pbgame.JoinDeskRspCode {
 	//判断人数满没满
 	log.Warnf("玩家%d加入房间%d", uid, d.id)
@@ -150,10 +152,10 @@ func (d *Desk) SendData(uid uint64, pb proto.Message) {
 			uids[i] = uid
 			i++
 		}
-		d.gameNode.RoundTpl.ToGateNormal(pb, uids...)
+		d.gameNode.ToGateNormal(pb, uids...)
 	} else {
 		if _, ok := d.deskPlayers[uid]; ok {
-			d.gameNode.RoundTpl.ToGateNormal(pb, uid)
+			d.gameNode.ToGateNormal(pb, uid)
 		}
 	}
 }
@@ -167,10 +169,10 @@ func (d *Desk) SendGameMessage(uid uint64, pb proto.Message) {
 			uids[i] = uid
 			i++
 		}
-		d.gameNode.RoundTpl.ToGate(pb, uids...)
+		d.gameNode.ToGate(pb, uids...)
 	} else {
 		if _, ok := d.deskPlayers[uid]; ok {
-			d.gameNode.RoundTpl.ToGate(pb, uid)
+			d.gameNode.ToGate(pb, uid)
 		}
 	}
 }

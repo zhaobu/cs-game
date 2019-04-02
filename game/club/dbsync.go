@@ -1,6 +1,7 @@
 package main
 
 import (
+	"cy/game/cache"
 	"cy/game/db/mgo"
 	"cy/game/pb/common"
 	"time"
@@ -17,6 +18,11 @@ func loadDB() {
 			c.Members = make(map[uint64]*mgo.ClubMember)
 		}
 		cc := &cacheClub{Club: c, desks: make(map[uint64]*pbcommon.DeskInfo)}
+		if ds, err := cache.QueryClubDeskInfo(c.ID); err == nil {
+			for _, d := range ds {
+				cc.desks[d.ID] = d
+			}
+		}
 		clubMgr[c.ID] = cc
 
 		for _, m := range c.Members {
@@ -27,7 +33,7 @@ func loadDB() {
 
 func syncDB() {
 	go func() {
-		tick := time.NewTicker(time.Second * 1)
+		tick := time.NewTicker(time.Second * 3)
 		defer tick.Stop()
 
 		for {
@@ -37,7 +43,11 @@ func syncDB() {
 				for _, v := range clubMgr {
 					v.Lock()
 					if v.noCommit {
-						mgo.SaveClub(v.Club)
+						err := mgo.SaveClub(v.Club)
+						if err == nil && v.f != nil {
+							go v.f()
+							v.f = nil
+						}
 						v.noCommit = false
 					}
 					v.Unlock()
