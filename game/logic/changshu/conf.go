@@ -4,6 +4,8 @@ import (
 	pbgame_logic "cy/game/pb/game/mj/changshu"
 	"encoding/json"
 	"io/ioutil"
+
+	"go.uber.org/zap"
 )
 
 var (
@@ -21,6 +23,6 @@ func loadArgTpl(fn string) error {
 		return err
 	}
 
-	log.Infof("arg tpl: %+v\n", argTpl)
+	tlog.Info("arg tpl", zap.Any("CreateArgTpl", argTpl))
 	return nil
 }
