@@ -4,8 +4,9 @@ import (
 	"cy/game/cache"
 	"cy/game/codec"
 	"cy/game/codec/protobuf"
+	"cy/game/configs"
 	"cy/game/db/mgo"
-	"cy/game/pb/inner"
+	pbinner "cy/game/pb/inner"
 	"cy/game/util"
 	"encoding/json"
 	"flag"
@@ -34,6 +35,16 @@ var (
 
 	redisPool *redis.Pool
 )
+
+func init() {
+	//如果不指定启动参数,默认读取全局配置
+	globalcnf := configs.GetConfig("../../configs/globalconf.json")
+	*consulAddr = globalcnf.ConsulAddr
+	*release = globalcnf.Release
+	*redisAddr = globalcnf.RedisAddr
+	*redisDb = globalcnf.RedisDb
+	*mgoURI = globalcnf.MgoURI
+}
 
 type club int
 

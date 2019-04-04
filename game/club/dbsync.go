@@ -3,7 +3,7 @@ package main
 import (
 	"cy/game/cache"
 	"cy/game/db/mgo"
-	"cy/game/pb/common"
+	pbcommon "cy/game/pb/common"
 	"time"
 )
 

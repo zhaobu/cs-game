@@ -4,8 +4,8 @@ import (
 	"context"
 	"cy/game/codec"
 	"cy/game/db/mgo"
-	"cy/game/pb/club"
-	"cy/game/pb/common"
+	pbclub "cy/game/pb/club"
+	pbcommon "cy/game/pb/common"
 	"fmt"
 	"runtime/debug"
 

@@ -1,0 +1,24 @@
+// 此文件为服务器内部使用，客户端调用无响应
+syntax = "proto3";
+
+package pbinner;
+
+message GamePlayerInfo  {
+    uint64 UserId = 1;			    //用户Id
+    string Name = 2; 				//姓名
+    int32 BringinIntegral = 3;	    //带入积分
+    int32 WinIntegral = 4;			//输赢积分
+}
+
+//games -> center
+message WriteGameRecordReq {
+    int32 GameId = 1;	 			//游戏Id
+    int32 AreaType = 2;				//场类型 1俱乐部房间 2好友房
+    int64 ClubId = 3;				//俱乐部Id 当 AreaType 1 时需要填写
+    uint32 RoomId = 4;              //房间号
+    int32  Index = 5;               //游戏当前局数
+    int64 GameStartTime = 6;		//开始时间 存储时间错
+    int64 GameEndTime = 7;			//结束时间 存储时间错
+    repeated GamePlayerInfo PlayerInfos = 8; //游戏内玩家数据
+    repeated bytes RePlayData = 9;   //复盘数据                暂时可不写
+}

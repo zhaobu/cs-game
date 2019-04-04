@@ -2,6 +2,7 @@ package main
 
 import (
 	"cy/game/cache"
+	"cy/game/configs"
 	"cy/game/util"
 	"flag"
 	"fmt"
@@ -25,6 +26,15 @@ var (
 	redisAddr  = flag.String("redisaddr", "192.168.0.90:6379", "redis address")
 	redisDb    = flag.Int("redisDb", 1, "redis db select")
 )
+
+func init() {
+	//如果不指定启动参数,默认读取全局配置
+	globalcnf := configs.GetConfig("../../configs/globalconf.json")
+	*consulAddr = globalcnf.ConsulAddr
+	*release = globalcnf.Release
+	*redisAddr = globalcnf.RedisAddr
+	*redisDb = globalcnf.RedisDb
+}
 
 type center int
 

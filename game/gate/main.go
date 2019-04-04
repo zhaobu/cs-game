@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/tls"
 	"cy/game/cache"
+	"cy/game/configs"
 	"cy/game/db/mgo"
 	"flag"
 	"fmt"
@@ -51,6 +52,16 @@ func initLog() {
 			logrus.SetOutput(os.Stdout)
 		}
 	}
+}
+
+func init() {
+	//如果不指定启动参数,默认读取全局配置
+	globalcnf := configs.GetConfig("../../configs/globalconf.json")
+	*consulAddr = globalcnf.ConsulAddr
+	*release = globalcnf.Release
+	*redisAddr = globalcnf.RedisAddr
+	*redisDb = globalcnf.RedisDb
+	*mgoURI = globalcnf.MgoURI
 }
 
 func main() {

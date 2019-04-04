@@ -3,6 +3,7 @@ package main
 import (
 	"cy/game/cache"
 	zaplog "cy/game/common/logger"
+	"cy/game/configs"
 	"cy/game/db/mgo"
 	"cy/game/logic/tpl"
 	"cy/game/util"
@@ -33,6 +34,16 @@ var (
 	log  *zap.SugaredLogger //printf风格
 	tlog *zap.Logger        //structured 风格
 )
+
+func init() {
+	//如果不指定启动参数,默认读取全局配置
+	globalcnf := configs.GetConfig("../../configs/globalconf.json")
+	*consulAddr = globalcnf.ConsulAddr
+	*release = globalcnf.Release
+	*redisAddr = globalcnf.RedisAddr
+	*redisDb = globalcnf.RedisDb
+	*mgoURI = globalcnf.MgoURI
+}
 
 type roomHandle struct {
 	*tpl.RoomServie
@@ -79,10 +90,12 @@ type roomHandle struct {
 // }
 
 func initLog() {
-	var logName, logLevel string = fmt.Sprintf("%s_%d_%d.log", gameName, os.Getpid(), time.Now().Unix()), ""
+	var logName, logLevel string
 	if *release {
 		logLevel = "info"
+		logName = fmt.Sprintf("./log/%s_%d_%s.log", gameName, os.Getpid(), time.Now().Format("2006_01_02"))
 	} else {
+		logName = fmt.Sprintf("./log/%s.log", gameName)
 		logLevel = "debug"
 		_, err := os.OpenFile(logName, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
 		if err != nil {
