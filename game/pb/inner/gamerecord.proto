@@ -12,8 +12,7 @@ message GamePlayerInfo  {
 
 //games -> center
 message WriteGameRecordReq {
-    int32 GameId = 1;	 			//游戏Id
-    int32 AreaType = 2;				//场类型 1俱乐部房间 2好友房
+    string GameId = 1;	 			//游戏Id
     int64 ClubId = 3;				//俱乐部Id 当 AreaType 1 时需要填写
     uint32 RoomId = 4;              //房间号
     int32  Index = 5;               //游戏当前局数

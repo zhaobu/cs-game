@@ -65,7 +65,7 @@ func (p *club) CreateClubReq(ctx context.Context, args *codec.Message, reply *co
 		req.Base.IsCustomGameArg = false
 	}
 
-	newID, err = mgo.IncClubID()
+	newID, err = mgo.AllocClubID()
 	if err != nil {
 		rsp.Code = 4
 		return nil

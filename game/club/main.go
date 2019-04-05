@@ -1,3 +1,5 @@
+// +build consul
+
 package main
 
 import (

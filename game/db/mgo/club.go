@@ -31,6 +31,58 @@ type Club struct {
 	GameArgs        []*DeskSetting
 }
 
+type clubId struct {
+	ID    int64 `bson:"_id"`
+	Inuse bool
+}
+
+// var (
+// 	muClubID sync.RWMutex
+// 	clubIds  = make(map[int64]struct{})
+// )
+
+// func initClubId() {
+// 	//tmp := make([]*clubId, 0)
+// 	var tmp []*clubId
+// 	mgoSess.DB("").C("club_id").Find(bson.M{"inuse": false}).All(&tmp)
+// 	for _, v := range tmp {
+// 		clubIds[v.ID] = struct{}{}
+// 	}
+// }
+
+// func AllocClubID() (id int64, err error) {
+// 	muClubID.Lock()
+// 	defer muClubID.Unlock()
+
+// 	if len(clubIds) == 0 {
+// 		return 0, fmt.Errorf("clubid exhaust")
+// 	}
+
+// 	for k := range clubIds {
+// 		id = k
+// 		break
+// 	}
+
+// 	err = mgoSess.DB("").C("club_id").UpdateId(id, bson.M{"$set": bson.M{"inuse": true}})
+// 	if err != nil {
+// 		return
+// 	}
+// 	delete(clubIds, id)
+
+// 	return
+// }
+
+func AllocClubID() (id int64, err error) {
+	var tmp clubId
+	_, err = mgoSess.DB("").C("club_id").Find(bson.M{"inuse": false}).Apply(mgo.Change{
+		Update:    bson.M{"$set": bson.M{"inuse": true}},
+		Upsert:    false,
+		Remove:    false,
+		ReturnNew: true,
+	}, &tmp)
+	return tmp.ID, err
+}
+
 func IncClubID() (int64, error) {
 	result := bson.M{}
 	_, err := mgoSess.DB("").C("clubid").Find(nil).Apply(mgo.Change{
