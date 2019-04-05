@@ -1,0 +1,7 @@
+2019/04/05 14:48:11.513	INFO	client-demo/player.go:64	connect succ	{"addr": "192.168.0.10:9876"}
+2019/04/05 14:48:11.539	INFO	session/session.go:46	SendPb	{"msgName": "pblogin.LoginReq"}
+2019/04/05 14:48:11.614	INFO	client-demo/player.go:137	recv	{"msgName": "pbcommon.SessionInfo", "msgValue": ""}
+2019/04/05 14:48:11.614	INFO	clientgame/changshu.go:31	recv gamemsg	{"msgName": "", "msgValue": ""}
+2019/04/05 14:48:27.610	INFO	clientgame/changshu.go:36	v=
+2019/04/05 14:48:27.610	INFO	client-demo/player.go:137	recv	{"msgName": "pblogin.LoginRsp", "msgValue": "Head:<Seq:1 > Code:Succ User:<UserID:31 SessionID:\"9686f9fd-41d1-42a9-9c20-8ff078d7b530\" WxID:\"wx_1\" Gold:5000 Masonry:8 > "}
+2019/04/05 14:48:27.611	INFO	client-demo/player.go:96	login suc	{"wxID": "wx_1", "UserId": 31}

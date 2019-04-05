@@ -115,6 +115,11 @@ func (d *Desk) doJoin(uid uint64) pbgame.JoinDeskRspCode {
 	return pbgame.JoinDeskRspCode_JoinDeskSucc
 }
 
+//坐下后由观察者变为游戏玩家
+func (d *Desk) doSitDown(uid uint64) {
+
+}
+
 func (d *Desk) doExit(uid uint64) uint32 {
 	// 判断条件 是否能离开
 	return 1 // 默认离开

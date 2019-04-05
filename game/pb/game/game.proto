@@ -21,14 +21,22 @@ enum JoinDeskRspCode {
     JoinDeskNotUse = 0;
     JoinDeskSucc = 1;
     JoinDeskNotExist = 2;
-    JoinDeskDeskFull = 3;    
-    JoinDeskInternalServerError = 4;
-    JoinDeskUserStatusErr = 5;
-    JoinDeskGameStatusErr = 6;
-    JoinDeskDistanceSoClose = 7;//距离限制不允许加入
-    JoinDeskAlreadyInDesk = 8; //已结在桌子中
+    JoinDeskDeskFull = 3;//如果观察者有上限,报错    
+    JoinDeskInternalServerError = 4; //服务器内部错误
+    JoinDeskUserStatusErr = 5;//redis缓存出错
+    JoinDeskAlreadyInDesk = 6; //已经在桌子中
+    // JoinDeskGameStatusErr = 7;
+    // JoinDeskDistanceSoClose = 8;//距离限制不允许加入
 }
 
+enum SitDownRspCode{
+    SitDownNone=0;
+    SitDownSucc =1;//坐下成功
+    SitDownNotInDesk =2;//不在桌子中
+    SitDownFull=3;//桌子已满
+    SitDownDistanceSoClose = 4;//距离限制不允许坐下
+    SitDownGameStatusErr = 5;//桌子状态错误(比如重复准备)
+}
 // 查询游戏配置 c -> s
 message QueryGameConfigReq {
 	pbcommon.ReqHead Head = 1;
@@ -101,6 +109,18 @@ message JoinDeskRsp {
     JoinDeskRspCode Code = 2;  
     string ErrMsg = 3;
     pbcommon.DeskInfo Info = 4;      
+}
+
+// 坐下准备 c -> s
+message SitDownReq {
+    pbcommon.ReqHead Head = 1;
+}
+
+message SitDownRsp {
+    pbcommon.RspHead Head = 1;
+    SitDownRspCode Code = 2;  
+    string ErrMsg = 3;
+    int32 ChairId=4; //座位号
 }
 
 // 离开桌子 c -> s

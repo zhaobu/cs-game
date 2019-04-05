@@ -1,6 +1,7 @@
 package zaplog
 
 import (
+	"fmt"
 	"os"
 	"time"
 
@@ -44,6 +45,11 @@ func InitLogger(logpath string, loglevel string, debugmode bool) *zap.Logger {
 	}
 	//如果是debug模式,同时输出到到终端
 	if debugmode {
+		//重新生成文件
+		_, err := os.OpenFile(logpath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
+		if err != nil {
+			fmt.Printf("err os.OpenFile()")
+		}
 		encoderConfig = zap.NewDevelopmentEncoderConfig()
 		encoderConfig.EncodeTime = timeFormat
 		allCore = append(allCore, zapcore.NewCore(zapcore.NewConsoleEncoder(encoderConfig), consoleDebugging, level))

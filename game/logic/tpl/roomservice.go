@@ -92,8 +92,11 @@ func (self *RoomServie) GetRpcHandle() *RpcHandle {
 	return &self.rpcHandle
 }
 
+//ToGateNormal发送消息
 func (self *RoomServie) ToGateNormal(pb proto.Message, uids ...uint64) error {
-	self.tlog.Info("send to gate", zap.Any("uids", uids), zap.String("msgName", proto.MessageName(pb)), zap.Any("msgValue", pb))
+	if _, ok := pb.(*pbgame.GameNotif); !ok { //游戏消息在ToGate里打印
+		self.tlog.Info("ToGateNormal", zap.Any("uids", uids), zap.String("msgName", proto.MessageName(pb)), zap.Any("msgValue", pb))
+	}
 	msg := &codec.Message{}
 	err := codec.Pb2Msg(pb, msg)
 	if err != nil {
@@ -122,7 +125,9 @@ func (self *RoomServie) ToGateNormal(pb proto.Message, uids ...uint64) error {
 	return err
 }
 
+//ToGate发送游戏消息
 func (self *RoomServie) ToGate(pb proto.Message, uids ...uint64) error {
+	self.tlog.Info("ToGate", zap.Any("uids", uids), zap.String("msgName", proto.MessageName(pb)), zap.Any("msgValue", pb))
 	var err error
 	notif := &pbgame.GameNotif{}
 	notif.NotifName, notif.NotifValue, err = protobuf.Marshal(pb)

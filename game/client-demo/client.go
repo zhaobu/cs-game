@@ -25,6 +25,7 @@ func main() {
 
 	player := &Player{}
 	player.Connect(*addr)
+	player.GameStart()
 }
 
 func writebuf(path string, wbuf string) {

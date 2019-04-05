@@ -81,6 +81,31 @@ func (self *roomHandle) HandleJoinDeskReq(uid uint64, req *pbgame.JoinDeskReq, r
 	return
 }
 
+func (self *roomHandle) HandleSitDownReq(uid uint64, req *pbgame.SitDownReq, rsp *pbgame.SitDownRsp) {
+	//检查玩家是否存在桌子
+	d := getDeskByUID(uid)
+	if d == nil {
+		rsp.Code = pbgame.SitDownRspCode_SitDownNotInDesk
+		rsp.ErrMsg = fmt.Sprintf("user%d not in desk", uid)
+		return
+	}
+	//检查玩家是否存在桌子信息
+	user, ok := d.deskPlayers[uid]
+	if !ok {
+		rsp.Code = pbgame.SitDownRspCode_SitDownNotInDesk
+		rsp.ErrMsg = fmt.Sprintf("user%d in desk,but has no deskinfo", uid)
+		return
+	}
+
+	//检查是否重复准备
+	if user.desk_state != LOOKON {
+		rsp.Code = pbgame.SitDownRspCode_SitDownGameStatusErr
+		rsp.ErrMsg = fmt.Sprintf("user%d gamestatus err", uid)
+		return
+	}
+	return
+}
+
 func (self *roomHandle) HandleMakeDeskReq(uid uint64, deskID uint64, req *pbgame.MakeDeskReq, rsp *pbgame.MakeDeskRsp) {
 	arg, err := checkArg(req)
 	if err != nil {

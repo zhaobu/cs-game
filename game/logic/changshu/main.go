@@ -97,10 +97,6 @@ func initLog() {
 	} else {
 		logName = fmt.Sprintf("./log/%s.log", gameName)
 		logLevel = "debug"
-		_, err := os.OpenFile(logName, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
-		if err != nil {
-			fmt.Printf("err os.OpenFile()")
-		}
 	}
 	tlog = zaplog.InitLogger(logName, logLevel, !*release)
 	log = tlog.Sugar()

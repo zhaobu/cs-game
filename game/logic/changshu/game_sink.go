@@ -176,7 +176,7 @@ func (self *GameSink) dealDiceResult() {
 	msg := &pbgame_logic.S2CChangePos{PosInfo: posInfo}
 	self.sendData(-1, msg)
 	//1s后发送游戏开始消息
-	self.desk.set_timer(mj.TID_DealCard, 4*time.Second, func() {
+	self.desk.set_timer(mj.TID_DealCard, 1*time.Second, func() {
 		self.deal_card()
 	})
 }

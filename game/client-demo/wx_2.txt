@@ -1,0 +1,32 @@
+2019/04/05 17:54:50.915	INFO	client-demo/player.go:63	connect succ	{"addr": "192.168.0.10:9876"}
+2019/04/05 17:54:50.939	INFO	session/session.go:46	SendPb	{"msgName": "pblogin.LoginReq"}
+2019/04/05 17:54:51.016	INFO	client-demo/player.go:136	recv	{"msgName": "pbcommon.SessionInfo", "msgValue": ""}
+2019/04/05 17:54:51.016	INFO	client-demo/player.go:160	未处理的消息	{"msgName": "pbcommon.SessionInfo", "msgValue": ""}
+2019/04/05 17:54:51.016	INFO	client-demo/player.go:136	recv	{"msgName": "pblogin.LoginRsp", "msgValue": "Head:<Seq:1 > Code:Succ User:<UserID:32 SessionID:\"da6e052f-a58b-4a5d-a51d-e76c0cf0c577\" WxID:\"wx_2\" Gold:5000 Masonry:8 > "}
+2019/04/05 17:54:51.016	INFO	client-demo/player.go:95	login suc	{"wxID": "wx_2", "UserId": 32}
+2019/04/05 17:54:51.417	INFO	session/session.go:46	SendPb	{"msgName": "pbgame.JoinDeskReq"}
+2019/04/05 17:54:51.518	INFO	client-demo/player.go:136	recv	{"msgName": "pbgame.JoinDeskRsp", "msgValue": "Code:JoinDeskSucc "}
+2019/04/05 17:54:51.518	INFO	client-demo/player.go:117	joindesk suc	{"wxID": "wx_2", "UserId": 32}
+2019/04/05 17:54:57.159	INFO	client-demo/player.go:136	recv	{"msgName": "pbgame.GameNotif", "msgValue": "NotifName:\"pbgame_mj_changshu.S2CThrowDice\" "}
+2019/04/05 17:54:57.159	INFO	clientgame/changshu.go:40	recv GameNotif 轮到玩家投色子	{"NotifName": "pbgame_mj_changshu.S2CThrowDice", "NotifValue": ""}
+2019/04/05 17:55:02.597	INFO	client-demo/player.go:136	recv	{"msgName": "pbgame.GameNotif", "msgValue": "NotifName:\"pbgame_mj_changshu.S2CThrowDiceResult\" NotifValue:\"\\022\\002\\010\\003\\022\\002\\010\\002\" "}
+2019/04/05 17:55:02.597	INFO	clientgame/changshu.go:42	recv GameNotif 玩家投了色子	{"NotifName": "pbgame_mj_changshu.S2CThrowDiceResult", "NotifValue": "dice_value:<T:3 > dice_value:<T:2 > "}
+2019/04/05 17:55:02.597	INFO	client-demo/player.go:136	recv	{"msgName": "pbgame.GameNotif", "msgValue": "NotifName:\"pbgame_mj_changshu.S2CThrowDice\" NotifValue:\"\\010\\001\" "}
+2019/04/05 17:55:02.597	INFO	clientgame/changshu.go:40	recv GameNotif 轮到玩家投色子	{"NotifName": "pbgame_mj_changshu.S2CThrowDice", "NotifValue": "chair_id:1 "}
+2019/04/05 17:55:04.727	INFO	session/session.go:46	SendPb	{"msgName": "pbgame.GameAction"}
+2019/04/05 17:55:04.811	INFO	client-demo/player.go:136	recv	{"msgName": "pbgame.GameNotif", "msgValue": "NotifName:\"pbgame_mj_changshu.S2CThrowDiceResult\" NotifValue:\"\\010\\001\\022\\002\\010\\001\\022\\002\\010\\003\" "}
+2019/04/05 17:55:04.811	INFO	clientgame/changshu.go:42	recv GameNotif 玩家投了色子	{"NotifName": "pbgame_mj_changshu.S2CThrowDiceResult", "NotifValue": "chair_id:1 dice_value:<T:1 > dice_value:<T:3 > "}
+2019/04/05 17:55:04.812	INFO	client-demo/player.go:136	recv	{"msgName": "pbgame.GameNotif", "msgValue": "NotifName:\"pbgame_mj_changshu.S2CThrowDice\" NotifValue:\"\\010\\002\" "}
+2019/04/05 17:55:04.813	INFO	clientgame/changshu.go:40	recv GameNotif 轮到玩家投色子	{"NotifName": "pbgame_mj_changshu.S2CThrowDice", "NotifValue": "chair_id:2 "}
+2019/04/05 17:55:08.134	INFO	client-demo/player.go:136	recv	{"msgName": "pbgame.GameNotif", "msgValue": "NotifName:\"pbgame_mj_changshu.S2CThrowDiceResult\" NotifValue:\"\\010\\002\\022\\002\\010\\003\\022\\002\\010\\001\" "}
+2019/04/05 17:55:08.134	INFO	clientgame/changshu.go:42	recv GameNotif 玩家投了色子	{"NotifName": "pbgame_mj_changshu.S2CThrowDiceResult", "NotifValue": "chair_id:2 dice_value:<T:3 > dice_value:<T:1 > "}
+2019/04/05 17:55:08.135	INFO	client-demo/player.go:136	recv	{"msgName": "pbgame.GameNotif", "msgValue": "NotifName:\"pbgame_mj_changshu.S2CThrowDice\" NotifValue:\"\\010\\003\" "}
+2019/04/05 17:55:08.136	INFO	clientgame/changshu.go:40	recv GameNotif 轮到玩家投色子	{"NotifName": "pbgame_mj_changshu.S2CThrowDice", "NotifValue": "chair_id:3 "}
+2019/04/05 17:55:13.882	INFO	client-demo/player.go:136	recv	{"msgName": "pbgame.GameNotif", "msgValue": "NotifName:\"pbgame_mj_changshu.S2CThrowDiceResult\" NotifValue:\"\\010\\003\\022\\002\\010\\001\\022\\002\\010\\003\" "}
+2019/04/05 17:55:13.882	INFO	clientgame/changshu.go:42	recv GameNotif 玩家投了色子	{"NotifName": "pbgame_mj_changshu.S2CThrowDiceResult", "NotifValue": "chair_id:3 dice_value:<T:1 > dice_value:<T:3 > "}
+2019/04/05 17:55:13.883	INFO	client-demo/player.go:136	recv	{"msgName": "pbgame.GameNotif", "msgValue": "NotifName:\"pbgame_mj_changshu.S2CChangePos\" NotifValue:\"\\n\\002\\020\\005\\n\\004\\010\\001\\020\\004\\n\\004\\010\\002\\020\\004\\n\\004\\010\\003\\020\\004\" "}
+2019/04/05 17:55:13.883	INFO	clientgame/changshu.go:44	recv GameNotif 换位结果	{"NotifName": "pbgame_mj_changshu.S2CChangePos", "NotifValue": "pos_info:<dice_value:5 > pos_info:<user_pos:1 dice_value:4 > pos_info:<user_pos:2 dice_value:4 > pos_info:<user_pos:3 dice_value:4 > "}
+2019/04/05 17:55:14.083	INFO	client-demo/player.go:136	recv	{"msgName": "pbgame.GameNotif", "msgValue": "NotifName:\"pbgame_mj_changshu.S2CStartGame\" NotifValue:\"\\020\\220\\001\\030[*\\017\\n\\r\\014\\025\\021\\017\\017\\r\\031.\\033\\032\\027\\022,\" "}
+2019/04/05 17:55:14.083	INFO	clientgame/changshu.go:46	recv GameNotif 游戏开始	{"NotifName": "pbgame_mj_changshu.S2CStartGame", "NotifValue": "total_card_num:144 left_card_num:91 user_info:<hand_cards:12 hand_cards:21 hand_cards:17 hand_cards:15 hand_cards:15 hand_cards:13 hand_cards:25 hand_cards:46 hand_cards:27 hand_cards:26 hand_cards:23 hand_cards:18 hand_cards:44 > "}
+2019/04/05 17:55:14.084	INFO	clientgame/changshu.go:54	self.HandCards	{"handcards": [12, 21, 17, 15, 15, 13, 25, 46, 27, 26, 23, 18, 44]}
+2019/04/05 17:55:14.084	INFO	client-demo/player.go:136	recv	{"msgName": "pbgame.GameNotif", "msgValue": "NotifName:\"pbgame_mj_changshu.S2CBuHua\" "}
