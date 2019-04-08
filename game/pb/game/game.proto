@@ -5,146 +5,154 @@ import "cy/game/pb/common/common.proto";
 
 package pbgame;
 
+//玩家在桌子中状态
+enum DeskStatus {
+  DSNone = 0;
+  DSLook = 1;     //观察者
+  DSSitDown = 2;  //已坐下准备中
+  DSPlaying = 3;  //游戏中
+}
+
 enum MakeDeskRspCode {
-    MakeDeskNotUse = 0;
-    MakeDeskSucc = 1;
-    MakeDeskArgsErr = 2; 
-    MakeDeskNotEnoughMoney = 3; // 财富不够
-    MakeDeskNotEnoughDesk = 4; // 桌子不够
-    MakeDeskInternalServerError = 5;
-    MakeDeskUserStatusErr = 6; // 创建并进入游戏失败
-    MakeDeskCanNotFindClubID = 7; // 无效的俱乐部ID
-    MakeDeskLimit = 8; // 个数限制
+  MakeDeskNotUse = 0;
+  MakeDeskSucc = 1;
+  MakeDeskArgsErr = 2;
+  MakeDeskNotEnoughMoney = 3;  // 财富不够
+  MakeDeskNotEnoughDesk = 4;   // 桌子不够
+  MakeDeskInternalServerError = 5;
+  MakeDeskUserStatusErr = 6;     // 创建并进入游戏失败
+  MakeDeskCanNotFindClubID = 7;  // 无效的俱乐部ID
+  MakeDeskLimit = 8;             // 个数限制
 }
 
 enum JoinDeskRspCode {
-    JoinDeskNotUse = 0;
-    JoinDeskSucc = 1;
-    JoinDeskNotExist = 2;
-    JoinDeskDeskFull = 3;//如果观察者有上限,报错    
-    JoinDeskInternalServerError = 4; //服务器内部错误
-    JoinDeskUserStatusErr = 5;//redis缓存出错
-    JoinDeskAlreadyInDesk = 6; //已经在桌子中
-    // JoinDeskGameStatusErr = 7;
-    // JoinDeskDistanceSoClose = 8;//距离限制不允许加入
+  JoinDeskNotUse = 0;
+  JoinDeskSucc = 1;
+  JoinDeskNotExist = 2;
+  JoinDeskDeskFull = 3;             //如果观察者有上限,报错
+  JoinDeskInternalServerError = 4;  //服务器内部错误
+  JoinDeskUserStatusErr = 5;        // redis缓存出错
+  JoinDeskAlreadyInDesk = 6;        //已经在桌子中
+                                    // JoinDeskGameStatusErr = 7;
+  // JoinDeskDistanceSoClose = 8;//距离限制不允许加入
 }
 
-enum SitDownRspCode{
-    SitDownNone=0;
-    SitDownSucc =1;//坐下成功
-    SitDownNotInDesk =2;//不在桌子中
-    SitDownFull=3;//桌子已满
-    SitDownDistanceSoClose = 4;//距离限制不允许坐下
-    SitDownGameStatusErr = 5;//桌子状态错误(比如重复准备)
+enum SitDownRspCode {
+  SitDownNone = 0;
+  SitDownSucc = 1;             //坐下成功
+  SitDownNotInDesk = 2;        //不在桌子中
+  SitDownFull = 3;             //桌子已满
+  SitDownDistanceSoClose = 4;  //距离限制不允许坐下
+  SitDownGameStatusErr = 5;    //桌子状态错误(比如重复准备)
 }
 // 查询游戏配置 c -> s
 message QueryGameConfigReq {
-	pbcommon.ReqHead Head = 1;
-    string GameName = 2;
-    // 1匹配 2好友 3比赛
-    int32 Type = 3;
+  pbcommon.ReqHead Head = 1;
+  string GameName = 2;
+  // 1匹配 2好友 3比赛
+  int32 Type = 3;
 }
 
 message QueryGameConfigRsp {
-	pbcommon.RspHead Head = 1;
-    string CfgName = 2; // 具体游戏配置 如 pbgame_ddz.MatchConfig or pbgame_ddz.FriendsConfigTpl
-    bytes CfgValue = 3;
+  pbcommon.RspHead Head = 1;
+  string CfgName = 2;  // 具体游戏配置 如 pbgame_ddz.MatchConfig or
+                       // pbgame_ddz.FriendsConfigTpl
+  bytes CfgValue = 3;
 }
 
 // 查询桌子信息 c -> s
 message QueryDeskInfoReq {
-    pbcommon.ReqHead Head = 1;
-    uint64 DeskID = 2;
+  pbcommon.ReqHead Head = 1;
+  uint64 DeskID = 2;
 }
 
 message QueryDeskInfoRsp {
-    pbcommon.RspHead Head = 1;
-    // 1 成功 2 不存在
-    uint32 Code = 2; 
-    pbcommon.DeskInfo Info = 3;    
+  pbcommon.RspHead Head = 1;
+  // 1 成功 2 不存在
+  uint32 Code = 2;
+  pbcommon.DeskInfo Info = 3;
 }
 
 // 新建桌子 c -> s
 message MakeDeskReq {
-    pbcommon.ReqHead Head = 1;
-    string GameName = 2;    
-    string GameArgMsgName = 3; // 具体游戏参数 如 pbgame_ddz.RoomArg
-    bytes GameArgMsgValue = 4;
-    int64 ClubID = 5;
+  pbcommon.ReqHead Head = 1;
+  string GameName = 2;
+  string GameArgMsgName = 3;  // 具体游戏参数 如 pbgame_ddz.RoomArg
+  bytes GameArgMsgValue = 4;
+  int64 ClubID = 5;
 }
 
-message MakeDeskRsp {    
-    pbcommon.RspHead Head = 1;
-    MakeDeskRspCode Code = 2;    
-    string StrCode = 3;
-    pbcommon.DeskInfo Info = 4;    
+message MakeDeskRsp {
+  pbcommon.RspHead Head = 1;
+  MakeDeskRspCode Code = 2;
+  string StrCode = 3;
+  pbcommon.DeskInfo Info = 4;
 }
 
 // 销毁桌子 c -> s
 message DestroyDeskReq {
-    pbcommon.ReqHead Head = 1;    
-    uint64 DeskID = 2;
+  pbcommon.ReqHead Head = 1;
+  uint64 DeskID = 2;
 }
 
 message DestroyDeskRsp {
-    pbcommon.RspHead Head = 1;
-    // 1成功 2失败-已经开始 3失败-必须为房主
-    uint32 Code = 2;
-    string StrCode = 3;
+  pbcommon.RspHead Head = 1;
+  // 1成功 2失败-已经开始 3失败-必须为房主
+  uint32 Code = 2;
+  string StrCode = 3;
 }
 
 // s -> c 通知桌子被销毁
 message DestroyDeskNotif {
-    uint64 DeskID = 1;
+  uint64 DeskID = 1;
 }
 
 // 加入桌子 c -> s
 message JoinDeskReq {
-    pbcommon.ReqHead Head = 1;
-    uint64 DeskID = 2;
+  pbcommon.ReqHead Head = 1;
+  uint64 DeskID = 2;
 }
 
 message JoinDeskRsp {
-    pbcommon.RspHead Head = 1;
-    JoinDeskRspCode Code = 2;  
-    string ErrMsg = 3;
-    pbcommon.DeskInfo Info = 4;      
+  pbcommon.RspHead Head = 1;
+  JoinDeskRspCode Code = 2;
+  string ErrMsg = 3;
+  pbcommon.DeskInfo Info = 4;
 }
 
 // 坐下准备 c -> s
 message SitDownReq {
-    pbcommon.ReqHead Head = 1;
+  pbcommon.ReqHead Head = 1;
 }
 
 message SitDownRsp {
-    pbcommon.RspHead Head = 1;
-    SitDownRspCode Code = 2;  
-    string ErrMsg = 3;
-    int32 ChairId=4; //座位号
+  pbcommon.RspHead Head = 1;
+  SitDownRspCode Code = 2;
+  string ErrMsg = 3;
+  int32 ChairId = 4;  //座位号
 }
 
 // 离开桌子 c -> s
 message ExitDeskReq {
-    pbcommon.ReqHead Head = 1;
+  pbcommon.ReqHead Head = 1;
 }
 
 message ExitDeskRsp {
-    pbcommon.RspHead Head = 1;
-    // 1 成功 2 失败-游戏开始
-    uint32 Code = 2;
-    string ErrMsg = 3;
+  pbcommon.RspHead Head = 1;
+  // 1 成功 2 失败-游戏开始
+  uint32 Code = 2;
+  string ErrMsg = 3;
 }
 
 // 游戏动作 c -> s
 message GameAction {
-    pbcommon.ReqHead Head = 1;
-    string ActionName = 2; // 具体游戏子命令
-    bytes ActionValue = 3;
+  pbcommon.ReqHead Head = 1;
+  string ActionName = 2;  // 具体游戏子命令
+  bytes ActionValue = 3;
 }
 
 // 服务器主动通知 s -> c
 message GameNotif {
-    string NotifName = 1; // 具体游戏子命令
-    bytes NotifValue = 2;
+  string NotifName = 1;  // 具体游戏子命令
+  bytes NotifValue = 2;
 }
-

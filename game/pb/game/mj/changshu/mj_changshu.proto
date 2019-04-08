@@ -1,5 +1,8 @@
 syntax = "proto3";
 
+import "cy/game/pb/common/common.proto";
+import "cy/game/pb/game/game.proto";
+
 package pbgame_mj_changshu;
 
 message cyU32String {
@@ -49,23 +52,50 @@ message CreateArgTpl {
 // 桌子参数
 message DeskArg {
   // 创建房间参数
-  repeated cyU32String Rule = 1;
-  uint32 Barhead = 2;
-  uint32 PlayerCount = 3;
-  uint32 Dipiao = 4;
-  RoundInfo RInfo = 5;
-  uint32 PaymentType = 6;
-  uint32 LimitIP = 7;
-  uint32 Voice = 8;
+  CreateArg args = 1;
+  // repeated cyU32String Rule = 1;
+  // uint32 Barhead = 2;
+  // uint32 PlayerCount = 3;
+  // uint32 Dipiao = 4;
+  // RoundInfo RInfo = 5;
+  // uint32 PaymentType = 6;
+  // uint32 LimitIP = 7;
+  // uint32 Voice = 8;
 
-  bool Enable = 9;
+  bool Enable = 2;
   // 1 匹配 2 好友 3 比赛
-  uint32 Type = 10;
+  uint32 Type = 3;
   // 服务费类型 1 金币 2 钻石
-  uint32 FeeType = 11;
-  uint64 DeskID = 12;
-  uint32 RoomId = 13;    // 匹配场时才有用
-  string RoomName = 14;  // 匹配场时才有用
+  uint32 FeeType = 4;
+  uint64 DeskID = 5;
+  uint32 RoomId = 6;    // 匹配场时才有用
+  string RoomName = 7;  // 匹配场时才有用
+}
+
+//游戏状态
+enum GameStatus {
+  GSNone = 0;
+  GSWait = 1;     // 等待中
+  GSPlay = 2;     // 游戏中
+  GSGameEnd = 3;  //游戏结束
+}
+
+// 玩家信息 s -> c
+message DeskUserInfo {
+  pbcommon.UserInfo info = 1;
+  int32 chair_id = 2;
+  pbgame.DeskStatus desk_status = 3;
+}
+
+// 断线重连、进入桌子 桌子信息 s -> c
+message DeskInfo {
+  string game_name = 1;  // 游戏名称
+  DeskArg arg = 2;
+  GameStatus game_status = 3;
+  uint32 cur_inning = 4;                //当前局数
+  int32 banker_id = 5;                  //庄家(庄家chairid)
+  uint64 master_uid = 6;                //房主(房主uid)
+  repeated DeskUserInfo game_user = 14;  // 准备的玩家信息
 }
 
 message cyint32 {

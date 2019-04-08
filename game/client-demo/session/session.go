@@ -21,8 +21,9 @@ func (self *Session) InitLog(_tlog *zap.Logger, _log *zap.SugaredLogger) {
 }
 
 type Session struct {
-	UserId uint64
-	Conn   net.Conn
+	ChairId int32
+	UserId  uint64
+	Conn    net.Conn
 }
 
 //发送游戏命令

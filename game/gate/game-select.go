@@ -25,7 +25,7 @@ func (s *gameSelector) Select(ctx context.Context, servicePath, serviceMethod st
 	switch serviceMethod {
 	case "MakeDeskReq", "QueryGameConfigReq":
 		return s.randomSelect()
-	case "QueryDeskInfoReq", "JoinDeskReq", "DestroyDeskReq", "ExitDeskReq", "GameAction":
+	case "QueryDeskInfoReq", "JoinDeskReq", "DestroyDeskReq", "ExitDeskReq", "GameAction","SitDownReq":
 		gameID := ctx.Value("game_id").(string)
 		return gameID
 	default:
@@ -86,6 +86,18 @@ func (s *session) getGameAddr(msg *codec.Message) (gameName, gameID string) {
 			}
 		}
 		s.sendPb(&pbgame.JoinDeskRsp{Code: pbgame.JoinDeskRspCode_JoinDeskNotExist})
+	// case proto.MessageName((*pbgame.SitDownReq)(nil)):
+	// 	sitDwonReq, ok := pb.(*pbgame.SitDownReq)
+	// 	if !ok {
+	// 		return
+	// 	}
+	// 	deskInfo, err := cache.QueryDeskInfo(joinDeskReq.DeskID)
+	// 	if err == nil && deskInfo != nil {
+	// 		if deskInfo.GameName != "" && deskInfo.GameID != "" {
+	// 			return deskInfo.GameName, deskInfo.GameID
+	// 		}
+	// 	}
+	// 	s.sendPb(&pbgame.JoinDeskRsp{Code: pbgame.JoinDeskRspCode_JoinDeskNotExist})
 	case proto.MessageName((*pbgame.QueryDeskInfoReq)(nil)):
 		queryDeskInfoReq, ok := pb.(*pbgame.QueryDeskInfoReq)
 		if !ok {

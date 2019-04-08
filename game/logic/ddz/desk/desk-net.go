@@ -4,8 +4,8 @@ import (
 	"cy/game/codec"
 	"cy/game/codec/protobuf"
 	"cy/game/db/mgo"
-	"cy/game/pb/common"
-	"cy/game/pb/game"
+	pbcommon "cy/game/pb/common"
+	pbgame "cy/game/pb/game"
 	"encoding/json"
 
 	"github.com/golang/protobuf/proto"

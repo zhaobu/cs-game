@@ -16,7 +16,7 @@ type Changshu struct {
 	Waitchan  chan int
 	BankerId  int32
 	HandCards []int32
-	chairId int32
+	chairId   int32
 }
 
 var (
@@ -47,14 +47,35 @@ func (self *Changshu) DispatchRecv(msg *pbgame.GameNotif) {
 		tlog.Info("recv GameNotif 游戏开始", zap.String("NotifName", msg.NotifName), zap.Any("NotifValue", v))
 		self.S2CStartGame(v)
 	case *pbgame_csmj.S2CBuHua:
-		if v.ChairId== {
-			
+		if v.ChairId == self.ChairId {
+			tlog.Info("recv GameNotif 轮到我补花", zap.String("NotifName", msg.NotifName), zap.Any("NotifValue", v))
+			self.S2CBuHua(v)
 		}
-		tlog.Info("recv GameNotif 游戏开始", zap.String("NotifName", msg.NotifName), zap.Any("NotifValue", v))
-		self.S2CStartGame(v)
 	}
 }
 
+func (self *Changshu) S2CBuHua(msg *pbgame_csmj.S2CBuHua) {
+	tlog.Info("补花前self.HandCards", zap.Any("handcards", self.HandCards))
+	for _, once := range msg.BuHuaResult {
+		//去掉花牌
+		self.removeCard(once.HuaCard, false)
+		tlog.Info("补花一次", zap.Int32("once.HuaCard", once.HuaCard), zap.Int32("once.BuCard", once.BuCard))
+		//增加补的牌
+		self.HandCards = append(self.HandCards, once.BuCard)
+	}
+	tlog.Info("补花后self.HandCards", zap.Any("handcards", self.HandCards))
+}
+
+func (self *Changshu) removeCard(delcard int32, delAll bool) {
+	for i, card := range self.HandCards {
+		if card == delcard {
+			self.HandCards = append(self.HandCards[:i], self.HandCards[i+1:]...)
+			if !delAll {
+				break
+			}
+		}
+	}
+}
 func (self *Changshu) S2CStartGame(msg *pbgame_csmj.S2CStartGame) {
 	self.BankerId = msg.BankerId
 	self.HandCards = msg.UserInfo.HandCards

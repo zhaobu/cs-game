@@ -1,0 +1,13 @@
+2019/04/08 14:33:01.035	INFO	client-demo/player.go:61	connect succ	{"addr": "192.168.0.10:9876"}
+2019/04/08 14:33:01.060	INFO	session/session.go:47	SendPb	{"msgName": "pblogin.LoginReq"}
+2019/04/08 14:33:01.135	INFO	client-demo/player.go:143	recv	{"msgName": "pbcommon.SessionInfo", "msgValue": ""}
+2019/04/08 14:33:01.135	INFO	client-demo/player.go:169	未处理的消息	{"msgName": "pbcommon.SessionInfo", "msgValue": ""}
+2019/04/08 14:33:01.136	INFO	client-demo/player.go:143	recv	{"msgName": "pblogin.LoginRsp", "msgValue": "Head:<Seq:1 > Code:Succ User:<UserID:31 SessionID:\"fc9ee461-4242-4f51-814b-2b7dce446fe7\" WxID:\"wx_1\" Gold:5000 Masonry:8 > "}
+2019/04/08 14:33:01.136	INFO	client-demo/player.go:93	login suc	{"wxID": "wx_1", "UserId": 31}
+2019/04/08 14:33:46.775	INFO	session/session.go:47	SendPb	{"msgName": "pbgame.MakeDeskReq"}
+2019/04/08 14:33:47.132	INFO	client-demo/player.go:143	recv	{"msgName": "pbgame.MakeDeskRsp", "msgValue": "Head:<Seq:1 > Code:MakeDeskSucc Info:<ID:365599 CreateUserID:31 CreateTime:1554705227 ArgName:\"pbgame_mj_changshu.CreateArg\" ArgValue:\"\\020\\005\\030\\004 \\001*\\0000\\003@\\001\" Status:\"1\" GameName:\"11101\" GameID:\"localhost:9601\" Kind:2 > "}
+2019/04/08 14:33:47.151	INFO	session/session.go:47	SendPb	{"msgName": "pbgame.JoinDeskReq"}
+2019/04/08 14:33:47.534	INFO	client-demo/player.go:143	recv	{"msgName": "pbgame.JoinDeskRsp", "msgValue": "Head:<Seq:1 > Code:JoinDeskSucc Info:<ID:365599 CreateUserID:31 CreateTime:1554705227 ArgName:\"pbgame_mj_changshu.CreateArg\" ArgValue:\"\\020\\005\\030\\004 \\001*\\0000\\003@\\001\" Status:\"1\" GameName:\"11101\" GameID:\"localhost:9601\" Kind:2 > "}
+2019/04/08 14:33:47.534	INFO	client-demo/player.go:115	joindesk suc	{"wxID": "wx_1", "UserId": 31}
+2019/04/08 14:33:47.535	INFO	session/session.go:47	SendPb	{"msgName": "pbgame.SitDownReq"}
+2019/04/08 14:34:28.568	ERROR	client-demo/player.go:133	ReadFrom err	{"error": "read tcp4 192.168.0.10:55475->192.168.0.10:9876: wsarecv: An existing connection was forcibly closed by the remote host."}

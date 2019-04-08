@@ -62,6 +62,7 @@ func (self *roomHandle) HandleGameAction(uid uint64, req *pbgame.GameAction) {
 	return
 }
 
+//加入桌子
 func (self *roomHandle) HandleJoinDeskReq(uid uint64, req *pbgame.JoinDeskReq, rsp *pbgame.JoinDeskRsp) {
 	//检查桌子是否存在
 	d := getDeskByID(req.DeskID)
@@ -81,6 +82,7 @@ func (self *roomHandle) HandleJoinDeskReq(uid uint64, req *pbgame.JoinDeskReq, r
 	return
 }
 
+//坐下准备
 func (self *roomHandle) HandleSitDownReq(uid uint64, req *pbgame.SitDownReq, rsp *pbgame.SitDownRsp) {
 	//检查玩家是否存在桌子
 	d := getDeskByUID(uid)
@@ -90,19 +92,13 @@ func (self *roomHandle) HandleSitDownReq(uid uint64, req *pbgame.SitDownReq, rsp
 		return
 	}
 	//检查玩家是否存在桌子信息
-	user, ok := d.deskPlayers[uid]
-	if !ok {
+	if _, ok := d.deskPlayers[uid]; !ok {
 		rsp.Code = pbgame.SitDownRspCode_SitDownNotInDesk
 		rsp.ErrMsg = fmt.Sprintf("user%d in desk,but has no deskinfo", uid)
 		return
 	}
-
-	//检查是否重复准备
-	if user.desk_state != LOOKON {
-		rsp.Code = pbgame.SitDownRspCode_SitDownGameStatusErr
-		rsp.ErrMsg = fmt.Sprintf("user%d gamestatus err", uid)
-		return
-	}
+	//TODO距离限制
+	d.doSitDown(uid, rsp)
 	return
 }
 

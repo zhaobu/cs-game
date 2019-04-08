@@ -172,10 +172,7 @@ func (self *RpcHandle) JoinDeskReq(ctx context.Context, args *codec.Message, rep
 	}
 
 	defer func() {
-		//为保证消息顺序,加入成功消息,游戏内部发送
-		if rsp.Code != pbgame.JoinDeskRspCode_JoinDeskSucc {
-			self.service.ToGateNormal(rsp, args.UserID)
-		}
+		self.service.ToGateNormal(rsp, args.UserID)
 	}()
 
 	self.service.tlog.Info("recv from gate", zap.Uint64("uid", args.UserID), zap.String("msgName", args.Name), zap.Any("msgValue", *req))
@@ -207,6 +204,47 @@ func (self *RpcHandle) JoinDeskReq(ctx context.Context, args *codec.Message, rep
 	}()
 
 	self.service.roomHandle.HandleJoinDeskReq(args.UserID, req, rsp)
+
+	return
+}
+
+//SitDownReq 坐下准备
+func (self *RpcHandle) SitDownReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
+	defer func() {
+		r := recover()
+		if r != nil {
+			self.service.tlog.Error("recover info", zap.Uint64("uid", args.UserID), zap.Any("stack", debug.Stack()))
+		}
+	}()
+
+	pb, err := codec.Msg2Pb(args)
+	if err != nil {
+		self.service.tlog.Error("error info", zap.Error(err))
+		return err
+	}
+
+	req, ok := pb.(*pbgame.SitDownReq)
+	if !ok {
+		err = fmt.Errorf("not *pbgame.SitDownReq")
+		self.service.tlog.Error("error info", zap.Error(err))
+		return
+	}
+
+	rsp := &pbgame.SitDownRsp{ChairId: -1}
+	if req.Head != nil {
+		rsp.Head = &pbcommon.RspHead{Seq: req.Head.Seq}
+	}
+
+	defer func() {
+		//为保证消息顺序,准备成功消息,游戏内部发送
+		if rsp.Code != pbgame.SitDownRspCode_SitDownSucc {
+			self.service.ToGateNormal(rsp, args.UserID)
+		}
+	}()
+
+	self.service.tlog.Info("recv from gate", zap.Uint64("uid", args.UserID), zap.String("msgName", args.Name), zap.Any("msgValue", *req))
+
+	self.service.roomHandle.HandleSitDownReq(args.UserID, req, rsp)
 
 	return
 }

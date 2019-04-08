@@ -17,11 +17,9 @@ import (
 
 type Player struct {
 	curgame  *clientgame.Changshu //当前的游戏
-	ChairId  int32
-	UserId   uint64
 	wxID     string
 	waitchan chan int
-	session  *csession.Session
+	csession.Session
 }
 
 type deskInfo struct {
@@ -31,8 +29,8 @@ type deskInfo struct {
 func (self *Player) init() {
 	//初始化
 	self.waitchan = make(chan int, 0)
-	self.session = &csession.Session{}
-	self.curgame = &clientgame.Changshu{Waitchan: self.waitchan, Session: self.session}
+	self.Session = csession.Session{}
+	self.curgame = &clientgame.Changshu{Waitchan: self.waitchan, Session: &self.Session}
 }
 
 func (self *Player) Connect(addr string) {
@@ -52,15 +50,15 @@ func (self *Player) Connect(addr string) {
 	tlog = zaplog.InitLogger(self.wxID+".txt", "debug", true)
 	log = tlog.Sugar()
 	self.curgame.InitLog(tlog, log)
-	self.session.InitLog(tlog, log)
+	self.InitLog(tlog, log)
 
 	var err error
-	self.session.Conn, err = net.Dial("tcp4", addr)
+	self.Conn, err = net.Dial("tcp4", addr)
 	if err != nil {
 		tlog.Error("connect err", zap.Error(err))
 		return
 	}
-	tlog.Info("connect succ", zap.Any("addr", self.session.Conn.RemoteAddr()))
+	tlog.Info("connect succ", zap.Any("addr", self.Conn.RemoteAddr()))
 	go self.recv()
 
 	self.login()
@@ -86,7 +84,7 @@ func (self *Player) GameStart() {
 }
 
 func (self *Player) login() {
-	self.session.SendPb(&pblogin.LoginReq{
+	self.SendPb(&pblogin.LoginReq{
 		Head:      &pbcommon.ReqHead{Seq: 1},
 		LoginType: pblogin.LoginType_WX,
 		ID:        self.wxID,
@@ -96,7 +94,7 @@ func (self *Player) login() {
 }
 
 func (self *Player) makedesk() {
-	self.session.SendPb(self.curgame.MakeDeskReq())
+	self.SendPb(self.curgame.MakeDeskReq())
 	<-self.waitchan
 	self.joindesk()
 }
@@ -109,19 +107,28 @@ func (self *Player) joindesk() {
 		tlog.Error("Unmarshal err", zap.Error(err))
 		return
 	}
-	self.session.SendPb(&pbgame.JoinDeskReq{
+	self.SendPb(&pbgame.JoinDeskReq{
 		Head:   &pbcommon.ReqHead{Seq: 1, UserID: self.UserId},
 		DeskID: desk.DeskId,
 	})
 	<-self.waitchan
 	tlog.Info("joindesk suc", zap.String("wxID", self.wxID), zap.Uint64("UserId", self.UserId))
+	self.sitdown()
+}
+
+func (self *Player) sitdown() {
+	self.SendPb(&pbgame.SitDownReq{
+		Head: &pbcommon.ReqHead{Seq: 1, UserID: self.UserId},
+	})
+	<-self.waitchan
+	tlog.Info("sitdown suc", zap.String("wxID", self.wxID), zap.Uint64("UserId", self.UserId))
 }
 
 func (self *Player) recv() {
 	for {
 		var err error
 		pktRsp := codec.NewPacket()
-		err = pktRsp.ReadFrom(self.session.Conn)
+		err = pktRsp.ReadFrom(self.Conn)
 		if err != nil {
 			tlog.Error("ReadFrom err", zap.Error(err))
 			return
@@ -139,7 +146,6 @@ func (self *Player) recv() {
 			case *pblogin.LoginRsp:
 				if v.Code == pblogin.LoginRspCode_Succ {
 					self.UserId = v.User.UserID
-					self.session.UserId = self.UserId
 					self.waitchan <- 1
 				}
 			case *pbgame.MakeDeskRsp:
@@ -154,6 +160,9 @@ func (self *Player) recv() {
 				self.waitchan <- 1
 			case *pbgame.JoinDeskRsp:
 				self.waitchan <- 1
+			case *pbgame.SitDownRsp:
+				self.waitchan <- 1
+				self.ChairId = v.ChairId
 			case *pbgame.GameNotif:
 				self.curgame.DispatchRecv(v)
 			default:
