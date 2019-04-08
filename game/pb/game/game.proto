@@ -129,7 +129,6 @@ message SitDownRsp {
   pbcommon.RspHead Head = 1;
   SitDownRspCode Code = 2;
   string ErrMsg = 3;
-  int32 ChairId = 4;  //座位号
 }
 
 // 离开桌子 c -> s

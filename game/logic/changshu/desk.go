@@ -131,10 +131,9 @@ func (d *Desk) doSitDown(uid uint64, rsp *pbgame.SitDownRsp) {
 	d.gameSink.AddPlayer(chair, uid, dUserInfo.info.GetName())
 	//先发送加入成功消息
 	rsp.Code = pbgame.SitDownRspCode_SitDownSucc
-	rsp.ChairId = chair
 	d.SendData(uid, rsp)
-	//发送玩家信息
-	d.sendReconnectInfo(uid)
+	//发送玩家信息给所有人
+	d.sendDeskInfo(0)
 	//再判断游戏开始
 	if d.checkStart() {
 		d.gameSink.StartGame()
@@ -142,8 +141,11 @@ func (d *Desk) doSitDown(uid uint64, rsp *pbgame.SitDownRsp) {
 	return
 }
 
-//sendReconnectInfo发送玩家断线重连消息
-func (d *Desk) sendReconnectInfo(uid uint64) {
+//sendDeskInfo 有新玩家坐下,起立,重连,发送玩家信息
+func (d *Desk) sendDeskInfo(uid uint64) {
+	if len(d.playChair) <= 0 {
+		return
+	}
 	msg := &pbgame_logic.DeskInfo{GameName: gameName, Arg: d.deskConfig, GameStatus: d.gameStatus, CurInning: d.curInning}
 	msg.BankerId = d.gameSink.bankerId
 	msg.MasterUid = d.masterUid
@@ -153,7 +155,9 @@ func (d *Desk) sendReconnectInfo(uid uint64) {
 		userInfo.Info = user.info
 		userInfo.ChairId = chair
 		userInfo.DeskStatus = user.deskStatus
+		msg.GameUser = append(msg.GameUser, userInfo)
 	}
+	d.gameSink.gameReconnect(msg, uid)
 	d.SendData(uid, msg)
 }
 
@@ -186,7 +190,7 @@ func (d *Desk) doAction(uid uint64, actionName string, actionValue []byte) {
 }
 
 func (d *Desk) SendData(uid uint64, pb proto.Message) {
-	//发给所有人
+	//发给所有人,包括观察者
 	if uid == 0 {
 		uids := make([]uint64, len(d.deskPlayers))
 		var i int = 0

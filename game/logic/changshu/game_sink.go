@@ -893,6 +893,14 @@ func (self *GameSink) afterGameEnd() {
 
 }
 
+//断线重连
+func (self *GameSink) gameReconnect(recInfo *pbgame_logic.DeskInfo, uid uint64) {
+	switch recInfo.GameStatus {
+	case pbgame_logic.GameStatus_GSWait:
+	default:
+	}
+}
+
 func (self *GameSink) logHeadUser(chairId int32) string {
 	if chairId == -1 {
 		return fmt.Sprintf("房间[%d] :", self.desk.id)

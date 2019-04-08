@@ -230,7 +230,7 @@ func (self *RpcHandle) SitDownReq(ctx context.Context, args *codec.Message, repl
 		return
 	}
 
-	rsp := &pbgame.SitDownRsp{ChairId: -1}
+	rsp := &pbgame.SitDownRsp{}
 	if req.Head != nil {
 		rsp.Head = &pbcommon.RspHead{Seq: req.Head.Seq}
 	}
