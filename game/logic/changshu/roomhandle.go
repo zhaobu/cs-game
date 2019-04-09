@@ -42,6 +42,7 @@ func (self *roomHandle) HandleDestroyDeskReq(uid uint64, req *pbgame.DestroyDesk
 	return
 }
 
+//HandleExitDeskReq退出桌子
 func (self *roomHandle) HandleExitDeskReq(uid uint64, req *pbgame.ExitDeskReq, rsp *pbgame.ExitDeskRsp) {
 	d := getDeskByUID(uid)
 	if d == nil {
@@ -84,6 +85,26 @@ func (self *roomHandle) HandleJoinDeskReq(uid uint64, req *pbgame.JoinDeskReq, r
 
 //坐下准备
 func (self *roomHandle) HandleSitDownReq(uid uint64, req *pbgame.SitDownReq, rsp *pbgame.SitDownRsp) {
+	//检查玩家是否存在桌子
+	d := getDeskByUID(uid)
+	if d == nil {
+		rsp.Code = pbgame.SitDownRspCode_SitDownNotInDesk
+		rsp.ErrMsg = fmt.Sprintf("user%d not in desk", uid)
+		return
+	}
+	//检查玩家是否存在桌子信息
+	if _, ok := d.deskPlayers[uid]; !ok {
+		rsp.Code = pbgame.SitDownRspCode_SitDownNotInDesk
+		rsp.ErrMsg = fmt.Sprintf("user%d in desk,but has no deskinfo", uid)
+		return
+	}
+	//TODO距离限制
+	d.doSitDown(uid, rsp)
+	return
+}
+
+//起立取消准备
+func (self *roomHandle) HandleStandUpReq(uid uint64, req *pbgame.SitDownReq, rsp *pbgame.SitDownRsp) {
 	//检查玩家是否存在桌子
 	d := getDeskByUID(uid)
 	if d == nil {

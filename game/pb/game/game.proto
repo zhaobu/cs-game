@@ -13,6 +13,7 @@ enum DeskStatus {
   DSPlaying = 3;  //游戏中
 }
 
+//创建桌子code
 enum MakeDeskRspCode {
   MakeDeskNotUse = 0;
   MakeDeskSucc = 1;
@@ -25,6 +26,7 @@ enum MakeDeskRspCode {
   MakeDeskLimit = 8;             // 个数限制
 }
 
+//加入桌子code
 enum JoinDeskRspCode {
   JoinDeskNotUse = 0;
   JoinDeskSucc = 1;
@@ -37,6 +39,7 @@ enum JoinDeskRspCode {
   // JoinDeskDistanceSoClose = 8;//距离限制不允许加入
 }
 
+//坐下准备code
 enum SitDownRspCode {
   SitDownNone = 0;
   SitDownSucc = 1;             //坐下成功
@@ -45,6 +48,7 @@ enum SitDownRspCode {
   SitDownDistanceSoClose = 4;  //距离限制不允许坐下
   SitDownGameStatusErr = 5;    //桌子状态错误(比如重复准备)
 }
+
 // 查询游戏配置 c -> s
 message QueryGameConfigReq {
   pbcommon.ReqHead Head = 1;
