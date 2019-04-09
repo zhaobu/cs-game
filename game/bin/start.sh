@@ -1,7 +1,4 @@
-# ./clear_redis.sh
-# sleep 2
-
-cd bin/linux
+cd linux
 
 ./club >/dev/null &
 echo "club start success" &
@@ -9,7 +6,7 @@ echo "club start success" &
 ./center >/dev/null &
 echo "center start success" &
 
-./gate -addr 192.168.0.90:9876 >/dev/null &
+./gate >/dev/null &
 echo "gate start success" &
 
 # ./ddz >/dev/null &

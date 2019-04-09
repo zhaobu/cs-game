@@ -3,6 +3,7 @@ package main
 import (
 	"cy/game/cache"
 	"cy/game/configs"
+	"cy/game/db/mgo"
 	"cy/game/util"
 	"flag"
 	"fmt"
@@ -25,6 +26,7 @@ var (
 	release    = flag.Bool("release", false, "run mode release")
 	redisAddr  = flag.String("redisaddr", "192.168.0.90:6379", "redis address")
 	redisDb    = flag.Int("redisDb", 1, "redis db select")
+	mgoURI     = flag.String("mgo", "mongodb://192.168.0.90:27017/game", "mongo connection URI")
 )
 
 func init() {
@@ -34,6 +36,8 @@ func init() {
 	*release = globalcnf.Release
 	*redisAddr = globalcnf.RedisAddr
 	*redisDb = globalcnf.RedisDb
+	*mgoURI = globalcnf.MgoURI
+	*addr = globalcnf.CenterConf.Addr
 }
 
 type center int
@@ -72,6 +76,8 @@ func main() {
 
 	initLog()
 
+	GameRecord_Init() //战绩初始化
+
 	err := cache.Init(*redisAddr, *redisDb)
 	if err != nil {
 		fmt.Println(err)
@@ -90,6 +96,12 @@ func main() {
 			}
 			return c, nil
 		},
+	}
+
+	err = mgo.Init(*mgoURI)
+	if err != nil {
+		logrus.Error(err.Error())
+		return
 	}
 
 	if *release && *addr == "" {

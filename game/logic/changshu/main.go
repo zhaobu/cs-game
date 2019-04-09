@@ -37,12 +37,13 @@ var (
 
 func init() {
 	//如果不指定启动参数,默认读取全局配置
-	globalcnf := configs.GetConfig("../../configs/globalconf.json")
+	globalcnf := configs.GetConfig("../globalconf.json")
 	*consulAddr = globalcnf.ConsulAddr
 	*release = globalcnf.Release
 	*redisAddr = globalcnf.RedisAddr
 	*redisDb = globalcnf.RedisDb
 	*mgoURI = globalcnf.MgoURI
+	*addr = globalcnf.ChangShuConf.Addr
 }
 
 type roomHandle struct {

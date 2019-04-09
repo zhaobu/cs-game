@@ -1,5 +1,5 @@
 pkill club &
 pkill center &
 pkill gate &
-pkill ddz &
+pkill changshu &
 echo "kill all success"

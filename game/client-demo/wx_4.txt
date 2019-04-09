@@ -1,0 +1,14 @@
+2019/04/08 20:27:58.549	INFO	client-demo/player.go:61	connect succ	{"addr": "192.168.0.10:9876"}
+2019/04/08 20:27:58.571	INFO	session/session.go:47	SendPb	{"msgName": "pblogin.LoginReq"}
+2019/04/08 20:27:58.650	INFO	client-demo/player.go:143	recv	{"msgName": "pbcommon.SessionInfo", "msgValue": ""}
+2019/04/08 20:27:58.650	INFO	client-demo/player.go:169	未处理的消息	{"msgName": "pbcommon.SessionInfo", "msgValue": ""}
+2019/04/08 20:27:58.650	INFO	client-demo/player.go:143	recv	{"msgName": "pblogin.LoginRsp", "msgValue": "Head:<Seq:1 > Code:Succ User:<UserID:34 SessionID:\"d7d0ccfd-b740-40b7-b2b5-ea58f23cafcb\" WxID:\"wx_4\" Gold:5000 Masonry:8 > "}
+2019/04/08 20:27:58.650	INFO	client-demo/player.go:93	login suc	{"wxID": "wx_4", "UserId": 34}
+2019/04/08 20:28:01.551	INFO	session/session.go:47	SendPb	{"msgName": "pbgame.JoinDeskReq"}
+2019/04/08 20:28:01.563	INFO	client-demo/player.go:143	recv	{"msgName": "pbgame.JoinDeskRsp", "msgValue": "Code:JoinDeskNotExist "}
+2019/04/08 20:28:01.563	INFO	client-demo/player.go:143	recv	{"msgName": "pbcommon.ErrorTip", "msgValue": "Msg:\"empty game name\" "}
+2019/04/08 20:28:01.563	INFO	client-demo/player.go:115	joindesk suc	{"wxID": "wx_4", "UserId": 34}
+2019/04/08 20:28:01.563	INFO	client-demo/player.go:169	未处理的消息	{"msgName": "pbcommon.ErrorTip", "msgValue": "Msg:\"empty game name\" "}
+2019/04/08 20:28:01.563	INFO	session/session.go:47	SendPb	{"msgName": "pbgame.SitDownReq"}
+2019/04/08 20:28:01.663	INFO	client-demo/player.go:143	recv	{"msgName": "pbcommon.ErrorTip", "msgValue": "Msg:\"empty game name\" "}
+2019/04/08 20:28:01.663	INFO	client-demo/player.go:169	未处理的消息	{"msgName": "pbcommon.ErrorTip", "msgValue": "Msg:\"empty game name\" "}

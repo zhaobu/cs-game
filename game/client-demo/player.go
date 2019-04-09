@@ -162,7 +162,6 @@ func (self *Player) recv() {
 				self.waitchan <- 1
 			case *pbgame.SitDownRsp:
 				self.waitchan <- 1
-				self.ChairId = v.ChairId
 			case *pbgame.GameNotif:
 				self.curgame.DispatchRecv(v)
 			default:
