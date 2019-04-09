@@ -1,6 +1,7 @@
 package main
 
 import (
+	"cy/game/configs"
 	"flag"
 	"fmt"
 
@@ -9,13 +10,21 @@ import (
 )
 
 var (
-	mgouri    = flag.String("mgo", "mongodb://127.0.0.1:27017/game", "mongodb uri")
+	mgoURI    = flag.String("mgo", "mongodb://127.0.0.1:27017/game", "mongodb uri")
 	redisAddr = flag.String("redisAddr", "127.0.0.1:6379", "redis address")
 	redisDb   = flag.Int("redisDb", 1, "redis db select")
 
 	mgoSess   *mgo.Session
 	redisPool *redis.Pool
 )
+
+func init() {
+	//如果不指定启动参数,默认读取全局配置
+	globalcnf := configs.GetConfig("../globalconf.json")
+	*redisAddr = globalcnf.RedisAddr
+	*redisDb = globalcnf.RedisDb
+	*mgoURI = globalcnf.MgoURI
+}
 
 func main() {
 	flag.Parse()
@@ -30,7 +39,7 @@ func main() {
 
 func initDb() {
 	var err error
-	mgoSess, err = mgo.Dial(*mgouri)
+	mgoSess, err = mgo.Dial(*mgoURI)
 	if err != nil {
 		fmt.Println(err)
 		panic(err.Error())

@@ -8,6 +8,8 @@ go build -tags consul -o bin/linux/club cy/game/club
 
 REM go build -tags consul -o bin/linux/ddz cy/game/logic/ddz
 
+go build -o bin/linux/initdb cy/game/script/initdb
+
 go build -tags consul -o bin/linux/changshu cy/game/logic/changshu
 
 pause

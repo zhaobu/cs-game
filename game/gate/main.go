@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/tls"
 	"cy/game/cache"
+	zaplog "cy/game/common/logger"
 	"cy/game/configs"
 	"cy/game/db/mgo"
 	"flag"
@@ -11,11 +12,12 @@ import (
 	"runtime/debug"
 	"time"
 
-	"github.com/sirupsen/logrus"
 	"github.com/smallnest/rpcx/client"
+	"go.uber.org/zap"
 )
 
 var (
+	gateName   = flag.String("gateName", "gate", "gateName")
 	addr       = flag.String("addr", "192.168.0.10:9876", "tcp listen address")
 	certFile   = flag.String("cert", "", "cert file")
 	keyFile    = flag.String("key", "", "key file")
@@ -31,28 +33,44 @@ var (
 
 	cliCenter client.XClient
 	cliClub   client.XClient
+
+	log  *zap.SugaredLogger //printf风格
+	tlog *zap.Logger        //structured 风格
 )
 
 func initLog() {
-	logrus.SetFormatter(&logrus.JSONFormatter{})
+	var logName, logLevel string
 	if *release {
-		logName := fmt.Sprintf("gate_%d_%d.log", os.Getpid(), time.Now().Unix())
-		file, err := os.OpenFile(logName, os.O_CREATE|os.O_WRONLY, 0666)
-		if err == nil {
-			logrus.SetOutput(file)
-		} else {
-			logrus.SetOutput(os.Stdout)
-		}
+		logLevel = "info"
+		logName = fmt.Sprintf("./log/%s_%d_%s.log", *gateName, os.Getpid(), time.Now().Format("2006_01_02"))
 	} else {
-		logName := fmt.Sprintf("./log/gate.log")
-		file, err := os.OpenFile(logName, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
-		if err == nil {
-			logrus.SetOutput(file)
-		} else {
-			logrus.SetOutput(os.Stdout)
-		}
+		logName = fmt.Sprintf("./log/%s.log", *gateName)
+		logLevel = "debug"
 	}
+	tlog = zaplog.InitLogger(logName, logLevel, !*release)
+	log = tlog.Sugar()
 }
+
+// func initLogrus() {
+// 	logrus.SetFormatter(&logrus.JSONFormatter{})
+// 	if *release {
+// 		logName := fmt.Sprintf("gate_%d_%d.log", os.Getpid(), time.Now().Unix())
+// 		file, err := os.OpenFile(logName, os.O_CREATE|os.O_WRONLY, 0666)
+// 		if err == nil {
+// 			logrus.SetOutput(file)
+// 		} else {
+// 			logrus.SetOutput(os.Stdout)
+// 		}
+// 	} else {
+// 		logName := fmt.Sprintf("./log/gate.log")
+// 		file, err := os.OpenFile(logName, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
+// 		if err == nil {
+// 			logrus.SetOutput(file)
+// 		} else {
+// 			logrus.SetOutput(os.Stdout)
+// 		}
+// 	}
+// }
 
 func init() {
 	//如果不指定启动参数,默认读取全局配置
@@ -70,7 +88,7 @@ func main() {
 
 	defer func() {
 		if r := recover(); r != nil {
-			logrus.Warn(string(debug.Stack()))
+			log.Warn(string(debug.Stack()))
 		}
 	}()
 
@@ -80,13 +98,13 @@ func main() {
 
 	err = cache.Init(*redisAddr, *redisDb)
 	if err != nil {
-		logrus.Error(err.Error())
+		log.Error(err.Error())
 		return
 	}
 
 	err = mgo.Init(*mgoURI)
 	if err != nil {
-		logrus.Error(err.Error())
+		log.Error(err.Error())
 		return
 	}
 
@@ -109,7 +127,7 @@ func main() {
 	if *useTLS {
 		certificate, err := tls.LoadX509KeyPair(*certFile, *keyFile)
 		if err != nil {
-			logrus.Warn(err.Error())
+			log.Warn(err.Error())
 			return
 		}
 
@@ -117,6 +135,6 @@ func main() {
 	}
 
 	tcpSrv := newTCPServer(config)
-	logrus.Error(tcpSrv.start(*addr))
+	log.Error(tcpSrv.start(*addr))
 
 }

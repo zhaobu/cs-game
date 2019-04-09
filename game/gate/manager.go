@@ -3,7 +3,7 @@ package main
 import (
 	"sync"
 
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 )
 
 const sessionMapNum = 32
@@ -40,7 +40,8 @@ func (manager *manager) SetSession(sess *session) {
 
 	old, ok := smap.sessions[sess.uid]
 	if ok {
-		logrus.WithFields(logrus.Fields{"uid": sess.uid}).Info("set session")
+
+		tlog.Info("set session", zap.Uint64("uid", sess.uid))
 		old.repeatLogin(sess)
 		old.stop()
 	}

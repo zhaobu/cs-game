@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"strconv"
+	"time"
 
 	"github.com/gomodule/redigo/redis"
 )
@@ -12,13 +13,12 @@ func AllocDeskID() (deskID uint64, err error) {
 	c := redisPool.Get()
 	defer c.Close()
 
-	reply, err := redis.Strings(c.Do("SPOP", "emptydesk", "1"))
+	left, err := redis.Int(c.Do("SCARD", "emptydesk"))
 	if err != nil {
 		return 0, err
 	}
-	if len(reply) == 1 {
-		return strconv.ParseUint(reply[0], 10, 64)
-	} else {
+	if left == 0 {
+		rand.Seed(time.Now().Unix())
 		var num int64 = 0
 		for {
 			enter_code := rand.Int63n(999999-100000) + 100000
@@ -26,8 +26,8 @@ func AllocDeskID() (deskID uint64, err error) {
 			if err != nil {
 				return 0, err
 			}
-			if reply == 1 && num == 10 {
-				return uint64(enter_code), nil
+			if reply == 1 && num == 1000 {
+				break
 			}
 			if num >= 30000 {
 				break
@@ -35,25 +35,11 @@ func AllocDeskID() (deskID uint64, err error) {
 			num++
 		}
 	}
+	reply, err := redis.Strings(c.Do("SPOP", "emptydesk", "1"))
+	if len(reply) == 1 {
+		return strconv.ParseUint(reply[0], 10, 64)
+	}
 	return 0, fmt.Errorf("not enough")
-	/*
-			var num int64 = 0
-		for {
-			enter_code := rand.Int63n(999999-100000) + 100000
-			reply, err := redis.Int(c.Do("SADD", "emptydesk", enter_code))
-			if err != nil {
-				return 0, err
-			}
-			if reply == 1 {
-				return uint64(enter_code), nil
-			}
-			if num >= 30000 {
-				break
-			}
-			num++
-		}
-		return 0, fmt.Errorf("not enough")
-	*/
 }
 
 func FreeDeskID(deskID uint64) (err error) {

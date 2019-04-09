@@ -5,8 +5,8 @@ import (
 	"cy/game/codec"
 	"cy/game/codec/protobuf"
 	"cy/game/db/mgo"
-	"cy/game/pb/common"
-	"cy/game/pb/login"
+	pbcommon "cy/game/pb/common"
+	pblogin "cy/game/pb/login"
 	"encoding/json"
 	"fmt"
 	"math/rand"
@@ -14,8 +14,8 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/pkg/errors"
-	"github.com/satori/go.uuid"
-	"github.com/sirupsen/logrus"
+	uuid "github.com/satori/go.uuid"
+	"go.uber.org/zap"
 )
 
 func loginBySessionID(loginReq *pblogin.LoginReq) (loginRsp *pblogin.LoginRsp) {
@@ -25,8 +25,8 @@ func loginBySessionID(loginReq *pblogin.LoginReq) (loginRsp *pblogin.LoginRsp) {
 	uid := loginReq.Head.UserID
 	sid := loginReq.Head.SessionID
 
-	logrus.WithFields(logrus.Fields{"req": loginReq.Head}).Info("loginBySessionID")
-	defer logrus.WithFields(logrus.Fields{"rsp": loginRsp}).Info("loginBySessionID")
+	tlog.Info("loginBySessionID", zap.Any("req", loginReq.Head))
+	defer tlog.Info("loginBySessionID", zap.Any("rsp", loginRsp))
 
 	uinfo, err := mgo.QueryUserInfo(uid)
 	if err != nil {
@@ -50,8 +50,8 @@ func backendLoginReq(loginReq *pblogin.LoginReq) (loginRsp *pblogin.LoginRsp) {
 		loginRsp.Head = &pbcommon.RspHead{Seq: loginReq.Head.Seq}
 	}
 
-	logrus.WithFields(logrus.Fields{"req": loginReq}).Info("loginReq")
-	defer logrus.WithFields(logrus.Fields{"rsp": loginRsp}).Info("loginReq")
+	tlog.Info("loginReq", zap.Any("req", loginReq))
+	defer tlog.Info("loginReq", zap.Any("rsp", loginRsp))
 
 	switch loginReq.LoginType {
 	case pblogin.LoginType_WX:
@@ -67,7 +67,7 @@ func backendLoginReq(loginReq *pblogin.LoginReq) (loginRsp *pblogin.LoginRsp) {
 		var err error
 		loginRsp.User, err = mgo.UpsertUserInfo(u)
 		if err != nil {
-			logrus.Error(errors.Wrapf(err, "upsertUserInfo %+v", *loginReq))
+			log.Error(errors.Wrapf(err, "upsertUserInfo %+v", *loginReq))
 			loginRsp.Code = pblogin.LoginRspCode_Other
 			loginRsp.StrCode = err.Error()
 			return

@@ -6,8 +6,6 @@ import (
 	"net"
 	"sync/atomic"
 	"time"
-
-	"github.com/sirupsen/logrus"
 )
 
 type serverConfig struct {
@@ -51,8 +49,7 @@ func (s *tcpServer) start(laddr string) error {
 
 	s.l = ln
 
-	logrus.WithFields(logrus.Fields{"listen at:": ln.Addr()}).Info()
-
+	log.Infof("listen at %v", ln.Addr())
 	return s.accept()
 }
 
@@ -80,7 +77,7 @@ func (s *tcpServer) accept() error {
 }
 
 func (s *tcpServer) serveConn(nc net.Conn) {
-	logrus.WithFields(logrus.Fields{"new connect:": nc.RemoteAddr()}).Info()
+	log.Infof("new connect:%v", nc.RemoteAddr())
 
 	if tc, ok := nc.(*net.TCPConn); ok {
 		tc.SetKeepAlive(true)

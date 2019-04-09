@@ -6,10 +6,10 @@ import (
 	"cy/game/cache"
 	"cy/game/codec"
 	"cy/game/codec/protobuf"
-	"cy/game/pb/common"
-	"cy/game/pb/hall"
-	"cy/game/pb/inner"
-	"cy/game/pb/login"
+	pbcommon "cy/game/pb/common"
+	pbhall "cy/game/pb/hall"
+	pbinner "cy/game/pb/inner"
+	pblogin "cy/game/pb/login"
 	"encoding/json"
 	"fmt"
 	"net"
@@ -20,8 +20,8 @@ import (
 
 	"github.com/aperdana/batcher"
 	"github.com/golang/protobuf/proto"
-	"github.com/sirupsen/logrus"
 	"github.com/smallnest/rpcx/client"
+	"go.uber.org/zap"
 )
 
 type session struct {
@@ -85,12 +85,7 @@ func (s *session) recv() (err error) {
 			stack = string(debug.Stack())
 		}
 
-		logrus.WithFields(logrus.Fields{
-			"err":   err,
-			"r":     r,
-			"stack": stack,
-		}).Error()
-
+		tlog.Error("recover info", zap.Any("err", err), zap.Any("recover", r), zap.Any("stack", stack))
 		s.stop()
 	}()
 
@@ -117,11 +112,7 @@ func (s *session) recv() (err error) {
 func (s *session) handleInput() (err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			logrus.WithFields(logrus.Fields{
-				"err":   err,
-				"r":     r,
-				"stack": string(debug.Stack()),
-			}).Error()
+			tlog.Error("recover info", zap.Any("err", err), zap.Any("recover", r), zap.Any("stack", string(debug.Stack())))
 		}
 
 		if err != nil {
@@ -160,7 +151,9 @@ func (s *session) handleInput() (err error) {
 			return
 		}
 
-		logrus.WithFields(logrus.Fields{"name": msg.Name, "uid": msg.UserID}).Info("recv cli")
+		if msg.Name != "pblogin.KeepAliveReq" {
+			tlog.Info("recv client", zap.String("name", msg.Name), zap.Uint64("uid", msg.UserID))
+		}
 
 		if !s.isLoginSucc {
 
@@ -251,7 +244,7 @@ func (s *session) dispatch(msg *codec.Message) {
 
 	idx := strings.LastIndex(msg.Name, ".")
 	if idx == -1 {
-		logrus.Warnf("bad msg name %s", msg.Name)
+		log.Warnf("bad msg name %s", msg.Name)
 		return
 	}
 	serviceName := msg.Name[:idx]
@@ -268,7 +261,7 @@ func (s *session) dispatch(msg *codec.Message) {
 		rsp := &codec.Message{}
 		err = cli.Call(ctx, serviceMethod, msg, rsp)
 		if err != nil {
-			logrus.WithFields(logrus.Fields{"err": err, "name": msg.Name}).Warn()
+			tlog.Error("pbcenter call err", zap.String("name", msg.Name), zap.Any("err", err))
 			return
 		}
 		s.sendMsg(rsp)
@@ -276,13 +269,14 @@ func (s *session) dispatch(msg *codec.Message) {
 		cli = cliClub
 		err = cli.Call(ctx, serviceMethod, msg, nil)
 		if err != nil {
-			logrus.WithFields(logrus.Fields{"err": err, "name": msg.Name}).Warn()
+			tlog.Error("pbclub call err", zap.String("name", msg.Name), zap.Any("err", err))
 			return
 		}
 	} else if serviceName == "pbgame" {
 		gameName, gameID := s.getGameAddr(msg)
 		cli, err = getGameCli(gameName)
 		if err != nil {
+			tlog.Error("pbgame getGameCli err", zap.String("name", msg.Name), zap.Any("err", err))
 			s.sendPb(&pbcommon.ErrorTip{Msg: err.Error()})
 			return
 		}
@@ -291,7 +285,7 @@ func (s *session) dispatch(msg *codec.Message) {
 
 		err = cli.Call(ctx, serviceMethod, msg, nil) // 不用回应
 		if err != nil {
-			logrus.WithFields(logrus.Fields{"err": err, "name": msg.Name}).Warn()
+			tlog.Error("pbgame call err", zap.String("name", msg.Name), zap.Any("err", err))
 			return
 		}
 	} else { // 本地处理
@@ -300,7 +294,7 @@ func (s *session) dispatch(msg *codec.Message) {
 		} else if serviceName == "pblogin" {
 			s.handleLogin(msg)
 		} else {
-			logrus.WithFields(logrus.Fields{"name": serviceName}).Warn("bad serviceName:")
+			tlog.Error("bad serviceName", zap.String("name", serviceName))
 			return
 		}
 	}
@@ -308,7 +302,7 @@ func (s *session) dispatch(msg *codec.Message) {
 
 func (s *session) sendPb(pb proto.Message) {
 	if pb == nil {
-		logrus.Warn("sendpb empty")
+		log.Warn("sendpb empty")
 		return
 	}
 
@@ -326,15 +320,12 @@ func (s *session) sendMsg(msg *codec.Message) {
 	if msg.Name == "" {
 		return
 	}
-
-	logrus.WithFields(logrus.Fields{"uid": s.uid, "name": msg.Name}).Info("send cli")
-
+	if msg.Name != "pblogin.KeepAliveRsp" {
+		tlog.Info("send client", zap.Uint64("uid", s.uid), zap.String("name", msg.Name))
+	}
 	defer func() {
 		if r := recover(); r != nil {
-			logrus.WithFields(logrus.Fields{
-				"r":     r,
-				"stack": string(debug.Stack()),
-			}).Error()
+			tlog.Error("recover info", zap.Any("recover", r), zap.String("stack", string(debug.Stack())))
 		}
 	}()
 
@@ -348,10 +339,7 @@ func (s *session) batchOperator(reqs []interface{}) {
 
 	defer func() {
 		if r := recover(); r != nil {
-			logrus.WithFields(logrus.Fields{
-				"r":     r,
-				"stack": string(debug.Stack()),
-			}).Error()
+			tlog.Error("recover info", zap.Any("recover", r), zap.String("stack", string(debug.Stack())))
 		}
 	}()
 
@@ -371,7 +359,7 @@ func (s *session) batchOperator(reqs []interface{}) {
 
 	err := pkt.WriteTo(s.tc)
 	if err != nil {
-		logrus.Warn(err.Error())
+		log.Warn(err.Error())
 		s.stop()
 		return
 	}
