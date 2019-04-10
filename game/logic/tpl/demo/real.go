@@ -3,19 +3,19 @@ package main
 import (
 	"cy/game/codec/protobuf"
 	"cy/game/db/mgo"
-	"cy/game/pb/game"
+	pbgame "cy/game/pb/game"
 	cs "cy/game/pb/game/mj/changshu"
 	"fmt"
 )
 
-const (
-	feeTypeGold    = 1
-	feeTypeMasonry = 2
+// const (
+// 	feeTypeGold    = 1
+// 	pbgame.FeeType_FTMasonry = 2
 
-	deskTypeMatch  = 1
-	deskTypeFriend = 2
-	deskTypeLadder = 3
-)
+// 	deskTypeMatch  = 1
+// 	deskTypeFriend = 2
+// 	deskTypeLadder = 3
+// )
 
 func checkArg(req *pbgame.MakeDeskReq) (*cs.CreateArg, error) {
 	pb, err := protobuf.Unmarshal(req.GameArgMsgName, req.GameArgMsgValue)
@@ -87,7 +87,7 @@ func (cs *mjcs) HandleMakeDeskReq(uid uint64, deskID uint64, req *pbgame.MakeDes
 	fee := calcFee(arg)
 
 	if fee != 0 {
-		_, err = mgo.UpdateWealthPre(uid, feeTypeMasonry, fee)
+		_, err = mgo.UpdateWealthPre(uid, pbgame.FeeType_FTMasonry, fee)
 		if err != nil {
 			rsp.Code = pbgame.MakeDeskRspCode_MakeDeskNotEnoughMoney
 			return
@@ -95,7 +95,7 @@ func (cs *mjcs) HandleMakeDeskReq(uid uint64, deskID uint64, req *pbgame.MakeDes
 
 		defer func() {
 			if err != nil {
-				mgo.UpdateWealthPreSure(uid, feeTypeMasonry, fee)
+				mgo.UpdateWealthPreSure(uid, pbgame.FeeType_FTMasonry, fee)
 			}
 		}()
 	}

@@ -1,7 +1,8 @@
 package mgo
 
 import (
-	"cy/game/pb/common"
+	pbcommon "cy/game/pb/common"
+	pbgame "cy/game/pb/game"
 	"cy/game/util"
 	"fmt"
 
@@ -60,13 +61,13 @@ func UpdateWealth(uid uint64, feeType uint32, change int64) (*pbcommon.UserInfo,
 }
 
 // UpdateWealthPre 预扣财富 feeType 1:gold, 2:masonry change需为正数
-func UpdateWealthPre(uid uint64, feeType uint32, change int64) (*pbcommon.UserInfo, error) {
+func UpdateWealthPre(uid uint64, feeType pbgame.FeeType, change int64) (*pbcommon.UserInfo, error) {
 	if change <= 0 {
 		return nil, fmt.Errorf("bad change %d", change)
 	}
 
 	field := "gold"
-	if feeType == 2 {
+	if feeType == pbgame.FeeType_FTMasonry {
 		field = "masonry"
 	}
 	fieldPre := field + "pre"
@@ -88,13 +89,13 @@ func UpdateWealthPre(uid uint64, feeType uint32, change int64) (*pbcommon.UserIn
 }
 
 // UpdateWealthPreSure UpdateWealthPre的反向操作
-func UpdateWealthPreSure(uid uint64, feeType uint32, change int64) (*pbcommon.UserInfo, error) {
+func UpdateWealthPreSure(uid uint64, feeType pbgame.FeeType, change int64) (*pbcommon.UserInfo, error) {
 	if change <= 0 {
 		return nil, fmt.Errorf("bad change %d", change)
 	}
 
 	field := "gold"
-	if feeType == 2 {
+	if feeType == pbgame.FeeType_FTMasonry {
 		field = "masonry"
 	}
 	fieldPre := field + "pre"

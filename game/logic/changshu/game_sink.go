@@ -894,7 +894,7 @@ func (self *GameSink) afterGameEnd() {
 }
 
 //断线重连
-func (self *GameSink) gameReconnect(recInfo *pbgame_logic.DeskInfo, uid uint64) {
+func (self *GameSink) gameReconnect(recInfo *pbgame_logic.GameDeskInfo, uid uint64) {
 	switch recInfo.GameStatus {
 	case pbgame_logic.GameStatus_GSWait:
 	default:

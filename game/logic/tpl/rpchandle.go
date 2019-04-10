@@ -14,25 +14,26 @@ import (
 	"go.uber.org/zap"
 )
 
-const (
-	// 结算类型
-	FeeTypeGold    = 1 // 金币
-	FeeTypeMasonry = 2 // 砖石
-	// 桌子类型
-	DeskTypeMatch  = 1 // 匹配
-	DeskTypeFriend = 2 // 好友、俱乐部
-	DeskTypeLadder = 3 // 比赛
-)
+// const (
+// 	// 结算类型
+// 	FeeTypeGold    = 1 // 金币
+// 	FeeTypeMasonry = 2 // 钻石
+// 	// 桌子类型
+// 	DeskTypeMatch  = 1 // 匹配
+// 	DeskTypeFriend = 2 // 好友、俱乐部
+// 	DeskTypeLadder = 3 // 比赛
+// )
 
 type RpcHandle struct {
 	service *RoomServie
 }
 
+//DestroyDeskReq解散请求
 func (self *RpcHandle) DestroyDeskReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
 	defer func() {
 		r := recover()
 		if r != nil {
-			self.service.tlog.Error("recover info", zap.Uint64("uid", args.UserID), zap.Any("stack", debug.Stack()))
+			self.service.tlog.Error("recover info", zap.Uint64("uid", args.UserID), zap.Any("stack", string(debug.Stack())))
 		}
 	}()
 
@@ -50,11 +51,15 @@ func (self *RpcHandle) DestroyDeskReq(ctx context.Context, args *codec.Message, 
 	}
 
 	rsp := &pbgame.DestroyDeskRsp{}
+	if req.Head != nil {
+		rsp.Head = &pbcommon.RspHead{Seq: req.Head.Seq}
+	}
 
 	self.service.tlog.Info("recv from gate", zap.Uint64("uid", args.UserID), zap.String("msgName", args.Name), zap.Any("msgValue", *req))
+
 	self.service.roomHandle.HandleDestroyDeskReq(args.UserID, req, rsp)
 
-	if rsp.Code == 1 {
+	if rsp.Code == pbgame.DestroyDeskRspCode_DestroyDeskSucc {
 		cache.DeleteClubDeskRelation(req.DeskID)
 		cache.DelDeskInfo(req.DeskID)
 		cache.FreeDeskID(req.DeskID)
@@ -63,11 +68,12 @@ func (self *RpcHandle) DestroyDeskReq(ctx context.Context, args *codec.Message, 
 	return
 }
 
+//ExitDeskReq退出桌子
 func (self *RpcHandle) ExitDeskReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
 	defer func() {
 		r := recover()
 		if r != nil {
-			self.service.tlog.Error("recover info", zap.Uint64("uid", args.UserID), zap.Any("stack", debug.Stack()))
+			self.service.tlog.Error("recover info", zap.Uint64("uid", args.UserID), zap.Any("stack", string(debug.Stack())))
 		}
 	}()
 
@@ -90,7 +96,6 @@ func (self *RpcHandle) ExitDeskReq(ctx context.Context, args *codec.Message, rep
 	}
 
 	defer func() {
-
 		self.service.ToGateNormal(rsp, args.UserID)
 	}()
 
@@ -122,7 +127,7 @@ func (self *RpcHandle) GameAction(ctx context.Context, args *codec.Message, repl
 	defer func() {
 		r := recover()
 		if r != nil {
-			self.service.tlog.Error("recover info", zap.Uint64("uid", args.UserID), zap.Any("stack", debug.Stack()))
+			self.service.tlog.Error("recover info", zap.Uint64("uid", args.UserID), zap.Any("stack", string(debug.Stack())))
 		}
 	}()
 
@@ -149,7 +154,7 @@ func (self *RpcHandle) JoinDeskReq(ctx context.Context, args *codec.Message, rep
 	defer func() {
 		r := recover()
 		if r != nil {
-			self.service.tlog.Error("recover info", zap.Uint64("uid", args.UserID), zap.Any("stack", debug.Stack()))
+			self.service.tlog.Error("recover info", zap.Uint64("uid", args.UserID), zap.Any("stack", string(debug.Stack())))
 		}
 	}()
 
@@ -213,7 +218,7 @@ func (self *RpcHandle) SitDownReq(ctx context.Context, args *codec.Message, repl
 	defer func() {
 		r := recover()
 		if r != nil {
-			self.service.tlog.Error("recover info", zap.Uint64("uid", args.UserID), zap.Any("stack", debug.Stack()))
+			self.service.tlog.Error("recover info", zap.Uint64("uid", args.UserID), zap.Any("stack", string(debug.Stack())))
 		}
 	}()
 
@@ -254,7 +259,8 @@ func (self *RpcHandle) MakeDeskReq(ctx context.Context, args *codec.Message, rep
 	defer func() {
 		r := recover()
 		if r != nil {
-			self.service.tlog.Error("recover info", zap.Uint64("uid", args.UserID), zap.Any("stack", debug.Stack()))
+			self.service.tlog.Error("recover info", zap.Uint64("uid", args.UserID), zap.Any("stack", string(debug.Stack())))
+			fmt.Println(string(debug.Stack()))
 		}
 	}()
 
@@ -270,7 +276,7 @@ func (self *RpcHandle) MakeDeskReq(ctx context.Context, args *codec.Message, rep
 		return
 	}
 
-	rsp := &pbgame.MakeDeskRsp{}
+	rsp := &pbgame.MakeDeskRsp{Info: &pbcommon.DeskInfo{}}
 	if req.Head != nil {
 		rsp.Head = &pbcommon.RspHead{Seq: req.Head.Seq}
 	}
@@ -297,6 +303,9 @@ func (self *RpcHandle) MakeDeskReq(ctx context.Context, args *codec.Message, rep
 	defer func() {
 		if rsp.Code != pbgame.MakeDeskRspCode_MakeDeskSucc {
 			cache.FreeDeskID(newDeskID)
+			if req.ClubID != 0 {
+				cache.DeleteClubDeskRelation(newDeskID)
+			}
 		}
 	}()
 
@@ -326,59 +335,46 @@ func (self *RpcHandle) MakeDeskReq(ctx context.Context, args *codec.Message, rep
 		// 		}
 		// 	}
 		// }
-
-		defer func() {
-			if rsp.Code != pbgame.MakeDeskRspCode_MakeDeskSucc {
-				cache.DeleteClubDeskRelation(newDeskID)
-			}
-		}()
 	}
 
-	deskInfo := &pbcommon.DeskInfo{}
-	deskInfo.ID = newDeskID
-	deskInfo.CreateUserID = args.UserID
-	if ui, err := mgo.QueryUserInfo(args.UserID); err == nil {
-		deskInfo.CreateUserName = ui.Name
-		deskInfo.CreateUserProfile = ui.Profile
-	}
-	deskInfo.CreateTime = time.Now().UTC().Unix()
-	// deskInfo.CreateFee =
-	deskInfo.ArgName = req.GameArgMsgName
-	deskInfo.ArgValue = req.GameArgMsgValue
-	deskInfo.Status = "1"
-	deskInfo.GameName = self.service.gameName
-	deskInfo.GameID = self.service.gameID
-	deskInfo.ClubID = req.ClubID
-	deskInfo.Kind = DeskTypeFriend
-	// deskInfo.SdInfos
-	deskInfo.TotalLoop = 0
-	deskInfo.CurrLoop = 0
-
-	err = cache.AddDeskInfo(deskInfo) // 2> 保存桌子信息
-	if err != nil {
-		self.service.tlog.Error("err cache.AddDeskInfo", zap.Error(err))
-		rsp.Code = pbgame.MakeDeskRspCode_MakeDeskInternalServerError
-		return nil
-	}
-
-	defer func() {
-		if rsp.Code != pbgame.MakeDeskRspCode_MakeDeskSucc {
-			cache.DelDeskInfo(newDeskID)
+	if self.service.roomHandle.HandleMakeDeskReq(args.UserID, newDeskID, req, rsp) {
+		deskInfo := rsp.Info
+		deskInfo.ID = newDeskID
+		deskInfo.CreateUserID = args.UserID
+		if ui, err := mgo.QueryUserInfo(args.UserID); err == nil {
+			deskInfo.CreateUserName = ui.Name
+			deskInfo.CreateUserProfile = ui.Profile
 		}
-	}()
+		deskInfo.CreateTime = time.Now().UTC().Unix()
+		// deskInfo.CreateFee =
+		// deskInfo.ArgName = rsp.Info.ArgName
+		// deskInfo.ArgValue = rsp.Info.ArgValue
+		deskInfo.Status = "1"
+		deskInfo.GameName = self.service.gameName
+		deskInfo.GameID = self.service.gameID
+		deskInfo.ClubID = req.ClubID
+		deskInfo.Kind = pbgame.DeskType_DTFriend
+		// deskInfo.SdInfos
+		deskInfo.TotalLoop = 0
+		deskInfo.CurrLoop = 0
 
-	rsp.Info = deskInfo
-
-	self.service.roomHandle.HandleMakeDeskReq(args.UserID, newDeskID, req, rsp)
-
+		err = cache.AddDeskInfo(deskInfo) // 2> 保存桌子信息
+		if err != nil {
+			self.service.tlog.Error("err cache.AddDeskInfo", zap.Error(err))
+			rsp.Code = pbgame.MakeDeskRspCode_MakeDeskInternalServerError
+			return nil
+		}
+		rsp.Code = pbgame.MakeDeskRspCode_MakeDeskSucc
+	}
 	return nil
 }
 
+//QueryDeskInfoReq查询桌子信息
 func (self *RpcHandle) QueryDeskInfoReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
 	defer func() {
 		r := recover()
 		if r != nil {
-			self.service.tlog.Error("recover info", zap.Uint64("uid", args.UserID), zap.Any("stack", debug.Stack()))
+			self.service.tlog.Error("recover info", zap.Uint64("uid", args.UserID), zap.Any("stack", string(debug.Stack())))
 		}
 	}()
 
@@ -413,11 +409,12 @@ func (self *RpcHandle) QueryDeskInfoReq(ctx context.Context, args *codec.Message
 	return
 }
 
+//QueryGameConfigReq查询游戏配置
 func (self *RpcHandle) QueryGameConfigReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
 	defer func() {
 		r := recover()
 		if r != nil {
-			self.service.tlog.Error("recover info", zap.Uint64("uid", args.UserID), zap.Any("stack", debug.Stack()))
+			self.service.tlog.Error("recover info", zap.Uint64("uid", args.UserID), zap.Any("stack", string(debug.Stack())))
 		}
 	}()
 

@@ -1,7 +1,7 @@
 package cache
 
 import (
-	"cy/game/pb/common"
+	pbcommon "cy/game/pb/common"
 	"encoding/json"
 	"fmt"
 	"strconv"
@@ -40,7 +40,7 @@ func AddDeskInfo(info *pbcommon.DeskInfo) (err error) {
 		info.GameName,
 		info.GameID,
 		strconv.FormatInt(info.ClubID, 10),
-		strconv.FormatInt(info.Kind, 10),
+		strconv.FormatInt(int64(info.Kind), 10),
 		sdInfo,
 		strconv.FormatInt(info.TotalLoop, 10),
 		strconv.FormatInt(info.CurrLoop, 10),
@@ -96,7 +96,7 @@ func UpdateDeskInfo(info *pbcommon.DeskInfo) error {
 		info.GameName,
 		info.GameID,
 		strconv.FormatInt(info.ClubID, 10),
-		strconv.FormatInt(info.Kind, 10),
+		strconv.FormatInt(int64(info.Kind), 10),
 		sdInfo,
 
 		strconv.FormatInt(info.TotalLoop, 10),
@@ -133,7 +133,8 @@ func QueryDeskInfo(deskID uint64) (*pbcommon.DeskInfo, error) {
 	info.GameName = reply["GameName"]
 	info.GameID = reply["GameID"]
 	info.ClubID, _ = strconv.ParseInt(reply["ClubID"], 10, 64)
-	info.Kind, _ = strconv.ParseInt(reply["Kind"], 10, 64)
+	tmp, _ := strconv.ParseInt(reply["Kind"], 10, 64)
+	info.Kind = pbcommon.DeskType(tmp)
 	info.SdInfos = make([]*pbcommon.SiteDownPlayerInfo, 0)
 	json.Unmarshal([]byte(reply["SdInfos"]), &info.SdInfos)
 	info.TotalLoop, _ = strconv.ParseInt(reply["TotalLoop"], 10, 64)

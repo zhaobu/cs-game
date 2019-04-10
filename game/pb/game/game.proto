@@ -1,60 +1,33 @@
 syntax = "proto3";
 
 import "cy/game/pb/common/head.proto";
-import "cy/game/pb/common/common.proto";
+import public "cy/game/pb/common/common.proto";
 
 package pbgame;
 
 //玩家在桌子中状态
-enum DeskStatus {
-  DSNone = 0;
-  DSLook = 1;     //观察者
-  DSSitDown = 2;  //已坐下准备中
-  DSPlaying = 3;  //游戏中
+enum UserDeskStatus {
+  UDSNone = 0;
+  UDSLook = 1;     //观察者
+  UDSSitDown = 2;  //已坐下准备中
+  UDSPlaying = 3;  //游戏中
 }
 
-//创建桌子code
-enum MakeDeskRspCode {
-  MakeDeskNotUse = 0;
-  MakeDeskSucc = 1;
-  MakeDeskArgsErr = 2;
-  MakeDeskNotEnoughMoney = 3;  // 财富不够
-  MakeDeskNotEnoughDesk = 4;   // 桌子不够
-  MakeDeskInternalServerError = 5;
-  MakeDeskUserStatusErr = 6;     // 创建并进入游戏失败
-  MakeDeskCanNotFindClubID = 7;  // 无效的俱乐部ID
-  MakeDeskLimit = 8;             // 个数限制
+//扣费类型
+enum FeeType {
+  FTNone = 0;
+  FTGold = 1;    //金币
+  FTMasonry = 2;  //钻石
 }
 
-//加入桌子code
-enum JoinDeskRspCode {
-  JoinDeskNotUse = 0;
-  JoinDeskSucc = 1;
-  JoinDeskNotExist = 2;
-  JoinDeskDeskFull = 3;             //如果观察者有上限,报错
-  JoinDeskInternalServerError = 4;  //服务器内部错误
-  JoinDeskUserStatusErr = 5;        // redis缓存出错
-  JoinDeskAlreadyInDesk = 6;        //已经在桌子中
-                                    // JoinDeskGameStatusErr = 7;
-  // JoinDeskDistanceSoClose = 8;//距离限制不允许加入
-}
 
-//坐下准备code
-enum SitDownRspCode {
-  SitDownNone = 0;
-  SitDownSucc = 1;             //坐下成功
-  SitDownNotInDesk = 2;        //不在桌子中
-  SitDownFull = 3;             //桌子已满
-  SitDownDistanceSoClose = 4;  //距离限制不允许坐下
-  SitDownGameStatusErr = 5;    //桌子状态错误(比如重复准备)
-}
 
 // 查询游戏配置 c -> s
 message QueryGameConfigReq {
   pbcommon.ReqHead Head = 1;
   string GameName = 2;
   // 1匹配 2好友 3比赛
-  int32 Type = 3;
+  pbcommon.DeskType Type = 3;
 }
 
 message QueryGameConfigRsp {
@@ -86,29 +59,23 @@ message MakeDeskReq {
   int64 ClubID = 5;
 }
 
+//创建桌子code
+enum MakeDeskRspCode {
+  MakeDeskNotUse = 0;
+  MakeDeskSucc = 1;
+  MakeDeskArgsErr = 2;
+  MakeDeskNotEnoughMoney = 3;  // 财富不够
+  MakeDeskNotEnoughDesk = 4;   // 桌子不够
+  MakeDeskInternalServerError = 5;
+  MakeDeskUserStatusErr = 6;     // 创建并进入游戏失败
+  MakeDeskCanNotFindClubID = 7;  // 无效的俱乐部ID
+  MakeDeskLimit = 8;             // 个数限制
+}
 message MakeDeskRsp {
   pbcommon.RspHead Head = 1;
   MakeDeskRspCode Code = 2;
   string StrCode = 3;
   pbcommon.DeskInfo Info = 4;
-}
-
-// 销毁桌子 c -> s
-message DestroyDeskReq {
-  pbcommon.ReqHead Head = 1;
-  uint64 DeskID = 2;
-}
-
-message DestroyDeskRsp {
-  pbcommon.RspHead Head = 1;
-  // 1成功 2失败-已经开始 3失败-必须为房主
-  uint32 Code = 2;
-  string StrCode = 3;
-}
-
-// s -> c 通知桌子被销毁
-message DestroyDeskNotif {
-  uint64 DeskID = 1;
 }
 
 // 加入桌子 c -> s
@@ -117,6 +84,17 @@ message JoinDeskReq {
   uint64 DeskID = 2;
 }
 
+//加入桌子code
+enum JoinDeskRspCode {
+  JoinDeskNotUse = 0;
+  JoinDeskSucc = 1;
+  JoinDeskNotExist = 2;
+  JoinDeskDeskFull = 3;             //如果观察者有上限,报错
+  JoinDeskInternalServerError = 4;  //服务器内部错误
+  JoinDeskUserStatusErr = 5;        // redis缓存出错
+  JoinDeskAlreadyInDesk = 6;        //已经在桌子中
+}
+// 加入桌子 s -> c
 message JoinDeskRsp {
   pbcommon.RspHead Head = 1;
   JoinDeskRspCode Code = 2;
@@ -127,8 +105,20 @@ message JoinDeskRsp {
 // 坐下准备 c -> s
 message SitDownReq {
   pbcommon.ReqHead Head = 1;
+  int32 chair_id = 2;  //座位号
 }
 
+//坐下准备code
+enum SitDownRspCode {
+  SitDownNone = 0;
+  SitDownSucc = 1;             //坐下成功
+  SitDownNotInDesk = 2;        //不在桌子中
+  SitDownNotEmpty = 3;         //座位有人
+  SitDownDistanceSoClose = 4;  //距离限制不允许坐下
+  SitDownGameStatusErr = 5;    //桌子状态错误(比如重复准备)
+  SitDownNotEnoughMoney = 6;   //金钱不够
+}
+// 坐下准备 s -> c
 message SitDownRsp {
   pbcommon.RspHead Head = 1;
   SitDownRspCode Code = 2;
@@ -145,6 +135,32 @@ message ExitDeskRsp {
   // 1 成功 2 失败-游戏开始
   uint32 Code = 2;
   string ErrMsg = 3;
+}
+
+// 游戏解散 c -> s
+message DestroyDeskReq {
+  pbcommon.ReqHead Head = 1;
+  uint64 DeskID = 2;
+}
+
+//解散回应code
+enum DestroyDeskRspCode {
+  DestroyDeskNone = 0;
+  DestroyDeskSucc = 1;       //解散成功
+  DestroyDeskPlaying = 2;    //正在游戏中,不能解散(非好友场次)
+  DestroyDeskNotMaster = 3;  //游戏开始前只有房主才能解散房间
+  DestroyDeskFrequent = 4;   //解散请求过于频繁
+  DestroyDeskNotExist = 5;   //桌子不存在
+}
+message DestroyDeskRsp {
+  pbcommon.RspHead Head = 1;
+  DestroyDeskRspCode Code = 2;
+  string ErrMsg = 3;
+}
+
+// s -> c 通知桌子被销毁
+message DestroyDeskNotif {
+  uint64 DeskID = 1;
 }
 
 // 游戏动作 c -> s

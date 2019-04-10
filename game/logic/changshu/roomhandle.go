@@ -10,14 +10,14 @@ import (
 	"go.uber.org/zap"
 )
 
-const (
-	feeTypeGold    = 1
-	feeTypeMasonry = 2
+// const (
+// 	feeTypeGold    = 1
+// 	feeTypeMasonry = 2
 
-	deskTypeMatch  = 1
-	deskTypeFriend = 2
-	deskTypeLadder = 3
-)
+// 	deskTypeMatch  = 1
+// 	deskTypeFriend = 2
+// 	deskTypeLadder = 3
+// )
 
 func checkArg(req *pbgame.MakeDeskReq) (*pbgame_logic.CreateArg, error) {
 	pb, err := protobuf.Unmarshal(req.GameArgMsgName, req.GameArgMsgValue)
@@ -35,10 +35,26 @@ func checkArg(req *pbgame.MakeDeskReq) (*pbgame_logic.CreateArg, error) {
 
 func calcFee(arg *pbgame_logic.CreateArg) int64 {
 	change := int64(0)
+	// 支付方式 1 个人支付 2 平局支付
+	if arg.PaymentType == 1 {
+		change = int64(arg.RInfo.Fee)
+	} else if arg.PaymentType == 2 {
+		change = int64(arg.RInfo.Fee / uint32(arg.PlayerCount))
+	}
+	change = 0
 	return change
 }
 
+//HandleDestroyDeskReq 解散请求
 func (self *roomHandle) HandleDestroyDeskReq(uid uint64, req *pbgame.DestroyDeskReq, rsp *pbgame.DestroyDeskRsp) {
+	//检查桌子是否存在
+	d := getDeskByID(req.DeskID)
+	if d == nil {
+		rsp.Code = pbgame.DestroyDeskRspCode_DestroyDeskNotExist
+		rsp.ErrMsg = fmt.Sprintf("没有该房间号:%d", req.DeskID)
+		return
+	}
+	d.doDestroyDesk(uid, rsp)
 	return
 }
 
@@ -99,36 +115,16 @@ func (self *roomHandle) HandleSitDownReq(uid uint64, req *pbgame.SitDownReq, rsp
 		return
 	}
 	//TODO距离限制
-	d.doSitDown(uid, rsp)
+	d.doSitDown(uid, req.ChairId, rsp)
 	return
 }
 
-//起立取消准备
-func (self *roomHandle) HandleStandUpReq(uid uint64, req *pbgame.SitDownReq, rsp *pbgame.SitDownRsp) {
-	//检查玩家是否存在桌子
-	d := getDeskByUID(uid)
-	if d == nil {
-		rsp.Code = pbgame.SitDownRspCode_SitDownNotInDesk
-		rsp.ErrMsg = fmt.Sprintf("user%d not in desk", uid)
-		return
-	}
-	//检查玩家是否存在桌子信息
-	if _, ok := d.deskPlayers[uid]; !ok {
-		rsp.Code = pbgame.SitDownRspCode_SitDownNotInDesk
-		rsp.ErrMsg = fmt.Sprintf("user%d in desk,but has no deskinfo", uid)
-		return
-	}
-	//TODO距离限制
-	d.doSitDown(uid, rsp)
-	return
-}
-
-func (self *roomHandle) HandleMakeDeskReq(uid uint64, deskID uint64, req *pbgame.MakeDeskReq, rsp *pbgame.MakeDeskRsp) {
+func (self *roomHandle) HandleMakeDeskReq(uid uint64, deskID uint64, req *pbgame.MakeDeskReq, rsp *pbgame.MakeDeskRsp) bool {
 	arg, err := checkArg(req)
 	if err != nil {
 		tlog.Error("err checkArg()", zap.Error(err))
 		rsp.Code = pbgame.MakeDeskRspCode_MakeDeskArgsErr
-		return
+		return false
 	}
 
 	tlog.Info("HandleMakeDeskReq", zap.Any("CreateArg", arg))
@@ -136,16 +132,17 @@ func (self *roomHandle) HandleMakeDeskReq(uid uint64, deskID uint64, req *pbgame
 	fee := calcFee(arg)
 
 	if fee != 0 {
-		_, err = mgo.UpdateWealthPre(uid, feeTypeMasonry, fee)
+		_, err = mgo.UpdateWealthPre(uid, pbgame.FeeType_FTMasonry, fee)
 		if err != nil {
 			tlog.Error("err mgo.UpdateWealthPre()", zap.Error(err))
 			rsp.Code = pbgame.MakeDeskRspCode_MakeDeskNotEnoughMoney
-			return
+			return false
 		}
 
+		//建房失败,返还扣除的房费
 		defer func() {
 			if err != nil {
-				mgo.UpdateWealthPreSure(uid, feeTypeMasonry, fee)
+				mgo.UpdateWealthPreSure(uid, pbgame.FeeType_FTMasonry, fee)
 			}
 		}()
 	}
@@ -155,8 +152,12 @@ func (self *roomHandle) HandleMakeDeskReq(uid uint64, deskID uint64, req *pbgame
 	//把桌子加入管理
 	updateID2desk(newD)
 
-	rsp.Code = pbgame.MakeDeskRspCode_MakeDeskSucc
-	return
+	//返回桌子参数
+	rsp.Info.ArgName, rsp.Info.ArgValue, err = protobuf.Marshal(newD.deskConfig)
+	if err != nil {
+		tlog.Error("err protobuf.Marshal()", zap.Error(err))
+	}
+	return true
 }
 
 func (self *roomHandle) HandleQueryGameConfigReq(uid uint64, req *pbgame.QueryGameConfigReq, rsp *pbgame.QueryGameConfigRsp) {

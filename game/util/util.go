@@ -1,6 +1,7 @@
 package util
 
 import (
+	"math"
 	"math/rand"
 	"sort"
 	"time"
@@ -51,4 +52,11 @@ func IntSliceEqualBCE(a, b []int, order bool) bool {
 	}
 
 	return true
+}
+
+const MIN = 0.000001
+
+//f1>f2时返回false,精度时Min
+func Float64Equal(f1, f2 float64) bool {
+	return math.Dim(f1, f2) < MIN
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"cy/game/db/mgo"
+	pbgame "cy/game/pb/game"
 	"fmt"
 )
 
@@ -21,7 +22,7 @@ func main() {
 func testWealth() {
 	//fmt.Println(mgo.UpdateWealth(14, 2, 8))
 	//fmt.Println(mgo.UpdateWealthPre(14, 2, 2))
-	fmt.Println(mgo.UpdateWealthPreSure(14, 2, 2))
+	fmt.Println(mgo.UpdateWealthPreSure(14, pbgame.FeeType_FTMasonry, 2))
 }
 
 func testClub() {

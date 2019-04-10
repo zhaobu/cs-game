@@ -55,10 +55,8 @@ message DeskArg {
   CreateArg args = 1;
 
   bool Enable = 2;
-  // 1 匹配 2 好友 3 比赛
-  uint32 Type = 3;
-  // 服务费类型 1 金币 2 钻石
-  uint32 FeeType = 4;
+  pbcommon.DeskType Type = 3;
+  pbgame.FeeType FeeType = 4;
   uint64 DeskID = 5;
   uint32 RoomId = 6;    // 匹配场时才有用
   string RoomName = 7;  // 匹配场时才有用
@@ -76,17 +74,17 @@ enum GameStatus {
 message DeskUserInfo {
   pbcommon.UserInfo info = 1;
   int32 chair_id = 2;
-  pbgame.DeskStatus desk_status = 3;
+  pbgame.UserDeskStatus user_status = 3;
 }
 
 // 断线重连、进入桌子 桌子信息 s -> c
-message DeskInfo {
+message GameDeskInfo {
   string game_name = 1;  // 游戏名称
   DeskArg arg = 2;
   GameStatus game_status = 3;
-  uint32 cur_inning = 4;                //当前局数
-  int32 banker_id = 5;                  //庄家(庄家chairid)
-  uint64 master_uid = 6;                //房主(房主uid)
+  uint32 cur_inning = 4;                 //当前局数
+  int32 banker_id = 5;                   //庄家(庄家chairid)
+  uint64 master_uid = 6;                 //房主(房主uid)
   repeated DeskUserInfo game_user = 14;  // 准备的玩家信息
 }
 
