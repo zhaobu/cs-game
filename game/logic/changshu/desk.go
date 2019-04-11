@@ -266,15 +266,6 @@ func (d *Desk) sendDeskInfo(uid uint64) {
 
 //解散桌子
 func (d *Desk) doDestroyDesk(uid uint64, rsp *pbgame.DestroyDeskRsp) {
-	//检查是否过于频繁
-	if dUserInfo, ok := d.deskPlayers[uid]; ok {
-		if dUserInfo.lastDiss.Unix() != 0 && util.Float64Equal(time.Now().Sub(dUserInfo.lastDiss).Seconds(), dissInterval) {
-			rsp.Code = pbgame.DestroyDeskRspCode_DestroyDeskFrequent
-			rsp.ErrMsg = fmt.Sprintf("解散请求过于频繁")
-			return
-		}
-		dUserInfo.lastDiss = time.Now()
-	}
 	if d.gameStatus == pbgame_logic.GameStatus_GSWait {
 		if uid != d.masterUid {
 			rsp.Code = pbgame.DestroyDeskRspCode_DestroyDeskNotMaster
@@ -283,6 +274,15 @@ func (d *Desk) doDestroyDesk(uid uint64, rsp *pbgame.DestroyDeskRsp) {
 		}
 		d.dealDestroyDesk()
 	} else if d.gameStatus >= pbgame_logic.GameStatus_GSPlay {
+		//检查是否过于频繁
+		if dUserInfo, ok := d.deskPlayers[uid]; ok {
+			if dUserInfo.lastDiss.Unix() != 0 && util.Float64Equal(time.Now().Sub(dUserInfo.lastDiss).Seconds(), dissInterval) {
+				rsp.Code = pbgame.DestroyDeskRspCode_DestroyDeskFrequent
+				rsp.ErrMsg = fmt.Sprintf("解散请求过于频繁")
+				return
+			}
+			dUserInfo.lastDiss = time.Now()
+		}
 		d.set_timer(mj.TID_Destory, 15*time.Second, func() {
 
 		})

@@ -151,7 +151,7 @@ message DestroyDeskReq {
 //解散回应code
 enum DestroyDeskRspCode {
   DestroyDeskNone = 0;
-  DestroyDeskSucc = 1;       //解散成功
+  DestroyDeskSucc = 1;       //申请解散成功
   DestroyDeskPlaying = 2;    //正在游戏中,不能解散(非好友场次)
   DestroyDeskNotMaster = 3;  //游戏开始前只有房主才能解散房间
   DestroyDeskFrequent = 4;   //解散请求过于频繁
@@ -163,9 +163,15 @@ message DestroyDeskRsp {
   string ErrMsg = 3;
 }
 
-// s -> c 通知桌子被销毁
+message VoteInfo{
+  uint64 UserID = 1;
+  bool Agree=2;
+}
+
+// s -> c 广播解散消息
 message DestroyDeskNotif {
-  uint64 DeskID = 1;
+  uint64 DeskID = 1;  //桌子号
+  repeated VoteInfo=2;//投票信息
 }
 
 // 游戏动作 c -> s
