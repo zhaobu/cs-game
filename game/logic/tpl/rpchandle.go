@@ -93,20 +93,21 @@ func (self *RpcHandle) ExitDeskReq(ctx context.Context, args *codec.Message, rep
 
 	sessInfo, err := cache.QuerySessionInfo(args.UserID)
 	if err != nil {
-		rsp.Code = 2
+		rsp.Code = pbgame.ExitDeskRspCode_ExitDeskInternalServerError
 		return
 	}
 
 	if sessInfo.Status != pbcommon.UserStatus_InGameing ||
-		sessInfo.GameName != self.service.gameName ||
-		sessInfo.GameID != self.service.gameID {
+		sessInfo.GameName != self.service.GameName ||
+		sessInfo.GameID != self.service.GameID {
+		rsp.Code = pbgame.ExitDeskRspCode_ExitDeskInternalServerError
 		return
 	}
 
 	self.service.roomHandle.HandleExitDeskReq(args.UserID, req, rsp)
 
-	if rsp.Code == 1 {
-		cache.ExitGame(args.UserID, self.service.gameName, self.service.gameID, sessInfo.AtDeskID)
+	if rsp.Code == pbgame.ExitDeskRspCode_ExitDeskSucc {
+		cache.ExitGame(args.UserID, self.service.GameName, self.service.GameID, sessInfo.AtDeskID)
 	}
 
 	return
@@ -167,7 +168,9 @@ func (self *RpcHandle) JoinDeskReq(ctx context.Context, args *codec.Message, rep
 	}
 
 	defer func() {
-		self.service.ToGateNormal(rsp, args.UserID)
+		if rsp.Code != pbgame.JoinDeskRspCode_JoinDeskSucc {
+			self.service.ToGateNormal(rsp, args.UserID)
+		}
 	}()
 
 	self.service.tlog.Info("recv from gate", zap.Uint64("uid", args.UserID), zap.String("msgName", args.Name), zap.Any("msgValue", *req))
@@ -179,7 +182,7 @@ func (self *RpcHandle) JoinDeskReq(ctx context.Context, args *codec.Message, rep
 		return nil
 	}
 
-	succ, err := cache.EnterGame(args.UserID, self.service.gameName, self.service.gameID, req.DeskID, false)
+	succ, err := cache.EnterGame(args.UserID, self.service.GameName, self.service.GameID, req.DeskID, false)
 	if err != nil {
 		self.service.tlog.Error("error info", zap.Error(err))
 		rsp.Code = pbgame.JoinDeskRspCode_JoinDeskInternalServerError
@@ -194,7 +197,7 @@ func (self *RpcHandle) JoinDeskReq(ctx context.Context, args *codec.Message, rep
 
 	defer func() {
 		if rsp.Code != pbgame.JoinDeskRspCode_JoinDeskSucc {
-			cache.ExitGame(args.UserID, self.service.gameName, self.service.gameID, req.DeskID)
+			cache.ExitGame(args.UserID, self.service.GameName, self.service.GameID, req.DeskID)
 		}
 	}()
 
@@ -341,8 +344,8 @@ func (self *RpcHandle) MakeDeskReq(ctx context.Context, args *codec.Message, rep
 		// deskInfo.ArgName = rsp.Info.ArgName
 		// deskInfo.ArgValue = rsp.Info.ArgValue
 		deskInfo.Status = "1"
-		deskInfo.GameName = self.service.gameName
-		deskInfo.GameID = self.service.gameID
+		deskInfo.GameName = self.service.GameName
+		deskInfo.GameID = self.service.GameID
 		deskInfo.ClubID = req.ClubID
 		deskInfo.Kind = pbgame.DeskType_DTFriend
 		// deskInfo.SdInfos

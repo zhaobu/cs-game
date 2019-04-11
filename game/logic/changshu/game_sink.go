@@ -45,12 +45,12 @@ type mjLib struct {
 //游戏主逻辑
 type GameSink struct {
 	mjLib
-	gameAllInfo  //游戏公共信息
-	desk         *Desk
-	game_config  *pbgame_logic.CreateArg //游戏参数
-	onlinePlayer []bool                  //在线玩家
-	baseCard     []int32                 //基础牌库
-	isPlaying    bool                    //是否在游戏中
+	gameAllInfo //游戏公共信息
+	desk        *Desk
+	game_config *pbgame_logic.CreateArg //游戏参数
+	// onlinePlayer []bool                  //在线玩家
+	baseCard  []int32 //基础牌库
+	isPlaying bool    //是否在游戏中
 }
 
 ////////////////////////调用desk接口函数START/////////////////////////////
@@ -70,7 +70,7 @@ func (self *GameSink) Ctor(config *pbgame_logic.CreateArg) error {
 	self.game_config = config
 	cardDef.Init(log)
 	self.isPlaying = false
-	self.onlinePlayer = make([]bool, config.PlayerCount)
+	// self.onlinePlayer = make([]bool, config.PlayerCount)
 	self.players = make([]mj.PlayerInfo, config.PlayerCount)
 	self.baseCard = cardDef.GetBaseCard(config.PlayerCount)
 	self.reset()
@@ -109,7 +109,18 @@ func (self *GameSink) AddPlayer(chairId int32, uid uint64, nickName string) bool
 
 	info := mj.PlayerInfo{BaseInfo: mj.PlayerBaseInfo{ChairId: chairId, Uid: uid, Nickname: nickName, Point: 0}}
 	self.players[chairId] = info
-	self.onlinePlayer[chairId] = true
+	// self.onlinePlayer[chairId] = true
+	return true
+}
+
+//玩家退出游戏
+func (self *GameSink) Exitlayer(chairId int32) bool {
+	if int(chairId) >= len(self.players) {
+		log.Error("Exitlayer 时int(chairId) >= len(self.players)")
+		return false
+	}
+	self.players = append(self.players[:chairId], self.players[chairId+1:]...)
+	// self.onlinePlayer[chairId] = false
 	return true
 }
 
@@ -903,8 +914,8 @@ func (self *GameSink) gameReconnect(recInfo *pbgame_logic.GameDeskInfo, uid uint
 
 func (self *GameSink) logHeadUser(chairId int32) string {
 	if chairId == -1 {
-		return fmt.Sprintf("房间[%d] :", self.desk.id)
+		return fmt.Sprintf("房间[%d] :", self.desk.deskId)
 	} else {
-		return fmt.Sprintf("房间[%d] 玩家[%s,%d]:", self.desk.id, self.players[chairId].BaseInfo.Nickname, chairId)
+		return fmt.Sprintf("房间[%d] 玩家[%s,%d]:", self.desk.deskId, self.players[chairId].BaseInfo.Nickname, chairId)
 	}
 }

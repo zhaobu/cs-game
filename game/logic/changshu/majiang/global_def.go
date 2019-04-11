@@ -14,7 +14,7 @@ type (
 //定时器ID
 const (
 	TID_DESK_Begin EmtimerID = 0 //桌子内部定时器开始
-	TID_Destory                  //销毁桌子
+	TID_Destory                  //解散桌子
 
 	TID_GAMESINK_Begin EmtimerID = 1000 //游戏逻辑定时器开始
 	TID_DealCard                        //发牌

@@ -9,22 +9,22 @@ var (
 	user2desk   = make(map[uint64]*Desk)
 )
 
-func getDeskByID(id uint64) *Desk {
+func getDeskByID(deskId uint64) *Desk {
 	muId2Desk.RLock()
 	defer muId2Desk.RUnlock()
 
-	return id2desk[id]
+	return id2desk[deskId]
 }
 
 func updateID2desk(d *Desk) bool {
 	muId2Desk.Lock()
 	defer muId2Desk.Unlock()
 
-	_, find := id2desk[d.id]
+	_, find := id2desk[d.deskId]
 	if find {
 		return false
 	}
-	id2desk[d.id] = d
+	id2desk[d.deskId] = d
 	return true
 }
 

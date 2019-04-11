@@ -221,6 +221,7 @@ func (s *session) afterLoginRsp(loginRsp *pblogin.LoginRsp) {
 }
 
 func (s *session) notifBackendOnline(online bool) {
+	tlog.Debug("notifBackendOnline", zap.Uint64("uid", s.uid), zap.Bool("obline", online))
 	m := &codec.Message{}
 	ucn := &pbinner.UserChangeNotif{
 		UserID: s.uid,

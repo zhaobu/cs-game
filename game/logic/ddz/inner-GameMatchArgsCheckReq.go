@@ -5,7 +5,7 @@ import (
 	"cy/game/codec"
 	"cy/game/codec/protobuf"
 	"cy/game/logic/ddz/desk"
-	"cy/game/pb/inner"
+	pbinner "cy/game/pb/inner"
 	"fmt"
 	"runtime/debug"
 

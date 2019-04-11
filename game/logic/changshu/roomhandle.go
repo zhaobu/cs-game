@@ -3,6 +3,7 @@ package main
 import (
 	"cy/game/codec/protobuf"
 	"cy/game/db/mgo"
+	pbcommon "cy/game/pb/common"
 	pbgame "cy/game/pb/game"
 	pbgame_logic "cy/game/pb/game/mj/changshu"
 	"fmt"
@@ -53,10 +54,10 @@ func (self *roomHandle) HandleDestroyDeskReq(uid uint64, req *pbgame.DestroyDesk
 func (self *roomHandle) HandleExitDeskReq(uid uint64, req *pbgame.ExitDeskReq, rsp *pbgame.ExitDeskRsp) {
 	d := getDeskByUID(uid)
 	if d == nil {
-		rsp.Code = 2
+		rsp.Code = pbgame.ExitDeskRspCode_ExitDeskNotInDesk
 		return
 	}
-	rsp.Code = d.doExit(uid)
+	d.doExit(uid, rsp)
 	return
 }
 
@@ -82,11 +83,11 @@ func (self *roomHandle) HandleJoinDeskReq(uid uint64, req *pbgame.JoinDeskReq, r
 	//检查玩家是否已经在桌子中
 	if old := getDeskByUID(uid); old != nil {
 		rsp.Code = pbgame.JoinDeskRspCode_JoinDeskAlreadyInDesk
-		rsp.ErrMsg = fmt.Sprintf("user already in desk:%d", old.id)
+		rsp.ErrMsg = fmt.Sprintf("user already in desk:%d", old.deskId)
 		return
 	}
 	updateUser2desk(d, uid)
-	rsp.Code = d.doJoin(uid)
+	d.doJoin(uid, rsp)
 	return
 }
 
@@ -99,11 +100,6 @@ func (self *roomHandle) HandleSitDownReq(uid uint64, req *pbgame.SitDownReq, rsp
 		rsp.ErrMsg = fmt.Sprintf("user%d not in desk", uid)
 		return
 	}
-	defer func() { //通知俱乐部查询桌子信息
-		if rsp.Code == pbgame.SitDownRspCode_SitDownSucc && d.clubId != 0 {
-			self.RoomServie.SendDeskChangeNotif(d.clubId, d.id, 2)
-		}
-	}()
 	//检查玩家是否存在桌子信息
 	if _, ok := d.deskPlayers[uid]; !ok {
 		rsp.Code = pbgame.SitDownRspCode_SitDownNotInDesk
@@ -143,16 +139,15 @@ func (self *roomHandle) HandleMakeDeskReq(uid uint64, deskID uint64, req *pbgame
 		}()
 	}
 
-	newD := makeDesk(arg, uid, deskID, req.ClubID)
+	//构建桌子参数
+	deskArg := &pbgame_logic.DeskArg{Args: arg, Enable: true, Type: pbcommon.DeskType_DTFriend, FeeType: pbgame.FeeType_FTMasonry, DeskID: deskID}
+	newD := makeDesk(deskArg, uid, deskID, req.ClubID)
 	newD.gameNode = self.RoomServie
 	//把桌子加入管理
 	updateID2desk(newD)
 
 	//返回桌子参数
-	rsp.Info.ArgName, rsp.Info.ArgValue, err = protobuf.Marshal(newD.deskConfig)
-	if err != nil {
-		tlog.Error("err protobuf.Marshal()", zap.Error(err))
-	}
+	rsp.Info.ArgName, rsp.Info.ArgValue, _ = protobuf.Marshal(newD.deskConfig)
 	return true
 }
 

@@ -7,6 +7,7 @@ import (
 	pbcommon "cy/game/pb/common"
 	pbgame "cy/game/pb/game"
 	pbinner "cy/game/pb/inner"
+	"cy/game/util"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -38,6 +39,7 @@ type IRoomHandle interface {
 	HandleQueryGameConfigReq(uid uint64, req *pbgame.QueryGameConfigReq, rsp *pbgame.QueryGameConfigRsp)
 	HandleQueryDeskInfoReq(uid uint64, req *pbgame.QueryDeskInfoReq, rsp *pbgame.QueryDeskInfoRsp)
 	RunLongTime(deskID uint64, typ int) bool
+	OnOffLine(uid uint64, online bool)
 }
 
 type RoomServie struct {
@@ -46,21 +48,22 @@ type RoomServie struct {
 	tlog       *zap.Logger              //structured 风格
 	log        *zap.SugaredLogger       //printf风格
 	Timer      *timingwheel.TimingWheel //定时器
-	gameName   string                   //游戏编号
-	gameID     string                   //游戏ip+port
+	GameName   string                   //游戏编号
+	GameID     string                   //游戏ip+port
 	redisPool  *redis.Pool
 }
 
 func (self *RoomServie) Init(gameName, gameID string, _tlog *zap.Logger, redisAddr string, redisDb int) {
 	self.initRedis(redisAddr, redisDb)
-	self.gameName = gameName
-	self.gameID = gameID
+	self.GameName = gameName
+	self.GameID = gameID
 	self.tlog = _tlog
 	self.log = _tlog.Sugar()
 	self.Timer = timingwheel.NewTimingWheel(time.Second, 60) //一个节点一个定时器
 	self.Timer.Start()
 	self.delInvalidDesk()
 	self.checkDeskLongTime()
+	go util.Subscribe(redisAddr, redisDb, "inner_broadcast", self.onMessage)
 }
 
 func (self *RoomServie) initRedis(redisAddr string, redisDb int) {
@@ -165,7 +168,7 @@ func (self *RoomServie) delInvalidDesk() {
 			continue
 		}
 
-		if deskInfo.GameName != self.gameName || deskInfo.GameID != self.gameID {
+		if deskInfo.GameName != self.GameName || deskInfo.GameID != self.GameID {
 			continue
 		}
 
@@ -180,8 +183,8 @@ func (self *RoomServie) delInvalidDesk() {
 			continue
 		}
 
-		if sessInfo.GameName != self.gameName ||
-			sessInfo.GameID != self.gameID ||
+		if sessInfo.GameName != self.GameName ||
+			sessInfo.GameID != self.GameID ||
 			sessInfo.Status != pbcommon.UserStatus_InGameing {
 			continue
 		}
@@ -214,7 +217,7 @@ func (self *RoomServie) checkDeskLongTime() {
 				continue
 			}
 
-			if deskInfo.GameName != self.gameName || deskInfo.GameID != self.gameID {
+			if deskInfo.GameName != self.GameName || deskInfo.GameID != self.GameID {
 				continue
 			}
 
@@ -234,4 +237,23 @@ func (self *RoomServie) checkDeskLongTime() {
 			}
 		}
 	}()
+}
+
+func (self *RoomServie) onMessage(channel string, data []byte) error {
+	m := &codec.Message{}
+	err := json.Unmarshal(data, m)
+	if err != nil {
+		return err
+	}
+
+	pb, err := protobuf.Unmarshal(m.Name, m.Payload)
+	if err != nil {
+		return err
+	}
+
+	switch v := pb.(type) {
+	case *pbinner.UserChangeNotif:
+		self.roomHandle.OnOffLine(v.UserID, v.Typ == pbinner.UserChangeType_Online)
+	}
+	return nil
 }

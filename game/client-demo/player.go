@@ -17,6 +17,7 @@ import (
 
 type Player struct {
 	curgame  *clientgame.Changshu //当前的游戏
+	pos      int32                //选择的座位号
 	wxID     string
 	waitchan chan int
 	csession.Session
@@ -35,15 +36,16 @@ func (self *Player) init() {
 
 func (self *Player) Connect(addr string) {
 	self.init()
-	var a int //要发送的消息
+	var a int32 //要发送的消息
 	for {
 		fmt.Printf("请输入座位号: ")
 		fmt.Scan(&a)
 		if a != 1 && a != 2 && a != 3 && a != 4 {
 			continue
 		}
-		name := map[int]string{1: "wx_1", 2: "wx_2", 3: "wx_3", 4: "wx_4"}
+		name := map[int32]string{1: "wx_1", 2: "wx_2", 3: "wx_3", 4: "wx_4"}
 		self.wxID = name[a]
+		self.pos = a
 		break
 	}
 
@@ -77,6 +79,8 @@ func (self *Player) GameStart() {
 			self.makedesk()
 		case "3":
 			self.joindesk()
+		case "4":
+			self.exitdesk()
 		default:
 			self.curgame.DoAction(a)
 		}
@@ -113,12 +117,21 @@ func (self *Player) joindesk() {
 	})
 	<-self.waitchan
 	tlog.Info("joindesk suc", zap.String("wxID", self.wxID), zap.Uint64("UserId", self.UserId))
-	self.sitdown()
+	self.sitdown(self.pos - 1)
 }
 
-func (self *Player) sitdown() {
-	self.SendPb(&pbgame.SitDownReq{
+func (self *Player) exitdesk() {
+	self.SendPb(&pbgame.ExitDeskReq{
 		Head: &pbcommon.ReqHead{Seq: 1, UserID: self.UserId},
+	})
+	<-self.waitchan
+	tlog.Info("exitdesk suc", zap.String("wxID", self.wxID), zap.Uint64("UserId", self.UserId))
+}
+
+func (self *Player) sitdown(chairId int32) {
+	self.SendPb(&pbgame.SitDownReq{
+		Head:    &pbcommon.ReqHead{Seq: 1, UserID: self.UserId},
+		ChairId: chairId,
 	})
 	<-self.waitchan
 	tlog.Info("sitdown suc", zap.String("wxID", self.wxID), zap.Uint64("UserId", self.UserId))
@@ -161,6 +174,8 @@ func (self *Player) recv() {
 			case *pbgame.JoinDeskRsp:
 				self.waitchan <- 1
 			case *pbgame.SitDownRsp:
+				self.waitchan <- 1
+			case *pbgame.ExitDeskRsp:
 				self.waitchan <- 1
 			case *pbgame.GameNotif:
 				self.curgame.DispatchRecv(v)

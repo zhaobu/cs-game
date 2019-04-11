@@ -3,8 +3,8 @@ package desk
 import (
 	"cy/game/cache"
 	"cy/game/db/mgo"
-	"cy/game/pb/game/ddz"
-	"cy/game/pb/hall"
+	pbgame_ddz "cy/game/pb/game/ddz"
+	pbhall "cy/game/pb/hall"
 	"sort"
 	"time"
 )
