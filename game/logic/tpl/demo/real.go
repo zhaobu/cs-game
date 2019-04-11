@@ -8,15 +8,6 @@ import (
 	"fmt"
 )
 
-// const (
-// 	feeTypeGold    = 1
-// 	pbgame.FeeType_FTMasonry = 2
-
-// 	deskTypeMatch  = 1
-// 	deskTypeFriend = 2
-// 	deskTypeLadder = 3
-// )
-
 func checkArg(req *pbgame.MakeDeskReq) (*cs.CreateArg, error) {
 	pb, err := protobuf.Unmarshal(req.GameArgMsgName, req.GameArgMsgValue)
 	if err != nil {

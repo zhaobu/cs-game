@@ -33,6 +33,7 @@ type deskUserInfo struct {
 type Desk struct {
 	mu          sync.Mutex
 	gameNode    *tpl.RoomServie
+	clubId      int64                    //俱乐部id
 	masterUid   uint64                   //房主uid
 	id          uint64                   //桌子id
 	curInning   uint32                   //第几局
@@ -45,8 +46,8 @@ type Desk struct {
 	timerManger map[mj.EmtimerID]*timingwheel.Timer
 }
 
-func makeDesk(arg *pbgame_logic.CreateArg, masterUid, deskID uint64) *Desk {
-	d := &Desk{id: deskID, masterUid: masterUid, deskConfig: &pbgame_logic.DeskArg{Args: arg}}
+func makeDesk(arg *pbgame_logic.CreateArg, masterUid, deskID uint64, clubID int64) *Desk {
+	d := &Desk{id: deskID, clubId: clubID, masterUid: masterUid, deskConfig: &pbgame_logic.DeskArg{Args: arg}}
 	d.gameSink = &GameSink{}
 	d.gameSink.Ctor(arg)
 	d.gameSink.desk = d
@@ -153,7 +154,30 @@ func (d *Desk) doSitDown(uid uint64, chair int32, rsp *pbgame.SitDownRsp) {
 	if d.checkStart() {
 		d.gameSink.StartGame()
 	}
+
+	d.updateDeskInfo()
 	return
+}
+
+//更新桌子信息到redis
+func (d *Desk) updateDeskInfo() {
+	deskInfo, err := cache.QueryDeskInfo(d.id)
+	if err != nil {
+		tlog.Error("err cache.QueryDeskInfo", zap.Error(err))
+		return
+	}
+	if d.gameStatus <= pbgame_logic.GameStatus_GSWait {
+		deskInfo.Status = "1"
+	} else {
+		deskInfo.Status = "2"
+	}
+	deskInfo.CurrLoop = int64(d.curInning)
+	deskInfo.SdInfos = []*pbcommon.SiteDownPlayerInfo{}
+	for k, v := range d.playChair {
+		uinfo := &pbcommon.SiteDownPlayerInfo{UserID: v.info.UserID, Dir: k, Name: v.info.Name, Profile: v.info.Profile}
+		deskInfo.SdInfos = append(deskInfo.SdInfos, uinfo)
+	}
+	cache.UpdateDeskInfo(deskInfo)
 }
 
 //sendDeskInfo 有新玩家坐下,起立,重连,发送玩家信息

@@ -23,7 +23,7 @@ message ErrorTip {
 
 message SiteDownPlayerInfo {
   uint64 UserID = 1;
-  int64 Dir = 2;
+  int32 Dir = 2;
   string Name = 3;
   string Profile = 4;
 }

@@ -139,6 +139,7 @@ func (self *RoomServie) ToGate(pb proto.Message, uids ...uint64) error {
 }
 
 func (self *RoomServie) SendDeskChangeNotif(cid int64, did uint64, changeTyp int32) {
+	self.tlog.Info("SendDeskChangeNotif", zap.Int64("cid", cid), zap.Uint64("did", did), zap.Int32("changeTyp", changeTyp))
 	m := &codec.Message{}
 	dcn := &pbinner.DeskChangeNotif{
 		ClubID:    cid,

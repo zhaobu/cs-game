@@ -10,15 +10,6 @@ import (
 	"go.uber.org/zap"
 )
 
-// const (
-// 	feeTypeGold    = 1
-// 	feeTypeMasonry = 2
-
-// 	deskTypeMatch  = 1
-// 	deskTypeFriend = 2
-// 	deskTypeLadder = 3
-// )
-
 func checkArg(req *pbgame.MakeDeskReq) (*pbgame_logic.CreateArg, error) {
 	pb, err := protobuf.Unmarshal(req.GameArgMsgName, req.GameArgMsgValue)
 	if err != nil {
@@ -108,6 +99,11 @@ func (self *roomHandle) HandleSitDownReq(uid uint64, req *pbgame.SitDownReq, rsp
 		rsp.ErrMsg = fmt.Sprintf("user%d not in desk", uid)
 		return
 	}
+	defer func() { //通知俱乐部查询桌子信息
+		if rsp.Code == pbgame.SitDownRspCode_SitDownSucc && d.clubId != 0 {
+			self.RoomServie.SendDeskChangeNotif(d.clubId, d.id, 2)
+		}
+	}()
 	//检查玩家是否存在桌子信息
 	if _, ok := d.deskPlayers[uid]; !ok {
 		rsp.Code = pbgame.SitDownRspCode_SitDownNotInDesk
@@ -147,7 +143,7 @@ func (self *roomHandle) HandleMakeDeskReq(uid uint64, deskID uint64, req *pbgame
 		}()
 	}
 
-	newD := makeDesk(arg, uid, deskID)
+	newD := makeDesk(arg, uid, deskID, req.ClubID)
 	newD.gameNode = self.RoomServie
 	//把桌子加入管理
 	updateID2desk(newD)

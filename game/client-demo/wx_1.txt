@@ -1,15 +1,15 @@
-2019/04/10 18:16:14.975	INFO	client-demo/player.go:61	connect succ	{"addr": "192.168.0.10:9876"}
-2019/04/10 18:16:14.999	INFO	session/session.go:47	SendPb	{"msgName": "pblogin.LoginReq"}
-2019/04/10 18:16:15.077	INFO	client-demo/player.go:143	recv	{"msgName": "pbcommon.SessionInfo", "msgValue": ""}
-2019/04/10 18:16:15.077	INFO	client-demo/player.go:168	未处理的消息	{"msgName": "pbcommon.SessionInfo", "msgValue": ""}
-2019/04/10 18:16:15.077	INFO	client-demo/player.go:143	recv	{"msgName": "pblogin.LoginRsp", "msgValue": "Head:<Seq:1 > Code:Succ User:<UserID:31 SessionID:\"6b4bc014-c8cc-4eb5-bc6a-1223a50a04bd\" WxID:\"wx_1\" Gold:5000 Masonry:8 > "}
-2019/04/10 18:16:15.077	INFO	client-demo/player.go:93	login suc	{"wxID": "wx_1", "UserId": 31}
-2019/04/10 18:16:15.606	INFO	session/session.go:47	SendPb	{"msgName": "pbgame.MakeDeskReq"}
-2019/04/10 18:16:16.280	INFO	client-demo/player.go:143	recv	{"msgName": "pbgame.MakeDeskRsp", "msgValue": "Head:<Seq:1 > Code:MakeDeskSucc Info:<ID:732163 CreateUserID:31 CreateTime:1554891376 ArgName:\"pbgame_mj_changshu.DeskArg\" ArgValue:\"\\n\\014\\020\\005\\030\\004 \\001*\\0000\\003@\\001\" Status:\"1\" GameName:\"11101\" GameID:\"localhost:9603\" Kind:2 > "}
-2019/04/10 18:16:16.281	INFO	session/session.go:47	SendPb	{"msgName": "pbgame.JoinDeskReq"}
-2019/04/10 18:16:16.681	INFO	client-demo/player.go:143	recv	{"msgName": "pbgame.JoinDeskRsp", "msgValue": "Head:<Seq:1 > Code:JoinDeskSucc Info:<ID:732163 CreateUserID:31 CreateTime:1554891376 ArgName:\"pbgame_mj_changshu.DeskArg\" ArgValue:\"\\n\\014\\020\\005\\030\\004 \\001*\\0000\\003@\\001\" Status:\"1\" GameName:\"11101\" GameID:\"localhost:9603\" Kind:2 > "}
-2019/04/10 18:16:16.681	INFO	client-demo/player.go:115	joindesk suc	{"wxID": "wx_1", "UserId": 31}
-2019/04/10 18:16:16.682	INFO	session/session.go:47	SendPb	{"msgName": "pbgame.SitDownReq"}
-2019/04/10 18:16:16.781	INFO	client-demo/player.go:143	recv	{"msgName": "pbgame.SitDownRsp", "msgValue": "Head:<Seq:1 > Code:SitDownSucc "}
-2019/04/10 18:16:16.781	INFO	client-demo/player.go:124	sitdown suc	{"wxID": "wx_1", "UserId": 31}
-2019/04/10 18:16:16.781	ERROR	client-demo/player.go:140	Unmarshal err	{"error": "unknown type: [pbgame_mj_changshu.GameDeskInfo]", "errorVerbose": "unknown type: [pbgame_mj_changshu.GameDeskInfo]\ncy/game/codec/protobuf.Unmarshal\n\tD:/gowork/src/cy/game/codec/protobuf/protobuf.go:19\ncy/game/codec.Msg2Pb\n\tD:/gowork/src/cy/game/codec/codec.go:209\nmain.(*Player).recv\n\tD:/gowork/src/cy/game/client-demo/player.go:138\nruntime.goexit\n\tD:/develope/Go/src/runtime/asm_amd64.s:1337"}
+2019/04/11 11:27:33.056	INFO	client-demo/player.go:61	connect succ	{"addr": "192.168.0.10:9876"}
+2019/04/11 11:27:33.080	INFO	session/session.go:47	SendPb	{"msgName": "pblogin.LoginReq"}
+2019/04/11 11:27:33.158	INFO	client-demo/player.go:143	recv	{"msgName": "pbcommon.SessionInfo", "msgValue": ""}
+2019/04/11 11:27:33.158	INFO	client-demo/player.go:168	未处理的消息	{"msgName": "pbcommon.SessionInfo", "msgValue": ""}
+2019/04/11 11:27:33.158	INFO	client-demo/player.go:143	recv	{"msgName": "pblogin.LoginRsp", "msgValue": "Head:<Seq:1 > Code:Succ User:<UserID:31 SessionID:\"e31ea368-f2eb-4f6e-a264-ca9c5b19f9be\" WxID:\"wx_1\" Gold:5000 Masonry:8 > "}
+2019/04/11 11:27:33.159	INFO	client-demo/player.go:93	login suc	{"wxID": "wx_1", "UserId": 31}
+2019/04/11 11:27:33.871	INFO	session/session.go:47	SendPb	{"msgName": "pbgame.MakeDeskReq"}
+2019/04/11 11:27:34.566	INFO	client-demo/player.go:143	recv	{"msgName": "pbgame.MakeDeskRsp", "msgValue": "Head:<Seq:1 > Code:MakeDeskSucc Info:<ID:848710 CreateUserID:31 CreateTime:1554953254 ArgName:\"pbgame_mj_changshu.DeskArg\" ArgValue:\"\\n\\014\\020\\005\\030\\004 \\001*\\0000\\003@\\001\" Status:\"1\" GameName:\"11101\" GameID:\"localhost:9603\" Kind:2 > "}
+2019/04/11 11:27:34.567	INFO	session/session.go:47	SendPb	{"msgName": "pbgame.JoinDeskReq"}
+2019/04/11 11:27:34.970	INFO	client-demo/player.go:143	recv	{"msgName": "pbgame.JoinDeskRsp", "msgValue": "Head:<Seq:1 > Code:JoinDeskSucc Info:<ID:848710 CreateUserID:31 CreateTime:1554953254 ArgName:\"pbgame_mj_changshu.DeskArg\" ArgValue:\"\\n\\014\\020\\005\\030\\004 \\001*\\0000\\003@\\001\" Status:\"1\" GameName:\"11101\" GameID:\"localhost:9603\" Kind:2 > "}
+2019/04/11 11:27:34.970	INFO	client-demo/player.go:115	joindesk suc	{"wxID": "wx_1", "UserId": 31}
+2019/04/11 11:27:34.970	INFO	session/session.go:47	SendPb	{"msgName": "pbgame.SitDownReq"}
+2019/04/11 11:27:35.071	INFO	client-demo/player.go:143	recv	{"msgName": "pbgame.SitDownRsp", "msgValue": "Head:<Seq:1 > Code:SitDownSucc "}
+2019/04/11 11:27:35.072	INFO	client-demo/player.go:124	sitdown suc	{"wxID": "wx_1", "UserId": 31}
+2019/04/11 11:27:35.071	ERROR	client-demo/player.go:140	Unmarshal err	{"error": "unknown type: [pbgame_mj_changshu.GameDeskInfo]", "errorVerbose": "unknown type: [pbgame_mj_changshu.GameDeskInfo]\ncy/game/codec/protobuf.Unmarshal\n\tD:/gowork/src/cy/game/codec/protobuf/protobuf.go:19\ncy/game/codec.Msg2Pb\n\tD:/gowork/src/cy/game/codec/codec.go:209\nmain.(*Player).recv\n\tD:/gowork/src/cy/game/client-demo/player.go:138\nruntime.goexit\n\tD:/develope/Go/src/runtime/asm_amd64.s:1337"}

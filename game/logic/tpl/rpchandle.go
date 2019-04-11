@@ -14,16 +14,6 @@ import (
 	"go.uber.org/zap"
 )
 
-// const (
-// 	// 结算类型
-// 	FeeTypeGold    = 1 // 金币
-// 	FeeTypeMasonry = 2 // 钻石
-// 	// 桌子类型
-// 	DeskTypeMatch  = 1 // 匹配
-// 	DeskTypeFriend = 2 // 好友、俱乐部
-// 	DeskTypeLadder = 3 // 比赛
-// )
-
 type RpcHandle struct {
 	service *RoomServie
 }
@@ -245,6 +235,7 @@ func (self *RpcHandle) SitDownReq(ctx context.Context, args *codec.Message, repl
 		if rsp.Code != pbgame.SitDownRspCode_SitDownSucc {
 			self.service.ToGateNormal(rsp, args.UserID)
 		}
+
 	}()
 
 	self.service.tlog.Info("recv from gate", zap.Uint64("uid", args.UserID), zap.String("msgName", args.Name), zap.Any("msgValue", *req))
