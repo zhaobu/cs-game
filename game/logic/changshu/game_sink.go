@@ -119,7 +119,8 @@ func (self *GameSink) Exitlayer(chairId int32) bool {
 		log.Error("Exitlayer 时int(chairId) >= len(self.players)")
 		return false
 	}
-	self.players = append(self.players[:chairId], self.players[chairId+1:]...)
+	self.players[chairId]= mj.PlayerInfo{}
+	//self.players = append(self.players[:chairId], self.players[chairId+1:]...)
 	// self.onlinePlayer[chairId] = false
 	return true
 }
