@@ -18,6 +18,34 @@ type RpcHandle struct {
 	service *RoomServie
 }
 
+//VoteDestroyDeskReq玩家选择解散请求
+func (self *RpcHandle) VoteDestroyDeskReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
+	defer func() {
+		r := recover()
+		if r != nil {
+			self.service.tlog.Error("recover info", zap.Uint64("uid", args.UserID), zap.Any("stack", string(debug.Stack())))
+		}
+	}()
+
+	pb, err := codec.Msg2Pb(args)
+	if err != nil {
+		self.service.tlog.Error("error info", zap.Error(err))
+		return err
+	}
+
+	req, ok := pb.(*pbgame.VoteDestroyDeskReq)
+	if !ok {
+		err = fmt.Errorf("not *pbgame.VoteDestroyDeskReq")
+		self.service.tlog.Error("error info", zap.Error(err))
+		return
+	}
+
+	self.service.tlog.Info("recv from gate", zap.Uint64("uid", args.UserID), zap.String("msgName", args.Name), zap.Any("msgValue", *req))
+
+	self.service.roomHandle.HandleVoteDestroyDeskReq(args.UserID, req)
+	return
+}
+
 //DestroyDeskReq解散请求
 func (self *RpcHandle) DestroyDeskReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
 	defer func() {
@@ -45,15 +73,19 @@ func (self *RpcHandle) DestroyDeskReq(ctx context.Context, args *codec.Message, 
 		rsp.Head = &pbcommon.RspHead{Seq: req.Head.Seq}
 	}
 
+	defer func() {
+		self.service.ToGateNormal(rsp, args.UserID)
+	}()
+
 	self.service.tlog.Info("recv from gate", zap.Uint64("uid", args.UserID), zap.String("msgName", args.Name), zap.Any("msgValue", *req))
 
 	self.service.roomHandle.HandleDestroyDeskReq(args.UserID, req, rsp)
 
-	if rsp.Code == pbgame.DestroyDeskRspCode_DestroyDeskSucc {
-		cache.DeleteClubDeskRelation(req.DeskID)
-		cache.DelDeskInfo(req.DeskID)
-		cache.FreeDeskID(req.DeskID)
-	}
+	// if rsp.Code == pbgame.DestroyDeskRspCode_DestroyDeskSucc {
+	// 	cache.DeleteClubDeskRelation(req.DeskID)
+	// 	cache.DelDeskInfo(req.DeskID)
+	// 	cache.FreeDeskID(req.DeskID)
+	// }
 
 	return
 }
@@ -317,18 +349,6 @@ func (self *RpcHandle) MakeDeskReq(ctx context.Context, args *codec.Message, rep
 
 		cache.AddClubDeskRelation(req.ClubID, newDeskID)
 
-		// // 用默认建房参数
-		// if !clubInfo.IsAutoCreate && !clubInfo.IsCustomGameArg {
-		// 	for idx, a := range clubInfo.GameArgs {
-		// 		if a.Enable && a.GameName == req.GameName {
-		// 			req.GameArgMsgName = a.GameArgMsgName
-		// 			req.GameArgMsgValue = a.GameArgMsgValue
-		// 			self.service.Log.Infof("club:%d use default arg %s %d",
-		// 				req.ClubID, req.GameArgMsgName, idx)
-		// 			break
-		// 		}
-		// 	}
-		// }
 	}
 
 	if self.service.roomHandle.HandleMakeDeskReq(args.UserID, newDeskID, req, rsp) {
@@ -347,7 +367,7 @@ func (self *RpcHandle) MakeDeskReq(ctx context.Context, args *codec.Message, rep
 		deskInfo.GameName = self.service.GameName
 		deskInfo.GameID = self.service.GameID
 		deskInfo.ClubID = req.ClubID
-		deskInfo.Kind = pbgame.DeskType_DTFriend
+		deskInfo.Kind = pbcommon.DeskType_DTFriend
 		// deskInfo.SdInfos
 		deskInfo.TotalLoop = 0
 		deskInfo.CurrLoop = 0

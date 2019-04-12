@@ -126,10 +126,6 @@ message C2SHuCard {
 message C2SCancelAction {
 }
 
-//重连获取牌局信息
-message C2SReconnectGame {
-}
-
 ///////////////////////////s-c///////////////////////////
 //通知玩家投色子
 message S2CThrowDice {
@@ -137,14 +133,14 @@ message S2CThrowDice {
 }
 
 //玩家投色子结果
-message S2CThrowDiceResult {
+message BS2CThrowDiceResult {
   int32 chair_id = 1;               //当前投色子玩家
   repeated cyint32 dice_value = 2;  //色子大小
 }
 
 message ChangePosInfo {
-  int32 user_pos = 1;    //玩家方位(1:东2:南3:西4:北)
-  int32 dice_value = 2;  //骰子值
+  int32 user_pos = 1;  //玩家最终方位(1:东2:南3:西4:北)
+  uint64 userId = 2;
 }
 
 //换位结果

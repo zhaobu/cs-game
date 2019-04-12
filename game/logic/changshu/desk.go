@@ -6,7 +6,6 @@ import (
 	"cy/game/db/mgo"
 	mj "cy/game/logic/changshu/majiang"
 	"cy/game/logic/tpl"
-	"cy/game/util"
 	"fmt"
 	"time"
 
@@ -21,7 +20,8 @@ import (
 	"go.uber.org/zap"
 )
 
-const dissInterval float64 = 2.00000 //解散间隔
+const dissInterval time.Duration = time.Second * 2 //解散间隔2s
+const dissTimeOut time.Duration = time.Second * 15 //投票解散时间15s
 
 type deskUserInfo struct {
 	chairId    int32                 //座位号
@@ -31,6 +31,12 @@ type deskUserInfo struct {
 	online     bool                  //是否在线
 }
 
+//投票解散信息
+type voteInfo struct {
+	voteUser     uint64                       //发起投票解散的玩家
+	voteOption   map[uint64]pbgame.VoteOption //玩家投票选择
+	voteLeftTime time.Duration                //玩家投票解散剩余时间
+}
 type Desk struct {
 	mu          sync.Mutex
 	gameNode    *tpl.RoomServie
@@ -41,10 +47,10 @@ type Desk struct {
 	gameStatus  pbgame_logic.GameStatus  //游戏状态
 	gameSink    *GameSink                //游戏逻辑
 	deskPlayers map[uint64]*deskUserInfo //本桌玩家信息,玩家uid到deskPlayers
-	// lookonPlayers map[uint64]*deskUserInfo //观察玩家信息
-	playChair   map[int32]*deskUserInfo //玩家chairid到deskPlayers,座位号从0开始
-	deskConfig  *pbgame_logic.DeskArg   //桌子参数
+	playChair   map[int32]*deskUserInfo  //玩家chairid到deskPlayers,座位号从0开始
+	deskConfig  *pbgame_logic.DeskArg    //桌子参数
 	timerManger map[mj.EmtimerID]*timingwheel.Timer
+	*voteInfo
 }
 
 func makeDesk(deskArg *pbgame_logic.DeskArg, masterUid, deskID uint64, clubID int64) *Desk {
@@ -152,8 +158,10 @@ func (d *Desk) doSitDown(uid uint64, chair int32, rsp *pbgame.SitDownRsp) {
 	d.SendData(uid, rsp)
 	//发送玩家信息给所有人
 	d.sendDeskInfo(0)
+	d.gameStatus = pbgame_logic.GameStatus_GSWait
 	//再判断游戏开始
 	if d.checkStart() {
+		d.gameStatus = pbgame_logic.GameStatus_GSPlay
 		d.gameSink.StartGame()
 	}
 	d.updateDeskInfo(2) //通知俱乐部更新桌子信息
@@ -209,6 +217,7 @@ func (d *Desk) doExit(uid uint64, rsp *pbgame.ExitDeskRsp) {
 		d.rollbackMoney(uid)
 	}
 	d.deleteDeskPlayer(uid)
+	rsp.Code = pbgame.ExitDeskRspCode_ExitDeskSucc
 }
 
 //删除桌子玩家
@@ -246,7 +255,7 @@ func (d *Desk) updateDeskInfo(changeTyp int32) {
 
 //sendDeskInfo 有新玩家坐下,起立,重连,发送玩家信息
 func (d *Desk) sendDeskInfo(uid uint64) {
-	if len(d.playChair) <= 0 {
+	if len(d.deskPlayers) <= 0 {
 		return
 	}
 	msg := &pbgame_logic.GameDeskInfo{GameName: gameName, Arg: d.deskConfig, GameStatus: d.gameStatus, CurInning: d.curInning}
@@ -266,72 +275,75 @@ func (d *Desk) sendDeskInfo(uid uint64) {
 
 //解散桌子
 func (d *Desk) doDestroyDesk(uid uint64, rsp *pbgame.DestroyDeskRsp) {
-	if d.gameStatus == pbgame_logic.GameStatus_GSWait {
-		if uid != d.masterUid {
-			rsp.Code = pbgame.DestroyDeskRspCode_DestroyDeskNotMaster
-			rsp.ErrMsg = fmt.Sprintf("游戏开始前只有房主才能解散桌子")
+	//游戏中申请解散
+	if d.gameStatus >= pbgame_logic.GameStatus_GSPlay {
+		dUserInfo, _ := d.deskPlayers[uid]
+		//检查是否过于频繁
+		if dUserInfo.lastDiss.Unix() != 0 && time.Since(dUserInfo.lastDiss) < dissInterval {
+			rsp.Code = pbgame.DestroyDeskRspCode_DestroyDeskFrequent
+			rsp.ErrMsg = fmt.Sprintf("解散请求过于频繁")
 			return
 		}
-		d.dealDestroyDesk()
-	} else if d.gameStatus >= pbgame_logic.GameStatus_GSPlay {
-		//检查是否过于频繁
-		if dUserInfo, ok := d.deskPlayers[uid]; ok {
-			if dUserInfo.lastDiss.Unix() != 0 && util.Float64Equal(time.Now().Sub(dUserInfo.lastDiss).Seconds(), dissInterval) {
-				rsp.Code = pbgame.DestroyDeskRspCode_DestroyDeskFrequent
-				rsp.ErrMsg = fmt.Sprintf("解散请求过于频繁")
-				return
-			}
-			dUserInfo.lastDiss = time.Now()
-		}
+		dUserInfo.lastDiss = time.Now()
+		d.voteInfo = &voteInfo{voteUser: uid, voteOption: map[uint64]pbgame.VoteOption{uid: pbgame.VoteOption_VoteOptionAgree}}
+		d.voteLeftTime = dissTimeOut
+		d.SendData(0, &pbgame.VoteDestroyDeskStartNotif{DeskID: d.deskId, VoteUser: uid, LeftTime: int32(dissTimeOut.Seconds())})
 		d.set_timer(mj.TID_Destory, 15*time.Second, func() {
-
+			msg := &pbgame.VoteDestroyDeskReq{Option: pbgame.VoteOption_VoteOptionAgree}
+			for _, v := range d.playChair {
+				//超时默认为同意解散
+				if _, ok := d.voteOption[v.info.UserID]; !ok {
+					d.doVoteDestroyDesk(v.info.UserID, msg)
+				}
+			}
 		})
+		return
 	}
 
+	if uid != d.masterUid {
+		rsp.Code = pbgame.DestroyDeskRspCode_DestroyDeskNotMaster
+		rsp.ErrMsg = fmt.Sprintf("游戏开始前只有房主才能解散桌子")
+		return
+	}
+	d.dealDestroyDesk(uid)
 	rsp.Code = pbgame.DestroyDeskRspCode_DestroyDeskSucc
 }
 
-//
-// func (d *Desk) timeOutDestroyDesk(uid uint64, req *pbgame_ddz.UserBreakGameVote) {
-// 	if d.voteStartUserID == 0 {
-// 		return
-// 	}
+//玩家选择解散请求
+func (d *Desk) doVoteDestroyDesk(uid uint64, req *pbgame.VoteDestroyDeskReq) {
+	if d.voteOption[uid] != pbgame.VoteOption_VoteOptionNone {
+		tlog.Info("doVoteDestroyDesk already do option", zap.Uint64("uid", uid))
+		return
+	}
+	d.voteOption[uid] = req.Option
+	//广播选择
+	d.SendData(0, &pbgame.VoteDestroyDeskNotif{DeskID: d.deskId, UserID: uid, Option: req.Option})
+	if req.Option == pbgame.VoteOption_VoteOptionReject { //拒绝解散
+		d.SendData(0, &pbgame.DestroyDeskResultNotif{DeskID: d.deskId, Result: 2})
+		d.voteInfo = nil
+	} else if len(d.voteOption) == int(d.deskConfig.Args.PlayerCount) { //所有人都同意解散
+		d.dealDestroyDesk(0)
+	}
+}
 
-// 	for _, v := range d.sdPlayers {
-// 		if v.uid == uid && v.agreeBreakGame == 0 {
-// 			if req.Agree {
-// 				v.agreeBreakGame = 1
-// 			} else {
-// 				v.agreeBreakGame = 2
-// 			}
-// 			d.toSiteDown(&pbgame_ddz.BreakGameVoteBroadcast{UserID: uid, Agree: req.Agree})
-
-// 			votedCnt := 0
-// 			for _, v := range d.sdPlayers {
-// 				if v.agreeBreakGame != 0 {
-// 					votedCnt++
-// 				}
-// 			}
-// 			if votedCnt == seatNumber || !req.Agree {
-// 				d.breakGameTimer.Stop()
-// 				d.breakGameVoteEnd()
-// 			}
-// 			break
-// 		}
-// 	}
-// }
-
-//处理桌子销毁
-func (d *Desk) dealDestroyDesk() {
+//处理桌子销毁(outUid不为0时表示人不在桌子)
+func (d *Desk) dealDestroyDesk(outUid uint64) {
 	//处理房间所有人的状态
+	msg := &pbgame.DestroyDeskResultNotif{DeskID: d.deskId, Result: 1}
+	if outUid != 0 {
+		d.SendData(outUid, msg)
+	}
 	for uid, _ := range d.deskPlayers {
 		delete(d.deskPlayers, uid)
 		deleteUser2desk(uid)
 		//通知所有人房间已销毁
-		d.SendData(uid, &pbgame.DestroyDeskNotif{DeskID: d.deskId})
+		d.SendData(uid, msg)
 		cache.ExitGame(uid, d.gameNode.GameName, d.gameNode.GameID, d.deskId)
 	}
 	deleteID2desk(d.deskId)
+	cache.DeleteClubDeskRelation(d.deskId)
+	cache.DelDeskInfo(d.deskId)
+	cache.FreeDeskID(d.deskId)
 }
 
 // 预扣还回去
@@ -367,56 +379,6 @@ func (d *Desk) rollbackMoney(uid uint64) {
 	})
 }
 
-// d.breakGameTimer = time.AfterFunc(time.Second*timeOutBreakGameVote, func() {
-// 	d.mu.Lock()
-// 	defer d.mu.Unlock()
-
-// 	for _, v := range d.sdPlayers {
-// 		if v.agreeBreakGame == 0 { // 默认为同意
-// 			v.agreeBreakGame = 1
-// 			d.toSiteDown(&pbgame_ddz.BreakGameVoteBroadcast{UserID: v.uid, Agree: true})
-// 		}
-// 	}
-
-// 	d.breakGameVoteEnd()
-// })
-
-// func (d *desk) breakGameVoteEnd() {
-// 	canBreakGame := true
-// 	for _, v := range d.sdPlayers {
-// 		if v.agreeBreakGame == 2 { // 有任意一人反对 就不能解散
-// 			canBreakGame = false
-// 			break
-// 		}
-// 	}
-
-// 	voteEnd := &pbgame_ddz.BreakGameVoteEnd{}
-// 	if canBreakGame {
-// 		voteEnd.Code = 1
-// 	} else {
-// 		voteEnd.Code = 2
-// 	}
-// 	d.toSiteDown(voteEnd)
-
-// 	if voteEnd.Code == 1 {
-// 		if d.arg.Type == gameTypFriend && d.currLoopCnt == 1 { // 第1局还没打完，就解散了，预扣的要还回去
-// 			d.preSureCreater()
-// 		}
-
-// 		d.gameOverInfo(2)
-// 		d.flashWarRecord()
-// 		d.toSiteDown(&d.warRecord)
-// 		d.enterEnd()
-// 		return
-// 	}
-
-// 	// clear
-// 	d.voteStartUserID = 0
-// 	for _, v := range d.sdPlayers {
-// 		v.agreeBreakGame = 0
-// 	}
-// }
-
 //游戏逻辑分发
 func (d *Desk) doAction(uid uint64, actionName string, actionValue []byte) {
 	pb, err := protobuf.Unmarshal(actionName, actionValue)
@@ -450,11 +412,9 @@ func (d *Desk) SendData(uid uint64, pb proto.Message) {
 			i++
 		}
 		d.gameNode.ToGateNormal(pb, uids...)
-	} else {
-		if _, ok := d.deskPlayers[uid]; ok {
-			d.gameNode.ToGateNormal(pb, uid)
-		}
+		return
 	}
+	d.gameNode.ToGateNormal(pb, uid)
 }
 
 func (d *Desk) SendGameMessage(uid uint64, pb proto.Message) {
@@ -467,11 +427,9 @@ func (d *Desk) SendGameMessage(uid uint64, pb proto.Message) {
 			i++
 		}
 		d.gameNode.ToGate(pb, uids...)
-	} else {
-		if _, ok := d.deskPlayers[uid]; ok {
-			d.gameNode.ToGate(pb, uid)
-		}
+		return
 	}
+	d.gameNode.ToGate(pb, uid)
 }
 
 //根据uid查找chair_id
@@ -513,7 +471,15 @@ func (d *Desk) cancel_timer(tID mj.EmtimerID) {
 
 //玩家上下线
 func (d *Desk) OnOffLine(uid uint64, online bool) {
-	if online {
-
+	dUserInfo := d.deskPlayers[uid]
+	dUserInfo.online = online
+	if dUserInfo.userStatus == pbgame.UserDeskStatus_UDSPlaying { //游戏玩家
+		if online { //上线
+			d.sendDeskInfo(uid)
+		}
+	} else { //观察者
+		if !online { //下线
+			d.doExit(uid, &pbgame.ExitDeskRsp{})
+		}
 	}
 }

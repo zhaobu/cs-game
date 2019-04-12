@@ -84,7 +84,7 @@ func (p *club) QueryClubByIDReq(ctx context.Context, args *codec.Message, reply 
 
 		uc := mustGetUserOther(m.UserID)
 		uc.RLock()
-		if uc.subFlag { // TODO
+		if uc.Online == 1 { // TODO
 			rsp.Info.OnlineCnt++
 		}
 		uc.RUnlock()

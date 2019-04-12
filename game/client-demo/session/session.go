@@ -21,6 +21,7 @@ func (self *Session) InitLog(_tlog *zap.Logger, _log *zap.SugaredLogger) {
 }
 
 type Session struct {
+	DeskId  uint64
 	ChairId int32
 	UserId  uint64
 	Conn    net.Conn

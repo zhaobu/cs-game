@@ -81,6 +81,8 @@ func (self *Player) GameStart() {
 			self.joindesk()
 		case "4":
 			self.exitdesk()
+		case "5":
+			self.destroyDesk()
 		default:
 			self.curgame.DoAction(a)
 		}
@@ -111,6 +113,7 @@ func (self *Player) joindesk() {
 		tlog.Error("Unmarshal err", zap.Error(err))
 		return
 	}
+	self.DeskId = desk.DeskId
 	self.SendPb(&pbgame.JoinDeskReq{
 		Head:   &pbcommon.ReqHead{Seq: 1, UserID: self.UserId},
 		DeskID: desk.DeskId,
@@ -126,6 +129,15 @@ func (self *Player) exitdesk() {
 	})
 	<-self.waitchan
 	tlog.Info("exitdesk suc", zap.String("wxID", self.wxID), zap.Uint64("UserId", self.UserId))
+}
+
+func (self *Player) destroyDesk() {
+	self.SendPb(&pbgame.DestroyDeskReq{
+		Head:   &pbcommon.ReqHead{Seq: 1, UserID: self.UserId},
+		DeskID: self.DeskId,
+	})
+	<-self.waitchan
+	tlog.Info("destroyDesk suc", zap.String("wxID", self.wxID), zap.Uint64("UserId", self.UserId))
 }
 
 func (self *Player) sitdown(chairId int32) {
@@ -176,6 +188,9 @@ func (self *Player) recv() {
 			case *pbgame.SitDownRsp:
 				self.waitchan <- 1
 			case *pbgame.ExitDeskRsp:
+				self.waitchan <- 1
+			case *pbgame.DestroyDeskRsp: //申请解散回应
+			case *pbgame.DestroyDeskResultNotif: //房间解散成功
 				self.waitchan <- 1
 			case *pbgame.GameNotif:
 				self.curgame.DispatchRecv(v)

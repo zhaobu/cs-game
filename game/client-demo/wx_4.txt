@@ -1,14 +1,30 @@
-2019/04/08 20:27:58.549	INFO	client-demo/player.go:61	connect succ	{"addr": "192.168.0.10:9876"}
-2019/04/08 20:27:58.571	INFO	session/session.go:47	SendPb	{"msgName": "pblogin.LoginReq"}
-2019/04/08 20:27:58.650	INFO	client-demo/player.go:143	recv	{"msgName": "pbcommon.SessionInfo", "msgValue": ""}
-2019/04/08 20:27:58.650	INFO	client-demo/player.go:169	未处理的消息	{"msgName": "pbcommon.SessionInfo", "msgValue": ""}
-2019/04/08 20:27:58.650	INFO	client-demo/player.go:143	recv	{"msgName": "pblogin.LoginRsp", "msgValue": "Head:<Seq:1 > Code:Succ User:<UserID:34 SessionID:\"d7d0ccfd-b740-40b7-b2b5-ea58f23cafcb\" WxID:\"wx_4\" Gold:5000 Masonry:8 > "}
-2019/04/08 20:27:58.650	INFO	client-demo/player.go:93	login suc	{"wxID": "wx_4", "UserId": 34}
-2019/04/08 20:28:01.551	INFO	session/session.go:47	SendPb	{"msgName": "pbgame.JoinDeskReq"}
-2019/04/08 20:28:01.563	INFO	client-demo/player.go:143	recv	{"msgName": "pbgame.JoinDeskRsp", "msgValue": "Code:JoinDeskNotExist "}
-2019/04/08 20:28:01.563	INFO	client-demo/player.go:143	recv	{"msgName": "pbcommon.ErrorTip", "msgValue": "Msg:\"empty game name\" "}
-2019/04/08 20:28:01.563	INFO	client-demo/player.go:115	joindesk suc	{"wxID": "wx_4", "UserId": 34}
-2019/04/08 20:28:01.563	INFO	client-demo/player.go:169	未处理的消息	{"msgName": "pbcommon.ErrorTip", "msgValue": "Msg:\"empty game name\" "}
-2019/04/08 20:28:01.563	INFO	session/session.go:47	SendPb	{"msgName": "pbgame.SitDownReq"}
-2019/04/08 20:28:01.663	INFO	client-demo/player.go:143	recv	{"msgName": "pbcommon.ErrorTip", "msgValue": "Msg:\"empty game name\" "}
-2019/04/08 20:28:01.663	INFO	client-demo/player.go:169	未处理的消息	{"msgName": "pbcommon.ErrorTip", "msgValue": "Msg:\"empty game name\" "}
+2019/04/12 17:35:46.623	INFO	client-demo/player.go:63	connect succ	{"addr": "192.168.0.10:9876"}
+2019/04/12 17:35:46.646	INFO	session/session.go:48	SendPb	{"msgName": "pblogin.LoginReq"}
+2019/04/12 17:35:46.723	INFO	client-demo/player.go:168	recv	{"msgName": "pbcommon.SessionInfo", "msgValue": ""}
+2019/04/12 17:35:46.723	INFO	client-demo/player.go:198	未处理的消息	{"msgName": "pbcommon.SessionInfo", "msgValue": ""}
+2019/04/12 17:35:46.723	INFO	client-demo/player.go:168	recv	{"msgName": "pblogin.LoginRsp", "msgValue": "Head:<Seq:1 > Code:Succ User:<UserID:34 SessionID:\"7b8aed56-0624-44d7-8f6e-fd07f3ccb9a7\" WxID:\"wx_4\" Gold:5000 Masonry:8 > "}
+2019/04/12 17:35:46.723	INFO	client-demo/player.go:99	login suc	{"wxID": "wx_4", "UserId": 34}
+2019/04/12 17:35:47.246	INFO	session/session.go:48	SendPb	{"msgName": "pbgame.JoinDeskReq"}
+2019/04/12 17:35:47.328	INFO	client-demo/player.go:168	recv	{"msgName": "pbgame.JoinDeskRsp", "msgValue": "Head:<Seq:1 > Code:JoinDeskSucc Info:<ID:325185 CreateUserID:31 CreateTime:1555061715 ArgName:\"pbgame_mj_changshu.DeskArg\" ArgValue:\"\\n\\014\\020\\005\\030\\004 \\001*\\0000\\003@\\001\\020\\001\\030\\002 \\002(\\301\\354\\023\" Status:\"1\" GameName:\"11101\" GameID:\"localhost:9603\" Kind:DTFriend > "}
+2019/04/12 17:35:47.328	INFO	client-demo/player.go:122	joindesk suc	{"wxID": "wx_4", "UserId": 34}
+2019/04/12 17:35:47.328	INFO	client-demo/player.go:168	recv	{"msgName": "pbgame_mj_changshu.GameDeskInfo", "msgValue": "game_name:\"11101\" arg:<args:<Barhead:5 PlayerCount:4 Dipiao:1 RInfo:<> PaymentType:3 LimitIP:1 > Enable:true Type:DTFriend FeeType:FTMasonry DeskID:325185 > game_status:GSWait banker_id:-1 master_uid:31 game_user:<info:<UserID:31 SessionID:\"853f6edf-11e6-40eb-a09b-1a4ac8b421c9\" WxID:\"wx_1\" Gold:5000 Masonry:8 > user_status:UDSSitDown > game_user:<info:<UserID:32 SessionID:\"a19632c8-1119-4685-a8be-e59c4e01b27c\" WxID:\"wx_2\" Gold:5000 Masonry:8 > chair_id:1 user_status:UDSSitDown > game_user:<info:<UserID:33 SessionID:\"4afc0fba-3830-41ff-9920-c3b25dfa659e\" WxID:\"wx_3\" Gold:5000 Masonry:8 > chair_id:2 user_status:UDSSitDown > "}
+2019/04/12 17:35:47.328	INFO	session/session.go:48	SendPb	{"msgName": "pbgame.SitDownReq"}
+2019/04/12 17:35:47.329	INFO	client-demo/player.go:198	未处理的消息	{"msgName": "pbgame_mj_changshu.GameDeskInfo", "msgValue": "game_name:\"11101\" arg:<args:<Barhead:5 PlayerCount:4 Dipiao:1 RInfo:<> PaymentType:3 LimitIP:1 > Enable:true Type:DTFriend FeeType:FTMasonry DeskID:325185 > game_status:GSWait banker_id:-1 master_uid:31 game_user:<info:<UserID:31 SessionID:\"853f6edf-11e6-40eb-a09b-1a4ac8b421c9\" WxID:\"wx_1\" Gold:5000 Masonry:8 > user_status:UDSSitDown > game_user:<info:<UserID:32 SessionID:\"a19632c8-1119-4685-a8be-e59c4e01b27c\" WxID:\"wx_2\" Gold:5000 Masonry:8 > chair_id:1 user_status:UDSSitDown > game_user:<info:<UserID:33 SessionID:\"4afc0fba-3830-41ff-9920-c3b25dfa659e\" WxID:\"wx_3\" Gold:5000 Masonry:8 > chair_id:2 user_status:UDSSitDown > "}
+2019/04/12 17:35:47.428	INFO	client-demo/player.go:168	recv	{"msgName": "pbgame.SitDownRsp", "msgValue": "Head:<Seq:1 > Code:SitDownSucc "}
+2019/04/12 17:35:47.428	INFO	client-demo/player.go:149	sitdown suc	{"wxID": "wx_4", "UserId": 34}
+2019/04/12 17:35:47.428	INFO	client-demo/player.go:168	recv	{"msgName": "pbgame_mj_changshu.GameDeskInfo", "msgValue": "game_name:\"11101\" arg:<args:<Barhead:5 PlayerCount:4 Dipiao:1 RInfo:<> PaymentType:3 LimitIP:1 > Enable:true Type:DTFriend FeeType:FTMasonry DeskID:325185 > game_status:GSWait banker_id:-1 master_uid:31 game_user:<info:<UserID:32 SessionID:\"a19632c8-1119-4685-a8be-e59c4e01b27c\" WxID:\"wx_2\" Gold:5000 Masonry:8 > chair_id:1 user_status:UDSSitDown > game_user:<info:<UserID:33 SessionID:\"4afc0fba-3830-41ff-9920-c3b25dfa659e\" WxID:\"wx_3\" Gold:5000 Masonry:8 > chair_id:2 user_status:UDSSitDown > game_user:<info:<UserID:34 SessionID:\"7b8aed56-0624-44d7-8f6e-fd07f3ccb9a7\" WxID:\"wx_4\" Gold:5000 Masonry:8 > chair_id:3 user_status:UDSSitDown > game_user:<info:<UserID:31 SessionID:\"853f6edf-11e6-40eb-a09b-1a4ac8b421c9\" WxID:\"wx_1\" Gold:5000 Masonry:8 > user_status:UDSSitDown > "}
+2019/04/12 17:35:47.430	INFO	client-demo/player.go:198	未处理的消息	{"msgName": "pbgame_mj_changshu.GameDeskInfo", "msgValue": "game_name:\"11101\" arg:<args:<Barhead:5 PlayerCount:4 Dipiao:1 RInfo:<> PaymentType:3 LimitIP:1 > Enable:true Type:DTFriend FeeType:FTMasonry DeskID:325185 > game_status:GSWait banker_id:-1 master_uid:31 game_user:<info:<UserID:32 SessionID:\"a19632c8-1119-4685-a8be-e59c4e01b27c\" WxID:\"wx_2\" Gold:5000 Masonry:8 > chair_id:1 user_status:UDSSitDown > game_user:<info:<UserID:33 SessionID:\"4afc0fba-3830-41ff-9920-c3b25dfa659e\" WxID:\"wx_3\" Gold:5000 Masonry:8 > chair_id:2 user_status:UDSSitDown > game_user:<info:<UserID:34 SessionID:\"7b8aed56-0624-44d7-8f6e-fd07f3ccb9a7\" WxID:\"wx_4\" Gold:5000 Masonry:8 > chair_id:3 user_status:UDSSitDown > game_user:<info:<UserID:31 SessionID:\"853f6edf-11e6-40eb-a09b-1a4ac8b421c9\" WxID:\"wx_1\" Gold:5000 Masonry:8 > user_status:UDSSitDown > "}
+2019/04/12 17:35:47.431	INFO	client-demo/player.go:168	recv	{"msgName": "pbgame.GameNotif", "msgValue": "NotifName:\"pbgame_mj_changshu.S2CThrowDice\" "}
+2019/04/12 17:35:47.432	INFO	clientgame/changshu.go:41	recv GameNotif 轮到玩家投色子	{"NotifName": "pbgame_mj_changshu.S2CThrowDice", "NotifValue": ""}
+2019/04/12 17:35:55.161	INFO	session/session.go:48	SendPb	{"msgName": "pbgame.DestroyDeskReq"}
+2019/04/12 17:35:55.180	INFO	client-demo/player.go:168	recv	{"msgName": "pbgame.VoteDestroyDeskStartNotif", "msgValue": "DeskID:325185 VoteUser:34 LeftTime:15 "}
+2019/04/12 17:35:55.180	INFO	client-demo/player.go:198	未处理的消息	{"msgName": "pbgame.VoteDestroyDeskStartNotif", "msgValue": "DeskID:325185 VoteUser:34 LeftTime:15 "}
+2019/04/12 17:35:55.181	INFO	client-demo/player.go:168	recv	{"msgName": "pbgame.DestroyDeskRsp", "msgValue": "Head:<Seq:1 > Code:DestroyDeskSucc "}
+2019/04/12 17:36:10.087	INFO	client-demo/player.go:168	recv	{"msgName": "pbgame.VoteDestroyDeskNotif", "msgValue": "DeskID:325185 UserID:31 Option:VoteOptionAgree "}
+2019/04/12 17:36:10.087	INFO	client-demo/player.go:198	未处理的消息	{"msgName": "pbgame.VoteDestroyDeskNotif", "msgValue": "DeskID:325185 UserID:31 Option:VoteOptionAgree "}
+2019/04/12 17:36:10.088	INFO	client-demo/player.go:168	recv	{"msgName": "pbgame.VoteDestroyDeskNotif", "msgValue": "DeskID:325185 UserID:32 Option:VoteOptionAgree "}
+2019/04/12 17:36:10.088	INFO	client-demo/player.go:198	未处理的消息	{"msgName": "pbgame.VoteDestroyDeskNotif", "msgValue": "DeskID:325185 UserID:32 Option:VoteOptionAgree "}
+2019/04/12 17:36:10.088	INFO	client-demo/player.go:168	recv	{"msgName": "pbgame.VoteDestroyDeskNotif", "msgValue": "DeskID:325185 UserID:33 Option:VoteOptionAgree "}
+2019/04/12 17:36:10.089	INFO	client-demo/player.go:198	未处理的消息	{"msgName": "pbgame.VoteDestroyDeskNotif", "msgValue": "DeskID:325185 UserID:33 Option:VoteOptionAgree "}
+2019/04/12 17:36:10.089	INFO	client-demo/player.go:168	recv	{"msgName": "pbgame.DestroyDeskResultNotif", "msgValue": "DeskID:325185 Result:1 "}
+2019/04/12 17:36:10.090	INFO	client-demo/player.go:140	destroyDesk suc	{"wxID": "wx_4", "UserId": 34}

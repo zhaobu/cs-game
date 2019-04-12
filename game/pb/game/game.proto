@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 import "cy/game/pb/common/head.proto";
-import public "cy/game/pb/common/common.proto";
+import "cy/game/pb/common/common.proto";
 
 package pbgame;
 
@@ -142,13 +142,13 @@ message ExitDeskRsp {
   string ErrMsg = 3;
 }
 
-// 游戏解散 c -> s
+// 申请解散 c -> s (包括游戏开始前房主解散和游戏中投票解散)
 message DestroyDeskReq {
   pbcommon.ReqHead Head = 1;
   uint64 DeskID = 2;
 }
 
-//解散回应code
+//申请解散回应code
 enum DestroyDeskRspCode {
   DestroyDeskNone = 0;
   DestroyDeskSucc = 1;       //申请解散成功
@@ -156,22 +156,51 @@ enum DestroyDeskRspCode {
   DestroyDeskNotMaster = 3;  //游戏开始前只有房主才能解散房间
   DestroyDeskFrequent = 4;   //解散请求过于频繁
   DestroyDeskNotExist = 5;   //桌子不存在
+  DestroyDeskNotInDesk = 6;  //玩家不在桌子中
+  DestroyDeskRepeated = 7;   //已经有人申请解散
 }
+//申请解散回应
 message DestroyDeskRsp {
   pbcommon.RspHead Head = 1;
   DestroyDeskRspCode Code = 2;
   string ErrMsg = 3;
 }
 
-message VoteInfo{
-  uint64 UserID = 1;
-  bool Agree=2;
+//房间解散结果通知
+message DestroyDeskResultNotif {
+  uint64 DeskID = 1;  //桌子号
+  int32 Result = 2;   // 1:解散成功 2:解散失败
 }
 
-// s -> c 广播解散消息
-message DestroyDeskNotif {
+//投票解散开始
+message VoteDestroyDeskStartNotif {
+  uint64 DeskID = 1;   //桌子号
+  uint64 VoteUser = 2;   //发起解散玩家
+  int32 LeftTime = 3;  //申请解散倒计时时间
+}
+
+enum VoteOption {
+  VoteOptionNone = 0;    //未选择
+  VoteOptionAgree = 1;   //同意
+  VoteOptionReject = 2;  //拒绝
+}
+// c -> s 玩家选择解散请求
+message VoteDestroyDeskReq {
+  pbcommon.ReqHead Head = 1;
+  VoteOption Option = 3;
+}
+
+// 玩家选择解散请求广播
+message VoteDestroyDeskNotif {
   uint64 DeskID = 1;  //桌子号
-  repeated VoteInfo=2;//投票信息
+  uint64 UserID = 2;  //选择解散请求玩家
+  VoteOption Option = 3;
+}
+
+//投票解散信息(断线重连时用)
+message VoteDestroyDeskInfo {
+  uint64 UserID = 1;
+  VoteOption Option = 2;
 }
 
 // 游戏动作 c -> s

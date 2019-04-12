@@ -95,8 +95,9 @@ func (p *club) CreateClubReq(ctx context.Context, args *codec.Message, reply *co
 			Enable:          v.Enable,
 		})
 	}
-
-	cc.f = func() { checkAutoCreate(newID) }
+	if cc.IsAutoCreate {
+		cc.f = func() { checkAutoCreate(newID) }
+	}
 	cc.noCommit = true
 
 	addClub(cc)

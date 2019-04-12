@@ -37,8 +37,32 @@ func calcFee(arg *pbgame_logic.CreateArg) int64 {
 	return change
 }
 
+//HandleVoteDestroyDeskReq玩家选择解散请求
+func (self *roomHandle) HandleVoteDestroyDeskReq(uid uint64, req *pbgame.VoteDestroyDeskReq) {
+	//检查桌子是否存在
+	d := getDeskByUID(uid)
+	if d == nil {
+		tlog.Info("HandleVoteDestroyDeskReq find no desk", zap.Uint64("uid", uid))
+		return
+	}
+	if d.voteInfo == nil {
+		tlog.Info("HandleVoteDestroyDeskReq find no voteInfo", zap.Uint64("uid", uid))
+		return
+	}
+	if req.Option == pbgame.VoteOption_VoteOptionNone {
+		tlog.Info("HandleVoteDestroyDeskReq bat option", zap.Uint64("uid", uid))
+		return
+	}
+	d.doVoteDestroyDesk(uid, req)
+}
+
 //HandleDestroyDeskReq 解散请求
 func (self *roomHandle) HandleDestroyDeskReq(uid uint64, req *pbgame.DestroyDeskReq, rsp *pbgame.DestroyDeskRsp) {
+	defer func() {
+		if rsp.ErrMsg != "" {
+			tlog.Info(rsp.ErrMsg)
+		}
+	}()
 	//检查桌子是否存在
 	d := getDeskByID(req.DeskID)
 	if d == nil {
@@ -46,7 +70,14 @@ func (self *roomHandle) HandleDestroyDeskReq(uid uint64, req *pbgame.DestroyDesk
 		rsp.ErrMsg = fmt.Sprintf("没有该房间号:%d", req.DeskID)
 		return
 	}
+	//检查是否重复申请
+	if d.voteInfo != nil {
+		rsp.Code = pbgame.DestroyDeskRspCode_DestroyDeskRepeated
+		rsp.ErrMsg = fmt.Sprintf("已经有玩家申请解散:%d", req.DeskID)
+		return
+	}
 	d.doDestroyDesk(uid, rsp)
+
 	return
 }
 

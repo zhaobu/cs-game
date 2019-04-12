@@ -138,7 +138,7 @@ func (self *GameSink) ThrowDice(chairId int32, req *pbgame_logic.C2SThrowDice) {
 	}
 
 	//给玩家随机2个色子
-	msg := &pbgame_logic.S2CThrowDiceResult{ChairId: chairId}
+	msg := &pbgame_logic.BS2CThrowDiceResult{ChairId: chairId}
 	rand.Seed(time.Now().Unix())
 	msg.DiceValue = make([]*pbgame_logic.Cyint32, 2)
 	for i := 0; i < 2; i++ {
@@ -180,7 +180,7 @@ func (self *GameSink) dealDiceResult() {
 	//发送换座位结果
 	posInfo := make([]*pbgame_logic.ChangePosInfo, len(diceRes))
 	for i, res := range diceRes {
-		posInfo[i] = &pbgame_logic.ChangePosInfo{UserPos: res.chairId, DiceValue: res.dice}
+		posInfo[i] = &pbgame_logic.ChangePosInfo{UserPos: res.chairId, UserId: self.desk.GetUidByChairid(int32(i))}
 	}
 	//记录庄家
 	self.bankerId = diceRes[0].chairId
