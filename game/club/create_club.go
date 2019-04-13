@@ -8,6 +8,7 @@ import (
 	pbcommon "cy/game/pb/common"
 	"fmt"
 	"runtime/debug"
+	"time"
 
 	"github.com/sirupsen/logrus"
 )
@@ -81,6 +82,8 @@ func (p *club) CreateClubReq(ctx context.Context, args *codec.Message, reply *co
 	cc.IsAutoCreate = req.Base.IsAutoCreate
 	cc.IsCustomGameArg = req.Base.IsCustomGameArg
 	cc.IsMasterPay = req.Base.IsMasterPay
+	cc.CurrDayDestoryDeskNum = 0
+	cc.LastDestoryDeskNumTime = time.Now().Unix()
 	// 创建人默认加入且同意
 	cc.Members[createUserID] = &mgo.ClubMember{
 		UserID:   createUserID,

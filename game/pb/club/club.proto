@@ -264,3 +264,14 @@ message ClubEmailRsp {
     pbcommon.RspHead Head = 1;
     repeated ClubEmail Emails = 2;
 }
+
+//校验是否可以解散俱乐部桌子
+message CheckCanDestoryDeskReq{
+    int64 ClubID = 1;
+    uint64 UserID = 2;
+    uint64 DeskID = 3;
+}
+//校验是否可以解散俱乐部桌子
+message CheckCanDestoryDeskRsp{
+    int32 Error = 1;    //0 可以解散 1当日解散次数已经用完 2用户权限不够 3俱乐部不存在
+}
