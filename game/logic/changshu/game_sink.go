@@ -37,9 +37,9 @@ type gameAllInfo struct {
 }
 
 type mjLib struct {
-	operAction OperAtion       //操作
-	record     mj.GameRecord   //游戏回放
-	players    []mj.PlayerInfo //玩家游戏信息
+	operAction OperAtion        //操作
+	record     mj.GameRecord    //游戏回放
+	players    []*mj.PlayerInfo //玩家游戏信息
 }
 
 //游戏主逻辑
@@ -71,7 +71,7 @@ func (self *GameSink) Ctor(config *pbgame_logic.CreateArg) error {
 	cardDef.Init(log)
 	self.isPlaying = false
 	// self.onlinePlayer = make([]bool, config.PlayerCount)
-	self.players = make([]mj.PlayerInfo, config.PlayerCount)
+	self.players = make([]*mj.PlayerInfo, config.PlayerCount)
 	self.baseCard = cardDef.GetBaseCard(config.PlayerCount)
 	self.reset()
 	self.operAction.Init(config, self.laiziCard)
@@ -107,7 +107,7 @@ func (self *GameSink) AddPlayer(chairId int32, uid uint64, nickName string) bool
 		return false
 	}
 
-	info := mj.PlayerInfo{BaseInfo: mj.PlayerBaseInfo{ChairId: chairId, Uid: uid, Nickname: nickName, Point: 0}}
+	info := &mj.PlayerInfo{BaseInfo: mj.PlayerBaseInfo{ChairId: chairId, Uid: uid, Nickname: nickName, Point: 0}}
 	self.players[chairId] = info
 	// self.onlinePlayer[chairId] = true
 	return true
@@ -119,10 +119,18 @@ func (self *GameSink) Exitlayer(chairId int32) bool {
 		log.Error("Exitlayer 时int(chairId) >= len(self.players)")
 		return false
 	}
-	self.players[chairId]= mj.PlayerInfo{}
+	self.players[chairId] = nil
 	//self.players = append(self.players[:chairId], self.players[chairId+1:]...)
 	// self.onlinePlayer[chairId] = false
 	return true
+}
+
+//改变游戏状态
+func (self *GameSink) changGameState(gState pbgame_logic.GameStatus) {
+	self.desk.gameStatus = gState
+	if gState > pbgame_logic.GameStatus_GSWait {
+		self.sendData(-1, &pbgame_logic.BS2CUpdateGameStatus{GameStatus: gState})
+	}
 }
 
 //玩家投色子
@@ -152,9 +160,11 @@ func (self *GameSink) ThrowDice(chairId int32, req *pbgame_logic.C2SThrowDice) {
 	//判断是否所有人都投色子
 	for i := int32(0); i < self.game_config.PlayerCount; i++ {
 		if self.diceResult[i][0] == 0 {
-			//通知下一个玩家投色子
-			self.sendData(-1, &pbgame_logic.S2CThrowDice{ChairId: i})
+			//2s后通知下一个玩家投色子
 			self.curThrowDice = i
+			self.desk.set_timer(mj.TID_Common, 2*time.Second, func() {
+				self.sendData(-1, &pbgame_logic.S2CThrowDice{ChairId: i})
+			})
 			return
 		}
 	}
@@ -164,31 +174,31 @@ func (self *GameSink) ThrowDice(chairId int32, req *pbgame_logic.C2SThrowDice) {
 //处理投色子结果
 func (self *GameSink) dealDiceResult() {
 	diceRes := make([]struct {
-		dice    int32
-		chairId int32
+		dice       int32
+		oldChairId int32
 	}, self.game_config.PlayerCount)
 	for i := 0; i < len(self.diceResult); i++ {
 		diceRes[i].dice = self.diceResult[i][0] + self.diceResult[i][1]
-		diceRes[i].chairId = int32(i)
+		diceRes[i].oldChairId = int32(i)
 	}
 	//排序，实现比较方法即可
 	sort.Slice(diceRes, func(i, j int) bool {
 		if diceRes[i].dice == diceRes[j].dice {
-			return diceRes[i].chairId < diceRes[j].chairId
+			return diceRes[i].oldChairId < diceRes[j].oldChairId
 		}
 		return diceRes[i].dice > diceRes[j].dice
 	})
 	//发送换座位结果
 	posInfo := make([]*pbgame_logic.ChangePosInfo, len(diceRes))
 	for i, res := range diceRes {
-		posInfo[i] = &pbgame_logic.ChangePosInfo{UserPos: res.chairId, UserId: self.desk.GetUidByChairid(int32(i))}
+		posInfo[i] = &pbgame_logic.ChangePosInfo{UserPos: res.oldChairId, UserId: self.desk.GetUidByChairid(int32(i))}
 	}
 	//记录庄家
-	self.bankerId = diceRes[0].chairId
+	self.bankerId = diceRes[0].oldChairId
 	msg := &pbgame_logic.S2CChangePos{PosInfo: posInfo}
 	self.sendData(-1, msg)
 	//1s后发送游戏开始消息
-	self.desk.set_timer(mj.TID_DealCard, 1*time.Second, func() {
+	self.desk.set_timer(mj.TID_Common, 2*time.Second, func() {
 		self.deal_card()
 	})
 }

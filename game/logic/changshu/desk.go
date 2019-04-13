@@ -143,7 +143,8 @@ func (d *Desk) doSitDown(uid uint64, chair int32, rsp *pbgame.SitDownRsp) {
 		}
 	}
 	dUserInfo.chairId = chair
-	d.changPlayerState(uid, pbgame.UserDeskStatus_UDSSitDown, pbgame_logic.GameStatus_GSWait)
+	d.changUserState(uid, pbgame.UserDeskStatus_UDSSitDown)
+	d.gameSink.changGameState(pbgame_logic.GameStatus_GSWait)
 	d.playChair[chair] = dUserInfo
 	d.gameSink.AddPlayer(chair, uid, dUserInfo.info.GetName())
 	//先发送加入成功消息
@@ -153,15 +154,15 @@ func (d *Desk) doSitDown(uid uint64, chair int32, rsp *pbgame.SitDownRsp) {
 	d.sendDeskInfo(0)
 	//再判断游戏开始
 	if d.checkStart() {
-		d.changPlayerState(0, pbgame.UserDeskStatus_UDSPlaying, pbgame_logic.GameStatus_GSPlay)
+		d.changUserState(0, pbgame.UserDeskStatus_UDSPlaying)
+		d.gameSink.changGameState(pbgame_logic.GameStatus_GSDice)
 		d.gameSink.StartGame()
 	}
 	d.updateDeskInfo(2) //通知俱乐部更新桌子信息
 }
 
-//改变游戏玩家状态和桌子状态
-func (d *Desk) changPlayerState(uid uint64, uState pbgame.UserDeskStatus, gState pbgame_logic.GameStatus) {
-	d.gameStatus = gState
+//改变玩家状态
+func (d *Desk) changUserState(uid uint64, uState pbgame.UserDeskStatus) {
 	if uid == 0 {
 		for _, userInfo := range d.playChair {
 			userInfo.userStatus = uState
@@ -280,7 +281,7 @@ func (d *Desk) sendDeskInfo(uid uint64) {
 //解散桌子
 func (d *Desk) doDestroyDesk(uid uint64, rsp *pbgame.DestroyDeskRsp) {
 	//游戏中申请解散
-	if d.gameStatus >= pbgame_logic.GameStatus_GSPlay {
+	if d.gameStatus > pbgame_logic.GameStatus_GSWait {
 		dUserInfo, _ := d.deskPlayers[uid]
 		//检查是否过于频繁
 		if dUserInfo.lastDiss.Unix() != 0 && time.Since(dUserInfo.lastDiss) < dissInterval {

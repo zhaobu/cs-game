@@ -13,12 +13,12 @@ type (
 
 //定时器ID
 const (
-	TID_DESK_Begin EmtimerID = 0 //桌子内部定时器开始
-	TID_Destory                  //解散桌子
+	TID_Common  EmtimerID = 0 //通用定时器id,用于不需要取消的定时
+	TID_Destory               //解散桌子
 
 	TID_GAMESINK_Begin EmtimerID = 1000 //游戏逻辑定时器开始
-	TID_DealCard                        //发牌
-	TID_GameStartBuHua                  //开始补花
+	// TID_DealCard                        //发牌
+	// TID_GameStartBuHua                  //开始补花
 )
 
 //杠类型
