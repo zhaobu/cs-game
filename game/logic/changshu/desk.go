@@ -64,13 +64,6 @@ func makeDesk(deskArg *pbgame_logic.DeskArg, masterUid, deskID uint64, clubID in
 	return d
 }
 
-func (d *Desk) doEnter(uid uint64) pbgame.JoinDeskRspCode {
-	// 判断条件 是否能加入
-
-	// 重复加入处理
-	return pbgame.JoinDeskRspCode_JoinDeskSucc
-}
-
 //找到空闲座位号
 // func (d *Desk) getFreeChair() (int32, bool) {
 // 	// for i := int32(0); i < d.deskConfig.Args.PlayerCount; i++ {
@@ -150,7 +143,7 @@ func (d *Desk) doSitDown(uid uint64, chair int32, rsp *pbgame.SitDownRsp) {
 		}
 	}
 	dUserInfo.chairId = chair
-	dUserInfo.userStatus = pbgame.UserDeskStatus_UDSSitDown
+	d.changPlayerState(uid, pbgame.UserDeskStatus_UDSSitDown, pbgame_logic.GameStatus_GSWait)
 	d.playChair[chair] = dUserInfo
 	d.gameSink.AddPlayer(chair, uid, dUserInfo.info.GetName())
 	//先发送加入成功消息
@@ -158,13 +151,24 @@ func (d *Desk) doSitDown(uid uint64, chair int32, rsp *pbgame.SitDownRsp) {
 	d.SendData(uid, rsp)
 	//发送玩家信息给所有人
 	d.sendDeskInfo(0)
-	d.gameStatus = pbgame_logic.GameStatus_GSWait
 	//再判断游戏开始
 	if d.checkStart() {
-		d.gameStatus = pbgame_logic.GameStatus_GSPlay
+		d.changPlayerState(0, pbgame.UserDeskStatus_UDSPlaying, pbgame_logic.GameStatus_GSPlay)
 		d.gameSink.StartGame()
 	}
 	d.updateDeskInfo(2) //通知俱乐部更新桌子信息
+}
+
+//改变游戏玩家状态和桌子状态
+func (d *Desk) changPlayerState(uid uint64, uState pbgame.UserDeskStatus, gState pbgame_logic.GameStatus) {
+	d.gameStatus = gState
+	if uid == 0 {
+		for _, userInfo := range d.playChair {
+			userInfo.userStatus = uState
+		}
+		return
+	}
+	d.deskPlayers[uid].userStatus = uState
 }
 
 //起立后由玩家变为观察者
@@ -340,6 +344,7 @@ func (d *Desk) dealDestroyDesk(outUid uint64) {
 		d.SendData(uid, msg)
 		cache.ExitGame(uid, d.gameNode.GameName, d.gameNode.GameID, d.deskId)
 	}
+	d.updateDeskInfo(3) //通知俱乐部更新桌子信息
 	deleteID2desk(d.deskId)
 	cache.DeleteClubDeskRelation(d.deskId)
 	cache.DelDeskInfo(d.deskId)
