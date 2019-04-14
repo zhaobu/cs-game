@@ -166,7 +166,7 @@ func (self *OperAtion) moCanGang(stackCards map[int32]int32, pengCards map[int32
 func (self *OperAtion) updateCardInfo(cardInfo *mj.PlayerCardInfo, addCards, subCards []int32) {
 	if len(addCards) != 0 {
 		mj.Add_stack(cardInfo.StackCards, addCards...)
-		cardInfo.HandCards = append(cardInfo.HandCards, subCards...)
+		cardInfo.HandCards = append(cardInfo.HandCards, addCards...)
 	} else if len(subCards) != 0 {
 		mj.Sub_stack(cardInfo.StackCards, subCards...)
 		for _, card := range subCards {

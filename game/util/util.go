@@ -1,11 +1,14 @@
 package util
 
 import (
+	"encoding/json"
 	"math"
 	"math/rand"
 	"sort"
 	"time"
 	"unsafe"
+
+	"github.com/gogo/protobuf/proto"
 )
 
 func SliceByteToString(b []byte) string {
@@ -59,4 +62,15 @@ const MIN = 0.000001
 //f1>f2时返回false,精度时Min
 func Float64Equal(f1, f2 float64) bool {
 	return math.Dim(f1, f2) < MIN
+}
+
+// pb转json字符串
+func PB2JSON(from_pb proto.Message, f bool) string {
+	var json_str []byte
+	if f {
+		json_str, _ = json.MarshalIndent(from_pb, "", "	")
+	} else {
+		json_str, _ = json.Marshal(from_pb)
+	}
+	return string(json_str)
 }

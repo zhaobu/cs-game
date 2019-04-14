@@ -8,6 +8,8 @@ import (
 	"sort"
 	"time"
 
+	"go.uber.org/zap"
+
 	"github.com/gogo/protobuf/proto"
 )
 
@@ -232,7 +234,8 @@ func (self *GameSink) deal_card() {
 
 //玩家第一次补花
 func (self *GameSink) firstBuHua(chairId int32) {
-	cardInfo := self.players[chairId].CardInfo
+	cardInfo := &self.players[chairId].CardInfo
+	tlog.Debug("庄家补花前手牌数据为", zap.Any("cardInfo", cardInfo))
 	leftCard := self.leftCard
 	huaIndex := make(map[int32]int32) //下次要补的花牌
 	leftCount := len(leftCard)
@@ -243,13 +246,13 @@ func (self *GameSink) firstBuHua(chairId int32) {
 	//补一张花牌
 	operOnce := func(card int32) int32 {
 		//减一张花牌
-		mj.Sub_stack(cardInfo.StackCards, card)
-		cardInfo.StackCards[card]--
+		self.operAction.updateCardInfo(cardInfo, nil, []int32{card})
 		//从牌库摸一张牌
 		moCard := leftCard[leftCount-1]
+		tlog.Debug("补花", zap.Int32("huaCard", card), zap.Int32("moCard", moCard))
 		leftCount--
 		//摸的牌加到手牌
-		mj.Add_stack(cardInfo.StackCards, moCard)
+		self.operAction.updateCardInfo(cardInfo, []int32{moCard}, nil)
 		//记录到消息
 		msg.BuHuaResult = append(msg.BuHuaResult, &pbgame_logic.BuHuaOnce{HuaCard: card, BuCard: moCard})
 		msgOther.BuHuaResult = append(msgOther.BuHuaResult, &pbgame_logic.BuHuaOnce{HuaCard: card, BuCard: 0})
@@ -294,6 +297,7 @@ func (self *GameSink) firstBuHua(chairId int32) {
 			}
 		}
 	}
+	tlog.Debug("庄家补花后手牌数据为", zap.Any("cardInfo", cardInfo))
 	for i := int32(0); i < self.game_config.PlayerCount; i++ {
 		if i == chairId {
 			self.sendData(i, &msg)

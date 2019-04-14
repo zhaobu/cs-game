@@ -19,21 +19,36 @@ func AllocDeskID() (deskID uint64, err error) {
 	}
 	if left == 0 {
 		rand.Seed(time.Now().Unix())
-		var num int64 = 0
+		var num int = 1000
+		codeMap := make(map[int64]bool, num)
 		for {
+			if len(codeMap) >= num {
+				break
+			}
 			enter_code := rand.Int63n(999999-100000) + 100000
-			reply, err := redis.Int(c.Do("SADD", "emptydesk", enter_code))
+			if _, ok := codeMap[enter_code]; ok {
+				continue
+			}
+			codeMap[enter_code] = true
+			_, err := redis.Int(c.Do("SADD", "emptydesk", enter_code))
 			if err != nil {
 				return 0, err
 			}
-			if reply == 1 && num == 1000 {
-				break
-			}
-			if num >= 30000 {
-				break
-			}
-			num++
 		}
+		// for {
+		// 	enter_code := rand.Int63n(999999-100000) + 100000
+		// 	reply, err := redis.Int(c.Do("SADD", "emptydesk", enter_code))
+		// 	if err != nil {
+		// 		return 0, err
+		// 	}
+		// 	if reply == 1 && num == 500 {
+		// 		break
+		// 	}
+		// 	if num >= 30000 {
+		// 		break
+		// 	}
+		// 	num++
+		// }
 	}
 	reply, err := redis.Strings(c.Do("SPOP", "emptydesk", "1"))
 	if len(reply) == 1 {

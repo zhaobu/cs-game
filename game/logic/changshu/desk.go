@@ -6,6 +6,7 @@ import (
 	"cy/game/db/mgo"
 	mj "cy/game/logic/changshu/majiang"
 	"cy/game/logic/tpl"
+	"cy/game/util"
 	"fmt"
 	"time"
 
@@ -394,6 +395,8 @@ func (d *Desk) doAction(uid uint64, actionName string, actionValue []byte) {
 	}
 	d.mu.Lock()
 	defer d.mu.Unlock()
+
+	log.Infof("doAction uid: %v,actionName: %s,actionValue: %s", uid, actionName, util.PB2JSON(pb, true))
 
 	chairId := d.GetChairidByUid(uid)
 	if -1 == chairId {
