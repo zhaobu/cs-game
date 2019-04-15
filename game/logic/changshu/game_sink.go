@@ -252,7 +252,7 @@ func (self *GameSink) deal_card() {
 	bankerCardInfo.HandCards = player_cards[self.bankerId]
 	bankerCardInfo.StackCards = cardDef.StackCards(player_cards[self.bankerId])
 	//庄家开始第一次补花
-	msg.HuaCards = switchToCyint32(self.firstBuHua1(self.bankerId))
+	msg.HuaCards = switchToCyint32(self.firstBuHua(self.bankerId))
 	msg.LeftNum = int32(len(self.leftCard))
 
 	self.curOutChair = self.bankerId
