@@ -163,10 +163,11 @@ message S2CStartGame {
   int32 banker_id = 1;    //庄家id(也表示第一个可操作玩家)
   int32 left_num = 2;     //剩余牌数
   uint32 cur_inning = 3;  //当前局
-  repeated cyint32 hand_cards = 4;  //玩家手牌
-  repeated cyint32 hua_cards = 5;   //庄家花牌
-  repeated cyint32 dice_value = 6;  //摸牌色子
-  int32 left_time = 7;              //超时时间
+  repeated cyint32 hand_cards = 4;   //玩家手牌
+  repeated cyint32 hua_cards = 5;    //庄家花牌
+  repeated cyint32 dice_value = 6;   //摸牌色子
+  int32 left_time = 7;               //超时时间
+  S2CHaveOperation banker_oper = 8;  //庄家能做的操作
 }
 
 // //发牌
@@ -183,10 +184,9 @@ message BS2CDrawCard {
   int32 left_num = 4;            //剩余张数
 }
 
-//倒计时显示在谁头上(玩家摸牌,吃牌,碰牌后广播,表示当前出牌的玩家)
-message BS2CTimeoutChair {
-  int32 chair_id = 1;  //倒计时玩家
-  int32 time = 2;      //倒计时时间
+//当前出牌玩家(玩家摸牌,吃牌,碰牌后广播,表示当前出牌的玩家)
+message BS2CCurOutChair {
+  int32 chair_id = 1;  //当前出牌玩家
 }
 
 // message BuHuaOnce {

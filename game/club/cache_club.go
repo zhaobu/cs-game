@@ -4,6 +4,7 @@ import (
 	"cy/game/db/mgo"
 	"cy/game/pb/common"
 	"sync"
+	"time"
 )
 
 type cacheClub struct {
@@ -12,6 +13,7 @@ type cacheClub struct {
 	desks    map[uint64]*pbcommon.DeskInfo
 	f        func()
 	noCommit bool
+	lastquerytime time.Time		//上一次查询时间 用户俱乐部桌子同步处理
 }
 
 var (
@@ -23,6 +25,7 @@ func newCacheClub() *cacheClub {
 	c := &cacheClub{
 		Club:  &mgo.Club{Members: make(map[uint64]*mgo.ClubMember)},
 		desks: make(map[uint64]*pbcommon.DeskInfo),
+		lastquerytime:time.Now(),
 	}
 	return c
 }

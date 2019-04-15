@@ -275,3 +275,9 @@ message CheckCanDestoryDeskReq{
 message CheckCanDestoryDeskRsp{
     int32 Error = 1;    //0 可以解散 1当日解散次数已经用完 2用户权限不够 3俱乐部不存在
 }
+
+//刷新俱乐部桌子信息
+message RefreshClubDesks{
+    pbcommon.ReqHead Head = 1;
+    int64 ClubID = 2;
+}

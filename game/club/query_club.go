@@ -7,6 +7,7 @@ import (
 	"cy/game/pb/common"
 	"fmt"
 	"runtime/debug"
+	"time"
 
 	"github.com/sirupsen/logrus"
 )
@@ -94,10 +95,28 @@ func (p *club) QueryClubByIDReq(ctx context.Context, args *codec.Message, reply 
 		rsp.Identity = m.Identity
 	}
 
+	if cc.lastquerytime.Sub(time.Now()).Seconds() > 3 {//进行缓存同步
+		synchroClubdeskinfo(cc.ID)
+		cc.lastquerytime = time.Now()
+	}
+
+	//在查询时 做一下俱乐部桌子校验 防止游戏服务器重启 自动开放俱乐部的桌子不存在的情况
+	if cc.IsAutoCreate {		//自动创建桌子 但是当前不存在桌子
+		haveEmptyTable := false
+		for _,v :=range cc.desks {
+			if v.Status == "1" {	//有空桌子
+				haveEmptyTable = true
+				break;
+			}
+		}
+		if !haveEmptyTable {	//不存在空桌子
+			fmt.Printf("查询俱乐部时校验到没有空桌子 %x",cc.desks)
+			checkAutoCreate(cc.ID)	//自动创建房间
+		}
+	}
 	for _, d := range cc.desks {
 		rsp.Info.Desks = append(rsp.Info.Desks, d)
 	}
-
 	rsp.Code = 1
 	return
 }

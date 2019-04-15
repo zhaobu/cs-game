@@ -42,7 +42,6 @@ func (self *HuLib) normal_hu(cardInfo *PlayerCardInfo) (bool, EmHuType) {
 
 // 胡牌牌型
 func (self *HuLib) CheckHuType(cardInfo *PlayerCardInfo) (bool, HuTypeList) {
-
 	huTypeList := HuTypeList{}
 
 	if ok, hutype := self.normal_hu(cardInfo); ok {

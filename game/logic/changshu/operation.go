@@ -175,6 +175,27 @@ func (self *OperAtion) updateCardInfo(cardInfo *mj.PlayerCardInfo, addCards, sub
 	}
 }
 
+//分析游戏开始发牌后庄家能做的操作
+func (self *OperAtion) BankerAnalysis(cardInfo mj.PlayerCardInfo) *CanOperInfo {
+	ret := &CanOperInfo{}
+
+	//判断是否能胡
+	if ok, huOper := huLib.CheckHuType(&cardInfo); ok {
+		ret.CanHu.HuList = huOper
+	}
+
+	card := cardInfo.HandCards[len(cardInfo.HandCards)-1]
+	self.updateCardInfo(&cardInfo, nil, []int32{card})
+
+	stackCards, pengCards := cardInfo.StackCards, cardInfo.PengCards
+
+	//检查能否杠(包括暗杠,补杠)
+	if ok, gangOper := self.moCanGang(stackCards, pengCards, card); ok {
+		ret.CanGang.GangList = gangOper
+	}
+	return ret
+}
+
 //摸牌后分析能做的操作
 func (self *OperAtion) DrawcardAnalysis(cardInfo *mj.PlayerCardInfo, card int32, leftCardNum int32) *CanOperInfo {
 	ret := &CanOperInfo{}

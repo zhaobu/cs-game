@@ -5,7 +5,7 @@ import (
 	"cy/game/codec/protobuf"
 	pbcommon "cy/game/pb/common"
 	pbgame "cy/game/pb/game"
-	pbgame_csmj "cy/game/pb/game/mj/changshu"
+	pbgame_logic "cy/game/pb/game/mj/changshu"
 
 	"go.uber.org/zap"
 )
@@ -37,16 +37,16 @@ func (self *Changshu) DispatchRecv(msg *pbgame.GameNotif) {
 		return
 	}
 	switch v := pb.(type) {
-	case *pbgame_csmj.S2CThrowDice:
+	case *pbgame_logic.S2CThrowDice:
 		tlog.Info("recv GameNotif 轮到玩家投色子", zap.String("NotifName", msg.NotifName), zap.Any("NotifValue", v))
-	case *pbgame_csmj.S2CThrowDiceResult:
+	case *pbgame_logic.BS2CThrowDiceResult:
 		tlog.Info("recv GameNotif 玩家投了色子", zap.String("NotifName", msg.NotifName), zap.Any("NotifValue", v))
-	case *pbgame_csmj.S2CChangePos:
+	case *pbgame_logic.S2CChangePos:
 		tlog.Info("recv GameNotif 换位结果", zap.String("NotifName", msg.NotifName), zap.Any("NotifValue", v))
-	case *pbgame_csmj.S2CStartGame:
+	case *pbgame_logic.S2CStartGame:
 		tlog.Info("recv GameNotif 游戏开始", zap.String("NotifName", msg.NotifName), zap.Any("NotifValue", v))
 		self.S2CStartGame(v)
-	case *pbgame_csmj.S2CBuHua:
+	case *pbgame_logic.BS2COutCard:
 		if v.ChairId == self.ChairId {
 			tlog.Info("recv GameNotif 轮到我补花", zap.String("NotifName", msg.NotifName), zap.Any("NotifValue", v))
 			self.S2CBuHua(v)
@@ -54,7 +54,7 @@ func (self *Changshu) DispatchRecv(msg *pbgame.GameNotif) {
 	}
 }
 
-func (self *Changshu) S2CBuHua(msg *pbgame_csmj.S2CBuHua) {
+func (self *Changshu) S2CBuHua(msg *pbgame_logic.S2CBuHua) {
 	tlog.Info("补花前self.HandCards", zap.Any("handcards", self.HandCards))
 	for _, once := range msg.BuHuaResult {
 		//去掉花牌
@@ -76,9 +76,17 @@ func (self *Changshu) removeCard(delcard int32, delAll bool) {
 		}
 	}
 }
-func (self *Changshu) S2CStartGame(msg *pbgame_csmj.S2CStartGame) {
+func switchToInt32(cards []*pbgame_logic.Cyint32) []int32 {
+	res := []int32{}
+	for _, card := range cards {
+		res = append(res, card.T)
+	}
+	return res
+}
+
+func (self *Changshu) S2CStartGame(msg *pbgame_logic.S2CStartGame) {
 	self.BankerId = msg.BankerId
-	self.HandCards = msg.UserInfo.HandCards
+	self.HandCards = switchToInt32(msg.HandCards)
 	tlog.Info("self.HandCards", zap.Any("handcards", self.HandCards))
 }
 
@@ -88,12 +96,12 @@ func (self *Changshu) MakeDeskReq() *pbgame.MakeDeskReq {
 		GameName: gamename,
 		ClubID:   0,
 	}
-	makeDeskReq.GameArgMsgName, makeDeskReq.GameArgMsgValue, _ = protobuf.Marshal(&pbgame_csmj.CreateArg{
-		Rule:        []*pbgame_csmj.CyU32String{},
+	makeDeskReq.GameArgMsgName, makeDeskReq.GameArgMsgValue, _ = protobuf.Marshal(&pbgame_logic.CreateArg{
+		Rule:        []*pbgame_logic.CyU32String{},
 		Barhead:     5,
 		PlayerCount: 4,
 		Dipiao:      1,
-		RInfo:       &pbgame_csmj.RoundInfo{},
+		RInfo:       &pbgame_logic.RoundInfo{},
 		PaymentType: 3,
 		LimitIP:     1,
 		Voice:       0,
@@ -112,5 +120,5 @@ func (self *Changshu) DoAction(act string) {
 
 //
 func (self *Changshu) dothrowdice() {
-	self.Session.SendGameAction(&pbgame_csmj.C2SThrowDice{})
+	self.Session.SendGameAction(&pbgame_logic.C2SThrowDice{})
 }
