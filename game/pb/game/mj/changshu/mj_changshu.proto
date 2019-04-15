@@ -53,7 +53,6 @@ message CreateArgTpl {
 message DeskArg {
   // 创建房间参数
   CreateArg args = 1;
-
   bool Enable = 2;
   pbcommon.DeskType Type = 3;
   pbgame.FeeType FeeType = 4;
@@ -154,18 +153,20 @@ message S2CChangePos {
   repeated ChangePosInfo pos_info = 1;  //换位结果
 }
 
-message StartGameInfo {
-  //玩家手牌
-  repeated int32 hand_cards = 1;
-}
+// message StartGameInfo {
+//   //玩家手牌
+//   repeated int32 hand_cards = 1;
+// }
 
 //游戏开始
 message S2CStartGame {
-  int32 banker_id = 1;          //庄家id(也表示第一个可操作玩家)
-  int32 total_card_num = 2;     //总牌数
-  int32 left_card_num = 3;      //剩余牌数
-  uint32 cur_inning = 4;        //当前局
-  StartGameInfo user_info = 5;  //玩家个人信息
+  int32 banker_id = 1;    //庄家id(也表示第一个可操作玩家)
+  int32 left_num = 2;     //剩余牌数
+  uint32 cur_inning = 3;  //当前局
+  repeated cyint32 hand_cards = 4;  //玩家手牌
+  repeated cyint32 hua_cards = 5;   //庄家花牌
+  repeated cyint32 dice_value = 6;  //摸牌色子
+  int32 left_time = 7;              //超时时间
 }
 
 // //发牌
@@ -175,24 +176,31 @@ message S2CStartGame {
 // }
 
 //玩家摸牌
-message S2CDrawCard {
-  int32 chair_id = 1;  //摸牌玩家
-  int32 card = 2;      //摸到的牌
-  int32 left_num = 3;  //剩余张数
+message BS2CDrawCard {
+  int32 chair_id = 1;            //摸牌玩家
+  repeated cyint32 huacard = 2;  //花牌
+  int32 card = 3;                //摸到的牌
+  int32 left_num = 4;            //剩余张数
 }
 
-message BuHuaOnce {
-  int32 hua_card = 1;  //花牌值
-  int32 bu_card = 2;  //补到的牌(补花玩家收到真实牌值,其他玩家收到0)
+//倒计时显示在谁头上(玩家摸牌,吃牌,碰牌后广播,表示当前出牌的玩家)
+message BS2CTimeoutChair {
+  int32 chair_id = 1;  //倒计时玩家
+  int32 time = 2;      //倒计时时间
 }
-//补花
-message S2CBuHua {
-  int32 chair_id = 1;                    //补花玩家
-  repeated BuHuaOnce bu_hua_result = 2;  //补花结果
-}
+
+// message BuHuaOnce {
+//   int32 hua_card = 1;  //花牌值
+//   int32 bu_card = 2;  //补到的牌(补花玩家收到真实牌值,其他玩家收到0)
+// }
+// //补花
+// message BS2CBuHua {
+//   int32 chair_id = 1;                    //补花玩家
+//   repeated BuHuaOnce bu_hua_result = 2;  //补花结果
+// }
 
 //玩家出牌
-message S2COutCard {
+message BS2COutCard {
   int32 chair_id = 1;  //出牌玩家
   int32 card = 2;      //出的牌
 }
@@ -235,7 +243,7 @@ message S2CHaveOperation {
 }
 
 //玩家碰牌
-message S2CPengCard {
+message BS2CPengCard {
   int32 chair_id = 1;  //碰牌玩家
   int32 card = 2;      //要碰的牌
 }
@@ -247,31 +255,25 @@ enum GangType {
   GangType_Ming = 3;  //明杠
 }
 //玩家杠牌
-message S2CGangCard {
+message BS2CGangCard {
   int32 chair_id = 1;  //杠牌玩家
   int32 card = 2;      //要杠的牌
   GangType type = 3;
-  int32 lose_chair =
-      4;  //放杠的玩家,暗杠为-1,补杠时为碰牌时被碰玩家,明杠时为出牌玩家
+  //放杠的玩家,暗杠为-1,补杠时为碰牌时被碰玩家,明杠时为出牌玩家
+  int32 lose_chair = 4;
 }
 
 //玩家吃牌
-message S2CChiCard {
+message BS2CChiCard {
   int32 chair_id = 1;   //吃牌玩家
-  int32 card = 2;       //要吃的牌:22
+  int32 card = 2;       //要吃的牌
   uint32 chi_type = 3;  //吃类型掩码
 }
 
 //玩家胡牌
-message S2CHuCard {
-  int32 chair_id = 1;             //胡牌玩家chair_id
+message BS2CHuCard {
+  int32 chair_id = 1;             //胡牌玩家
   repeated int32 hand_cards = 2;  //胡牌手牌
-}
-
-//倒计时显示在谁头上
-message S2CTimeoutChair {
-  int32 chair_id = 1;  //倒计时玩家
-  int32 time = 2;      //倒计时时间
 }
 
 message PlayerBalanceInfo {
@@ -285,7 +287,7 @@ message PlayerBalanceInfo {
   bool is_hu = 7;                 //是否胡牌
 }
 //单局游戏结束
-message S2CGameEnd {
+message BS2CGameEnd {
   uint32 curInning = 1;                           //当前局数
   int32 banker = 2;                               //庄家id
   repeated PlayerBalanceInfo player_balance = 3;  //玩家当局结算信息
@@ -301,33 +303,33 @@ message PlayerBalanceResult {
   int32 mingGang = 6;  //明杠次数
 }
 //大局结算
-message S2CBalanceResult {
+message BS2CBalanceResult {
   string room_name = 1;                            //房间名称
   repeated PlayerBalanceResult player_result = 2;  //大结算结果
 }
 
-message CardInfo {
-  int32 chair_id = 1;  //玩家chair_id
-  int32 out_cards = 2;  //玩家出過的牌(不包括被碰，杠，吃掉的牌)
-  //玩家碰的牌 json {"12":1,"13":1}->碰了2萬 3萬
-  string peng_cards = 3;
-  //玩家杠的牌 json {"16":2}-> 杠了6萬（1:明杠(碰牌后再杠)，2:暗杠，3:接杠)
-  string gang_cards = 4;
-  //玩家吃的牌[11,12,13;22,23,24],3个连续的组成吃
-  repeated cyint32 chi_cards = 5;
-  repeated cyint32 hand_cards = 6;  //玩家的手牌
-  int32 card_num = 7;               //玩家当前手上的牌数
-  int32 point = 8;                  //玩家当前分数
-}
-//重连获取牌局信息
-message S2CReconnectGame {
-  CardInfo player_card = 1;  //玩家的牌
-  //玩家可執行的操作 json  [{"canPeng":true}] [{"canGang":[42]}]
-  string can_operation = 2;
-  int32 cur_out_chair = 3;   //當前該出牌的玩家
-  int32 last_out_chair = 4;  //上次出牌的玩家
-  int32 last_out_card = 5;   //上次出的牌
-  int32 banker = 6;          //庄家
-  int32 left_num = 7;        //剩下的牌數
-  int32 game_index = 8;      //當前局數
-}
+// message CardInfo {
+//   int32 chair_id = 1;  //玩家chair_id
+//   int32 out_cards = 2;  //玩家出過的牌(不包括被碰，杠，吃掉的牌)
+//   //玩家碰的牌 json {"12":1,"13":1}->碰了2萬 3萬
+//   string peng_cards = 3;
+//   //玩家杠的牌 json {"16":2}-> 杠了6萬（1:明杠(碰牌后再杠)，2:暗杠，3:接杠)
+//   string gang_cards = 4;
+//   //玩家吃的牌[11,12,13;22,23,24],3个连续的组成吃
+//   repeated cyint32 chi_cards = 5;
+//   repeated cyint32 hand_cards = 6;  //玩家的手牌
+//   int32 card_num = 7;               //玩家当前手上的牌数
+//   int32 point = 8;                  //玩家当前分数
+// }
+// //重连获取牌局信息
+// message S2CReconnectGame {
+//   CardInfo player_card = 1;  //玩家的牌
+//   //玩家可執行的操作 json  [{"canPeng":true}] [{"canGang":[42]}]
+//   string can_operation = 2;
+//   int32 cur_out_chair = 3;   //當前該出牌的玩家
+//   int32 last_out_chair = 4;  //上次出牌的玩家
+//   int32 last_out_card = 5;   //上次出的牌
+//   int32 banker = 6;          //庄家
+//   int32 left_num = 7;        //剩下的牌數
+//   int32 game_index = 8;      //當前局數
+// }
