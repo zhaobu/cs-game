@@ -222,15 +222,18 @@ func (d *Desk) doExit(uid uint64, rsp *pbgame.ExitDeskRsp) {
 		}
 		d.rollbackMoney(uid)
 	}
-	d.deleteDeskPlayer(uid)
+	delete(d.deskPlayers, uid)
+	deleteUser2desk(uid)
+	cache.ExitGame(uid, d.gameNode.GameName, d.gameNode.GameID, d.deskId)
 	rsp.Code = pbgame.ExitDeskRspCode_ExitDeskSucc
 }
 
 //删除桌子玩家
-func (d *Desk) deleteDeskPlayer(uid uint64) {
-	delete(d.deskPlayers, uid)
-	deleteUser2desk(uid)
-}
+// func (d *Desk) deleteDeskPlayer(uid uint64) {
+// 	delete(d.deskPlayers, uid)
+// 	deleteUser2desk(uid)
+// 	cache.ExitGame(uid, d.gameNode.GameName, d.gameNode.GameID, d.deskId)
+// }
 
 //更新桌子信息到redis,并通知俱乐部,changeTyp:1create 2update 3delete
 func (d *Desk) updateDeskInfo(changeTyp int32) {
@@ -243,9 +246,9 @@ func (d *Desk) updateDeskInfo(changeTyp int32) {
 		return
 	}
 	if d.gameStatus <= pbgame_logic.GameStatus_GSWait {
-		deskInfo.Status = "1"
+		deskInfo.Status = "1" //等待中
 	} else {
-		deskInfo.Status = "2"
+		deskInfo.Status = "2" //开始了
 	}
 	deskInfo.CurrLoop = int64(d.curInning)
 	deskInfo.SdInfos = []*pbcommon.SiteDownPlayerInfo{}

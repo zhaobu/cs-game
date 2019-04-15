@@ -143,6 +143,12 @@ func (self *roomHandle) HandleSitDownReq(uid uint64, req *pbgame.SitDownReq, rsp
 }
 
 func (self *roomHandle) HandleMakeDeskReq(uid uint64, deskID uint64, req *pbgame.MakeDeskReq, rsp *pbgame.MakeDeskRsp) bool {
+	//检查玩家是否已经在别的房间中
+	d := getDeskByUID(uid)
+	if d != nil {
+		rsp.Code = pbgame.MakeDeskRspCode_MakeDeskAlreadyInDesk
+		return false
+	}
 	arg, err := checkArg(req)
 	if err != nil {
 		tlog.Error("err checkArg()", zap.Error(err))

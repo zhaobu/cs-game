@@ -141,11 +141,6 @@ func (self *RpcHandle) ExitDeskReq(ctx context.Context, args *codec.Message, rep
 	}
 
 	self.service.roomHandle.HandleExitDeskReq(args.UserID, req, rsp)
-
-	if rsp.Code == pbgame.ExitDeskRspCode_ExitDeskSucc {
-		cache.ExitGame(args.UserID, self.service.GameName, self.service.GameID, sessInfo.AtDeskID)
-	}
-
 	return
 }
 

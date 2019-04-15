@@ -64,10 +64,11 @@ enum MakeDeskRspCode {
   MakeDeskArgsErr = 2;
   MakeDeskNotEnoughMoney = 3;  // 财富不够
   MakeDeskNotEnoughDesk = 4;   // 桌子不够
-  MakeDeskInternalServerError = 5;
+  MakeDeskInternalServerError = 5; //服务器内部错误
   MakeDeskUserStatusErr = 6;     // 创建并进入游戏失败
   MakeDeskCanNotFindClubID = 7;  // 无效的俱乐部ID
   MakeDeskLimit = 8;             // 个数限制
+  MakeDeskAlreadyInDesk=9; //已经在桌子中
 }
 message MakeDeskRsp {
   pbcommon.RspHead Head = 1;

@@ -252,7 +252,7 @@ func (self *GameSink) deal_card() {
 	bankerCardInfo.HandCards = player_cards[self.bankerId]
 	bankerCardInfo.StackCards = cardDef.StackCards(player_cards[self.bankerId])
 	//庄家开始第一次补花
-	msg.HuaCards = switchToCyint32(self.firstBuHua(self.bankerId))
+	msg.HuaCards = switchToCyint32(self.firstBuHua1(self.bankerId))
 	msg.LeftNum = int32(len(self.leftCard))
 
 	self.curOutChair = self.bankerId
@@ -287,72 +287,72 @@ func switchToCyint32(cards []int32) []*pbgame_logic.Cyint32 {
 }
 
 //玩家第一次补花,返回所有的花牌
-func (self *GameSink) firstBuHua(chairId int32) []int32 {
-	cardInfo := &self.players[chairId].CardInfo
-	tlog.Debug("庄家补花前手牌数据为", zap.Any("cardInfo", cardInfo))
-	leftCard := self.leftCard
-	huaIndex := make(map[int32]int32) //下次要补的花牌
+// func (self *GameSink) firstBuHua(chairId int32) []int32 {
+// 	cardInfo := &self.players[chairId].CardInfo
+// 	tlog.Debug("庄家补花前手牌数据为", zap.Any("cardInfo", cardInfo))
+// 	leftCard := self.leftCard
+// 	huaIndex := make(map[int32]int32) //下次要补的花牌
 
-	huaCards := []int32{} //所有的花牌
-	//补掉一张花牌
-	operOnce := func(card int32) int32 {
-		//减一张花牌
-		self.operAction.updateCardInfo(cardInfo, nil, []int32{card})
-		//从牌库摸一张牌
-		moCard := leftCard[len(leftCard)-1]
-		self.leftCard = self.leftCard[:len(leftCard)-1]
-		tlog.Debug("补花", zap.Int32("huaCard", card), zap.Int32("moCard", moCard))
-		//摸的牌加到手牌
-		self.operAction.updateCardInfo(cardInfo, []int32{moCard}, nil)
-		//记录到消息
-		huaCards = append(huaCards, card)
-		if cardDef.IsHuaCard(moCard) {
-			mj.Add_stack(huaIndex, moCard)
-		}
-		return moCard
-	}
+// 	huaCards := []int32{} //所有的花牌
+// 	//补掉一张花牌
+// 	operOnce := func(card int32) int32 {
+// 		//减一张花牌
+// 		self.operAction.updateCardInfo(cardInfo, nil, []int32{card})
+// 		//从牌库摸一张牌
+// 		moCard := leftCard[len(leftCard)-1]
+// 		self.leftCard = self.leftCard[:len(leftCard)-1]
+// 		tlog.Debug("补花", zap.Int32("huaCard", card), zap.Int32("moCard", moCard))
+// 		//摸的牌加到手牌
+// 		self.operAction.updateCardInfo(cardInfo, []int32{moCard}, nil)
+// 		//记录到消息
+// 		huaCards = append(huaCards, card)
+// 		if cardDef.IsHuaCard(moCard) {
+// 			mj.Add_stack(huaIndex, moCard)
+// 		}
+// 		return moCard
+// 	}
 
-	//先遍历一次所有花牌
-	for huaCard := int32(51); huaCard <= 59; huaCard++ {
-		//遇到一张花牌,补一张
-		if huaCount, ok := cardInfo.StackCards[huaCard]; ok {
-			for j := int32(0); j < huaCount; j++ {
-				operOnce(huaCard)
-			}
-		}
-	}
+// 	//先遍历一次所有花牌
+// 	for huaCard := int32(51); huaCard <= 59; huaCard++ {
+// 		//遇到一张花牌,补一张
+// 		if huaCount, ok := cardInfo.StackCards[huaCard]; ok {
+// 			for j := int32(0); j < huaCount; j++ {
+// 				operOnce(huaCard)
+// 			}
+// 		}
+// 	}
 
-	//再从第一次结果补花
-	if len(huaIndex) > 0 {
-		bFin := true //补花结束
-		num := 0
-		for {
-			//遍历所有
-			for huaCard, huaCount := range huaIndex {
-				for j := int32(0); j < huaCount; j++ {
-					if cardDef.IsHuaCard(operOnce(huaCard)) {
-						bFin = false
-					}
-					//补一张减一张
-					mj.Sub_stack(huaIndex, huaCard)
-				}
-			}
-			if bFin {
-				break
-			}
-			num++
-			if num >= 12 {
-				log.Errorf("补花死循环")
-				return nil
-			}
-		}
-	}
-	tlog.Debug("庄家补花后手牌数据为", zap.Any("cardInfo", cardInfo))
-	return huaCards
-}
+// 	//再从第一次结果补花
+// 	if len(huaIndex) > 0 {
+// 		bFin := true //补花结束
+// 		num := 0
+// 		for {
+// 			//遍历所有
+// 			for huaCard, huaCount := range huaIndex {
+// 				for j := int32(0); j < huaCount; j++ {
+// 					if cardDef.IsHuaCard(operOnce(huaCard)) {
+// 						bFin = false
+// 					}
+// 					//补一张减一张
+// 					mj.Sub_stack(huaIndex, huaCard)
+// 				}
+// 			}
+// 			if bFin {
+// 				break
+// 			}
+// 			num++
+// 			if num >= 12 {
+// 				log.Errorf("补花死循环")
+// 				return nil
+// 			}
+// 		}
+// 	}
+// 	tlog.Debug("庄家补花后手牌数据为", zap.Any("cardInfo", cardInfo))
+// 	return huaCards
+// }
 
 //玩家第一次补花,返回所有的花牌
-func (self *GameSink) firstBuHua1(chairId int32) []int32 {
+func (self *GameSink) firstBuHua(chairId int32) []int32 {
 	cardInfo := &self.players[chairId].CardInfo
 	tlog.Debug("庄家补花前手牌数据为", zap.Any("cardInfo", cardInfo))
 
@@ -362,6 +362,7 @@ func (self *GameSink) firstBuHua1(chairId int32) []int32 {
 	for _, card := range tmpHandCards {
 		if cardDef.IsHuaCard(card) {
 			tmpHuaCards, moCard := self.drawOneCard()
+			tlog.Debug("补花", zap.Int32("huacard", card), zap.Int32("moCard", moCard), zap.Any("tmpHuaCards", tmpHuaCards))
 			//减掉原有的花牌
 			self.operAction.updateCardInfo(cardInfo, nil, []int32{card})
 			//加上摸到的牌
