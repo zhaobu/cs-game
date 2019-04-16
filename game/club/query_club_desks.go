@@ -1,30 +1,31 @@
 package main
 
 import (
-	"context"
 	"cy/game/codec"
-	"cy/game/pb/club"
-	"cy/game/pb/common"
+	"context"
+	pbclub "cy/game/pb/club"
+	pbcommon "cy/game/pb/common"
 	"fmt"
-	"runtime/debug"
 	"github.com/sirupsen/logrus"
+	"runtime/debug"
 	"time"
 )
 
-func (p *club) QueryClubByIDReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
+//查询俱乐部桌子信息
+func (p *club) RefreshClubDesks(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
 		logrus.Error(err.Error())
 		return err
 	}
 
-	req, ok := pb.(*pbclub.QueryClubByIDReq)
+	req, ok := pb.(*pbclub.RefreshClubDesks)
 	if !ok {
 		err = fmt.Errorf("not *pbclub.QueryClubByIDReq")
 		logrus.Error(err.Error())
 		return
 	}
-	fmt.Printf("请求查询俱乐部详情\n")
+
 	logrus.Infof("recv %s %+v", args.Name, req)
 
 	rsp := &pbclub.QueryClubByIDRsp{}
@@ -97,7 +98,6 @@ func (p *club) QueryClubByIDReq(ctx context.Context, args *codec.Message, reply 
 	if time.Now().Sub(cc.lastquerytime).Seconds() > 3 {//进行缓存同步
 		synchroClubdeskinfo(cc.ID)
 		cc.lastquerytime = time.Now()
-		fmt.Printf("俱乐部同步桌子信息\n")
 	}
 
 	//在查询时 做一下俱乐部桌子校验 防止游戏服务器重启 自动开放俱乐部的桌子不存在的情况
@@ -110,7 +110,7 @@ func (p *club) QueryClubByIDReq(ctx context.Context, args *codec.Message, reply 
 			}
 		}
 		if !haveEmptyTable {	//不存在空桌子
-			fmt.Printf("查询俱乐部时校验到没有空桌子 \n")
+			logrus.Infof("查询俱乐部时校验到没有空桌子 %x",cc.desks)
 			checkAutoCreate(cc.ID)	//自动创建房间
 		}
 	}

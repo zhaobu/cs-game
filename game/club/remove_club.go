@@ -42,6 +42,7 @@ func (p *club) RemoveClubReq(ctx context.Context, args *codec.Message, reply *co
 		if rsp.Code == 1 {
 			sendClubRemove(args.UserID, req.ClubID, notifyUids...)
 		}
+		delClub(req.ClubID)
 	}()
 
 	cc := getClub(req.ClubID)
@@ -63,13 +64,10 @@ func (p *club) RemoveClubReq(ctx context.Context, args *codec.Message, reply *co
 	cc.Unlock()
 
 	mgo.RemoveClub(req.ClubID) // db 直接删除
-	delClub(req.ClubID)
 	for _, uid := range notifyUids {
 		delUserJoinClub(uid, req.ClubID)
 	}
-
 	rsp.Code = 1
-
 	return
 }
 

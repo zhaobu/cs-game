@@ -34,14 +34,12 @@ func loadDB() {
 //游戏服务器异常之后 需要重新同步桌子信息
 func synchroClubdeskinfo(ClubID int64)  {
 	if v,ok :=clubMgr[ClubID] ;ok{
-		v.Lock()
 		v.desks = make(map[uint64]*pbcommon.DeskInfo)
 		if ds, err := cache.QueryClubDeskInfo(v.ID); err == nil {
 			for _, d := range ds {
 				v.desks[d.ID] = d
 			}
 		}
-		v.Unlock()
 	}
 }
 
