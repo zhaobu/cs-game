@@ -3,10 +3,12 @@
 
 package pbgame
 
-import proto "github.com/golang/protobuf/proto"
-import fmt "fmt"
-import math "math"
-import common "cy/game/pb/common"
+import (
+	common "cy/game/pb/common"
+	fmt "fmt"
+	proto "github.com/golang/protobuf/proto"
+	math "math"
+)
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
@@ -35,6 +37,7 @@ var UserDeskStatus_name = map[int32]string{
 	2: "UDSSitDown",
 	3: "UDSPlaying",
 }
+
 var UserDeskStatus_value = map[string]int32{
 	"UDSNone":    0,
 	"UDSLook":    1,
@@ -45,8 +48,9 @@ var UserDeskStatus_value = map[string]int32{
 func (x UserDeskStatus) String() string {
 	return proto.EnumName(UserDeskStatus_name, int32(x))
 }
+
 func (UserDeskStatus) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_game_f1ee0acae25292c9, []int{0}
+	return fileDescriptor_2a9278d664c0c01e, []int{0}
 }
 
 // 扣费类型
@@ -63,6 +67,7 @@ var FeeType_name = map[int32]string{
 	1: "FTGold",
 	2: "FTMasonry",
 }
+
 var FeeType_value = map[string]int32{
 	"FTNone":    0,
 	"FTGold":    1,
@@ -72,8 +77,9 @@ var FeeType_value = map[string]int32{
 func (x FeeType) String() string {
 	return proto.EnumName(FeeType_name, int32(x))
 }
+
 func (FeeType) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_game_f1ee0acae25292c9, []int{1}
+	return fileDescriptor_2a9278d664c0c01e, []int{1}
 }
 
 // 创建桌子code
@@ -104,6 +110,7 @@ var MakeDeskRspCode_name = map[int32]string{
 	8: "MakeDeskLimit",
 	9: "MakeDeskAlreadyInDesk",
 }
+
 var MakeDeskRspCode_value = map[string]int32{
 	"MakeDeskNotUse":              0,
 	"MakeDeskSucc":                1,
@@ -120,8 +127,9 @@ var MakeDeskRspCode_value = map[string]int32{
 func (x MakeDeskRspCode) String() string {
 	return proto.EnumName(MakeDeskRspCode_name, int32(x))
 }
+
 func (MakeDeskRspCode) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_game_f1ee0acae25292c9, []int{2}
+	return fileDescriptor_2a9278d664c0c01e, []int{2}
 }
 
 // 加入桌子code
@@ -146,6 +154,7 @@ var JoinDeskRspCode_name = map[int32]string{
 	5: "JoinDeskUserStatusErr",
 	6: "JoinDeskAlreadyInDesk",
 }
+
 var JoinDeskRspCode_value = map[string]int32{
 	"JoinDeskNotUse":              0,
 	"JoinDeskSucc":                1,
@@ -159,8 +168,9 @@ var JoinDeskRspCode_value = map[string]int32{
 func (x JoinDeskRspCode) String() string {
 	return proto.EnumName(JoinDeskRspCode_name, int32(x))
 }
+
 func (JoinDeskRspCode) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_game_f1ee0acae25292c9, []int{3}
+	return fileDescriptor_2a9278d664c0c01e, []int{3}
 }
 
 // 坐下准备code
@@ -185,6 +195,7 @@ var SitDownRspCode_name = map[int32]string{
 	5: "SitDownGameStatusErr",
 	6: "SitDownNotEnoughMoney",
 }
+
 var SitDownRspCode_value = map[string]int32{
 	"SitDownNone":            0,
 	"SitDownSucc":            1,
@@ -198,8 +209,9 @@ var SitDownRspCode_value = map[string]int32{
 func (x SitDownRspCode) String() string {
 	return proto.EnumName(SitDownRspCode_name, int32(x))
 }
+
 func (SitDownRspCode) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_game_f1ee0acae25292c9, []int{4}
+	return fileDescriptor_2a9278d664c0c01e, []int{4}
 }
 
 // 离开桌子code
@@ -220,6 +232,7 @@ var ExitDeskRspCode_name = map[int32]string{
 	3: "ExitDeskPlaying",
 	4: "ExitDeskInternalServerError",
 }
+
 var ExitDeskRspCode_value = map[string]int32{
 	"ExitDeskNone":                0,
 	"ExitDeskSucc":                1,
@@ -231,8 +244,9 @@ var ExitDeskRspCode_value = map[string]int32{
 func (x ExitDeskRspCode) String() string {
 	return proto.EnumName(ExitDeskRspCode_name, int32(x))
 }
+
 func (ExitDeskRspCode) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_game_f1ee0acae25292c9, []int{5}
+	return fileDescriptor_2a9278d664c0c01e, []int{5}
 }
 
 // 申请解散回应code
@@ -259,6 +273,7 @@ var DestroyDeskRspCode_name = map[int32]string{
 	6: "DestroyDeskNotInDesk",
 	7: "DestroyDeskRepeated",
 }
+
 var DestroyDeskRspCode_value = map[string]int32{
 	"DestroyDeskNone":      0,
 	"DestroyDeskSucc":      1,
@@ -273,8 +288,9 @@ var DestroyDeskRspCode_value = map[string]int32{
 func (x DestroyDeskRspCode) String() string {
 	return proto.EnumName(DestroyDeskRspCode_name, int32(x))
 }
+
 func (DestroyDeskRspCode) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_game_f1ee0acae25292c9, []int{6}
+	return fileDescriptor_2a9278d664c0c01e, []int{6}
 }
 
 type VoteOption int32
@@ -290,6 +306,7 @@ var VoteOption_name = map[int32]string{
 	1: "VoteOptionAgree",
 	2: "VoteOptionReject",
 }
+
 var VoteOption_value = map[string]int32{
 	"VoteOptionNone":   0,
 	"VoteOptionAgree":  1,
@@ -299,8 +316,9 @@ var VoteOption_value = map[string]int32{
 func (x VoteOption) String() string {
 	return proto.EnumName(VoteOption_name, int32(x))
 }
+
 func (VoteOption) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_game_f1ee0acae25292c9, []int{7}
+	return fileDescriptor_2a9278d664c0c01e, []int{7}
 }
 
 // 查询游戏配置 c -> s
@@ -318,16 +336,17 @@ func (m *QueryGameConfigReq) Reset()         { *m = QueryGameConfigReq{} }
 func (m *QueryGameConfigReq) String() string { return proto.CompactTextString(m) }
 func (*QueryGameConfigReq) ProtoMessage()    {}
 func (*QueryGameConfigReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_game_f1ee0acae25292c9, []int{0}
+	return fileDescriptor_2a9278d664c0c01e, []int{0}
 }
+
 func (m *QueryGameConfigReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_QueryGameConfigReq.Unmarshal(m, b)
 }
 func (m *QueryGameConfigReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_QueryGameConfigReq.Marshal(b, m, deterministic)
 }
-func (dst *QueryGameConfigReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryGameConfigReq.Merge(dst, src)
+func (m *QueryGameConfigReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryGameConfigReq.Merge(m, src)
 }
 func (m *QueryGameConfigReq) XXX_Size() int {
 	return xxx_messageInfo_QueryGameConfigReq.Size(m)
@@ -373,16 +392,17 @@ func (m *QueryGameConfigRsp) Reset()         { *m = QueryGameConfigRsp{} }
 func (m *QueryGameConfigRsp) String() string { return proto.CompactTextString(m) }
 func (*QueryGameConfigRsp) ProtoMessage()    {}
 func (*QueryGameConfigRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_game_f1ee0acae25292c9, []int{1}
+	return fileDescriptor_2a9278d664c0c01e, []int{1}
 }
+
 func (m *QueryGameConfigRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_QueryGameConfigRsp.Unmarshal(m, b)
 }
 func (m *QueryGameConfigRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_QueryGameConfigRsp.Marshal(b, m, deterministic)
 }
-func (dst *QueryGameConfigRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryGameConfigRsp.Merge(dst, src)
+func (m *QueryGameConfigRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryGameConfigRsp.Merge(m, src)
 }
 func (m *QueryGameConfigRsp) XXX_Size() int {
 	return xxx_messageInfo_QueryGameConfigRsp.Size(m)
@@ -427,16 +447,17 @@ func (m *QueryDeskInfoReq) Reset()         { *m = QueryDeskInfoReq{} }
 func (m *QueryDeskInfoReq) String() string { return proto.CompactTextString(m) }
 func (*QueryDeskInfoReq) ProtoMessage()    {}
 func (*QueryDeskInfoReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_game_f1ee0acae25292c9, []int{2}
+	return fileDescriptor_2a9278d664c0c01e, []int{2}
 }
+
 func (m *QueryDeskInfoReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_QueryDeskInfoReq.Unmarshal(m, b)
 }
 func (m *QueryDeskInfoReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_QueryDeskInfoReq.Marshal(b, m, deterministic)
 }
-func (dst *QueryDeskInfoReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryDeskInfoReq.Merge(dst, src)
+func (m *QueryDeskInfoReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryDeskInfoReq.Merge(m, src)
 }
 func (m *QueryDeskInfoReq) XXX_Size() int {
 	return xxx_messageInfo_QueryDeskInfoReq.Size(m)
@@ -475,16 +496,17 @@ func (m *QueryDeskInfoRsp) Reset()         { *m = QueryDeskInfoRsp{} }
 func (m *QueryDeskInfoRsp) String() string { return proto.CompactTextString(m) }
 func (*QueryDeskInfoRsp) ProtoMessage()    {}
 func (*QueryDeskInfoRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_game_f1ee0acae25292c9, []int{3}
+	return fileDescriptor_2a9278d664c0c01e, []int{3}
 }
+
 func (m *QueryDeskInfoRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_QueryDeskInfoRsp.Unmarshal(m, b)
 }
 func (m *QueryDeskInfoRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_QueryDeskInfoRsp.Marshal(b, m, deterministic)
 }
-func (dst *QueryDeskInfoRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryDeskInfoRsp.Merge(dst, src)
+func (m *QueryDeskInfoRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryDeskInfoRsp.Merge(m, src)
 }
 func (m *QueryDeskInfoRsp) XXX_Size() int {
 	return xxx_messageInfo_QueryDeskInfoRsp.Size(m)
@@ -532,16 +554,17 @@ func (m *MakeDeskReq) Reset()         { *m = MakeDeskReq{} }
 func (m *MakeDeskReq) String() string { return proto.CompactTextString(m) }
 func (*MakeDeskReq) ProtoMessage()    {}
 func (*MakeDeskReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_game_f1ee0acae25292c9, []int{4}
+	return fileDescriptor_2a9278d664c0c01e, []int{4}
 }
+
 func (m *MakeDeskReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_MakeDeskReq.Unmarshal(m, b)
 }
 func (m *MakeDeskReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_MakeDeskReq.Marshal(b, m, deterministic)
 }
-func (dst *MakeDeskReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_MakeDeskReq.Merge(dst, src)
+func (m *MakeDeskReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MakeDeskReq.Merge(m, src)
 }
 func (m *MakeDeskReq) XXX_Size() int {
 	return xxx_messageInfo_MakeDeskReq.Size(m)
@@ -601,16 +624,17 @@ func (m *MakeDeskRsp) Reset()         { *m = MakeDeskRsp{} }
 func (m *MakeDeskRsp) String() string { return proto.CompactTextString(m) }
 func (*MakeDeskRsp) ProtoMessage()    {}
 func (*MakeDeskRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_game_f1ee0acae25292c9, []int{5}
+	return fileDescriptor_2a9278d664c0c01e, []int{5}
 }
+
 func (m *MakeDeskRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_MakeDeskRsp.Unmarshal(m, b)
 }
 func (m *MakeDeskRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_MakeDeskRsp.Marshal(b, m, deterministic)
 }
-func (dst *MakeDeskRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_MakeDeskRsp.Merge(dst, src)
+func (m *MakeDeskRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MakeDeskRsp.Merge(m, src)
 }
 func (m *MakeDeskRsp) XXX_Size() int {
 	return xxx_messageInfo_MakeDeskRsp.Size(m)
@@ -662,16 +686,17 @@ func (m *JoinDeskReq) Reset()         { *m = JoinDeskReq{} }
 func (m *JoinDeskReq) String() string { return proto.CompactTextString(m) }
 func (*JoinDeskReq) ProtoMessage()    {}
 func (*JoinDeskReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_game_f1ee0acae25292c9, []int{6}
+	return fileDescriptor_2a9278d664c0c01e, []int{6}
 }
+
 func (m *JoinDeskReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_JoinDeskReq.Unmarshal(m, b)
 }
 func (m *JoinDeskReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_JoinDeskReq.Marshal(b, m, deterministic)
 }
-func (dst *JoinDeskReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_JoinDeskReq.Merge(dst, src)
+func (m *JoinDeskReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_JoinDeskReq.Merge(m, src)
 }
 func (m *JoinDeskReq) XXX_Size() int {
 	return xxx_messageInfo_JoinDeskReq.Size(m)
@@ -711,16 +736,17 @@ func (m *JoinDeskRsp) Reset()         { *m = JoinDeskRsp{} }
 func (m *JoinDeskRsp) String() string { return proto.CompactTextString(m) }
 func (*JoinDeskRsp) ProtoMessage()    {}
 func (*JoinDeskRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_game_f1ee0acae25292c9, []int{7}
+	return fileDescriptor_2a9278d664c0c01e, []int{7}
 }
+
 func (m *JoinDeskRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_JoinDeskRsp.Unmarshal(m, b)
 }
 func (m *JoinDeskRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_JoinDeskRsp.Marshal(b, m, deterministic)
 }
-func (dst *JoinDeskRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_JoinDeskRsp.Merge(dst, src)
+func (m *JoinDeskRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_JoinDeskRsp.Merge(m, src)
 }
 func (m *JoinDeskRsp) XXX_Size() int {
 	return xxx_messageInfo_JoinDeskRsp.Size(m)
@@ -772,16 +798,17 @@ func (m *SitDownReq) Reset()         { *m = SitDownReq{} }
 func (m *SitDownReq) String() string { return proto.CompactTextString(m) }
 func (*SitDownReq) ProtoMessage()    {}
 func (*SitDownReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_game_f1ee0acae25292c9, []int{8}
+	return fileDescriptor_2a9278d664c0c01e, []int{8}
 }
+
 func (m *SitDownReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SitDownReq.Unmarshal(m, b)
 }
 func (m *SitDownReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_SitDownReq.Marshal(b, m, deterministic)
 }
-func (dst *SitDownReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_SitDownReq.Merge(dst, src)
+func (m *SitDownReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SitDownReq.Merge(m, src)
 }
 func (m *SitDownReq) XXX_Size() int {
 	return xxx_messageInfo_SitDownReq.Size(m)
@@ -820,16 +847,17 @@ func (m *SitDownRsp) Reset()         { *m = SitDownRsp{} }
 func (m *SitDownRsp) String() string { return proto.CompactTextString(m) }
 func (*SitDownRsp) ProtoMessage()    {}
 func (*SitDownRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_game_f1ee0acae25292c9, []int{9}
+	return fileDescriptor_2a9278d664c0c01e, []int{9}
 }
+
 func (m *SitDownRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SitDownRsp.Unmarshal(m, b)
 }
 func (m *SitDownRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_SitDownRsp.Marshal(b, m, deterministic)
 }
-func (dst *SitDownRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_SitDownRsp.Merge(dst, src)
+func (m *SitDownRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SitDownRsp.Merge(m, src)
 }
 func (m *SitDownRsp) XXX_Size() int {
 	return xxx_messageInfo_SitDownRsp.Size(m)
@@ -873,16 +901,17 @@ func (m *ExitDeskReq) Reset()         { *m = ExitDeskReq{} }
 func (m *ExitDeskReq) String() string { return proto.CompactTextString(m) }
 func (*ExitDeskReq) ProtoMessage()    {}
 func (*ExitDeskReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_game_f1ee0acae25292c9, []int{10}
+	return fileDescriptor_2a9278d664c0c01e, []int{10}
 }
+
 func (m *ExitDeskReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ExitDeskReq.Unmarshal(m, b)
 }
 func (m *ExitDeskReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ExitDeskReq.Marshal(b, m, deterministic)
 }
-func (dst *ExitDeskReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ExitDeskReq.Merge(dst, src)
+func (m *ExitDeskReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ExitDeskReq.Merge(m, src)
 }
 func (m *ExitDeskReq) XXX_Size() int {
 	return xxx_messageInfo_ExitDeskReq.Size(m)
@@ -913,16 +942,17 @@ func (m *ExitDeskRsp) Reset()         { *m = ExitDeskRsp{} }
 func (m *ExitDeskRsp) String() string { return proto.CompactTextString(m) }
 func (*ExitDeskRsp) ProtoMessage()    {}
 func (*ExitDeskRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_game_f1ee0acae25292c9, []int{11}
+	return fileDescriptor_2a9278d664c0c01e, []int{11}
 }
+
 func (m *ExitDeskRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ExitDeskRsp.Unmarshal(m, b)
 }
 func (m *ExitDeskRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ExitDeskRsp.Marshal(b, m, deterministic)
 }
-func (dst *ExitDeskRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ExitDeskRsp.Merge(dst, src)
+func (m *ExitDeskRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ExitDeskRsp.Merge(m, src)
 }
 func (m *ExitDeskRsp) XXX_Size() int {
 	return xxx_messageInfo_ExitDeskRsp.Size(m)
@@ -967,16 +997,17 @@ func (m *DestroyDeskReq) Reset()         { *m = DestroyDeskReq{} }
 func (m *DestroyDeskReq) String() string { return proto.CompactTextString(m) }
 func (*DestroyDeskReq) ProtoMessage()    {}
 func (*DestroyDeskReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_game_f1ee0acae25292c9, []int{12}
+	return fileDescriptor_2a9278d664c0c01e, []int{12}
 }
+
 func (m *DestroyDeskReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DestroyDeskReq.Unmarshal(m, b)
 }
 func (m *DestroyDeskReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_DestroyDeskReq.Marshal(b, m, deterministic)
 }
-func (dst *DestroyDeskReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_DestroyDeskReq.Merge(dst, src)
+func (m *DestroyDeskReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DestroyDeskReq.Merge(m, src)
 }
 func (m *DestroyDeskReq) XXX_Size() int {
 	return xxx_messageInfo_DestroyDeskReq.Size(m)
@@ -1015,16 +1046,17 @@ func (m *DestroyDeskRsp) Reset()         { *m = DestroyDeskRsp{} }
 func (m *DestroyDeskRsp) String() string { return proto.CompactTextString(m) }
 func (*DestroyDeskRsp) ProtoMessage()    {}
 func (*DestroyDeskRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_game_f1ee0acae25292c9, []int{13}
+	return fileDescriptor_2a9278d664c0c01e, []int{13}
 }
+
 func (m *DestroyDeskRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DestroyDeskRsp.Unmarshal(m, b)
 }
 func (m *DestroyDeskRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_DestroyDeskRsp.Marshal(b, m, deterministic)
 }
-func (dst *DestroyDeskRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_DestroyDeskRsp.Merge(dst, src)
+func (m *DestroyDeskRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DestroyDeskRsp.Merge(m, src)
 }
 func (m *DestroyDeskRsp) XXX_Size() int {
 	return xxx_messageInfo_DestroyDeskRsp.Size(m)
@@ -1069,16 +1101,17 @@ func (m *DestroyDeskResultNotif) Reset()         { *m = DestroyDeskResultNotif{}
 func (m *DestroyDeskResultNotif) String() string { return proto.CompactTextString(m) }
 func (*DestroyDeskResultNotif) ProtoMessage()    {}
 func (*DestroyDeskResultNotif) Descriptor() ([]byte, []int) {
-	return fileDescriptor_game_f1ee0acae25292c9, []int{14}
+	return fileDescriptor_2a9278d664c0c01e, []int{14}
 }
+
 func (m *DestroyDeskResultNotif) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DestroyDeskResultNotif.Unmarshal(m, b)
 }
 func (m *DestroyDeskResultNotif) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_DestroyDeskResultNotif.Marshal(b, m, deterministic)
 }
-func (dst *DestroyDeskResultNotif) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_DestroyDeskResultNotif.Merge(dst, src)
+func (m *DestroyDeskResultNotif) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DestroyDeskResultNotif.Merge(m, src)
 }
 func (m *DestroyDeskResultNotif) XXX_Size() int {
 	return xxx_messageInfo_DestroyDeskResultNotif.Size(m)
@@ -1117,16 +1150,17 @@ func (m *VoteDestroyDeskStartNotif) Reset()         { *m = VoteDestroyDeskStartN
 func (m *VoteDestroyDeskStartNotif) String() string { return proto.CompactTextString(m) }
 func (*VoteDestroyDeskStartNotif) ProtoMessage()    {}
 func (*VoteDestroyDeskStartNotif) Descriptor() ([]byte, []int) {
-	return fileDescriptor_game_f1ee0acae25292c9, []int{15}
+	return fileDescriptor_2a9278d664c0c01e, []int{15}
 }
+
 func (m *VoteDestroyDeskStartNotif) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_VoteDestroyDeskStartNotif.Unmarshal(m, b)
 }
 func (m *VoteDestroyDeskStartNotif) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_VoteDestroyDeskStartNotif.Marshal(b, m, deterministic)
 }
-func (dst *VoteDestroyDeskStartNotif) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_VoteDestroyDeskStartNotif.Merge(dst, src)
+func (m *VoteDestroyDeskStartNotif) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_VoteDestroyDeskStartNotif.Merge(m, src)
 }
 func (m *VoteDestroyDeskStartNotif) XXX_Size() int {
 	return xxx_messageInfo_VoteDestroyDeskStartNotif.Size(m)
@@ -1171,16 +1205,17 @@ func (m *VoteDestroyDeskReq) Reset()         { *m = VoteDestroyDeskReq{} }
 func (m *VoteDestroyDeskReq) String() string { return proto.CompactTextString(m) }
 func (*VoteDestroyDeskReq) ProtoMessage()    {}
 func (*VoteDestroyDeskReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_game_f1ee0acae25292c9, []int{16}
+	return fileDescriptor_2a9278d664c0c01e, []int{16}
 }
+
 func (m *VoteDestroyDeskReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_VoteDestroyDeskReq.Unmarshal(m, b)
 }
 func (m *VoteDestroyDeskReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_VoteDestroyDeskReq.Marshal(b, m, deterministic)
 }
-func (dst *VoteDestroyDeskReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_VoteDestroyDeskReq.Merge(dst, src)
+func (m *VoteDestroyDeskReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_VoteDestroyDeskReq.Merge(m, src)
 }
 func (m *VoteDestroyDeskReq) XXX_Size() int {
 	return xxx_messageInfo_VoteDestroyDeskReq.Size(m)
@@ -1219,16 +1254,17 @@ func (m *VoteDestroyDeskNotif) Reset()         { *m = VoteDestroyDeskNotif{} }
 func (m *VoteDestroyDeskNotif) String() string { return proto.CompactTextString(m) }
 func (*VoteDestroyDeskNotif) ProtoMessage()    {}
 func (*VoteDestroyDeskNotif) Descriptor() ([]byte, []int) {
-	return fileDescriptor_game_f1ee0acae25292c9, []int{17}
+	return fileDescriptor_2a9278d664c0c01e, []int{17}
 }
+
 func (m *VoteDestroyDeskNotif) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_VoteDestroyDeskNotif.Unmarshal(m, b)
 }
 func (m *VoteDestroyDeskNotif) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_VoteDestroyDeskNotif.Marshal(b, m, deterministic)
 }
-func (dst *VoteDestroyDeskNotif) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_VoteDestroyDeskNotif.Merge(dst, src)
+func (m *VoteDestroyDeskNotif) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_VoteDestroyDeskNotif.Merge(m, src)
 }
 func (m *VoteDestroyDeskNotif) XXX_Size() int {
 	return xxx_messageInfo_VoteDestroyDeskNotif.Size(m)
@@ -1273,16 +1309,17 @@ func (m *VoteDestroyDeskInfo) Reset()         { *m = VoteDestroyDeskInfo{} }
 func (m *VoteDestroyDeskInfo) String() string { return proto.CompactTextString(m) }
 func (*VoteDestroyDeskInfo) ProtoMessage()    {}
 func (*VoteDestroyDeskInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_game_f1ee0acae25292c9, []int{18}
+	return fileDescriptor_2a9278d664c0c01e, []int{18}
 }
+
 func (m *VoteDestroyDeskInfo) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_VoteDestroyDeskInfo.Unmarshal(m, b)
 }
 func (m *VoteDestroyDeskInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_VoteDestroyDeskInfo.Marshal(b, m, deterministic)
 }
-func (dst *VoteDestroyDeskInfo) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_VoteDestroyDeskInfo.Merge(dst, src)
+func (m *VoteDestroyDeskInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_VoteDestroyDeskInfo.Merge(m, src)
 }
 func (m *VoteDestroyDeskInfo) XXX_Size() int {
 	return xxx_messageInfo_VoteDestroyDeskInfo.Size(m)
@@ -1321,16 +1358,17 @@ func (m *GameAction) Reset()         { *m = GameAction{} }
 func (m *GameAction) String() string { return proto.CompactTextString(m) }
 func (*GameAction) ProtoMessage()    {}
 func (*GameAction) Descriptor() ([]byte, []int) {
-	return fileDescriptor_game_f1ee0acae25292c9, []int{19}
+	return fileDescriptor_2a9278d664c0c01e, []int{19}
 }
+
 func (m *GameAction) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GameAction.Unmarshal(m, b)
 }
 func (m *GameAction) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_GameAction.Marshal(b, m, deterministic)
 }
-func (dst *GameAction) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GameAction.Merge(dst, src)
+func (m *GameAction) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GameAction.Merge(m, src)
 }
 func (m *GameAction) XXX_Size() int {
 	return xxx_messageInfo_GameAction.Size(m)
@@ -1375,16 +1413,17 @@ func (m *GameNotif) Reset()         { *m = GameNotif{} }
 func (m *GameNotif) String() string { return proto.CompactTextString(m) }
 func (*GameNotif) ProtoMessage()    {}
 func (*GameNotif) Descriptor() ([]byte, []int) {
-	return fileDescriptor_game_f1ee0acae25292c9, []int{20}
+	return fileDescriptor_2a9278d664c0c01e, []int{20}
 }
+
 func (m *GameNotif) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GameNotif.Unmarshal(m, b)
 }
 func (m *GameNotif) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_GameNotif.Marshal(b, m, deterministic)
 }
-func (dst *GameNotif) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GameNotif.Merge(dst, src)
+func (m *GameNotif) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GameNotif.Merge(m, src)
 }
 func (m *GameNotif) XXX_Size() int {
 	return xxx_messageInfo_GameNotif.Size(m)
@@ -1410,6 +1449,14 @@ func (m *GameNotif) GetNotifValue() []byte {
 }
 
 func init() {
+	proto.RegisterEnum("pbgame.UserDeskStatus", UserDeskStatus_name, UserDeskStatus_value)
+	proto.RegisterEnum("pbgame.FeeType", FeeType_name, FeeType_value)
+	proto.RegisterEnum("pbgame.MakeDeskRspCode", MakeDeskRspCode_name, MakeDeskRspCode_value)
+	proto.RegisterEnum("pbgame.JoinDeskRspCode", JoinDeskRspCode_name, JoinDeskRspCode_value)
+	proto.RegisterEnum("pbgame.SitDownRspCode", SitDownRspCode_name, SitDownRspCode_value)
+	proto.RegisterEnum("pbgame.ExitDeskRspCode", ExitDeskRspCode_name, ExitDeskRspCode_value)
+	proto.RegisterEnum("pbgame.DestroyDeskRspCode", DestroyDeskRspCode_name, DestroyDeskRspCode_value)
+	proto.RegisterEnum("pbgame.VoteOption", VoteOption_name, VoteOption_value)
 	proto.RegisterType((*QueryGameConfigReq)(nil), "pbgame.QueryGameConfigReq")
 	proto.RegisterType((*QueryGameConfigRsp)(nil), "pbgame.QueryGameConfigRsp")
 	proto.RegisterType((*QueryDeskInfoReq)(nil), "pbgame.QueryDeskInfoReq")
@@ -1431,19 +1478,11 @@ func init() {
 	proto.RegisterType((*VoteDestroyDeskInfo)(nil), "pbgame.VoteDestroyDeskInfo")
 	proto.RegisterType((*GameAction)(nil), "pbgame.GameAction")
 	proto.RegisterType((*GameNotif)(nil), "pbgame.GameNotif")
-	proto.RegisterEnum("pbgame.UserDeskStatus", UserDeskStatus_name, UserDeskStatus_value)
-	proto.RegisterEnum("pbgame.FeeType", FeeType_name, FeeType_value)
-	proto.RegisterEnum("pbgame.MakeDeskRspCode", MakeDeskRspCode_name, MakeDeskRspCode_value)
-	proto.RegisterEnum("pbgame.JoinDeskRspCode", JoinDeskRspCode_name, JoinDeskRspCode_value)
-	proto.RegisterEnum("pbgame.SitDownRspCode", SitDownRspCode_name, SitDownRspCode_value)
-	proto.RegisterEnum("pbgame.ExitDeskRspCode", ExitDeskRspCode_name, ExitDeskRspCode_value)
-	proto.RegisterEnum("pbgame.DestroyDeskRspCode", DestroyDeskRspCode_name, DestroyDeskRspCode_value)
-	proto.RegisterEnum("pbgame.VoteOption", VoteOption_name, VoteOption_value)
 }
 
-func init() { proto.RegisterFile("game/game.proto", fileDescriptor_game_f1ee0acae25292c9) }
+func init() { proto.RegisterFile("game/game.proto", fileDescriptor_2a9278d664c0c01e) }
 
-var fileDescriptor_game_f1ee0acae25292c9 = []byte{
+var fileDescriptor_2a9278d664c0c01e = []byte{
 	// 1126 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x57, 0xdd, 0x6e, 0xdb, 0x36,
 	0x14, 0x9e, 0xe4, 0xbf, 0xe4, 0xb8, 0xb1, 0x19, 0x26, 0x75, 0x1d, 0x2f, 0xe8, 0x02, 0x01, 0x1b,
