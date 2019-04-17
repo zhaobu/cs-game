@@ -61,8 +61,7 @@ func flashDesk(n *pbinner.DeskChangeNotif) {
 		}
 	}
 
-	go sendClubChangeInfo(n.ClubID, clubChangeTypUpdate, 0)
-
+	go sendClubChangeInfo(n.ClubID, clubChanageTypeDeskUpdata, 0)
 }
 
 func checkAutoCreate(cid int64) {

@@ -2,6 +2,7 @@ package util
 
 import (
 	"encoding/json"
+	"fmt"
 	"math"
 	"math/rand"
 	"sort"
@@ -67,10 +68,14 @@ func Float64Equal(f1, f2 float64) bool {
 // pb转json字符串
 func PB2JSON(from_pb proto.Message, f bool) string {
 	var json_str []byte
+	var err error
 	if f {
-		json_str, _ = json.MarshalIndent(from_pb, "", "	")
+		json_str, err = json.MarshalIndent(from_pb, "", "	")
 	} else {
-		json_str, _ = json.Marshal(from_pb)
+		json_str, err = json.Marshal(from_pb)
+	}
+	if err != nil {
+		fmt.Printf("PB2JSON err:%s", err)
 	}
 	return string(json_str)
 }

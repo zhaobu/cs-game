@@ -40,10 +40,23 @@ func (self *HuLib) normal_hu(cardInfo *PlayerCardInfo) (bool, EmHuType) {
 	return false, 0
 }
 
+func hasHuaCard(cardInfo *PlayerCardInfo) bool {
+	for k, _ := range cardInfo.StackCards {
+		if IsHuaCard(k) {
+			return true
+		}
+	}
+	return false
+}
+
 // 胡牌牌型
 func (self *HuLib) CheckHuType(cardInfo *PlayerCardInfo) (bool, HuTypeList) {
 	huTypeList := HuTypeList{}
 
+	//判断是否有花牌
+	if hasHuaCard(cardInfo) {
+		return false, nil
+	}
 	if ok, hutype := self.normal_hu(cardInfo); ok {
 		huTypeList = append(huTypeList, hutype)
 	}

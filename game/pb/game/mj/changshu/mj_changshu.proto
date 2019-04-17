@@ -153,12 +153,49 @@ message S2CChangePos {
   repeated ChangePosInfo pos_info = 1;  //换位结果
 }
 
-// message UserCardInfo {
-//   repeated cyint32 hand_card1 = 1;  //玩家0手牌
-//   repeated cyint32 hand_card2 = 2;  //玩家1手牌
-//   repeated cyint32 hand_card3 = 3;  //玩家2手牌
-//   repeated cyint32 hand_card4 = 4;  //玩家3手牌
+enum CanOperMask {
+  OperMaskNone = 0;
+  OperMaskChi = 1;   //吃标记
+  OperMaskPeng = 2;  //碰标记
+  OperMaskGang = 4;  //杠标记
+  OperMaskHu = 8;    //胡标记
+}
+
+enum ChiTypeMask {
+  ChiMaskNone = 0;
+  ChiMaskLeft = 1;    //左吃(11,12,13,其中11为被吃的牌)
+  ChiMaskMiddle = 2;  //中吃(11,12,13,其中12为被吃的牌)
+  ChiMaskRight = 4;   //右吃(11,12,13,其中13为被吃的牌)
+}
+
+//胡
+// message CanHuMsg {
 // }
+
+//吃
+message CanChiMsg {
+  uint32 chi_type = 1;  //能吃的类型
+}
+
+//杠
+message CanGangMsg {
+  repeated int32 cards = 1;  //能杠的牌
+}
+
+//玩家该轮的操作
+message S2CHaveOperation {
+  uint32 oper_mask = 1;     //操作的掩码
+  int32 card = 2;           //操作的牌
+  CanChiMsg can_chi = 3;    //吃信息
+  CanGangMsg can_gang = 4;  //杠信息
+}
+
+message Json_UserCardInfo {
+  message cards {
+    repeated int32 cards = 1;  //一个人的手牌
+  }
+  map<int32, cards> hand_cards = 1;  //每个人的手牌
+}
 
 //游戏开始
 message S2CStartGame {
@@ -167,30 +204,29 @@ message S2CStartGame {
   int32 total_num = 3;             //总牌数
   uint32 cur_inning = 4;           //当前局
   repeated cyint32 hua_cards = 5;  //庄家花牌
-  repeated cyint32 dice_value = 6;      //摸牌色子
-  int32 left_time = 7;                  //超时时间
-  S2CHaveOperation banker_oper = 8;     //庄家能做的操作
-  repeated cyint32 all_user_cards = 9;  //所有玩家手牌
+  repeated cyint32 dice_value = 6;   //摸牌色子
+  int32 left_time = 7;               //超时时间
+  S2CHaveOperation banker_oper = 8;  //庄家能做的操作
+  string json_all_cards = 9;  //所有玩家手牌,(按Json_UserCardInfo格式解析)
 }
 
-// //发牌
-// message S2CDealCard {
-//   int32 card_first = 1;        //第一个出牌的玩家id
-//   repeated cyint32 cards = 2;  //玩家手牌数组
-// }
+//第一次补花信息
+message Json_FirstBuHua {
+  repeated int32 hua_cards = 1;  //所有的花牌(包括发牌时的花和补到的花)
+  repeated int32 mo_cards = 2;  //摸到的所有牌
+}
 
 //玩家摸牌
 message BS2CDrawCard {
-  int32 chair_id = 1;            //摸牌玩家
-  repeated cyint32 huacard = 2;  //花牌
-  int32 card = 3;                //摸到的牌
-  int32 left_num = 4;            //剩余张数
+  int32 chair_id = 1;         //摸牌玩家
+  int32 left_num = 2;         //剩余张数
+  string json_draw_info = 3;  //摸牌信息(按Json_FirstBuHua格式解析)
 }
 
 //当前出牌玩家(玩家摸牌,吃牌,碰牌后广播,表示当前出牌的玩家)
-message BS2CCurOutChair {
-  int32 chair_id = 1;  //当前出牌玩家
-}
+// message BS2CCurOutChair {
+//   int32 chair_id = 1;  //当前出牌玩家
+// }
 
 // message BuHuaOnce {
 //   int32 hua_card = 1;  //花牌值
@@ -208,47 +244,11 @@ message BS2COutCard {
   int32 card = 2;      //出的牌
 }
 
-enum CanOperMask {
-  OperMaskNone = 0;
-  OperMaskChi = 1;   //吃标记
-  OperMaskPeng = 2;  //碰标记
-  OperMaskGang = 4;  //杠标记
-  OperMaskHu = 8;    //胡标记
-}
-
-enum ChiTypeMask {
-  ChiMaskNone = 0;
-  ChiMaskLeft = 1;    //左吃(11,12,13,其中11为被吃的牌)
-  ChiMaskMiddle = 2;  //中吃(11,12,13,其中12为被吃的牌)
-  ChiMaskRight = 4;   //右吃(11,12,13,其中13为被吃的牌)
-}
-
-//吃
-message CanChiMsg {
-  uint32 chi_type = 1;  //能吃的类型
-}
-
-//杠
-message CanGangMsg {
-  repeated int32 cards = 1;  //能杠的牌
-}
-
-//胡
-// message CanHuMsg {
-// }
-
-//玩家该轮的操作
-message S2CHaveOperation {
-  uint32 oper_mask = 1;     //操作的掩码
-  int32 card = 2;           //操作的牌
-  CanChiMsg can_chi = 3;    //吃信息
-  CanGangMsg can_gang = 4;  //杠信息
-}
-
 //玩家碰牌
 message BS2CPengCard {
-  int32 chair_id = 1;  //碰牌玩家
-  int32 card = 2;      //要碰的牌
+  int32 chair_id = 1;           //碰牌玩家
+  int32 card = 2;               //要碰的牌
+  string json_first_buhua = 3;  //第一次补花信息(按Json_FirstBuHua格式解析)
 }
 
 enum GangType {
@@ -264,13 +264,15 @@ message BS2CGangCard {
   GangType type = 3;
   //放杠的玩家,暗杠为-1,补杠时为碰牌时被碰玩家,明杠时为出牌玩家
   int32 lose_chair = 4;
+  string json_first_buhua = 5;  //第一次补花信息(按Json_FirstBuHua格式解析)
 }
 
 //玩家吃牌
 message BS2CChiCard {
-  int32 chair_id = 1;   //吃牌玩家
-  int32 card = 2;       //要吃的牌
-  uint32 chi_type = 3;  //吃类型掩码
+  int32 chair_id = 1;           //吃牌玩家
+  int32 card = 2;               //要吃的牌
+  uint32 chi_type = 3;          //吃类型掩码
+  string json_first_buhua = 4;  //第一次补花信息(按Json_FirstBuHua格式解析)
 }
 
 //玩家胡牌

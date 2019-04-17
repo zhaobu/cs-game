@@ -9,6 +9,7 @@ type ClubMember struct {
 	UserID   uint64
 	Identity int32
 	Agree    bool
+	Relation []uint64	//改成员关系列表
 }
 
 type DeskSetting struct {

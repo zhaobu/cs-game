@@ -82,6 +82,7 @@ func ackJoin(e *mgo.ClubEmail, agree bool) int32 {
 			UserID:   joinUID,
 			Identity: identityNormal,
 			Agree:    false,
+			Relation:[]uint64{},
 		}
 		cc.noCommit = true
 		cc.Unlock()

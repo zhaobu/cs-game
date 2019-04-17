@@ -150,6 +150,6 @@ func (self *CardDef) StackCards(rawcards []int32) map[int32]int32 {
 	return newcard
 }
 
-func (self *CardDef) IsHuaCard(card int32) bool {
+func IsHuaCard(card int32) bool {
 	return card >= 51 && card <= 59
 }

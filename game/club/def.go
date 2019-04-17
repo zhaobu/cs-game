@@ -11,6 +11,7 @@ const (
 	clubChangeTypUpdate clubChangeTyp = 2
 	clubChangeTypExit   clubChangeTyp = 3
 	clubChangeTypRemove clubChangeTyp = 4
+	clubChanageTypeDeskUpdata clubChangeTyp  = 5
 	// 被踢出？
 )
 

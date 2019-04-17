@@ -281,3 +281,54 @@ message RefreshClubDesks{
     pbcommon.ReqHead Head = 1;
     int64 ClubID = 2;
 }
+
+//查询俱乐部成员关系列表请求 需要管理员以上权限
+message QueryClubMemberRelationReq{
+    pbcommon.ReqHead Head = 1;
+    int64 ClubID = 2;               //俱乐部Id
+    uint64 UserID = 3;              //被查询用户
+}
+//查询俱乐部成员关系列表回应
+message QueryClubMemberRelationRsp{
+    pbcommon.RspHead Head = 1;
+    int32 Code = 2;                //1 成功 2俱乐部不存在 3请求用户权限不够 4被查询用户不存在俱乐部中
+    repeated MemberInfo Members = 3;
+}
+
+//添加俱乐部成员关系
+message AddClubMemberRelationReq{
+    pbcommon.ReqHead Head = 1;
+    int64 ClubID = 2;                       //俱乐部Id
+    uint64 UserID = 3;                      //被操作的用户id
+    uint64 RelationUserID = 4;              //被添加的用户Id
+}
+//添加俱乐部成员关系
+message AddClubMemberRelationRsp{
+    pbcommon.RspHead Head = 1;
+    int32 Code = 2;                         //1 成功 2俱乐部不存在 3请求用户权限不够 4用户不是本俱乐部成员 5已经存在了关联关系
+}
+
+//添加俱乐部成员关系
+message RemoveClubMemberRelationReq{
+    pbcommon.ReqHead Head = 1;
+    int64 ClubID = 2;                       //俱乐部Id
+    uint64 UserID = 3;                      //被操作的用户id
+    uint64 RelationUserID = 4;              //被添加的用户Id
+}
+//添加俱乐部成员关系
+message RemoveClubMemberRelationRsp{
+    pbcommon.RspHead Head = 1;
+    int32 Code = 2;                         //1 成功 2俱乐部不存在 3请求用户权限不够 4用户不是本俱乐部成员 5用户不在关系列表中
+}
+
+//校验用户是否能加入俱乐部桌子请求
+message CheckCanJoinClubDeskReq{
+    int64 ClubID = 1;                       //俱乐部Id
+    repeated uint64 DeskUserIds = 2;        //桌子内的用户成员
+    uint64 JoinUserId = 3;                  //
+}
+
+//校验用户是否能加入俱乐部桌子回应
+message CheckCanJoinClubDeskRsp{
+    int32 Code = 1;                         //1可以加入 2俱乐部不存在 3加入用户不属于此俱乐部成员 4该用户于桌子内成员有亲属关系
+}

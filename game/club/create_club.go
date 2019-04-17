@@ -89,6 +89,7 @@ func (p *club) CreateClubReq(ctx context.Context, args *codec.Message, reply *co
 		UserID:   createUserID,
 		Identity: identityMaster,
 		Agree:    true,
+		Relation:[]uint64{},
 	}
 	for _, v := range req.GameArgs {
 		cc.GameArgs = append(cc.GameArgs, &mgo.DeskSetting{

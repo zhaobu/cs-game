@@ -3,6 +3,7 @@ package clientgame
 import (
 	csession "cy/game/client-demo/session"
 	"cy/game/codec/protobuf"
+	"encoding/json"
 
 	// mj "cy/game/logic/changshu/majiang"
 	pbcommon "cy/game/pb/common"
@@ -74,11 +75,19 @@ func (self *Changshu) DispatchRecv(msg *pbgame.GameNotif) {
 	case *pbgame_logic.BS2CHuCard:
 		tlog.Info("recv GameNotif 玩家胡牌")
 		self.dealHuCard(v)
+	case *pbgame_logic.BS2CDrawCard:
+		tlog.Info("recv GameNotif 玩家摸牌")
+		self.dealDrawCard(v)
 	default:
 		tlog.Info("recv GameNotif 未处理", zap.String("NotifName", msg.NotifName))
 	}
 }
 
+func getFirstBuHua(str string) (msg *pbgame_logic.Json_FirstBuHua) {
+	msg = &pbgame_logic.Json_FirstBuHua{}
+	json.Unmarshal([]byte(str), &msg)
+	return
+}
 func (self *Changshu) dealChangPos(msg *pbgame_logic.S2CChangePos) {
 	for _, v := range msg.PosInfo {
 		if v.UserId == self.UserId {
@@ -86,6 +95,17 @@ func (self *Changshu) dealChangPos(msg *pbgame_logic.S2CChangePos) {
 			self.ChairId = v.UserPos
 		}
 	}
+}
+
+func (self *Changshu) dealDrawCard(msg *pbgame_logic.BS2CDrawCard) {
+	tmp := getFirstBuHua(msg.JsonDrawInfo)
+	if msg.ChairId == self.ChairId {
+		tlog.Info("我摸了牌", zap.Any("MoCards", tmp.MoCards), zap.Any("HuaCards", tmp.HuaCards))
+		self.updateCardInfo(tmp.MoCards, nil)
+	} else {
+		tlog.Info("别人出了牌", zap.Any("MoCards", tmp.MoCards), zap.Any("HuaCards", tmp.HuaCards))
+	}
+
 }
 
 func (self *Changshu) dealOutCard(msg *pbgame_logic.BS2COutCard) {
@@ -180,9 +200,12 @@ func switchToInt32(cards []*pbgame_logic.Cyint32) []int32 {
 
 func (self *Changshu) S2CStartGame(msg *pbgame_logic.S2CStartGame) {
 	self.BankerId = msg.BankerId
-	h := self.ChairId * 14
-	e := h + 13
-	self.HandCards = switchToInt32(msg.AllUserCards[h:e])
+	// h := self.ChairId * 14
+	// e := h + 13
+	// self.HandCards = switchToInt32(msg.AllUserCards[h:e])
+	tmp := pbgame_logic.Json_UserCardInfo{}
+	json.Unmarshal([]byte(msg.JsonAllCards), &tmp)
+	self.HandCards = tmp.HandCards[self.ChairId].Cards
 	tlog.Info("self.HandCards", zap.Any("handcards", self.HandCards))
 	self.readHaveOper(msg.BankerOper)
 }

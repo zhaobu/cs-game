@@ -3,6 +3,7 @@ package main
 import (
 	mj "cy/game/logic/changshu/majiang"
 	pbgame_logic "cy/game/pb/game/mj/changshu"
+	"cy/game/util"
 	"fmt"
 	"math/rand"
 	"sort"
@@ -35,7 +36,8 @@ type gameAllInfo struct {
 	makeCards      bool                              //是否做牌
 	debugCard      []int32                           //配牌
 	laiziCard      map[int32]int32                   //癞子牌
-	hasHu          bool                              //是否胡牌
+	hasHu          bool                              //是否有人胡牌
+	hasFirstBuHua  [4]bool                           //是否已经进行过第一次补花
 }
 
 type mjLib struct {
@@ -152,8 +154,7 @@ func (self *GameSink) ThrowDice(chairId int32, req *pbgame_logic.C2SThrowDice) {
 	msg := &pbgame_logic.BS2CThrowDiceResult{ChairId: chairId}
 	msg.DiceValue = make([]*pbgame_logic.Cyint32, 2)
 	for i, rnd := range self.randDice() {
-		// msg.DiceValue[i] = &pbgame_logic.Cyint32{T: rnd}
-		msg.DiceValue[i] = &pbgame_logic.Cyint32{T: 0}
+		msg.DiceValue[i] = &pbgame_logic.Cyint32{T: rnd}
 		self.diceResult[chairId][i] = rnd
 	}
 
@@ -184,6 +185,7 @@ func (self *GameSink) dealDiceResult() {
 		diceRes[i].dice = self.diceResult[i][0] + self.diceResult[i][1]
 		diceRes[i].oldChairId = int32(i)
 	}
+	log.Debugf("排序前,dices=%+v", diceRes)
 	//排序，实现比较方法即可
 	sort.Slice(diceRes, func(i, j int) bool {
 		if diceRes[i].dice == diceRes[j].dice {
@@ -191,6 +193,7 @@ func (self *GameSink) dealDiceResult() {
 		}
 		return diceRes[i].dice > diceRes[j].dice
 	})
+	log.Debugf("排序后,dices=%+v", diceRes)
 
 	//发送换座位结果
 	posInfo := make([]*pbgame_logic.ChangePosInfo, len(diceRes))
@@ -198,20 +201,25 @@ func (self *GameSink) dealDiceResult() {
 		uid := self.desk.GetUidByChairid(res.oldChairId)
 		posInfo[newChair] = &pbgame_logic.ChangePosInfo{UserPos: int32(newChair), UserId: uid}
 	}
-
 	//切换位子
-	newdiceResult := self.diceResult
-	newplayers := self.players
-	newplayChair := self.desk.playChair
+	newdiceResult := [4][2]int32{}
+	newplayers := make([]*mj.PlayerInfo, len(self.players))
+	newplayChair := map[int32]*deskUserInfo{}
+	log.Debugf("切换内存前,self.diceResult=%+v,self.players=%+v,self.desk.playChair=%+v", self.diceResult, self.players, self.desk.playChair)
+
+	// tlog.Debug("切换内存前", zap.Any("newdiceResult", newdiceResult), zap.Any("newplayers", newplayers), zap.Any("newplayChair", newplayChair))
 	for newChair, res := range diceRes {
-		newdiceResult[newChair], newdiceResult[res.oldChairId] = newdiceResult[res.oldChairId], newdiceResult[newChair]
-		newplayers[newChair], newplayers[res.oldChairId] = newplayers[res.oldChairId], newplayers[newChair]
-		newplayChair[int32(newChair)], newplayChair[res.oldChairId] = newplayChair[res.oldChairId], newplayChair[int32(newChair)]
+		newdiceResult[newChair] = self.diceResult[res.oldChairId]
+		newplayers[newChair] = self.players[res.oldChairId]
+		newplayChair[int32(newChair)] = self.desk.playChair[res.oldChairId]
 		newplayChair[int32(newChair)].chairId = int32(newChair)
 	}
 	self.diceResult = newdiceResult
 	self.players = newplayers
 	self.desk.playChair = newplayChair
+	log.Debugf("切换内存后,self.diceResult=%+v,self.players=%+v,self.desk.playChair=%+v", self.diceResult, self.players, self.desk.playChair)
+
+	// tlog.Debug("切换内存后", zap.Any("newdiceResult", newdiceResult), zap.Any("newplayers", newplayers), zap.Any("newplayChair", newplayChair))
 
 	//记录庄家
 	self.bankerId = 0
@@ -253,7 +261,8 @@ func (self *GameSink) deal_card() {
 	bankerCardInfo.HandCards = player_cards[self.bankerId]
 	bankerCardInfo.StackCards = cardDef.StackCards(player_cards[self.bankerId])
 	//庄家开始第一次补花
-	msg.HuaCards = switchToCyint32(self.firstBuHua(self.bankerId))
+	tmp := self.firstBuHua(self.bankerId)
+	msg.HuaCards = switchToCyint32(tmp.HuaCards)
 	msg.LeftNum = int32(len(self.leftCard))
 	msg.TotalNum = int32(len(self.baseCard))
 	self.curOutChair = self.bankerId
@@ -272,21 +281,9 @@ func (self *GameSink) deal_card() {
 			v.CardInfo.StackCards = cardDef.StackCards(player_cards[k])
 		}
 
-		msg.AllUserCards = []*pbgame_logic.Cyint32{}
-		for i := 0; i < len(self.players); i++ {
-			if i == k {
-				msg.AllUserCards = append(msg.AllUserCards, switchToCyint32(v.CardInfo.HandCards)...)
-				if len(v.CardInfo.HandCards) == 13 {
-					msg.AllUserCards = append(msg.AllUserCards, &pbgame_logic.Cyint32{T: 0})
-				}
-			} else {
-				tmp := [14]int32{}
-				msg.AllUserCards = append(msg.AllUserCards, switchToCyint32(tmp[:])...)
-			}
-		}
-		// tmp := [4]pbgame_logic.UserCardInfo{}
-		// msg.AllUserCards = []*pbgame_logic.UserCardInfo{&tmp[0], &tmp[1], &tmp[2], &tmp[3]}
-		// msg.AllUserCards[k] = &pbgame_logic.UserCardInfo{HandCards: v.CardInfo.HandCards}
+		tmp := &pbgame_logic.Json_UserCardInfo{HandCards: map[int32]*pbgame_logic.Json_UserCardInfoCards{}}
+		tmp.HandCards[int32(k)] = &pbgame_logic.Json_UserCardInfoCards{Cards: v.CardInfo.HandCards}
+		msg.JsonAllCards = util.PB2JSON(tmp, false)
 		log.Warnf("%s手牌为:%v", self.logHeadUser(int32(k)), player_cards[k])
 		//给每个玩家发送游戏开始消息
 		self.sendData(int32(k), msg)
@@ -322,7 +319,7 @@ func switchToCyint32(cards []int32) []*pbgame_logic.Cyint32 {
 // 		self.operAction.updateCardInfo(cardInfo, []int32{moCard}, nil)
 // 		//记录到消息
 // 		huaCards = append(huaCards, card)
-// 		if cardDef.IsHuaCard(moCard) {
+// 		if mj.IsHuaCard(moCard) {
 // 			mj.Add_stack(huaIndex, moCard)
 // 		}
 // 		return moCard
@@ -346,7 +343,7 @@ func switchToCyint32(cards []int32) []*pbgame_logic.Cyint32 {
 // 			//遍历所有
 // 			for huaCard, huaCount := range huaIndex {
 // 				for j := int32(0); j < huaCount; j++ {
-// 					if cardDef.IsHuaCard(operOnce(huaCard)) {
+// 					if mj.IsHuaCard(operOnce(huaCard)) {
 // 						bFin = false
 // 					}
 // 					//补一张减一张
@@ -367,39 +364,41 @@ func switchToCyint32(cards []int32) []*pbgame_logic.Cyint32 {
 // 	return huaCards
 // }
 
-//玩家第一次补花,返回所有的花牌
-func (self *GameSink) firstBuHua(chairId int32) []int32 {
+//玩家第一次补花,返回所有的花牌,所有摸到的牌
+func (self *GameSink) firstBuHua(chairId int32) (msg *pbgame_logic.Json_FirstBuHua) {
+	if self.hasFirstBuHua[chairId] {
+		tlog.Error("玩家第一次补花执行了多次", zap.Int32("chairId", chairId))
+	}
+	msg = &pbgame_logic.Json_FirstBuHua{}
+	self.hasFirstBuHua[chairId] = true
 	cardInfo := &self.players[chairId].CardInfo
-	tlog.Debug("庄家补花前手牌数据为", zap.Any("cardInfo", cardInfo))
+	tlog.Debug("玩家第一次补花前手牌数据为", zap.Int32("chairId", chairId), zap.Any("cardInfo", cardInfo))
 
-	huaCards := []int32{} //所有花牌
 	tmpHandCards := make([]int32, len(cardInfo.HandCards))
 	copy(tmpHandCards, cardInfo.HandCards)
 	for _, card := range tmpHandCards {
-		if cardDef.IsHuaCard(card) {
+		if mj.IsHuaCard(card) {
 			tmpHuaCards, moCard := self.drawOneCard()
 			tlog.Debug("补花", zap.Int32("huacard", card), zap.Int32("moCard", moCard), zap.Any("tmpHuaCards", tmpHuaCards))
-			//减掉原有的花牌
-			self.operAction.updateCardInfo(cardInfo, nil, []int32{card})
-			//加上摸到的牌
-			self.operAction.updateCardInfo(cardInfo, []int32{moCard}, nil)
-			huaCards = append(huaCards, card)
-			huaCards = append(huaCards, tmpHuaCards...)
+			self.operAction.updateCardInfo(cardInfo, nil, []int32{card})   //减掉原有的花
+			self.operAction.updateCardInfo(cardInfo, []int32{moCard}, nil) //加上摸到的牌
+			msg.HuaCards = append(msg.HuaCards, card)                      //记录原有的花
+			msg.HuaCards = append(msg.HuaCards, tmpHuaCards...)            //记录摸到的花
+			msg.MoCards = append(msg.MoCards, moCard)                      //记录摸到的牌
 		}
 	}
-	tlog.Debug("庄家补花后手牌数据为", zap.Any("cardInfo", cardInfo))
-	return huaCards
+	tlog.Debug("玩家第一次补花后手牌数据为", zap.Int32("chairId", chairId), zap.Any("cardInfo", cardInfo))
+	return
 }
 
 //从牌堆摸一张非花牌
-func (self *GameSink) drawOneCard() ([]int32, int32) {
-	huaCards := []int32{} //所有的花牌
-	var moCard, num int32
+func (self *GameSink) drawOneCard() (huaCards []int32, moCard int32) {
+	var num int32
 	for {
 		moCard = self.leftCard[len(self.leftCard)-1]
 		self.leftCard = self.leftCard[:len(self.leftCard)-1]
 
-		if !cardDef.IsHuaCard(moCard) {
+		if !mj.IsHuaCard(moCard) {
 			break
 		}
 		huaCards = append(huaCards, moCard)
@@ -410,11 +409,14 @@ func (self *GameSink) drawOneCard() ([]int32, int32) {
 		}
 	}
 	tlog.Debug("drawOneCard 结果", zap.Any("huaCards", huaCards), zap.Int32("moCard", moCard))
-	return huaCards, moCard
+	return
 }
 
 func (self *GameSink) resetOper() {
 	self.canOperInfo = map[int32]*CanOperInfo{}
+	for i := int32(0); i < self.game_config.PlayerCount; i++ {
+		self.canOperInfo[i] = &CanOperInfo{}
+	}
 	self.waitHigestOper = nil
 	self.operOrder = map[PriorityOrder][]*OperPriority{}
 }
@@ -429,22 +431,37 @@ func (self *GameSink) drawCard(chairId, last, lose_chair int32) error {
 	}
 
 	self.resetOper()
-	huaCards, card := self.drawOneCard()
 
-	log.Debugf("%s 摸牌[%d]剩余[%d]张", self.logHeadUser(chairId), card, len(self.leftCard))
+	msg := &pbgame_logic.BS2CDrawCard{ChairId: chairId, LeftNum: int32(len(self.leftCard))}
+	drawInfo := &pbgame_logic.Json_FirstBuHua{}
+	var card int32 //最后摸到的牌
+	moCards := []int32{0}
 
+	//游戏中摸牌
+	if self.hasFirstBuHua[chairId] {
+		drawInfo.HuaCards, moCards[0] = self.drawOneCard()
+		log.Debugf("%s 游戏中摸牌moCards=%v,huaCards=%v,剩余[%d]张", self.logHeadUser(chairId), moCards, drawInfo.HuaCards, len(self.leftCard))
+	} else { //第一次摸牌
+		drawInfo = self.firstBuHua(chairId)
+		moCards = drawInfo.MoCards
+		log.Debugf("%s 第一次摸牌moCards=%v,huaCards=%v,剩余[%d]张", self.logHeadUser(chairId), moCards, drawInfo.HuaCards, len(self.leftCard))
+		//删掉一张牌
+		self.operAction.updateCardInfo(&self.players[chairId].CardInfo, nil, []int32{card})
+	}
+
+	card = moCards[len(moCards)-1]
 	//发送摸牌
-	msg := &pbgame_logic.BS2CDrawCard{ChairId: chairId, LeftNum: int32(len(self.leftCard)), Huacard: switchToCyint32(huaCards)}
 	for i := int32(0); i < self.game_config.PlayerCount; i++ {
 		if i == chairId {
-			msg.Card = card
+			drawInfo.MoCards = moCards
 		} else {
-			msg.Card = 0
+			drawInfo.MoCards = nil
 		}
+		msg.JsonDrawInfo = util.PB2JSON(drawInfo, false)
 		self.sendData(i, msg)
 	}
-	self.curOutChair = chairId
 
+	self.curOutChair = chairId
 	cardInfo := &self.players[chairId].CardInfo
 	//分析能否暗杠,补杠,自摸胡
 	ret := self.operAction.DrawcardAnalysis(cardInfo, card, int32(len(self.leftCard)))
@@ -467,6 +484,29 @@ func (self *GameSink) drawCard(chairId, last, lose_chair int32) error {
 	return nil
 }
 
+//第一次补花后分析能做的操作(card为最后摸到的牌)
+func (self *GameSink) afterFirstBuHua(chairId, card int32) {
+	//删掉一张牌
+	self.operAction.updateCardInfo(&self.players[chairId].CardInfo, nil, []int32{card})
+
+	cardInfo := &self.players[chairId].CardInfo
+	//分析能否暗杠,补杠,自摸胡
+	ret := self.operAction.DrawcardAnalysis(cardInfo, card, int32(len(self.leftCard)))
+	log.Infof("%s 第一次补花后操作分析ret=%+v", self.logHeadUser(chairId), ret)
+	//发送倒计时玩家
+	// self.sendData(-1, &pbgame_logic.BS2CCurOutChair{ChairId: chairId})
+	//更新玩家card_info表
+	self.operAction.HandleDrawCard(cardInfo, card)
+	//游戏回放记录
+	//统计能做的操作
+	if !ret.Empty() {
+		msg := &pbgame_logic.S2CHaveOperation{Card: card}
+		self.countCanOper(ret, chairId, mj.HuMode_ZIMO, -1, card, -1, msg)
+		//发送玩家可进行的操作
+		self.sendData(chairId, msg)
+	}
+}
+
 //出牌
 func (self *GameSink) outCard(chairId, card int32) error {
 	log.Debugf("%s,出牌操作,card=%d", self.logHeadUser(chairId), card)
@@ -481,7 +521,7 @@ func (self *GameSink) outCard(chairId, card int32) error {
 		return nil
 	}
 	//出牌前检测是否还有其可执行的操作没有完成
-	if _, ok := self.canOperInfo[chairId]; ok {
+	if !self.canOperInfo[chairId].Empty() {
 		log.Errorf("%s 出牌失败,还有其他操作，先取消", self.logHeadUser(chairId))
 		return nil
 	}
@@ -692,13 +732,31 @@ func (self *GameSink) chiCard(chairId, card int32, chiType uint32) error {
 	self.operAction.HandleChiCard(&self.players[chairId].CardInfo, &self.players[self.lastOutChair].CardInfo, card, chiType)
 	//回放记录
 
-	self.sendData(-1, &pbgame_logic.BS2CChiCard{ChairId: chairId, Card: card, ChiType: chiType})
 	// self.sendData(-1, &pbgame_logic.BS2CCurOutChair{ChairId: chairId})
 	//变量维护
 	self.curOutChair = chairId
 	self.haswaitOper[chairId] = false
 	self.resetOper()
 
+	msg := &pbgame_logic.BS2CChiCard{ChairId: chairId, Card: card, ChiType: chiType}
+	if self.hasFirstBuHua[chairId] {
+		self.sendData(-1, msg)
+	} else {
+		//进行第一次补花
+		buHuaInfo := self.firstBuHua(chairId)
+		//发给自己
+		msg.JsonFirstBuhua = util.PB2JSON(buHuaInfo, false)
+		self.sendData(chairId, msg)
+		//发给别人
+		buHuaInfo.MoCards = nil
+		msg.JsonFirstBuhua = util.PB2JSON(buHuaInfo, false)
+		for i := int32(0); i < self.game_config.PlayerCount; i++ {
+			if i != chairId {
+				self.sendData(i, msg)
+			}
+		}
+		self.afterFirstBuHua(chairId, buHuaInfo.MoCards[len(buHuaInfo.MoCards)-1])
+	}
 	return nil
 }
 
@@ -743,13 +801,31 @@ func (self *GameSink) pengCard(chairId, card int32) error {
 	self.operAction.HandlePengCard(&self.players[chairId].CardInfo, &self.players[self.lastOutChair].CardInfo, card, self.canOperInfo[chairId].CanPeng.LoseChair)
 	//回放记录
 
-	self.sendData(-1, &pbgame_logic.BS2CPengCard{ChairId: chairId, Card: card})
 	// self.sendData(-1, &pbgame_logic.BS2CCurOutChair{ChairId: chairId})
 	//变量维护
 	self.curOutChair = chairId
 	self.haswaitOper[chairId] = false
 	self.resetOper()
 
+	msg := &pbgame_logic.BS2CPengCard{ChairId: chairId, Card: card}
+	if self.hasFirstBuHua[chairId] {
+		self.sendData(-1, msg)
+	} else {
+		//进行第一次补花
+		buHuaInfo := self.firstBuHua(chairId)
+		//发给自己
+		msg.JsonFirstBuhua = util.PB2JSON(buHuaInfo, false)
+		self.sendData(chairId, msg)
+		//发给别人
+		buHuaInfo.MoCards = nil
+		msg.JsonFirstBuhua = util.PB2JSON(buHuaInfo, false)
+		for i := int32(0); i < self.game_config.PlayerCount; i++ {
+			if i != chairId {
+				self.sendData(i, msg)
+			}
+		}
+		self.afterFirstBuHua(chairId, buHuaInfo.MoCards[len(buHuaInfo.MoCards)-1])
+	}
 	return nil
 }
 
@@ -809,8 +885,6 @@ func (self *GameSink) gangCard(chairId, card int32) error {
 		log.Debugf("%s 暗杠,杠牌为%d", self.logHeadUser(chairId), card)
 	}
 
-	self.sendData(-1, &pbgame_logic.BS2CGangCard{ChairId: chairId, Card: card, Type: pbgame_logic.GangType(gangType), LoseChair: loseChair})
-
 	willWait := false
 	//判断抢杠胡
 	if gangType == mj.OperType_BU_GANG {
@@ -848,6 +922,26 @@ func (self *GameSink) gangCard(chairId, card int32) error {
 	self.resetOper()
 
 	self.afterGangCard(chairId, card, gangType)
+
+	msg := &pbgame_logic.BS2CGangCard{ChairId: chairId, Card: card, Type: pbgame_logic.GangType(gangType), LoseChair: loseChair}
+	if self.hasFirstBuHua[chairId] {
+		self.sendData(-1, msg)
+	} else {
+		//进行第一次补花
+		buHuaInfo := self.firstBuHua(chairId)
+		//发给自己
+		msg.JsonFirstBuhua = util.PB2JSON(buHuaInfo, false)
+		self.sendData(chairId, msg)
+		//发给别人
+		buHuaInfo.MoCards = nil
+		msg.JsonFirstBuhua = util.PB2JSON(buHuaInfo, false)
+		for i := int32(0); i < self.game_config.PlayerCount; i++ {
+			if i != chairId {
+				self.sendData(i, msg)
+			}
+		}
+		self.afterFirstBuHua(chairId, buHuaInfo.MoCards[len(buHuaInfo.MoCards)-1])
+	}
 	return nil
 }
 
