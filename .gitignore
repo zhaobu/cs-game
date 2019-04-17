@@ -16,3 +16,5 @@
 *.idea
 linux/
 win/
+binbak/
+desk.json

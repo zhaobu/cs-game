@@ -139,6 +139,7 @@ func (self *RoomServie) ToGate(pb proto.Message, uids ...uint64) error {
 	notif := &pbgame.GameNotif{}
 	notif.NotifName, notif.NotifValue, err = protobuf.Marshal(pb)
 	if err != nil {
+		self.tlog.Error("protobuf.Marshal err", zap.Error(err))
 		return err
 	}
 	return self.ToGateNormal(notif, uids...)

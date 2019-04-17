@@ -419,6 +419,8 @@ func (d *Desk) doAction(uid uint64, actionName string, actionValue []byte) {
 		d.gameSink.huCard(chairId)
 	case *pbgame_logic.C2SCancelAction:
 		d.gameSink.cancelOper(chairId)
+	case *pbgame_logic.C2SOutCard:
+		d.gameSink.outCard(chairId, v.Card)
 	default:
 		log.Warnf("invalid type %s", actionName)
 	}

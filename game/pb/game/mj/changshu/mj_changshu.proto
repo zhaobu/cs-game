@@ -153,21 +153,24 @@ message S2CChangePos {
   repeated ChangePosInfo pos_info = 1;  //换位结果
 }
 
-// message StartGameInfo {
-//   //玩家手牌
-//   repeated int32 hand_cards = 1;
+// message UserCardInfo {
+//   repeated cyint32 hand_card1 = 1;  //玩家0手牌
+//   repeated cyint32 hand_card2 = 2;  //玩家1手牌
+//   repeated cyint32 hand_card3 = 3;  //玩家2手牌
+//   repeated cyint32 hand_card4 = 4;  //玩家3手牌
 // }
 
 //游戏开始
 message S2CStartGame {
-  int32 banker_id = 1;    //庄家id(也表示第一个可操作玩家)
-  int32 left_num = 2;     //剩余牌数
-  uint32 cur_inning = 3;  //当前局
-  repeated cyint32 hand_cards = 4;   //玩家手牌
-  repeated cyint32 hua_cards = 5;    //庄家花牌
-  repeated cyint32 dice_value = 6;   //摸牌色子
-  int32 left_time = 7;               //超时时间
-  S2CHaveOperation banker_oper = 8;  //庄家能做的操作
+  int32 banker_id = 1;             //庄家id(也表示第一个可操作玩家)
+  int32 left_num = 2;              //剩余牌数
+  int32 total_num = 3;             //总牌数
+  uint32 cur_inning = 4;           //当前局
+  repeated cyint32 hua_cards = 5;  //庄家花牌
+  repeated cyint32 dice_value = 6;      //摸牌色子
+  int32 left_time = 7;                  //超时时间
+  S2CHaveOperation banker_oper = 8;     //庄家能做的操作
+  repeated cyint32 all_user_cards = 9;  //所有玩家手牌
 }
 
 // //发牌

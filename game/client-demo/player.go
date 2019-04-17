@@ -8,6 +8,7 @@ import (
 	pbcommon "cy/game/pb/common"
 	pbgame "cy/game/pb/game"
 	pblogin "cy/game/pb/login"
+	"cy/game/util"
 	"encoding/json"
 	"fmt"
 	"net"
@@ -49,7 +50,7 @@ func (self *Player) Connect(addr string) {
 		break
 	}
 
-	tlog = zaplog.InitLogger(self.wxID+".txt", "debug", true)
+	tlog = zaplog.InitLogger(self.wxID+".log", "debug", true)
 	log = tlog.Sugar()
 	self.curgame.InitLog(tlog, log)
 	self.InitLog(tlog, log)
@@ -146,6 +147,7 @@ func (self *Player) sitdown(chairId int32) {
 		ChairId: chairId,
 	})
 	<-self.waitchan
+	self.ChairId = chairId
 	tlog.Info("sitdown suc", zap.String("wxID", self.wxID), zap.Uint64("UserId", self.UserId))
 }
 
@@ -165,8 +167,10 @@ func (self *Player) recv() {
 				tlog.Error("Unmarshal err", zap.Error(err))
 				return
 			}
-			tlog.Info("recv", zap.String("msgName", msg.Name), zap.Any("msgValue", pb))
-
+			// tlog.Info("recv", zap.String("msgName", msg.Name), zap.Any("msgValue", pb))
+			if msg.Name != "pbgame.GameNotif" {
+				log.Infof("revcv msgName:%s msgValue:%s", msg.Name, util.PB2JSON(pb, true))
+			}
 			switch v := pb.(type) {
 			case *pblogin.LoginRsp:
 				if v.Code == pblogin.LoginRspCode_Succ {
@@ -195,7 +199,7 @@ func (self *Player) recv() {
 			case *pbgame.GameNotif:
 				self.curgame.DispatchRecv(v)
 			default:
-				tlog.Info("未处理的消息", zap.String("msgName", msg.Name), zap.Any("msgValue", v))
+				tlog.Info("未处理的消息", zap.String("msgName", msg.Name))
 			}
 		}
 	}

@@ -152,7 +152,8 @@ func (self *GameSink) ThrowDice(chairId int32, req *pbgame_logic.C2SThrowDice) {
 	msg := &pbgame_logic.BS2CThrowDiceResult{ChairId: chairId}
 	msg.DiceValue = make([]*pbgame_logic.Cyint32, 2)
 	for i, rnd := range self.randDice() {
-		msg.DiceValue[i] = &pbgame_logic.Cyint32{T: rnd}
+		// msg.DiceValue[i] = &pbgame_logic.Cyint32{T: rnd}
+		msg.DiceValue[i] = &pbgame_logic.Cyint32{T: 0}
 		self.diceResult[chairId][i] = rnd
 	}
 
@@ -254,7 +255,7 @@ func (self *GameSink) deal_card() {
 	//庄家开始第一次补花
 	msg.HuaCards = switchToCyint32(self.firstBuHua(self.bankerId))
 	msg.LeftNum = int32(len(self.leftCard))
-
+	msg.TotalNum = int32(len(self.baseCard))
 	self.curOutChair = self.bankerId
 	self.resetOper()
 	//分析庄家能做的操作
@@ -270,7 +271,22 @@ func (self *GameSink) deal_card() {
 			v.CardInfo.HandCards = player_cards[k]
 			v.CardInfo.StackCards = cardDef.StackCards(player_cards[k])
 		}
-		msg.HandCards = switchToCyint32(v.CardInfo.HandCards)
+
+		msg.AllUserCards = []*pbgame_logic.Cyint32{}
+		for i := 0; i < len(self.players); i++ {
+			if i == k {
+				msg.AllUserCards = append(msg.AllUserCards, switchToCyint32(v.CardInfo.HandCards)...)
+				if len(v.CardInfo.HandCards) == 13 {
+					msg.AllUserCards = append(msg.AllUserCards, &pbgame_logic.Cyint32{T: 0})
+				}
+			} else {
+				tmp := [14]int32{}
+				msg.AllUserCards = append(msg.AllUserCards, switchToCyint32(tmp[:])...)
+			}
+		}
+		// tmp := [4]pbgame_logic.UserCardInfo{}
+		// msg.AllUserCards = []*pbgame_logic.UserCardInfo{&tmp[0], &tmp[1], &tmp[2], &tmp[3]}
+		// msg.AllUserCards[k] = &pbgame_logic.UserCardInfo{HandCards: v.CardInfo.HandCards}
 		log.Warnf("%s手牌为:%v", self.logHeadUser(int32(k)), player_cards[k])
 		//给每个玩家发送游戏开始消息
 		self.sendData(int32(k), msg)

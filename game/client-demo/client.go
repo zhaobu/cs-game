@@ -13,7 +13,7 @@ import (
 var (
 	// wxID = flag.String("wxid", "wx_1", "wx id")
 	// addr = flag.String("addr", "localhost:9876", "tcp listen address")
-	addr     = flag.String("addr", "192.168.0.90:9876", "tcp listen address")
+	addr     = flag.String("addr", "192.168.0.10:9876", "tcp listen address")
 	fileName = flag.String("fileName", "./desk.json", "deskInfo readfileName")
 
 	log  *zap.SugaredLogger //printf风格
