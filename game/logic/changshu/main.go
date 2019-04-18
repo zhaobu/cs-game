@@ -125,7 +125,7 @@ func main() {
 	}
 
 	var err error
-	err = loadArgTpl("../changshou.json")
+	err = loadArgTpl("./run_env/changshou.json")
 	if err != nil {
 		fmt.Println(err)
 	}
