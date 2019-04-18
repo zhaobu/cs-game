@@ -18,4 +18,4 @@ linux/
 win/
 binbak/
 desk.json
-game/logic/changshu/run_env/*
+game/logic/changshu

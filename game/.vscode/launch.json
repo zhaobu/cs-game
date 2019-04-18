@@ -12,9 +12,9 @@
             "program": "${fileDirname}", //配置Go项目启动文件路径，即main函数所在的.go文件的路径,${workspaceRoot}代表项目的根目录,也就是 /bin /pkg /src这三个文件夹所在的目录
             "buildFlags": "-tags consul", //设置编译参数
             "args": [],
-            "cwd": "D:/gowork/src/cy/game/bin/win", //设置工作目录
+            "cwd": "${workspaceFolder}/bin/win", //设置工作目录
             "internalConsoleOptions": "openOnSessionStart",
-            "output": "D:/gowork/src/cy/game/bin/win/vsdebug", //设置vscode调试时生成文件的路径
+            "output": "${workspaceFolder}/bin/win/vsdebug", //设置vscode调试时生成文件的路径
             "showGlobalVariables": true,
             // "externalConsole": true,
             // "console": "integratedTerminal",
