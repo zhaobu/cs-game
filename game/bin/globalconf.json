@@ -1,0 +1,21 @@
+{
+    "GlobalConf": {
+        "ConsulAddr": "192.168.0.91:8500",
+        "Release": false,
+        "RedisAddr": "192.168.0.91:6379",
+        "RedisDb": 1,
+        "MgoURI": "mongodb://192.168.0.91:27017/game"
+    },
+    "ClubConf": {
+        "Addr": "localhost:9301"
+    },
+    "CenterConf": {
+        "Addr": "localhost:9201"
+    },
+    "GateConf": {
+        "Addr": "192.168.0.10:9876"
+    },
+    "ChangShuConf": {
+        "Addr": "192.168.0.10:9603"
+    }
+}
