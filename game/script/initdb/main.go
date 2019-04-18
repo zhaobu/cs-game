@@ -20,10 +20,9 @@ var (
 
 func init() {
 	//如果不指定启动参数,默认读取全局配置
-	globalcnf := configs.GetConfig("./run_env/globalconf.json")
-	*redisAddr = globalcnf.RedisAddr
-	*redisDb = globalcnf.RedisDb
-	*mgoURI = globalcnf.MgoURI
+	*redisAddr = configs.Conf.RedisAddr
+	*redisDb = configs.Conf.RedisDb
+	*mgoURI = configs.Conf.MgoURI
 }
 
 func main() {

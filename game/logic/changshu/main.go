@@ -37,13 +37,12 @@ var (
 
 func init() {
 	//如果不指定启动参数,默认读取全局配置
-	globalcnf := configs.GetConfig("./run_env/globalconf.json")
-	*consulAddr = globalcnf.ConsulAddr
-	*release = globalcnf.Release
-	*redisAddr = globalcnf.RedisAddr
-	*redisDb = globalcnf.RedisDb
-	*mgoURI = globalcnf.MgoURI
-	*addr = globalcnf.ChangShuConf.Addr
+	*consulAddr = configs.Conf.ConsulAddr
+	*release = configs.Conf.Release
+	*redisAddr = configs.Conf.RedisAddr
+	*redisDb = configs.Conf.RedisDb
+	*mgoURI = configs.Conf.MgoURI
+	*addr = configs.Conf.GameNode[gameName].Addr
 }
 
 type roomHandle struct {
@@ -125,13 +124,15 @@ func main() {
 	}
 
 	var err error
-	err = loadArgTpl("./run_env/changshou.json")
+	err = loadArgTpl(configs.Conf.GameNode[gameName].TplName)
 	if err != nil {
-		fmt.Println(err)
+		tlog.Error("loadArgTpl err", zap.Error(err))
+		return
 	}
 
 	err = mgo.Init(*mgoURI)
 	if err != nil {
+		tlog.Error("mgo.Init err", zap.Error(err))
 		return
 	}
 
@@ -142,7 +143,7 @@ func main() {
 	s.RegisterName("game/"+gameName, roomService.GetRpcHandle(), "")
 	err = s.Serve("tcp", *addr)
 	if err != nil {
-		fmt.Println(err)
+		tlog.Error("Serve err", zap.Error(err))
 	}
 }
 

@@ -1,4 +1,5 @@
-start /b .\win\club.exe
-start /b .\win\center.exe
-start /b .\win\gate.exe
+cd win
+start /b club.exe
+start /b center.exe
+start /b gate.exe
 pause

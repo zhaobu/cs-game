@@ -274,7 +274,7 @@ func (self *Changshu) dothrowdice() {
 
 func (self *Changshu) operAction() {
 	oper := self.curoper
-	if oper.OperMask != 0 {
+	if oper.OperMask == 0 {
 		tlog.Error("当前不能吃碰杠胡")
 	}
 	log.Infof("我能做的操作:oper=%s", util.PB2JSON(oper, true))

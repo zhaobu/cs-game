@@ -27,13 +27,18 @@ var fourPlayerCardDef = []int32{
 	31, 32, 33, 34, 35, 36, 37, 38, 39,
 	31, 32, 33, 34, 35, 36, 37, 38, 39,
 	//  东 南 西  北 中 發   白(白板算花牌)
-	41, 42, 43, 44, 45, 46, 59,
-	41, 42, 43, 44, 45, 46, 59,
-	41, 42, 43, 44, 45, 46, 59,
-	41, 42, 43, 44, 45, 46, 59,
+	41, 42, 43, 44, 45, 46, 47,
+	41, 42, 43, 44, 45, 46, 47,
+	41, 42, 43, 44, 45, 46, 47,
+	41, 42, 43, 44, 45, 46, 47,
 
 	//春夏秋冬,梅兰竹菊
 	51, 52, 53, 54, 55, 56, 57, 58,
+}
+
+//配牌解析结构
+type TestHandCards struct {
+	HandCards map[string][]int32 `json:"handCards"`
 }
 
 //二人麻将
@@ -151,5 +156,5 @@ func (self *CardDef) StackCards(rawcards []int32) map[int32]int32 {
 }
 
 func IsHuaCard(card int32) bool {
-	return card >= 51 && card <= 59
+	return card >= 51 && card <= 58 || card == 47
 }

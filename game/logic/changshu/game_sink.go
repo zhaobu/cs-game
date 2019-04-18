@@ -6,7 +6,6 @@ import (
 	"cy/game/util"
 	"fmt"
 	"math/rand"
-	"sort"
 	"time"
 
 	"go.uber.org/zap"
@@ -181,18 +180,18 @@ func (self *GameSink) dealDiceResult() {
 		dice       int32
 		oldChairId int32 //坐下时的chairid
 	}, self.game_config.PlayerCount)
-	for i := 0; i < len(self.diceResult); i++ {
+	for i := int32(0); i < self.game_config.PlayerCount; i++ {
 		diceRes[i].dice = self.diceResult[i][0] + self.diceResult[i][1]
 		diceRes[i].oldChairId = int32(i)
 	}
 	log.Debugf("排序前,dices=%+v", diceRes)
 	//排序，实现比较方法即可
-	sort.Slice(diceRes, func(i, j int) bool {
-		if diceRes[i].dice == diceRes[j].dice {
-			return diceRes[i].oldChairId < diceRes[j].oldChairId
-		}
-		return diceRes[i].dice > diceRes[j].dice
-	})
+	// sort.Slice(diceRes, func(i, j int) bool {
+	// 	if diceRes[i].dice == diceRes[j].dice {
+	// 		return diceRes[i].oldChairId < diceRes[j].oldChairId
+	// 	}
+	// 	return diceRes[i].dice > diceRes[j].dice
+	// })
 	log.Debugf("排序后,dices=%+v", diceRes)
 
 	//发送换座位结果

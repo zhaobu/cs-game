@@ -6,6 +6,11 @@ import (
 	"io/ioutil"
 )
 
+// 隐式导入
+var (
+	Conf *allConfig
+)
+
 //公共配置
 type GlobalConf struct {
 	ConsulAddr string `json:"ConsulAddr"`
@@ -13,7 +18,6 @@ type GlobalConf struct {
 	RedisAddr  string `json:"RedisAddr"`
 	RedisDb    int    `json:"RedisDb"`
 	MgoURI     string `json:"MgoURI"`
-	MjLibPath  string `json:"MjLibPath"`
 }
 
 //节点配置
@@ -21,27 +25,44 @@ type nodeConf struct {
 	Addr string `json:"Addr"`
 }
 
-type AllConfig struct {
-	ClubConf     nodeConf            `json:"ClubConf"`
-	CenterConf   nodeConf            `json:"CenterConf"`
-	GateConf     nodeConf            `json:"GateConf"`
-	ChangShuConf nodeConf            `json:"ChangShuConf"`
-	GlobalConf   `json:"GlobalConf"` //麻将胡牌表加载路径
+type gameNodeConf struct {
+	nodeConf
+	TplName  string `json:"TplName"`  //默认建房参数
+	GameName string `json:"GameName"` //游戏名称
+}
+type GameConfs struct {
+	MjLibPath string                  `json:"MjLibPath"` //胡牌表加载路径
+	GameNode  map[string]gameNodeConf `json:"GameNode"`
 }
 
-func GetConfig(filename string) *AllConfig {
-	var tmp AllConfig
+type allConfig struct {
+	ClubConf    *nodeConf `json:"ClubConf"`
+	CenterConf  *nodeConf `json:"CenterConf"`
+	GateConf    *nodeConf `json:"GateConf"`
+	*GlobalConf `json:"GlobalConf"`
+	*GameConfs  `json:"GameConfs"`
+}
 
-	data, err := ioutil.ReadFile(filename)
+func init() {
+	// 初始所有指针数据
+	Conf = &allConfig{
+		ClubConf:   new(nodeConf),
+		CenterConf: new(nodeConf),
+		GateConf:   new(nodeConf),
+		GlobalConf: new(GlobalConf),
+		GameConfs:  new(GameConfs),
+	}
+
+	data, err := ioutil.ReadFile("./configs/globalconf.json")
 	if err != nil {
 		fmt.Println("ReadFile err = ", err)
-		return nil
+		return
 	}
 
-	err = json.Unmarshal(data, &tmp)
+	err = json.Unmarshal(data, Conf)
 	if err != nil {
 		fmt.Println("json.Unmarshal err = ", err)
-		return nil
+		return
 	}
-	return &tmp
+	return
 }

@@ -8,8 +8,9 @@ import (
 var tblPath string = "./run_env/mjhulib"
 
 func init() {
-	globalcnf := configs.GetConfig("./run_env/globalconf.json")
-	tblPath = globalcnf.MjLibPath
+	if configs.Conf.GameConfs.MjLibPath != "" {
+		tblPath = configs.Conf.GameConfs.MjLibPath
+	}
 }
 
 type TableMgr struct {
