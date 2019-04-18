@@ -45,6 +45,7 @@ func (this *Table) load(name string) {
 	defer file.Close()
 	if err != nil {
 		fmt.Printf("读取文件%s失败\n", name)
+		os.Exit(0)
 		return
 	}
 

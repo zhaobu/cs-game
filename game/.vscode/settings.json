@@ -1,0 +1,22 @@
+{
+    "go.inferGopath": true,
+    "go.buildOnSave": "off",
+    "go.lintOnSave": "package",
+    "go.vetOnSave": "package",
+    "go.buildTags": "",
+    "go.buildFlags": [],
+    "go.lintFlags": [],
+    "go.vetFlags": [],
+    "go.coverOnSave": false,
+    "go.useCodeSnippetsOnFunctionSuggest": true,
+    "go.formatTool": "goreturns",
+    "go.gocodeAutoBuild": false,
+    "go.autocompleteUnimportedPackages": true,
+    "go.gocodePackageLookupMode": "go",
+    "go.gotoSymbol.includeImports": true,
+    "go.useCodeSnippetsOnFunctionSuggestWithoutType": true,
+    "go.liveErrors": {
+        "enabled": true,
+        "delay": 500
+    },
+}

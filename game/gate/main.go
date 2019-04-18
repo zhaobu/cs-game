@@ -74,7 +74,7 @@ func initLog() {
 
 func init() {
 	//如果不指定启动参数,默认读取全局配置
-	globalcnf := configs.GetConfig("../globalconf.json")
+	globalcnf := configs.GetConfig("./run_env/globalconf.json")
 	*consulAddr = globalcnf.ConsulAddr
 	*release = globalcnf.Release
 	*redisAddr = globalcnf.RedisAddr

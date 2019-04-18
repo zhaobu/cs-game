@@ -6,10 +6,6 @@ import (
 	"io/ioutil"
 )
 
-type MjHuLibConfig struct {
-	MjPath string `json:"mjPath"`
-}
-
 //公共配置
 type GlobalConf struct {
 	ConsulAddr string `json:"ConsulAddr"`
@@ -17,6 +13,7 @@ type GlobalConf struct {
 	RedisAddr  string `json:"RedisAddr"`
 	RedisDb    int    `json:"RedisDb"`
 	MgoURI     string `json:"MgoURI"`
+	MjLibPath  string `json:"MjLibPath"`
 }
 
 //节点配置
@@ -25,11 +22,11 @@ type nodeConf struct {
 }
 
 type AllConfig struct {
-	ClubConf     nodeConf `json:"ClubConf"`
-	CenterConf   nodeConf `json:"CenterConf"`
-	GateConf     nodeConf `json:"GateConf"`
-	ChangShuConf nodeConf `json:"ChangShuConf"`
-	GlobalConf   `json:"GlobalConf"`
+	ClubConf     nodeConf            `json:"ClubConf"`
+	CenterConf   nodeConf            `json:"CenterConf"`
+	GateConf     nodeConf            `json:"GateConf"`
+	ChangShuConf nodeConf            `json:"ChangShuConf"`
+	GlobalConf   `json:"GlobalConf"` //麻将胡牌表加载路径
 }
 
 func GetConfig(filename string) *AllConfig {

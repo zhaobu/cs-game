@@ -1,10 +1,16 @@
 package mjlib
 
 import (
+	"cy/game/configs"
 	"fmt"
 )
 
-var tblPath string = "../mjhulib"
+var tblPath string = "./run_env/mjhulib"
+
+func init() {
+	globalcnf := configs.GetConfig("./run_env/globalconf.json")
+	tblPath = globalcnf.MjLibPath
+}
 
 type TableMgr struct {
 	m_tbl          [9]*Table
