@@ -2,6 +2,7 @@ package majiang
 
 import (
 	"math/rand"
+	"runtime/debug"
 	"time"
 
 	"go.uber.org/zap"
@@ -141,7 +142,7 @@ func Sub_stack(m map[int32]int32, cards ...int32) {
 				delete(m, card)
 			}
 		} else {
-			log.Errorf("减牌%d时牌数量为0", card)
+			log.Errorf("减牌%d时牌数量为0,stack=%s", card, string(debug.Stack()))
 		}
 	}
 }
@@ -157,4 +158,13 @@ func (self *CardDef) StackCards(rawcards []int32) map[int32]int32 {
 
 func IsHuaCard(card int32) bool {
 	return card >= 51 && card <= 58 || card == 47
+}
+
+func GetHuaCount(stackCards map[int32]int32) (res int32) {
+	for k, v := range stackCards {
+		if IsHuaCard(k) {
+			res += v
+		}
+	}
+	return
 }

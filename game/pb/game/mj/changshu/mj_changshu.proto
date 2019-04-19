@@ -223,6 +223,12 @@ message BS2CDrawCard {
   string json_draw_info = 3;  //摸牌信息(按Json_FirstBuHua格式解析)
 }
 
+//玩家第一次补花(庄家出牌,如果有人吃碰发)
+message BS2CFirstBuHua {
+  int32 chair_id = 1;           //补花玩家
+  string json_first_buhua = 2;  //第一次补花信息(按Json_FirstBuHua格式解析)
+}
+
 //当前出牌玩家(玩家摸牌,吃牌,碰牌后广播,表示当前出牌的玩家)
 // message BS2CCurOutChair {
 //   int32 chair_id = 1;  //当前出牌玩家
@@ -248,7 +254,6 @@ message BS2COutCard {
 message BS2CPengCard {
   int32 chair_id = 1;           //碰牌玩家
   int32 card = 2;               //要碰的牌
-  string json_first_buhua = 3;  //第一次补花信息(按Json_FirstBuHua格式解析)
 }
 
 enum GangType {
@@ -264,7 +269,6 @@ message BS2CGangCard {
   GangType type = 3;
   //放杠的玩家,暗杠为-1,补杠时为碰牌时被碰玩家,明杠时为出牌玩家
   int32 lose_chair = 4;
-  string json_first_buhua = 5;  //第一次补花信息(按Json_FirstBuHua格式解析)
 }
 
 //玩家吃牌
@@ -272,7 +276,6 @@ message BS2CChiCard {
   int32 chair_id = 1;           //吃牌玩家
   int32 card = 2;               //要吃的牌
   uint32 chi_type = 3;          //吃类型掩码
-  string json_first_buhua = 4;  //第一次补花信息(按Json_FirstBuHua格式解析)
 }
 
 //玩家胡牌

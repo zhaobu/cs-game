@@ -18,8 +18,16 @@
             "showGlobalVariables": true,
             // "externalConsole": true,
             // "console": "integratedTerminal",
-            "env": {} //可以用来配置调试启动时所用的环境变量参数,比如gopath临时设置为某个参数就可以在这里指定，如果有多个gopath，用英文冒号:来连接多个gopath
+            "env": {}, //可以用来配置调试启动时所用的环境变量参数,比如gopath临时设置为某个参数就可以在这里指定，如果有多个gopath，用英文冒号:来连接多个gopath
             // "trace": "log"
+            "dlvLoadConfig": {
+                "followPointers": true,
+                "maxVariableRecurse": 2,
+                "maxStringLen": 1024,
+                "maxArrayValues": 1024,
+                "maxStructFields": -1
+            }
+
         },
         {
             "name": "Launch executable",

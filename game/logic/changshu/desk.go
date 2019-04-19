@@ -426,9 +426,9 @@ func (d *Desk) doAction(uid uint64, actionName string, actionValue []byte) {
 	}
 }
 
-func (d *Desk) SendData(uid uint64, pb proto.Message) {
-	//发给所有人,包括观察者
-	if uid == 0 {
+//_uid为0时发送给所有人,包括观察者
+func (d *Desk) SendData(_uid uint64, pb proto.Message) {
+	if _uid == 0 {
 		uids := make([]uint64, len(d.deskPlayers))
 		var i int = 0
 		for uid, _ := range d.deskPlayers {
@@ -438,12 +438,12 @@ func (d *Desk) SendData(uid uint64, pb proto.Message) {
 		d.gameNode.ToGateNormal(pb, uids...)
 		return
 	}
-	d.gameNode.ToGateNormal(pb, uid)
+	d.gameNode.ToGateNormal(pb, _uid)
 }
 
-func (d *Desk) SendGameMessage(uid uint64, pb proto.Message) {
-	//发给所有人
-	if uid == 0 {
+//_uid为0时发送给所有人,包括观察者
+func (d *Desk) SendGameMessage(_uid uint64, pb proto.Message) {
+	if _uid == 0 {
 		uids := make([]uint64, len(d.deskPlayers))
 		var i int = 0
 		for uid, _ := range d.deskPlayers {
@@ -453,7 +453,18 @@ func (d *Desk) SendGameMessage(uid uint64, pb proto.Message) {
 		d.gameNode.ToGate(pb, uids...)
 		return
 	}
-	d.gameNode.ToGate(pb, uid)
+	d.gameNode.ToGate(pb, _uid)
+}
+
+//发送消息给除_uid其他所有人
+func (d *Desk) SendGameMessageOther(_uid uint64, pb proto.Message) {
+	uids := []uint64{}
+	for uid, _ := range d.deskPlayers {
+		if uid != _uid {
+			uids = append(uids, uid)
+		}
+	}
+	d.gameNode.ToGate(pb, uids...)
 }
 
 //根据uid查找chair_id

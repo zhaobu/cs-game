@@ -78,6 +78,9 @@ func (self *Changshu) DispatchRecv(msg *pbgame.GameNotif) {
 	case *pbgame_logic.BS2CDrawCard:
 		tlog.Info("recv GameNotif 玩家摸牌")
 		self.dealDrawCard(v)
+	case *pbgame_logic.BS2CFirstBuHua:
+		tlog.Info("recv GameNotif 玩家第一次补花")
+		self.dealFirstBuHua(v)
 	default:
 		tlog.Info("recv GameNotif 未处理", zap.String("NotifName", msg.NotifName))
 	}
@@ -97,13 +100,29 @@ func (self *Changshu) dealChangPos(msg *pbgame_logic.S2CChangePos) {
 	}
 }
 
+func (self *Changshu) dealFirstBuHua(msg *pbgame_logic.BS2CFirstBuHua) {
+	tmp := getFirstBuHua(msg.JsonFirstBuhua)
+	if msg.ChairId == self.ChairId {
+		tlog.Info("我第一次补花", zap.Any("MoCards", tmp.MoCards), zap.Any("HuaCards", tmp.HuaCards))
+		//删掉所有花牌
+		self.updateCardInfo(nil, tmp.HuaCards)
+		//加上所有摸的牌
+		self.updateCardInfo(tmp.MoCards, nil)
+	} else {
+		tlog.Info("别人第一次补花", zap.Any("MoCards", tmp.MoCards), zap.Any("HuaCards", tmp.HuaCards))
+	}
+}
+
 func (self *Changshu) dealDrawCard(msg *pbgame_logic.BS2CDrawCard) {
 	tmp := getFirstBuHua(msg.JsonDrawInfo)
 	if msg.ChairId == self.ChairId {
 		tlog.Info("我摸了牌", zap.Any("MoCards", tmp.MoCards), zap.Any("HuaCards", tmp.HuaCards))
+		//删掉所有花牌
+		self.updateCardInfo(nil, tmp.HuaCards)
+		//加上所有摸的牌
 		self.updateCardInfo(tmp.MoCards, nil)
 	} else {
-		tlog.Info("别人出了牌", zap.Any("MoCards", tmp.MoCards), zap.Any("HuaCards", tmp.HuaCards))
+		tlog.Info("别人摸了牌", zap.Any("MoCards", tmp.MoCards), zap.Any("HuaCards", tmp.HuaCards))
 	}
 
 }
@@ -317,6 +336,8 @@ func (self *Changshu) operAction() {
 		self.SendGameAction(&pbgame_logic.C2SGangCard{Card: card})
 	case "h":
 		self.SendGameAction(&pbgame_logic.C2SHuCard{})
+	case "cancel":
+		self.SendGameAction(&pbgame_logic.C2SCancelAction{})
 	}
 }
 

@@ -147,17 +147,17 @@ func (self *OperAtion) GetMaxOrder(a, b PriorityOrder) PriorityOrder {
 }
 
 // /返回摸到牌后所有能杠的牌值
-func (self *OperAtion) moCanGang(stackCards map[int32]int32, pengCards map[int32]int32, card int32) (bool, map[int32]int32) {
+func (self *OperAtion) moCanGang(stackCards map[int32]int32, pengCards map[int32]int32, _card int32) (bool, map[int32]int32) {
 	ret := map[int32]int32{}
 	for card, num := range stackCards {
 		if num == 4 { //原来的暗杠
 			ret[card] = card
 		}
 	}
-	if num, ok := stackCards[card]; ok && num == 3 { //摸到的牌组成暗杠
-		ret[card] = card
-	} else if _, ok := pengCards[card]; ok {
-		ret[card] = card
+	if num, ok := stackCards[_card]; ok && num == 3 { //摸到的牌组成暗杠
+		ret[_card] = _card
+	} else if _, ok := pengCards[_card]; ok { //补杠
+		ret[_card] = _card
 	}
 	return len(ret) > 0, ret
 }
@@ -176,22 +176,35 @@ func (self *OperAtion) updateCardInfo(cardInfo *mj.PlayerCardInfo, addCards, sub
 }
 
 //分析游戏开始发牌后庄家能做的操作
-func (self *OperAtion) BankerAnalysis(cardInfo mj.PlayerCardInfo) *CanOperInfo {
+func (self *OperAtion) BankerAnalysis(cardInfo *mj.PlayerCardInfo) *CanOperInfo {
 	ret := &CanOperInfo{}
 
 	//判断是否能胡
-	if ok, huOper := huLib.CheckHuType(&cardInfo); ok {
+	if ok, huOper := huLib.CheckHuType(cardInfo); ok {
 		ret.CanHu.HuList = huOper
 	}
 
 	card := cardInfo.HandCards[len(cardInfo.HandCards)-1]
-	self.updateCardInfo(&cardInfo, nil, []int32{card})
+	self.updateCardInfo(cardInfo, nil, []int32{card}) //减掉一张手牌
 
 	stackCards, pengCards := cardInfo.StackCards, cardInfo.PengCards
 
 	//检查能否杠(包括暗杠,补杠)
 	if ok, gangOper := self.moCanGang(stackCards, pengCards, card); ok {
 		ret.CanGang.GangList = gangOper
+	}
+	self.updateCardInfo(cardInfo, []int32{card}, nil) //还原手牌
+	return ret
+}
+
+//吃碰后分析能做的操作
+func (self *OperAtion) AfterChiPengAnalysis(cardInfo *mj.PlayerCardInfo) *CanOperInfo {
+	ret := &CanOperInfo{}
+	//检查能否暗杠
+	for card, num := range cardInfo.StackCards {
+		if num == 4 { //原来的暗杠
+			ret.CanGang.GangList[card] = card
+		}
 	}
 	return ret
 }
@@ -208,16 +221,16 @@ func (self *OperAtion) DrawcardAnalysis(cardInfo *mj.PlayerCardInfo, card int32,
 	}
 
 	//判断是否能胡
-	tmpCardInfo := *cardInfo
-	self.updateCardInfo(&tmpCardInfo, []int32{card}, nil)
-	if ok, huOper := huLib.CheckHuType(&tmpCardInfo); ok {
+	self.updateCardInfo(cardInfo, []int32{card}, nil)
+	if ok, huOper := huLib.CheckHuType(cardInfo); ok {
 		ret.CanHu.HuList = huOper
 	}
+	self.updateCardInfo(cardInfo, nil, []int32{card}) //还原手牌
 	return ret
 }
 
 func GetNextChair(chairId, playerCount int32) int32 {
-	if chairId == playerCount {
+	if chairId+1 == playerCount {
 		return 0
 	}
 	return chairId + 1
@@ -278,11 +291,11 @@ func (self *OperAtion) OutCardAnalysis(cardInfo *mj.PlayerCardInfo, outCard, cha
 		}
 	}
 	//判断是否能胡
-	tmpCardInfo := *cardInfo
-	self.updateCardInfo(&tmpCardInfo, []int32{outCard}, nil)
-	if ok, huOper := huLib.CheckHuType(&tmpCardInfo); ok {
+	self.updateCardInfo(cardInfo, []int32{outCard}, nil)
+	if ok, huOper := huLib.CheckHuType(cardInfo); ok {
 		ret.CanHu.HuList = huOper
 	}
+	self.updateCardInfo(cardInfo, nil, []int32{outCard}) //还原手牌
 	return ret
 }
 
@@ -308,7 +321,7 @@ func (self *OperAtion) HandleChiCard(cardInfo *mj.PlayerCardInfo, loseCardInfo *
 	} else if chiType == chiType&uint32(pbgame_logic.ChiTypeMask_ChiMaskRight) {
 		eatGroup = [3]int32{card, card - 2, card - 1}
 	}
-	self.updateCardInfo(cardInfo, nil, eatGroup[:])
+	self.updateCardInfo(cardInfo, nil, eatGroup[1:])
 	cardInfo.ChiCards = append(cardInfo.ChiCards, eatGroup)
 
 	//处理出牌玩家,把牌从出过的牌中拿走
