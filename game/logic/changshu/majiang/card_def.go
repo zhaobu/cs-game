@@ -13,7 +13,7 @@ import (
 //card_def文件写对牌的定义
 
 //四人麻将
-var fourPlayerCardDef = []byte{
+var fourPlayerCardDef = []int32{
 	//  一万二万三万四万五万六万七八万九万
 	11, 12, 13, 14, 15, 16, 17, 18, 19,
 	11, 12, 13, 14, 15, 16, 17, 18, 19,
@@ -41,16 +41,16 @@ var fourPlayerCardDef = []byte{
 
 //配牌解析结构
 type TestHandCards struct {
-	HandCards  map[int32][]byte `json:"handCards"`  //配牌数据
-	DebugCards bool             `json:"debugCards"` //是否配牌
-	stackCards map[byte]int     //所有牌的统计
+	HandCards  map[int32][]int32 `json:"handCards"`  //配牌数据
+	DebugCards bool              `json:"debugCards"` //是否配牌
+	stackCards map[int32]int32   //所有牌的统计
 }
 
 //二人麻将
-var threePlayerCardDef = []byte{}
+var threePlayerCardDef = []int32{}
 
 //二人麻将
-var twoPlayerCardDef = []byte{}
+var twoPlayerCardDef = []int32{}
 
 var (
 	log       *zap.SugaredLogger //majiang package的log
@@ -64,16 +64,16 @@ func (self *CardDef) Init(logptr *zap.SugaredLogger) {
 	log = logptr
 }
 
-func (self *CardDef) GetBaseCard(playerCount int32) []byte {
-	var card []byte
+func (self *CardDef) GetBaseCard(playerCount int32) []int32 {
+	var card []int32
 	if playerCount == 4 {
-		card = make([]byte, len(fourPlayerCardDef))
+		card = make([]int32, len(fourPlayerCardDef))
 		copy(card, fourPlayerCardDef)
 	} else if playerCount == 3 {
-		card = make([]byte, len(threePlayerCardDef))
+		card = make([]int32, len(threePlayerCardDef))
 		copy(card, threePlayerCardDef)
 	} else if playerCount == 2 {
-		card = make([]byte, len(twoPlayerCardDef))
+		card = make([]int32, len(twoPlayerCardDef))
 		copy(card, twoPlayerCardDef)
 	} else {
 		log.Error("玩家人数有问题")
@@ -83,14 +83,14 @@ func (self *CardDef) GetBaseCard(playerCount int32) []byte {
 }
 
 //读取配牌
-func (self *CardDef) DebugCards(gameName string, baseCard []byte, playercount int32) []byte {
+func (self *CardDef) DebugCards(gameName string, baseCard []int32, playercount int32) []int32 {
 	//从配牌文件读取
 	util.LoadJSON(configs.Conf.GameNode[gameName].GameTest, &testCards)
 	if !testCards.DebugCards {
 		return RandCards(baseCard)
 	}
-	testCards.stackCards = map[byte]int{}
-	debugCards := []byte{} //配的牌
+	testCards.stackCards = map[int32]int32{}
+	debugCards := []int32{} //配的牌
 	for i := playercount - 1; i >= 0; i-- {
 		debugCards = append(debugCards, testCards.HandCards[i]...)
 		Add_stack(testCards.stackCards, testCards.HandCards[i]...)
@@ -109,9 +109,9 @@ func (self *CardDef) DebugCards(gameName string, baseCard []byte, playercount in
 		}
 	}
 	//剩下的牌随机
-	leftCards := []byte{}
+	leftCards := []int32{}
 	for k, v := range baseStacks {
-		for i := 0; i < v; i++ {
+		for i := int32(0); i < v; i++ {
 			leftCards = append(leftCards, k)
 		}
 	}
@@ -121,8 +121,8 @@ func (self *CardDef) DebugCards(gameName string, baseCard []byte, playercount in
 }
 
 //洗牌
-func RandCards(baseCard []byte) []byte {
-	array := make([]byte, len(baseCard)) //保证不会改变baseCard
+func RandCards(baseCard []int32) []int32 {
+	array := make([]int32, len(baseCard)) //保证不会改变baseCard
 	copy(array, baseCard)
 	rand.Seed(time.Now().Unix())
 	for i := len(array) - 1; i >= 0; i-- {
@@ -143,17 +143,17 @@ func randInt64(min, max int64) int64 {
 }
 
 //发牌
-func (self *CardDef) DealCard(rawcards []byte, playercount, bankerID int32) (handCards [][]byte, leftCards []byte) {
-	player_cards := make([][]byte, playercount)
+func (self *CardDef) DealCard(rawcards []int32, playercount, bankerID int32) (handCards [][]int32, leftCards []int32) {
+	player_cards := make([][]int32, playercount)
 	var leftNum = len(rawcards) //剩下的牌数量
 	for i := int32(0); i < playercount; i++ {
 		//庄家多摸一张牌
 		if i == bankerID {
-			player_cards[i] = make([]byte, 14)
+			player_cards[i] = make([]int32, 14)
 			player_cards[i][13] = rawcards[leftNum-1]
 			leftNum--
 		} else {
-			player_cards[i] = make([]byte, 13)
+			player_cards[i] = make([]int32, 13)
 		}
 		for index := 0; index < 13; index++ {
 			player_cards[i][index] = rawcards[leftNum-1]
@@ -166,7 +166,7 @@ func (self *CardDef) DealCard(rawcards []byte, playercount, bankerID int32) (han
 }
 
 //加
-func Add_stack(m map[byte]int, cards ...byte) {
+func Add_stack(m map[int32]int32, cards ...int32) {
 	for _, card := range cards {
 		if _, ok := m[card]; ok {
 			m[card] = m[card] + 1
@@ -180,7 +180,7 @@ func Add_stack(m map[byte]int, cards ...byte) {
 }
 
 //减
-func Sub_stack(m map[byte]int, cards ...byte) {
+func Sub_stack(m map[int32]int32, cards ...int32) {
 	for _, card := range cards {
 		if num, ok := m[card]; ok {
 			m[card] = num - 1
@@ -194,19 +194,19 @@ func Sub_stack(m map[byte]int, cards ...byte) {
 }
 
 //统计牌数量
-func CalStackCards(rawcards []byte) map[byte]int {
-	var newcard = make(map[byte]int)
+func CalStackCards(rawcards []int32) map[int32]int32 {
+	var newcard = make(map[int32]int32)
 	for _, v := range rawcards {
 		Add_stack(newcard, v)
 	}
 	return newcard
 }
 
-func IsHuaCard(card byte) bool {
+func IsHuaCard(card int32) bool {
 	return card >= 51 && card <= 58 || card == 47
 }
 
-func GetHuaCount(stackCards map[byte]int) (res int) {
+func GetHuaCount(stackCards map[int32]int32) (res int32) {
 	for k, v := range stackCards {
 		if IsHuaCard(k) {
 			res += v
