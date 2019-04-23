@@ -66,28 +66,39 @@ func (self *CanHuOper) Empty() bool {
 }
 
 //默认创建函数
-// func NewCanChiOper() *CanChiOper {
-// 	return &CanChiOper{
-// 		ChairId: -1,
-// 	}
-// }
-// func NewCanPengOper() *CanPengOper {
-// 	return &CanPengOper{
-// 		ChairId:   -1,
-// 		LoseChair: -1,
-// 	}
-// }
-// func NewCanGangOper() *CanGangOper {
-// 	return &CanGangOper{
-// 		ChairId: -1,
-// 	}
-// }
-// func NewCanHuOper() *CanHuOper {
-// 	return &CanHuOper{
-// 		LoseChair: -1,
-// 		OpChair:   -1,
-// 	}
-// }
+func NewCanChiOper() *CanChiOper {
+	return &CanChiOper{
+		ChairId: -1,
+	}
+}
+func NewCanPengOper() *CanPengOper {
+	return &CanPengOper{
+		ChairId:   -1,
+		LoseChair: -1,
+	}
+}
+func NewCanGangOper() *CanGangOper {
+	return &CanGangOper{
+		ChairId:  -1,
+		GangList: map[int32]int32{},
+	}
+}
+func NewCanHuOper() *CanHuOper {
+	return &CanHuOper{
+		LoseChair: -1,
+		OpChair:   -1,
+		HuList:    mj.HuTypeList{},
+	}
+}
+
+func NewCanOper() *CanOperInfo {
+	return &CanOperInfo{
+		CanChi:  *NewCanChiOper(),
+		CanPeng: *NewCanPengOper(),
+		CanGang: *NewCanGangOper(),
+		CanHu:   *NewCanHuOper(),
+	}
+}
 
 // func (self *CanOperInfo) ResetCanOper() {
 // 	self.CanChi = *NewCanChiOper()
@@ -177,7 +188,7 @@ func (self *OperAtion) updateCardInfo(cardInfo *mj.PlayerCardInfo, addCards, sub
 
 //分析游戏开始发牌后庄家能做的操作
 func (self *OperAtion) BankerAnalysis(cardInfo *mj.PlayerCardInfo) *CanOperInfo {
-	ret := &CanOperInfo{}
+	ret := NewCanOper()
 
 	//判断是否能胡
 	if ok, huOper := huLib.CheckHuType(cardInfo); ok {
@@ -199,7 +210,7 @@ func (self *OperAtion) BankerAnalysis(cardInfo *mj.PlayerCardInfo) *CanOperInfo 
 
 //吃碰后分析能做的操作
 func (self *OperAtion) AfterChiPengAnalysis(cardInfo *mj.PlayerCardInfo) *CanOperInfo {
-	ret := &CanOperInfo{}
+	ret := NewCanOper()
 	//检查能否暗杠
 	for card, num := range cardInfo.StackCards {
 		if num == 4 { //原来的暗杠
@@ -211,7 +222,7 @@ func (self *OperAtion) AfterChiPengAnalysis(cardInfo *mj.PlayerCardInfo) *CanOpe
 
 //摸牌后分析能做的操作
 func (self *OperAtion) DrawcardAnalysis(cardInfo *mj.PlayerCardInfo, card int32, leftCardNum int32) *CanOperInfo {
-	ret := &CanOperInfo{}
+	ret := NewCanOper()
 
 	stackCards, pengCards := cardInfo.StackCards, cardInfo.PengCards
 
@@ -278,7 +289,7 @@ func (self *OperAtion) checkPengGang(stackCards map[int32]int32, card int32) boo
 //出牌后分析能做的操作
 func (self *OperAtion) OutCardAnalysis(cardInfo *mj.PlayerCardInfo, outCard, chairId, outChair, leftCardNum int32) *CanOperInfo {
 	log.Infof("玩家%d出牌,检测玩家%d能做的操作", outChair, chairId)
-	ret := &CanOperInfo{}
+	ret := NewCanOper()
 	if leftCardNum > 0 {
 		if ok, chi := self.checkChi(cardInfo.StackCards, outCard, chairId, outChair); ok {
 			ret.CanChi.ChiType = chi
@@ -368,7 +379,7 @@ func (self *OperAtion) GetGangType(cardInfo *mj.PlayerCardInfo, card int32) mj.E
 
 func (self *OperAtion) QiangGangAnalysis(cardInfo *mj.PlayerCardInfo, outCard, chairId, loseChair int32) *CanOperInfo {
 	log.Infof("玩家%d补杠,检测玩家%d能否抢杠胡", loseChair, chairId)
-	ret := &CanOperInfo{}
+	ret := NewCanOper()
 
 	//判断是否能胡
 	tmpCardInfo := *cardInfo

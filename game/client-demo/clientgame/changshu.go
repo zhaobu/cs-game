@@ -166,9 +166,10 @@ func (self *Changshu) dealPengCard(msg *pbgame_logic.BS2CPengCard) {
 func (self *Changshu) dealGangCard(msg *pbgame_logic.BS2CGangCard) {
 	if msg.ChairId == self.ChairId {
 		tlog.Info("我杠牌", zap.Int32("Card", msg.Card))
-		self.updateCardInfo(nil, []int32{msg.Card, msg.Card})
 		if msg.Type == pbgame_logic.GangType_GangType_AN {
-
+			self.updateCardInfo(nil, []int32{msg.Card, msg.Card, msg.Card, msg.Card})
+		} else if msg.Type == pbgame_logic.GangType_GangType_Ming {
+			self.updateCardInfo(nil, []int32{msg.Card, msg.Card, msg.Card})
 		}
 		return
 	} else {
