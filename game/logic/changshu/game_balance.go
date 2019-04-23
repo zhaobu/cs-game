@@ -19,7 +19,7 @@ type GameBalance struct {
 	huMode       mj.EmHuMode            //胡牌方式
 	gangHuaChair int32                  //杠上花玩家
 	gangPaoHu    bool                   //杠上炮
-	huCard       int32                  //胡的牌
+	huCard       byte                   //胡的牌
 	huChairs     map[int32]*HuScoreInfo //胡牌玩家信息
 }
 

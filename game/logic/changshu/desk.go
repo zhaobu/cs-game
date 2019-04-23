@@ -410,17 +410,17 @@ func (d *Desk) doAction(uid uint64, actionName string, actionValue []byte) {
 	case *pbgame_logic.C2SThrowDice:
 		d.gameSink.ThrowDice(chairId, v)
 	case *pbgame_logic.C2SChiCard:
-		d.gameSink.chiCard(chairId, v.Card, v.ChiType)
+		d.gameSink.chiCard(chairId, byte(v.Card), v.ChiType)
 	case *pbgame_logic.C2SPengCard:
-		d.gameSink.pengCard(chairId, v.Card)
+		d.gameSink.pengCard(chairId, byte(v.Card))
 	case *pbgame_logic.C2SGangCard:
-		d.gameSink.gangCard(chairId, v.Card)
+		d.gameSink.gangCard(chairId, byte(v.Card))
 	case *pbgame_logic.C2SHuCard:
 		d.gameSink.huCard(chairId)
 	case *pbgame_logic.C2SCancelAction:
 		d.gameSink.cancelOper(chairId)
 	case *pbgame_logic.C2SOutCard:
-		d.gameSink.outCard(chairId, v.Card)
+		d.gameSink.outCard(chairId, byte(v.Card))
 	default:
 		log.Warnf("invalid type %s", actionName)
 	}

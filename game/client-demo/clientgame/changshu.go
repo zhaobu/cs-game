@@ -20,7 +20,7 @@ type Changshu struct {
 	gamename  string
 	Waitchan  chan int
 	BankerId  int32
-	HandCards []int32
+	HandCards []byte
 	curoper   *pbgame_logic.S2CHaveOperation
 }
 
@@ -130,7 +130,7 @@ func (self *Changshu) dealDrawCard(msg *pbgame_logic.BS2CDrawCard) {
 func (self *Changshu) dealOutCard(msg *pbgame_logic.BS2COutCard) {
 	if msg.ChairId == self.ChairId {
 		tlog.Info("我出了牌", zap.Int32("Card", msg.Card))
-		self.updateCardInfo(nil, []int32{msg.Card})
+		self.updateCardInfo(nil, []byte{byte(msg.Card)})
 	} else {
 		tlog.Info("别人出了牌", zap.Int32("Card", msg.Card), zap.Int32("chair", msg.ChairId))
 	}
@@ -141,11 +141,11 @@ func (self *Changshu) dealChiCard(msg *pbgame_logic.BS2CChiCard) {
 	if msg.ChairId == self.ChairId {
 		tlog.Info("我吃牌", zap.Int32("Card", msg.Card), zap.Uint32("ChiType", msg.ChiType))
 		if isFlag(msg.ChiType, uint32(pbgame_logic.ChiTypeMask_ChiMaskRight)) {
-			self.updateCardInfo(nil, []int32{msg.Card - 2, msg.Card - 1})
+			self.updateCardInfo(nil, []byte{byte(msg.Card - 2), byte(msg.Card - 1)})
 		} else if isFlag(msg.ChiType, uint32(pbgame_logic.ChiTypeMask_ChiMaskMiddle)) {
-			self.updateCardInfo(nil, []int32{msg.Card - 1, msg.Card + 1})
+			self.updateCardInfo(nil, []byte{byte(msg.Card - 1), byte(msg.Card + 1)})
 		} else if isFlag(msg.ChiType, uint32(pbgame_logic.ChiTypeMask_ChiMaskLeft)) {
-			self.updateCardInfo(nil, []int32{msg.Card + 1, msg.Card + 2})
+			self.updateCardInfo(nil, []byte{byte(msg.Card + 1), byte(msg.Card + 2)})
 		}
 	} else {
 		tlog.Info("别人吃牌", zap.Int32("Card", msg.Card), zap.Uint32("ChiType", msg.ChiType), zap.Int32("chair", msg.ChairId))
@@ -156,7 +156,7 @@ func (self *Changshu) dealChiCard(msg *pbgame_logic.BS2CChiCard) {
 func (self *Changshu) dealPengCard(msg *pbgame_logic.BS2CPengCard) {
 	if msg.ChairId == self.ChairId {
 		tlog.Info("我碰牌", zap.Int32("Card", msg.Card))
-		self.updateCardInfo(nil, []int32{msg.Card, msg.Card})
+		self.updateCardInfo(nil, []byte{byte(msg.Card), byte(msg.Card)})
 	} else {
 		tlog.Info("别人碰牌", zap.Int32("Card", msg.Card), zap.Int32("chair", msg.ChairId))
 	}
@@ -167,9 +167,9 @@ func (self *Changshu) dealGangCard(msg *pbgame_logic.BS2CGangCard) {
 	if msg.ChairId == self.ChairId {
 		tlog.Info("我杠牌", zap.Int32("Card", msg.Card))
 		if msg.Type == pbgame_logic.GangType_GangType_AN {
-			self.updateCardInfo(nil, []int32{msg.Card, msg.Card, msg.Card, msg.Card})
+			self.updateCardInfo(nil, []byte{byte(msg.Card), byte(msg.Card), byte(msg.Card), byte(msg.Card)})
 		} else if msg.Type == pbgame_logic.GangType_GangType_Ming {
-			self.updateCardInfo(nil, []int32{msg.Card, msg.Card, msg.Card})
+			self.updateCardInfo(nil, []byte{byte(msg.Card), byte(msg.Card), byte(msg.Card)})
 		}
 		return
 	} else {
@@ -200,7 +200,7 @@ func (self *Changshu) dealHuCard(msg *pbgame_logic.BS2CHuCard) {
 // 	tlog.Info("补花后self.HandCards", zap.Any("handcards", self.HandCards))
 // }
 
-func (self *Changshu) removeCard(delcard int32, delAll bool) {
+func (self *Changshu) removeCard(delcard byte, delAll bool) {
 	for i, card := range self.HandCards {
 		if card == delcard {
 			self.HandCards = append(self.HandCards[:i], self.HandCards[i+1:]...)
@@ -210,13 +210,14 @@ func (self *Changshu) removeCard(delcard int32, delAll bool) {
 		}
 	}
 }
-func switchToInt32(cards []*pbgame_logic.Cyint32) []int32 {
-	res := []int32{}
-	for _, card := range cards {
-		res = append(res, card.T)
-	}
-	return res
-}
+
+// func switchToInt32(cards []*pbgame_logic.Cyint32) []int32 {
+// 	res := []int32{}
+// 	for _, card := range cards {
+// 		res = append(res, card.T)
+// 	}
+// 	return res
+// }
 
 func (self *Changshu) S2CStartGame(msg *pbgame_logic.S2CStartGame) {
 	self.BankerId = msg.BankerId
@@ -350,7 +351,7 @@ func (self *Changshu) outCard() {
 	self.SendGameAction(&pbgame_logic.C2SOutCard{Card: card})
 }
 
-func (self *Changshu) updateCardInfo(addCards, subCards []int32) {
+func (self *Changshu) updateCardInfo(addCards, subCards []byte) {
 	if len(addCards) != 0 {
 		self.HandCards = append(self.HandCards, addCards...)
 	} else if len(subCards) != 0 {
@@ -361,7 +362,7 @@ func (self *Changshu) updateCardInfo(addCards, subCards []int32) {
 }
 
 //删除手牌中的某张牌,delAll为true时删除所有的delcard
-func RemoveCard(handCards []int32, delcard int32, delAll bool) []int32 {
+func RemoveCard(handCards []byte, delcard byte, delAll bool) []byte {
 	for i, card := range handCards {
 		if card == delcard {
 			handCards = append(handCards[:i], handCards[i+1:]...)

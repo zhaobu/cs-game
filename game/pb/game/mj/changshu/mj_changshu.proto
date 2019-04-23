@@ -139,8 +139,8 @@ message S2CThrowDice {
 
 //玩家投色子结果
 message BS2CThrowDiceResult {
-  int32 chair_id = 1;               //当前投色子玩家
-  repeated cyint32 dice_value = 2;  //色子大小
+  int32 chair_id = 1;          //当前投色子玩家
+  bytes dice_valueArrary = 2;  //色子大小
 }
 
 message ChangePosInfo {
@@ -192,28 +192,28 @@ message S2CHaveOperation {
 
 message Json_UserCardInfo {
   message cards {
-    repeated int32 cards = 1;  //一个人的手牌
+    bytes cards = 1;  //一个人的手牌
   }
   map<int32, cards> hand_cards = 1;  //每个人的手牌
 }
 
 //游戏开始
 message S2CStartGame {
-  int32 banker_id = 1;             //庄家id(也表示第一个可操作玩家)
-  int32 left_num = 2;              //剩余牌数
-  int32 total_num = 3;             //总牌数
-  uint32 cur_inning = 4;           //当前局
-  repeated cyint32 hua_cards = 5;  //庄家花牌
-  repeated cyint32 dice_value = 6;   //摸牌色子
-  int32 left_time = 7;               //超时时间
+  int32 banker_id = 1;         //庄家id(也表示第一个可操作玩家)
+  int32 left_num = 2;          //剩余牌数
+  int32 total_num = 3;         //总牌数
+  uint32 cur_inning = 4;       //当前局
+  bytes hua_cardsArrary = 5;   //庄家花牌
+  bytes dice_valueArrary = 6;  //摸牌色子
+  int32 left_time = 7;         //超时时间
   S2CHaveOperation banker_oper = 8;  //庄家能做的操作
   string json_all_cards = 9;  //所有玩家手牌,(按Json_UserCardInfo格式解析)
 }
 
 //第一次补花信息
 message Json_FirstBuHua {
-  repeated int32 hua_cards = 1;  //所有的花牌(包括发牌时的花和补到的花)
-  repeated int32 mo_cards = 2;  //摸到的所有牌
+  bytes hua_cards = 1;  //所有的花牌(包括发牌时的花和补到的花)
+  bytes mo_cards = 2;   //摸到的所有牌
 }
 
 //玩家摸牌
@@ -252,8 +252,8 @@ message BS2COutCard {
 
 //玩家碰牌
 message BS2CPengCard {
-  int32 chair_id = 1;           //碰牌玩家
-  int32 card = 2;               //要碰的牌
+  int32 chair_id = 1;  //碰牌玩家
+  int32 card = 2;      //要碰的牌
 }
 
 enum GangType {
@@ -273,26 +273,26 @@ message BS2CGangCard {
 
 //玩家吃牌
 message BS2CChiCard {
-  int32 chair_id = 1;           //吃牌玩家
-  int32 card = 2;               //要吃的牌
-  uint32 chi_type = 3;          //吃类型掩码
+  int32 chair_id = 1;   //吃牌玩家
+  int32 card = 2;       //要吃的牌
+  uint32 chi_type = 3;  //吃类型掩码
 }
 
 //玩家胡牌
 message BS2CHuCard {
   int32 chair_id = 1;             //胡牌玩家
-  repeated int32 hand_cards = 2;  //胡牌手牌
+  bytes hand_cards = 2;  //胡牌手牌
 }
 
 message PlayerBalanceInfo {
   string hu_type = 1;  // json G_HuScore_Type类型参数
   // json {anGang:1,jieGang:1,fangGang:1,mingGang:1},暗杠数,接杠数,放杠数,明杠数
   string gang_type = 2;
-  int32 hu_card = 3;              //显示胡的牌
-  repeated int32 hand_cards = 4;  //手牌
-  int32 point = 5;                //当局获得分数
-  int32 total_point = 6;          //玩家当前总分数
-  bool is_hu = 7;                 //是否胡牌
+  int32 hu_card = 3;      //显示胡的牌
+  bytes hand_cards = 4;   //手牌
+  int32 point = 5;        //当局获得分数
+  int32 total_point = 6;  //玩家当前总分数
+  bool is_hu = 7;         //是否胡牌
 }
 //单局游戏结束
 message BS2CGameEnd {
