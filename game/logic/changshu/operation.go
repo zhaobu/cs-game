@@ -191,7 +191,7 @@ func (self *OperAtion) BankerAnalysis(cardInfo *mj.PlayerCardInfo) *CanOperInfo 
 	ret := NewCanOper()
 
 	//判断是否能胡
-	if ok, huOper := huLib.CheckHuType(cardInfo); ok {
+	if ok, huOper := self.CheckHuType(cardInfo, mj.HuMode_ZIMO); ok {
 		ret.CanHu.HuList = huOper
 	}
 
@@ -233,7 +233,7 @@ func (self *OperAtion) DrawcardAnalysis(cardInfo *mj.PlayerCardInfo, card int32,
 
 	//判断是否能胡
 	self.updateCardInfo(cardInfo, []int32{card}, nil)
-	if ok, huOper := huLib.CheckHuType(cardInfo); ok {
+	if ok, huOper := self.CheckHuType(cardInfo, mj.HuMode_ZIMO); ok {
 		ret.CanHu.HuList = huOper
 	}
 	self.updateCardInfo(cardInfo, nil, []int32{card}) //还原手牌
@@ -303,7 +303,7 @@ func (self *OperAtion) OutCardAnalysis(cardInfo *mj.PlayerCardInfo, outCard, cha
 	}
 	//判断是否能胡
 	self.updateCardInfo(cardInfo, []int32{outCard}, nil)
-	if ok, huOper := huLib.CheckHuType(cardInfo); ok {
+	if ok, huOper := self.CheckHuType(cardInfo, mj.HuMode_PAOHU); ok {
 		ret.CanHu.HuList = huOper
 	}
 	self.updateCardInfo(cardInfo, nil, []int32{outCard}) //还原手牌
@@ -384,16 +384,19 @@ func (self *OperAtion) QiangGangAnalysis(cardInfo *mj.PlayerCardInfo, outCard, c
 	//判断是否能胡
 	tmpCardInfo := *cardInfo
 	self.updateCardInfo(&tmpCardInfo, []int32{outCard}, nil)
-	if ok, huOper := huLib.CheckHuType(&tmpCardInfo); ok {
+	if ok, huOper := self.CheckHuType(&tmpCardInfo, mj.HuMode_QIANGHU); ok {
 		ret.CanHu.HuList = huOper
 	}
 	return ret
 }
 
+//判断胡牌
 func (self *OperAtion) CheckHuType(cardInfo *mj.PlayerCardInfo, huMode mj.EmHuMode) (bool, mj.HuTypeList) {
 	//自摸需要2花,点炮需要3花
-	if  {
-		
+	if huMode == mj.HuMode_ZIMO && len(cardInfo.HuaCards) < 2 {
+		return false, nil
+	} else if (huMode == mj.HuMode_PAOHU || huMode == mj.HuMode_QIANGHU) && len(cardInfo.HuaCards) < 3 {
+		return false, nil
 	}
-	return false, nil
+	return huLib.CheckHuType(cardInfo)
 }

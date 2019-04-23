@@ -40,6 +40,7 @@ func (self *PlayerCardInfo) reset() {
 	self.GangCards = map[int32]EmOperType{}
 	self.StackCards = map[int32]int32{}
 	self.ChiCards = [][3]int32{}
+	self.HuaCards = []int32{}
 }
 
 //单局结算信息

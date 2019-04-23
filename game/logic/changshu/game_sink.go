@@ -37,6 +37,9 @@ type gameAllInfo struct {
 	laiziCard      map[int32]int32                   //癞子牌
 	hasHu          bool                              //是否有人胡牌
 	hasFirstBuHua  []bool                            //是否已经进行过第一次补花
+	guoChiCards    map[int32][]int32                 //过吃的牌
+	guoPengCards   map[int32]int32                   //过碰的牌
+	louPeng        map[int32]bool                    //是否过碰
 }
 
 type mjLib struct {
@@ -48,12 +51,12 @@ type mjLib struct {
 //游戏主逻辑
 type GameSink struct {
 	mjLib
-	gameAllInfo //游戏公共信息
-	desk        *Desk
+	desk        *Desk                   //桌子
+	gameAllInfo                         //游戏公共信息
 	game_config *pbgame_logic.CreateArg //游戏参数
+	baseCard    []int32                 //基础牌库
+	isPlaying   bool                    //是否在游戏中
 	// onlinePlayer []bool                  //在线玩家
-	baseCard  []int32 //基础牌库
-	isPlaying bool    //是否在游戏中
 }
 
 ////////////////////////调用desk接口函数START/////////////////////////////
@@ -86,6 +89,7 @@ func (self *GameSink) Ctor(config *pbgame_logic.CreateArg) error {
 	self.players = make([]*mj.PlayerInfo, config.PlayerCount)
 	self.baseCard = cardDef.GetBaseCard(config.PlayerCount)
 	self.operAction.Init(config, self.laiziCard)
+	self.gameBalance.Init(config)
 	return nil
 }
 
@@ -240,11 +244,11 @@ func (self *GameSink) dealDiceResult() {
 }
 
 //随机摇一次色子
-func (self *GameSink) randDice() []int32 {
+func (self *GameSink) randDice() [2]int32 {
 	rand.Seed(time.Now().Unix())
-	res := []int32{}
+	res := [2]int32{}
 	for i := 0; i < 2; i++ {
-		res = append(res, int32(rand.Intn(5)+1))
+		res[i] = int32(rand.Intn(5) + 1)
 	}
 	return res
 }
@@ -254,7 +258,9 @@ func (self *GameSink) deal_card() {
 	//随机2个色子,用于客户端选择从牌堆摸牌的方向
 	msg := &pbgame_logic.S2CStartGame{BankerId: self.bankerId, CurInning: self.desk.curInning, LeftTime: 15}
 	msg.DiceValue = make([]*pbgame_logic.Cyint32, 2)
-	for i, rnd := range self.randDice() {
+	randRes := self.randDice()
+	self.gameBalance.DealStartDice(randRes)
+	for i, rnd := range randRes {
 		msg.DiceValue[i] = &pbgame_logic.Cyint32{T: rnd}
 	}
 
@@ -390,7 +396,8 @@ func (self *GameSink) firstBuHuaCards(chairId int32) (huaCards, moCards []int32)
 			self.operAction.updateCardInfo(cardInfo, moCard, nil)        //加上摸到的牌
 			huaCards = append(huaCards, card)                            //记录原有的花
 			huaCards = append(huaCards, tmpHuaCards...)                  //记录摸到的花
-			moCards = append(moCards, moCard...)                         //记录摸到的牌
+			cardInfo.HuaCards = append(cardInfo.HuaCards, huaCards...)
+			moCards = append(moCards, moCard...) //记录摸到的牌
 		}
 	}
 	tlog.Debug("玩家第一次补花后手牌数据为", zap.Int32("chairId", chairId), zap.Any("cardInfo", cardInfo))
@@ -460,14 +467,16 @@ func (self *GameSink) drawCard(chairId, last, lose_chair int32) error {
 	//发送自己
 	msg.JsonDrawInfo = util.PB2JSON(&pbgame_logic.Json_FirstBuHua{HuaCards: huaCards, MoCards: moCards}, false)
 	self.sendData(chairId, msg)
+	cardInfo := &self.players[chairId].CardInfo
 	//发送别人
 	if len(huaCards) > 0 {
+		cardInfo.HuaCards = append(cardInfo.HuaCards, huaCards...)
 		msg.JsonDrawInfo = util.PB2JSON(&pbgame_logic.Json_FirstBuHua{HuaCards: huaCards}, false)
 	}
 	self.sendDataOther(chairId, msg)
 
 	self.curOutChair = chairId
-	cardInfo := &self.players[chairId].CardInfo
+
 	//分析能否暗杠,补杠,自摸胡
 	ret := self.operAction.DrawcardAnalysis(cardInfo, card, int32(len(self.leftCard)))
 	log.Infof("%s 摸牌后操作分析ret=%+v", self.logHeadUser(chairId), ret)
@@ -747,6 +756,7 @@ func (self *GameSink) chiCard(chairId, card int32, chiType uint32) error {
 
 	// self.sendData(-1, &pbgame_logic.BS2CCurOutChair{ChairId: chairId})
 	//变量维护
+	self.AddGuoChiCards(chairId, card, chiType)
 	self.curOutChair = chairId
 	self.haswaitOper[chairId] = false
 	self.resetOper()
@@ -1090,4 +1100,14 @@ func (self *GameSink) logHeadUser(chairId int32) string {
 	} else {
 		return fmt.Sprintf("房间[%d] 玩家[%s,%d]:", self.desk.deskId, self.players[chairId].BaseInfo.Nickname, chairId)
 	}
+}
+
+//过吃
+func (self *GameSink) AddGuoChiCards(chairId, card int32, chiType uint32) {
+
+}
+
+//过碰
+func (self *GameSink) AddGuoPengCards(chairId, card int32) {
+
 }
