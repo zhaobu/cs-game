@@ -389,3 +389,11 @@ func (self *OperAtion) QiangGangAnalysis(cardInfo *mj.PlayerCardInfo, outCard, c
 	}
 	return ret
 }
+
+func (self *OperAtion) CheckHuType(cardInfo *mj.PlayerCardInfo, huMode mj.EmHuMode) (bool, mj.HuTypeList) {
+	//自摸需要2花,点炮需要3花
+	if  {
+		
+	}
+	return false, nil
+}
