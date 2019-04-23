@@ -29,6 +29,7 @@ type gameNodeConf struct {
 	nodeConf
 	TplName  string `json:"TplName"`  //默认建房参数
 	GameName string `json:"GameName"` //游戏名称
+	GameTest string `json:"GameTest"` //游戏测试配置文件
 }
 type GameConfs struct {
 	MjLibPath string                  `json:"MjLibPath"` //胡牌表加载路径

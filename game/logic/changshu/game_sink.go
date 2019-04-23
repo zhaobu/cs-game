@@ -1,6 +1,7 @@
 package main
 
 import (
+	"cy/game/configs"
 	mj "cy/game/logic/changshu/majiang"
 	pbgame_logic "cy/game/pb/game/mj/changshu"
 	"cy/game/util"
@@ -32,7 +33,6 @@ type gameAllInfo struct {
 	curOutChair    int32                             //当前出牌玩家
 	lastOutChair   int32                             //上次出牌玩家
 	lastOutCard    int32                             //上次出的牌
-	makeCards      bool                              //是否做牌
 	debugCard      []int32                           //配牌
 	laiziCard      map[int32]int32                   //癞子牌
 	hasHu          bool                              //是否有人胡牌
@@ -83,9 +83,8 @@ func (self *GameSink) Ctor(config *pbgame_logic.CreateArg) error {
 	cardDef.Init(log)
 	self.isPlaying = false
 	// self.onlinePlayer = make([]bool, config.PlayerCount)
-	self.players = mj.MakePlayers(config.PlayerCount)
+	self.players = make([]*mj.PlayerInfo, config.PlayerCount)
 	self.baseCard = cardDef.GetBaseCard(config.PlayerCount)
-	self.reset()
 	self.operAction.Init(config, self.laiziCard)
 	return nil
 }
@@ -110,6 +109,7 @@ func (self *GameSink) reset() {
 //开始游戏
 func (self *GameSink) StartGame() {
 	self.isPlaying = true
+	self.reset()
 	//通知第一个玩家投色子
 	self.sendData(-1, &pbgame_logic.S2CThrowDice{ChairId: 0})
 	self.curThrowDice = 0
@@ -121,6 +121,7 @@ func (self *GameSink) AddPlayer(chairId int32, uid uint64, nickName string) bool
 		log.Errorf("%s 加入房间失败,人数已满,游戏开始人数为%d", self.logHeadUser(chairId), self.game_config.PlayerCount)
 		return false
 	}
+	self.players[chairId] = mj.MakePlayers()
 	self.players[chairId].BaseInfo = mj.PlayerBaseInfo{ChairId: chairId, Uid: uid, Nickname: nickName, Point: 0}
 	// self.onlinePlayer[chairId] = true
 	return true
@@ -265,7 +266,7 @@ func (self *GameSink) deal_card() {
 	//庄家手牌
 	bankerCardInfo := &self.players[self.bankerId].CardInfo
 	bankerCardInfo.HandCards = player_cards[self.bankerId]
-	bankerCardInfo.StackCards = cardDef.StackCards(player_cards[self.bankerId])
+	bankerCardInfo.StackCards = mj.CalStackCards(player_cards[self.bankerId])
 	//庄家开始第一次补花
 	huaCards, _ := self.firstBuHuaCards(self.bankerId)
 	msg.HuaCards = switchToCyint32(huaCards)
@@ -284,7 +285,7 @@ func (self *GameSink) deal_card() {
 	for k, v := range self.players {
 		if int32(k) != self.bankerId {
 			v.CardInfo.HandCards = player_cards[k]
-			v.CardInfo.StackCards = cardDef.StackCards(player_cards[k])
+			v.CardInfo.StackCards = mj.CalStackCards(player_cards[k])
 		}
 
 		tmp := &pbgame_logic.Json_UserCardInfo{HandCards: map[int32]*pbgame_logic.Json_UserCardInfoCards{}}
@@ -615,11 +616,11 @@ func (self *GameSink) countCanOper(ret *CanOperInfo, chairId int32, huMode mj.Em
 
 //洗牌
 func (self *GameSink) shuffle_cards() {
-	if self.makeCards {
-		self.leftCard = self.debugCard
+	if configs.Conf.GameNode[gameName].GameTest != "" {
+		self.leftCard = cardDef.DebugCards(gameName, self.baseCard, self.game_config.PlayerCount)
 		return
 	}
-	self.leftCard = cardDef.RandCards(self.baseCard)
+	self.leftCard = mj.RandCards(self.baseCard)
 }
 
 //返回1表示能直接进行该操作,返回2表示还需要等待,返回3表示需要唤醒等待中的操作

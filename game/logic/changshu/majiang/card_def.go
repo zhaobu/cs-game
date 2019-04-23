@@ -1,6 +1,8 @@
 package majiang
 
 import (
+	"cy/game/configs"
+	"cy/game/util"
 	"math/rand"
 	"runtime/debug"
 	"time"
@@ -39,7 +41,9 @@ var fourPlayerCardDef = []int32{
 
 //配牌解析结构
 type TestHandCards struct {
-	HandCards map[string][]int32 `json:"handCards"`
+	HandCards  map[int32][]int32 `json:"handCards"`  //配牌数据
+	DebugCards bool              `json:"debugCards"` //是否配牌
+	stackCards map[int32]int32   //所有牌的统计
 }
 
 //二人麻将
@@ -49,7 +53,8 @@ var threePlayerCardDef = []int32{}
 var twoPlayerCardDef = []int32{}
 
 var (
-	log *zap.SugaredLogger //majiang package的log
+	log       *zap.SugaredLogger //majiang package的log
+	testCards TestHandCards
 )
 
 type CardDef struct {
@@ -77,13 +82,51 @@ func (self *CardDef) GetBaseCard(playerCount int32) []int32 {
 	return card
 }
 
+//读取配牌
+func (self *CardDef) DebugCards(gameName string, baseCard []int32, playercount int32) []int32 {
+	//从配牌文件读取
+	util.LoadJSON(configs.Conf.GameNode[gameName].GameTest, &testCards)
+	if !testCards.DebugCards {
+		return RandCards(baseCard)
+	}
+	testCards.stackCards = map[int32]int32{}
+	debugCards := []int32{} //配的牌
+	for i := playercount - 1; i >= 0; i-- {
+		debugCards = append(debugCards, testCards.HandCards[i]...)
+		Add_stack(testCards.stackCards, testCards.HandCards[i]...)
+	}
+	//去掉配的牌
+	baseStacks := CalStackCards(baseCard)
+	for k, v := range testCards.stackCards {
+		num, ok := baseStacks[k]
+		if !ok || v > num {
+			log.Errorf("配牌时牌%d数量太多或者牌库不存在该牌", k)
+			continue
+		}
+		baseStacks[k] -= v
+		if baseStacks[k] == 0 {
+			delete(baseStacks, k)
+		}
+	}
+	//剩下的牌随机
+	leftCards := []int32{}
+	for k, v := range baseStacks {
+		for i := int32(0); i < v; i++ {
+			leftCards = append(leftCards, k)
+		}
+	}
+	leftCards = RandCards(leftCards)
+
+	return append(leftCards, debugCards...)
+}
+
 //洗牌
-func (self *CardDef) RandCards(baseCard []int32) []int32 {
+func RandCards(baseCard []int32) []int32 {
 	array := make([]int32, len(baseCard)) //保证不会改变baseCard
 	copy(array, baseCard)
 	rand.Seed(time.Now().Unix())
 	for i := len(array) - 1; i >= 0; i-- {
-		p := self.randInt64(0, int64(i))
+		p := randInt64(0, int64(i))
 		a := array[i]
 		array[i] = array[p]
 		array[p] = a
@@ -92,7 +135,7 @@ func (self *CardDef) RandCards(baseCard []int32) []int32 {
 }
 
 // randInt64 区间随机数
-func (self *CardDef) randInt64(min, max int64) int64 {
+func randInt64(min, max int64) int64 {
 	if min >= max || max == 0 {
 		return max
 	}
@@ -127,6 +170,9 @@ func Add_stack(m map[int32]int32, cards ...int32) {
 	for _, card := range cards {
 		if _, ok := m[card]; ok {
 			m[card] = m[card] + 1
+			if m[card] > 4 {
+				log.Errorf("加牌%d时牌数量>4,stack=%s", card, string(debug.Stack()))
+			}
 		} else {
 			m[card] = 1
 		}
@@ -148,7 +194,7 @@ func Sub_stack(m map[int32]int32, cards ...int32) {
 }
 
 //统计牌数量
-func (self *CardDef) StackCards(rawcards []int32) map[int32]int32 {
+func CalStackCards(rawcards []int32) map[int32]int32 {
 	var newcard = make(map[int32]int32)
 	for _, v := range rawcards {
 		Add_stack(newcard, v)

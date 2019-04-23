@@ -7,14 +7,10 @@ type PlayerInfo struct {
 	BalanceResult PlayerBalanceResult //总结算
 }
 
-func MakePlayers(num int32) []*PlayerInfo {
-	res := []*PlayerInfo{}
-	for i := int32(0); i < num; i++ {
-		p := &PlayerInfo{}
-		p.init()
-		res = append(res, p)
-	}
-	return res
+func MakePlayers() *PlayerInfo {
+	p := &PlayerInfo{}
+	p.init()
+	return p
 }
 func (self *PlayerInfo) init() {
 	self.CardInfo.reset()

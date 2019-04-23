@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
+	"os"
 	"sort"
 	"time"
 	"unsafe"
@@ -78,4 +79,17 @@ func PB2JSON(from_pb proto.Message, f bool) string {
 		fmt.Printf("PB2JSON err:%s", err)
 	}
 	return string(json_str)
+}
+
+func LoadJSON(fp string, v interface{}) {
+	fd, err := os.Open(fp)
+	if err != nil {
+		fmt.Printf("loadJSON err:%s", err)
+	}
+	defer fd.Close()
+	err = json.NewDecoder(fd).Decode(v)
+	if err != nil {
+		fmt.Printf("loadJSON err:%s", err)
+	}
+	fmt.Printf("load jsonfile:%s successfully", fp)
 }
