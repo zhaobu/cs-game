@@ -19,6 +19,64 @@ type RpcHandle struct {
 	service *RoomServie
 }
 
+//GameCommandReq发送指令
+func (self *RpcHandle) GameCommandReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
+	defer func() {
+		r := recover()
+		if r != nil {
+			self.service.log.Errorf("recover info: uid:%d stack:%s", args.UserID, string(debug.Stack()))
+		}
+	}()
+
+	pb, err := codec.Msg2Pb(args)
+	if err != nil {
+		self.service.tlog.Error("error info", zap.Error(err))
+		return err
+	}
+	self.service.log.Infof("recv from gate uid: %v,msgName: %s,pb: %s", args.UserID, args.Name, util.PB2JSON(pb, true))
+
+	req, ok := pb.(*pbgame.GameCommandReq)
+	if !ok {
+		err = fmt.Errorf("not *pbgame.GameCommandReq")
+		self.service.tlog.Error("error info", zap.Error(err))
+		return
+	}
+
+	//self.service.tlog.Info("recv from gate", zap.Uint64("uid", args.UserID), zap.String("msgName", args.Name), zap.Any("msgValue", *req))
+
+	self.service.roomHandle.HandleGameCommandReq(args.UserID, req)
+	return
+}
+
+//ChatMessageReq玩家发送聊天
+func (self *RpcHandle) ChatMessageReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
+	defer func() {
+		r := recover()
+		if r != nil {
+			self.service.log.Errorf("recover info: uid:%d stack:%s", args.UserID, string(debug.Stack()))
+		}
+	}()
+
+	pb, err := codec.Msg2Pb(args)
+	if err != nil {
+		self.service.tlog.Error("error info", zap.Error(err))
+		return err
+	}
+	self.service.log.Infof("recv from gate uid: %v,msgName: %s,pb: %s", args.UserID, args.Name, util.PB2JSON(pb, true))
+
+	req, ok := pb.(*pbgame.ChatMessageReq)
+	if !ok {
+		err = fmt.Errorf("not *pbgame.ChatMessageReq")
+		self.service.tlog.Error("error info", zap.Error(err))
+		return
+	}
+
+	//self.service.tlog.Info("recv from gate", zap.Uint64("uid", args.UserID), zap.String("msgName", args.Name), zap.Any("msgValue", *req))
+
+	self.service.roomHandle.HandleChatMessageReq(args.UserID, req)
+	return
+}
+
 //VoteDestroyDeskReq玩家选择解散请求
 func (self *RpcHandle) VoteDestroyDeskReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
 	defer func() {

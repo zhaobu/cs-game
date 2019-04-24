@@ -30,6 +30,8 @@ import (
 // }
 
 type IRoomHandle interface {
+	HandleGameCommandReq(uid uint64, req *pbgame.GameCommandReq)
+	HandleChatMessageReq(uid uint64, req *pbgame.ChatMessageReq)
 	HandleVoteDestroyDeskReq(uid uint64, req *pbgame.VoteDestroyDeskReq)
 	HandleDestroyDeskReq(uid uint64, req *pbgame.DestroyDeskReq, rsp *pbgame.DestroyDeskRsp)
 	HandleExitDeskReq(uid uint64, req *pbgame.ExitDeskReq, rsp *pbgame.ExitDeskRsp)

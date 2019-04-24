@@ -214,3 +214,13 @@ func GetHuaCount(stackCards map[int32]int32) (res int32) {
 	}
 	return
 }
+
+//是否合法
+func IsVaildCard(card int32) bool {
+	if card >= 11 && card <= 19 || card >= 21 && card <= 29 || card >= 31 && card <= 39 {
+		return true
+	} else if card >= 41 && card <= 47 || card >= 51 && card <= 58 {
+		return true
+	}
+	return false
+}

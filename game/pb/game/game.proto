@@ -62,13 +62,13 @@ enum MakeDeskRspCode {
   MakeDeskNotUse = 0;
   MakeDeskSucc = 1;
   MakeDeskArgsErr = 2;
-  MakeDeskNotEnoughMoney = 3;  // 财富不够
-  MakeDeskNotEnoughDesk = 4;   // 桌子不够
-  MakeDeskInternalServerError = 5; //服务器内部错误
-  MakeDeskUserStatusErr = 6;     // 创建并进入游戏失败
-  MakeDeskCanNotFindClubID = 7;  // 无效的俱乐部ID
-  MakeDeskLimit = 8;             // 个数限制
-  MakeDeskAlreadyInDesk=9; //已经在桌子中
+  MakeDeskNotEnoughMoney = 3;       // 财富不够
+  MakeDeskNotEnoughDesk = 4;        // 桌子不够
+  MakeDeskInternalServerError = 5;  //服务器内部错误
+  MakeDeskUserStatusErr = 6;        // 创建并进入游戏失败
+  MakeDeskCanNotFindClubID = 7;     // 无效的俱乐部ID
+  MakeDeskLimit = 8;                // 个数限制
+  MakeDeskAlreadyInDesk = 9;        //已经在桌子中
 }
 message MakeDeskRsp {
   pbcommon.RspHead Head = 1;
@@ -143,10 +143,17 @@ message ExitDeskRsp {
   string ErrMsg = 3;
 }
 
+//点击解散按钮方式
+enum DestroyDeskType {
+  DestroyTypeGame = 0;   //在桌子发起解散
+  DestroyTypeClub = 1;   //在俱乐部发起解散
+  DestroyTypeDebug = 2;  //强制解散,调试用
+}
 // 申请解散 c -> s (包括游戏开始前房主解散和游戏中投票解散)
 message DestroyDeskReq {
   pbcommon.ReqHead Head = 1;
   uint64 DeskID = 2;
+  DestroyDeskType Type = 3;
 }
 
 //申请解散回应code
@@ -171,14 +178,15 @@ message DestroyDeskRsp {
 message DestroyDeskResultNotif {
   uint64 DeskID = 1;  //桌子号
   int32 Result = 2;   // 1:解散成功 2:解散失败
+  string Reason = 3;  //解散原因
 }
 
 //投票解散开始
-message VoteDestroyDeskStartNotif {
-  uint64 DeskID = 1;   //桌子号
-  uint64 VoteUser = 2;   //发起解散玩家
-  int32 LeftTime = 3;  //申请解散倒计时时间
-}
+// message VoteDestroyDeskStartNotif {
+//   uint64 DeskID = 1;    //桌子号
+//   uint64 VoteUser = 2;  //发起解散玩家
+//   int32 LeftTime = 3;   //申请解散倒计时时间
+// }
 
 enum VoteOption {
   VoteOptionNone = 0;    //未选择
@@ -191,17 +199,18 @@ message VoteDestroyDeskReq {
   VoteOption Option = 3;
 }
 
-// 玩家选择解散请求广播
-message VoteDestroyDeskNotif {
-  uint64 DeskID = 1;  //桌子号
-  uint64 UserID = 2;  //选择解散请求玩家
-  VoteOption Option = 3;
-}
-
-//投票解散信息(断线重连时用)
+//投票解散信息
 message VoteDestroyDeskInfo {
   uint64 UserID = 1;
   VoteOption Option = 2;
+}
+
+// 玩家选择解散请求广播
+message VoteDestroyDeskNotif {
+  uint64 DeskID = 1;                            //桌子号
+  uint64 VoteUser = 2;                          //发起解散玩家
+  int32 LeftTime = 3;                           //申请解散倒计时时间
+  repeated VoteDestroyDeskInfo VoteResult = 4;  //解散结果
 }
 
 // 游戏动作 c -> s
@@ -215,4 +224,23 @@ message GameAction {
 message GameNotif {
   string NotifName = 1;  // 具体游戏子命令
   bytes NotifValue = 2;
+}
+
+//发送聊天信息 c -> s
+message ChatMessageReq {
+  pbcommon.ReqHead Head = 1;
+  string Info = 2;
+}
+
+//广播聊天信息 s-> c
+message ChatMessageNotif {
+  uint64 UserID = 1;
+  string Info = 2;
+}
+
+//发送游戏指令 c -> s
+message GameCommandReq {
+  pbcommon.ReqHead Head = 1;
+  int32 CmdType = 2;   //指令类型
+  string CmdInfo = 3;  //指令内容(按json格式前后端协定好格式)
 }

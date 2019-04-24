@@ -47,6 +47,7 @@ func init() {
 
 type roomHandle struct {
 	*tpl.RoomServie
+	gameCommond
 }
 
 // func initLogrus() {
@@ -117,7 +118,7 @@ func main() {
 	}
 	roomService := &tpl.RoomServie{}
 	roomService.Init(gameName, *addr, tlog, *redisAddr, *redisDb)
-	roomService.RegisterHandle(&roomHandle{roomService})
+	roomService.RegisterHandle(&roomHandle{RoomServie: roomService})
 
 	if !*release {
 		cache.FlushDb(*redisDb)

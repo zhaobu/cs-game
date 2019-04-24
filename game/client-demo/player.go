@@ -136,6 +136,7 @@ func (self *Player) destroyDesk() {
 	self.SendPb(&pbgame.DestroyDeskReq{
 		Head:   &pbcommon.ReqHead{Seq: 1, UserID: self.UserId},
 		DeskID: self.DeskId,
+		Type:   pbgame.DestroyDeskType_DestroyTypeDebug,
 	})
 	<-self.waitchan
 	tlog.Info("destroyDesk suc", zap.String("wxID", self.wxID), zap.Uint64("UserId", self.UserId))

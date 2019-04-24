@@ -181,7 +181,7 @@ func (self *OperAtion) updateCardInfo(cardInfo *mj.PlayerCardInfo, addCards, sub
 	} else if len(subCards) != 0 {
 		mj.Sub_stack(cardInfo.StackCards, subCards...)
 		for _, card := range subCards {
-			cardInfo.HandCards = mj.RemoveCard(cardInfo.HandCards, card, false)
+			cardInfo.HandCards, _ = mj.RemoveCard(cardInfo.HandCards, card, false)
 		}
 	}
 }
@@ -336,7 +336,7 @@ func (self *OperAtion) HandleChiCard(cardInfo *mj.PlayerCardInfo, loseCardInfo *
 	cardInfo.ChiCards = append(cardInfo.ChiCards, eatGroup)
 
 	//处理出牌玩家,把牌从出过的牌中拿走
-	loseCardInfo.OutCards = mj.RemoveCard(loseCardInfo.OutCards, card, false)
+	loseCardInfo.OutCards, _ = mj.RemoveCard(loseCardInfo.OutCards, card, false)
 }
 
 //处理碰牌(cardInfo为碰牌玩家,loseCardInfo为出牌玩家)
@@ -345,7 +345,7 @@ func (self *OperAtion) HandlePengCard(cardInfo *mj.PlayerCardInfo, loseCardInfo 
 	self.updateCardInfo(cardInfo, nil, []int32{card, card})
 	cardInfo.PengCards[card] = loseChair
 	//处理出牌玩家,把牌从出过的牌中拿走
-	loseCardInfo.OutCards = mj.RemoveCard(loseCardInfo.OutCards, card, false)
+	loseCardInfo.OutCards, _ = mj.RemoveCard(loseCardInfo.OutCards, card, false)
 }
 
 func (self *OperAtion) HandleGangCard(cardInfo *mj.PlayerCardInfo, loseCardInfo *mj.PlayerCardInfo, card int32, gangType mj.EmOperType) {
@@ -357,7 +357,7 @@ func (self *OperAtion) HandleGangCard(cardInfo *mj.PlayerCardInfo, loseCardInfo 
 	} else if gangType == mj.OperType_MING_GANG { //明杠
 		self.updateCardInfo(cardInfo, nil, []int32{card, card, card})
 		//处理出牌玩家,把牌从出过的牌中拿走
-		loseCardInfo.OutCards = mj.RemoveCard(loseCardInfo.OutCards, card, false)
+		loseCardInfo.OutCards, _ = mj.RemoveCard(loseCardInfo.OutCards, card, false)
 	} else {
 		log.Errorf("杠类型错误,gangType=%d", gangType)
 	}

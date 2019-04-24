@@ -77,14 +77,15 @@ func (self *PlayerBalanceResult) init() {
 }
 
 //删除手牌中的某张牌,delAll为true时删除所有的delcard
-func RemoveCard(handCards []int32, delcard int32, delAll bool) []int32 {
+func RemoveCard(handCards []int32, delcard int32, delAll bool) (cards []int32, del bool) {
 	for i, card := range handCards {
 		if card == delcard {
-			handCards = append(handCards[:i], handCards[i+1:]...)
+			cards = append(handCards[:i], handCards[i+1:]...)
+			del = true
 			if !delAll {
 				break
 			}
 		}
 	}
-	return handCards
+	return
 }
