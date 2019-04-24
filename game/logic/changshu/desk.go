@@ -40,6 +40,7 @@ type voteInfo struct {
 }
 type Desk struct {
 	mu          sync.Mutex
+	rmu         sync.RWMutex
 	gameNode    *tpl.RoomServie
 	clubId      int64                    //俱乐部id
 	masterUid   uint64                   //房主uid
@@ -485,23 +486,31 @@ func (d *Desk) GetUidByChairid(chairId int32) uint64 {
 
 func (d *Desk) set_timer(tID mj.EmtimerID, dura time.Duration, f func()) {
 	exefun := func() {
-		d.mu.Lock()
-		defer d.mu.Unlock()
 		f()
-		delete(d.timerManger, tID) //闭包,删除已经执行过的定时器
+		d.timerMangerDelete(tID) //闭包,删除已经执行过的定时器
 	}
+	d.rmu.Lock()
 	d.timerManger[tID] = d.gameNode.Timer.AfterFunc(dura, exefun)
+	d.rmu.Unlock()
 }
 
 func (d *Desk) cancel_timer(tID mj.EmtimerID) {
-	if t, ok := d.timerManger[tID]; ok == false {
+	d.rmu.RLock()
+	t, ok := d.timerManger[tID]
+	d.rmu.Unlock()
+	if !ok {
 		log.Infof("取消定时器时定时器不存在")
 		return
-	} else {
-		t.Stop()
-		//取消后删除该定时器
-		delete(d.timerManger, tID)
 	}
+	t.Stop()
+	//取消后删除该定时器
+	d.timerMangerDelete(tID)
+}
+
+func (d *Desk) timerMangerDelete(tID mj.EmtimerID) {
+	d.rmu.Lock()
+	delete(d.timerManger, tID)
+	d.rmu.Unlock()
 }
 
 //玩家上下线

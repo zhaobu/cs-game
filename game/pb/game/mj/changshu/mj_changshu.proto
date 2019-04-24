@@ -252,8 +252,8 @@ message BS2COutCard {
 
 //玩家碰牌
 message BS2CPengCard {
-  int32 chair_id = 1;           //碰牌玩家
-  int32 card = 2;               //要碰的牌
+  int32 chair_id = 1;  //碰牌玩家
+  int32 card = 2;      //要碰的牌
 }
 
 enum GangType {
@@ -273,9 +273,9 @@ message BS2CGangCard {
 
 //玩家吃牌
 message BS2CChiCard {
-  int32 chair_id = 1;           //吃牌玩家
-  int32 card = 2;               //要吃的牌
-  uint32 chi_type = 3;          //吃类型掩码
+  int32 chair_id = 1;   //吃牌玩家
+  int32 card = 2;       //要吃的牌
+  uint32 chi_type = 3;  //吃类型掩码
 }
 
 //玩家胡牌

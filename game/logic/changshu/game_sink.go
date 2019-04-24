@@ -467,13 +467,12 @@ func (self *GameSink) drawCard(chairId, last, lose_chair int32) error {
 	//发送自己
 	msg.JsonDrawInfo = util.PB2JSON(&pbgame_logic.Json_FirstBuHua{HuaCards: huaCards, MoCards: moCards}, false)
 	self.sendData(chairId, msg)
-	cardInfo := &self.players[chairId].CardInfo
 	//发送别人
-	if len(huaCards) > 0 {
-		cardInfo.HuaCards = append(cardInfo.HuaCards, huaCards...)
-		msg.JsonDrawInfo = util.PB2JSON(&pbgame_logic.Json_FirstBuHua{HuaCards: huaCards}, false)
-	}
+	msg.JsonDrawInfo = util.PB2JSON(&pbgame_logic.Json_FirstBuHua{HuaCards: huaCards, MoCards: make([]int32, len(moCards))}, false)
 	self.sendDataOther(chairId, msg)
+
+	cardInfo := &self.players[chairId].CardInfo
+	cardInfo.HuaCards = append(cardInfo.HuaCards, huaCards...)
 
 	self.curOutChair = chairId
 
@@ -508,7 +507,7 @@ func (self *GameSink) checkAfterChiPeng(chairId int32) {
 			msg.JsonFirstBuhua = util.PB2JSON(&pbgame_logic.Json_FirstBuHua{HuaCards: huaCards, MoCards: moCards}, false)
 			self.sendData(chairId, msg)
 			//发给别人
-			msg.JsonFirstBuhua = util.PB2JSON(&pbgame_logic.Json_FirstBuHua{HuaCards: huaCards}, false)
+			msg.JsonFirstBuhua = util.PB2JSON(&pbgame_logic.Json_FirstBuHua{HuaCards: huaCards, MoCards: make([]int32, len(moCards))}, false)
 			self.sendDataOther(chairId, msg)
 		}
 	}
