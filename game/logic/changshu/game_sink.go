@@ -906,9 +906,9 @@ func (self *GameSink) gangCard(chairId, card int32) error {
 
 	//更新玩家card_info表
 	if gangType == mj.OperType_MING_GANG {
-		self.operAction.HandleGangCard(&self.players[chairId].CardInfo, &self.players[self.lastOutChair].CardInfo, card, gangType)
+		self.operAction.HandleGangCard(self.players[chairId], &self.players[self.lastOutChair].CardInfo, card, gangType)
 	} else {
-		self.operAction.HandleGangCard(&self.players[chairId].CardInfo, nil, card, gangType)
+		self.operAction.HandleGangCard(self.players[chairId], nil, card, gangType)
 	}
 	//回放记录
 
