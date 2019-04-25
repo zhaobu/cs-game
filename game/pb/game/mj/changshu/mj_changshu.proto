@@ -185,9 +185,10 @@ message CanGangMsg {
 //玩家该轮的操作
 message S2CHaveOperation {
   uint32 oper_mask = 1;     //操作的掩码
-  int32 card = 2;           //操作的牌
-  CanChiMsg can_chi = 3;    //吃信息
-  CanGangMsg can_gang = 4;  //杠信息
+  int32 chair_id = 2;       //能操作的玩家
+  int32 card = 3;           //操作的牌
+  CanChiMsg can_chi = 4;    //吃信息
+  CanGangMsg can_gang = 5;  //杠信息
 }
 
 message Json_UserCardInfo {
@@ -212,7 +213,7 @@ message S2CStartGame {
 
 //第一次补花信息
 message Json_FirstBuHua {
-  repeated int32 hua_cards = 1;  //所有的花牌(包括发牌时的花和补到的花)
+  repeated int32 hua_cards = 1;  //所有的花牌(包括手牌原有的花和补到的花)
   repeated int32 mo_cards = 2;  //摸到的所有牌
 }
 
@@ -254,8 +255,9 @@ message BS2COutCard {
 
 //玩家碰牌
 message BS2CPengCard {
-  int32 chair_id = 1;  //碰牌玩家
-  int32 card = 2;      //要碰的牌
+  int32 chair_id = 1;    //碰牌玩家
+  int32 card = 2;        //要碰的牌
+  int32 lose_chair = 3;  //被碰玩家
 }
 
 enum GangType {
@@ -282,8 +284,8 @@ message BS2CChiCard {
 
 //玩家胡牌
 message BS2CHuCard {
-  int32 chair_id = 1;             //胡牌玩家
-  repeated int32 hand_cards = 2;  //胡牌手牌
+  int32 chair_id = 1;  //胡牌玩家
+  int32 hu_card = 2;   //胡的牌
 }
 
 message PlayerBalanceInfo {

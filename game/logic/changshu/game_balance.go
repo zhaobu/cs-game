@@ -36,6 +36,7 @@ type GameBalance struct {
 	huCard       int32                   //胡的牌
 	huChairs     map[int32]*HuScoreInfo  //胡牌玩家信息
 	gangTou      map[int32]int32         //玩家杠头数
+	pghuaShu     []int32                 //碰花,杠花
 }
 
 func (self *GameBalance) Init(config *pbgame_logic.CreateArg) {
@@ -47,8 +48,9 @@ func (self *GameBalance) Reset() {
 	self.bankerId = -1
 	self.loseChair = -1
 	self.gangHuaChair = -1
-	self.huChairs = map[int32]*HuScoreInfo{}
-	self.gangTou = map[int32]int32{}
+	self.huChairs = make(map[int32]*HuScoreInfo, self.game_config.PlayerCount)
+	self.gangTou = make(map[int32]int32, self.game_config.PlayerCount)
+	self.pghuaShu = make([]int32, self.game_config.PlayerCount)
 }
 
 //统计次数
@@ -58,11 +60,6 @@ func (self *GameBalance) AddScoreTimes(balanceResult *mj.PlayerBalanceResult, op
 	} else {
 		balanceResult.ScoreTimes[op] = 1
 	}
-}
-
-//计算杠分
-func (self *GameBalance) CalGangScore(chairId, loseChair int32, gangType mj.EmOperType) {
-
 }
 
 //处理豹子翻倍

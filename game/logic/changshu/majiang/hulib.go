@@ -50,18 +50,44 @@ func hasHuaCard(cardInfo *PlayerCardInfo) bool {
 }
 
 // 胡牌牌型
-func (self *HuLib) CheckHuType(cardInfo *PlayerCardInfo) (bool, HuTypeList) {
+func (self *HuLib) CheckHuType(cardInfo *PlayerCardInfo, balanceInfo *PlayserBalanceInfo, huMode EmHuMode) (bool, HuTypeList) {
 	huTypeList := HuTypeList{}
 
 	//判断是否有花牌
 	if hasHuaCard(cardInfo) {
 		return false, nil
 	}
-	if ok, hutype := self.normal_hu(cardInfo); ok {
-		huTypeList = append(huTypeList, hutype)
+	if self.checkBaseHuHua(cardInfo, balanceInfo, huMode) {
+		if ok, hutype := self.normal_hu(cardInfo); ok {
+			huTypeList = append(huTypeList, hutype)
+		}
 	}
 	if len(huTypeList) > 0 {
 		return true, huTypeList
 	}
 	return false, nil
+}
+
+//检查基本胡花数够不够
+func (self *HuLib) checkBaseHuHua(cardInfo *PlayerCardInfo, balanceInfo *PlayserBalanceInfo, huMode EmHuMode) bool {
+	huaShu := balanceInfo.GetPingHuHua()
+	if huaShu == 0 && huMode == HuMode_ZIMO { //没花的情况下手牌里有两张一样的风牌，可自摸
+		for i := 41; i < 47; i++ {
+			if cardInfo.StackCards[int32(i)] > 1 {
+				return true
+			}
+		}
+	} else if huaShu == 1 && huMode == HuMode_ZIMO { //有一个花的情况下，自摸风牌仍可胡，但点炮不能胡
+		card := cardInfo.HuaCards[len(cardInfo.HuaCards)-1]
+		return card >= 41 && card < 47
+	} else if huMode == HuMode_ZIMO { //自摸
+		return huaShu >= 2
+	} else { //点炮
+		if huaShu == 2 { //有两个花的情况下，点炮只能胡风牌
+			card := cardInfo.HuaCards[len(cardInfo.HuaCards)-1]
+			return card >= 41 && card < 47
+		}
+		return huaShu >= 3
+	}
+	return false
 }

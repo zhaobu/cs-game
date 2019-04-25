@@ -31,6 +31,7 @@ type PlayerCardInfo struct {
 	StackCards map[int32]int32      //玩家手牌数量统计 {card=num,...}
 	ChiCards   [][3]int32           //{card1,card2,card3,card4,card5,card6}3个连续的能组成吃,吃的牌放第一个
 	HuaCards   []int32              //花牌
+	GuoPeng    bool                 //是否过碰
 }
 
 func (self *PlayerCardInfo) reset() {
@@ -45,17 +46,34 @@ func (self *PlayerCardInfo) reset() {
 
 //单局结算信息
 type PlayserBalanceInfo struct {
-	HuCard    int32
-	GangPoint int32
-	HuPoint   int32
-	HuType    []EmHuScoreType //emHuScoreType类型参数
+	HuCard       int32           //胡的牌
+	Baozi        int32           //豹子倍数
+	HuPoint      int32           //胡牌分
+	BuHuaPoint   int32           //补花分
+	GangPoint    int32           //杠分
+	SpecialPoint int32           //特殊牌型分
+	JiangMaPoint int32           //奖码分
+	FengPoint    int32           //风花
+	DiPiaoPoint  int32           //底飘分
+	HuType       []EmHuScoreType //emHuScoreType类型参数
 }
 
 func (self *PlayserBalanceInfo) reset() {
 	self.HuCard = 0
-	self.GangPoint = 0
+	self.Baozi = 0
 	self.HuPoint = 0
+	self.BuHuaPoint = 0
+	self.GangPoint = 0
+	self.SpecialPoint = 0
+	self.JiangMaPoint = 0
+	self.FengPoint = 0
+	self.DiPiaoPoint = 0
 	self.HuType = []EmHuScoreType{}
+}
+
+//返回平胡需要的花数
+func (self *PlayserBalanceInfo) GetPingHuHua() int32 {
+	return self.BuHuaPoint + self.GangPoint + self.FengPoint
 }
 
 //玩家基础信息
@@ -77,15 +95,16 @@ func (self *PlayerBalanceResult) init() {
 }
 
 //删除手牌中的某张牌,delAll为true时删除所有的delcard
-func RemoveCard(handCards []int32, delcard int32, delAll bool) (cards []int32, del bool) {
+func RemoveCard(handCards []int32, delcard int32, delAll bool) ([]int32, bool) {
+	del := false
 	for i, card := range handCards {
 		if card == delcard {
-			cards = append(handCards[:i], handCards[i+1:]...)
+			handCards = append(handCards[:i], handCards[i+1:]...)
 			del = true
 			if !delAll {
 				break
 			}
 		}
 	}
-	return
+	return handCards, del
 }
