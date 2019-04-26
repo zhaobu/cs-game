@@ -1,0 +1,1 @@
+docker run --name cygame -it -p3316:22 -v C:/code/VmwareHome:/mnt myubuntu:v2 bin/bash
