@@ -39,7 +39,11 @@ func calcFee(arg *pbgame_logic.CreateArg) int64 {
 
 //HandleGameCommandReq游戏指令
 func (self *roomHandle) HandleGameCommandReq(uid uint64, req *pbgame.GameCommandReq) {
-	self.gameCommond.HandleCommond(uid, req)
+	rsp := &pbgame.GameCommandRsp{Head: &pbcommon.RspHead{Seq: req.Head.Seq}}
+	self.gameCommond.HandleCommond(uid, req, rsp)
+	if rsp.ErrMsg != "" {
+		self.RoomServie.ToGateNormal(rsp, uid)
+	}
 }
 
 //HandleChatMessageReq玩家发送聊天

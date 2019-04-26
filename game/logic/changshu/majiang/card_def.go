@@ -41,9 +41,9 @@ var fourPlayerCardDef = []int32{
 
 //配牌解析结构
 type TestHandCards struct {
-	HandCards  map[int32][]int32 `json:"handCards"`  //配牌数据
-	DebugCards bool              `json:"debugCards"` //是否配牌
-	stackCards map[int32]int32   //所有牌的统计
+	HandCards  []int32         `json:"handCards"`  //配牌数据
+	DebugCards bool            `json:"debugCards"` //是否配牌
+	stackCards map[int32]int32 //所有牌的统计
 }
 
 //二人麻将
@@ -89,35 +89,18 @@ func (self *CardDef) DebugCards(gameName string, baseCard []int32, playercount i
 	if !testCards.DebugCards {
 		return RandCards(baseCard)
 	}
-	testCards.stackCards = map[int32]int32{}
-	debugCards := []int32{} //配的牌
-	for i := playercount - 1; i >= 0; i-- {
-		debugCards = append(debugCards, testCards.HandCards[i]...)
-		Add_stack(testCards.stackCards, testCards.HandCards[i]...)
-	}
-	//去掉配的牌
-	baseStacks := CalStackCards(baseCard)
-	for k, v := range testCards.stackCards {
-		num, ok := baseStacks[k]
-		if !ok || v > num {
-			log.Errorf("配牌时牌%d数量太多或者牌库不存在该牌", k)
-			continue
-		}
-		baseStacks[k] -= v
-		if baseStacks[k] == 0 {
-			delete(baseStacks, k)
-		}
-	}
-	//剩下的牌随机
-	leftCards := []int32{}
-	for k, v := range baseStacks {
-		for i := int32(0); i < v; i++ {
-			leftCards = append(leftCards, k)
-		}
-	}
-	leftCards = RandCards(leftCards)
 
-	return append(leftCards, debugCards...)
+	//随机剩下的牌
+	leftCards := RandCards(DelCards(nil, testCards.HandCards, baseCard))
+	return append(leftCards, ReversaCards(testCards.HandCards)...)
+}
+
+//反转牌
+func ReversaCards(cards []int32) []int32 {
+	for i, j := 0, len(cards)-1; i < j; i, j = i+1, j-1 {
+		cards[i], cards[j] = cards[j], cards[i]
+	}
+	return cards
 }
 
 //洗牌
@@ -142,11 +125,18 @@ func randInt64(min, max int64) int64 {
 	return rand.Int63n(max-min) + min
 }
 
+func GetNextChair(chairId, playerCount int32) int32 {
+	if chairId+1 == playerCount {
+		return 0
+	}
+	return chairId + 1
+}
+
 //发牌
 func (self *CardDef) DealCard(rawcards []int32, playercount, bankerID int32) (handCards [][]int32, leftCards []int32) {
 	player_cards := make([][]int32, playercount)
-	var leftNum = len(rawcards) //剩下的牌数量
-	for i := int32(0); i < playercount; i++ {
+	var leftNum = len(rawcards)                                                                 //剩下的牌数量
+	for i, j := bankerID, int32(0); j < playercount; i, j = GetNextChair(i, playercount), j+1 { //保证配牌时,前14张发给庄家
 		//庄家多摸一张牌
 		if i == bankerID {
 			player_cards[i] = make([]int32, 14)
@@ -223,4 +213,29 @@ func IsVaildCard(card int32) bool {
 		return true
 	}
 	return false
+}
+
+//从allCards中去掉cards,返回剩下的牌
+func DelCards(cardsStack map[int32]int32, cards, allCards []int32) (leftCards []int32) {
+	if cardsStack == nil {
+		cardsStack = CalStackCards(cards)
+	}
+	for _, v := range allCards { //找到没有指定的牌,保存
+		if num, ok := cardsStack[v]; ok {
+			cardsStack[v]--
+			if num == 1 {
+				delete(cardsStack, v)
+			}
+		} else {
+			leftCards = append(leftCards, v)
+		}
+	}
+	return
+}
+
+//客户端配初始牌,然后写入文件
+func (self *CardDef) DebugCardsFromClient(gameName string, debugCards []int32) {
+	tmp := &TestHandCards{HandCards: debugCards, DebugCards: true}
+	//写入到文件中
+	util.WriteJSON(configs.Conf.GameNode[gameName].GameTest, tmp)
 }

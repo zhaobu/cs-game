@@ -2,7 +2,6 @@ package main
 
 import (
 	pbgame "cy/game/pb/game"
-	pbgame_logic "cy/game/pb/game/mj/changshu"
 	"encoding/json"
 	"fmt"
 
@@ -12,17 +11,17 @@ import (
 type gameCommond struct {
 }
 
-func (self *gameCommond) HandleCommond(uid uint64, req *pbgame.GameCommandReq) {
+func (self *gameCommond) HandleCommond(uid uint64, req *pbgame.GameCommandReq, rsp *pbgame.GameCommandRsp) {
 	switch req.CmdType {
 	case 1: //强制解散房间
-		self.CmdDestroy(uid, req)
+		self.CmdDestroy(uid, req, rsp)
 	case 2: //要牌
-		self.CmdWantCard(uid, req)
+		self.CmdWantCard(uid, req, rsp)
 	}
 }
 
 //强制解散房间
-func (self *gameCommond) CmdDestroy(uid uint64, req *pbgame.GameCommandReq) {
+func (self *gameCommond) CmdDestroy(uid uint64, req *pbgame.GameCommandReq, rsp *pbgame.GameCommandRsp) {
 	type cmd struct {
 		DeskId uint64 `json:"deskId"`
 	}
@@ -44,31 +43,38 @@ func (self *gameCommond) CmdDestroy(uid uint64, req *pbgame.GameCommandReq) {
 }
 
 //要牌
-func (self *gameCommond) CmdWantCard(uid uint64, req *pbgame.GameCommandReq) {
+func (self *gameCommond) CmdWantCard(uid uint64, req *pbgame.GameCommandReq, rsp *pbgame.GameCommandRsp) {
 	type cmd struct {
 		Cards []int32 `json:"cards"`
 	}
+	defer func() {
+		if rsp.ErrMsg != "" {
+			tlog.Error(rsp.ErrMsg)
+		}
+	}()
 	tmp := &cmd{}
 	if err := json.Unmarshal([]byte(req.CmdInfo), tmp); err != nil {
-		fmt.Println("json.Unmarshal err = ", err)
+		rsp.ErrMsg = fmt.Sprintf("CmdWantCard err,uid=%d, json.Unmarshal err:%v", uid, err)
 		return
 	}
 	//检查桌子是否存在
 	d := getDeskByUID(uid)
 	if d == nil {
-		tlog.Error("CmdWantCard err,玩家不在桌子中", zap.Uint64("uid", uid))
+		rsp.ErrMsg = fmt.Sprintf("CmdWantCard err,uid=%d, 玩家不在桌子中", uid)
 		return
 	}
-	if d.gameStatus != pbgame_logic.GameStatus_GSPlaying {
-		tlog.Error("CmdWantCard err,不在游戏中要牌失败", zap.Uint64("uid", uid))
-		return
-	}
+	// if d.gameStatus <= pbgame_logic.GameStatus_GSWait {
+	// 	rsp.ErrMsg = fmt.Sprintf("CmdWantCard err,uid=%d, 当前游戏还没开始,不能要牌", uid)
+	// 	return
+	// }
 	//检查牌是否合法
 	chairId := d.GetChairidByUid(uid)
 	if chairId == -1 {
-		tlog.Error("CmdWantCard err,GetChairidByUid 失败", zap.Uint64("uid", uid))
+		rsp.ErrMsg = fmt.Sprintf("CmdWantCard err,uid=%d,找不到座位号", uid)
 		return
 	}
-	d.gameSink.doWantCards(chairId, tmp.Cards)
+	if len(tmp.Cards) > 0 {
+		rsp.ErrMsg = d.gameSink.doWantCards(chairId, tmp.Cards)
+	}
 	return
 }

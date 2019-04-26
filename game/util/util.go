@@ -93,3 +93,16 @@ func LoadJSON(fp string, v interface{}) {
 	}
 	fmt.Printf("load jsonfile:%s successfully", fp)
 }
+
+func WriteJSON(fp string, v interface{}) {
+	fd, err := os.Create(fp)
+	if err != nil {
+		fmt.Printf("WriteJSON err:%s", err)
+	}
+	defer fd.Close()
+	err = json.NewEncoder(fd).Encode(v)
+	if err != nil {
+		fmt.Printf("WriteJSON err:%s", err)
+	}
+	fmt.Printf("WriteJSON:%s successfully", fp)
+}

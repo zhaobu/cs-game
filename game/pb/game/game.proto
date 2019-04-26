@@ -244,3 +244,9 @@ message GameCommandReq {
   int32 CmdType = 2;   //指令类型
   string CmdInfo = 3;  //指令内容(按json格式前后端协定好格式)
 }
+
+//发送游戏指令 s -> c
+message GameCommandRsp {
+  pbcommon.RspHead Head = 1;
+  string errMsg = 2;  //指令错误原因
+}

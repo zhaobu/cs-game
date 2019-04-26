@@ -406,7 +406,8 @@ func (self *GameSink) firstBuHuaCards(chairId int32) (huaCards, moCards []int32)
 func (self *GameSink) drawOneCard(chairId int32) (huaCards, moCard []int32) {
 	var num int32
 	for {
-		card := self.popLeftCard(chairId)
+		card := self.leftCard[len(self.leftCard)-1]
+		self.leftCard = self.leftCard[:len(self.leftCard)-1]
 		if !mj.IsHuaCard(card) {
 			moCard = append(moCard, card)
 			break
@@ -622,10 +623,11 @@ func (self *GameSink) countCanOper(ret *CanOperInfo, chairId int32, huMode mj.Em
 
 //洗牌
 func (self *GameSink) shuffle_cards() {
-	if *release && configs.Conf.GameNode[gameName].GameTest != "" {
+	if !*release && configs.Conf.GameNode[gameName].GameTest != "" {
 		self.leftCard = cardDef.DebugCards(gameName, self.baseCard, self.game_config.PlayerCount)
 		return
 	}
+	log.Debugf("*release=%v,configs.Conf.GameNode[gameName].GameTest=%v",*release,configs.Conf.GameNode[gameName].GameTest)
 	self.leftCard = mj.RandCards(self.baseCard)
 }
 
@@ -699,7 +701,6 @@ func (self *GameSink) dealWaitOper(chairId int32) {
 		log.Debugf("%s 唤醒操作碰", self.logHeadUser(chairId))
 	case *CanGangOper:
 		log.Debugf("%s 唤醒操作杠", self.logHeadUser(chairId))
-
 	case *CanHuOper:
 		log.Debugf("%s 唤醒操作胡", self.logHeadUser(chairId))
 
@@ -1114,36 +1115,58 @@ func (self *GameSink) addCanNotOut(chairId, card int32, chiType uint32) {
 	self.players[chairId].CardInfo.CanNotOut[card] = card
 }
 
-func (self *GameSink) popLeftCard(chairId int32) (card int32) {
-	if self.wantCards[chairId] != nil { //如果玩家要牌,优先发要的牌
-		var index int //要牌索引
-		for _, wcard := range self.wantCards[chairId] {
-			index++
-			if leftCards, ok := mj.RemoveCard(self.leftCard, wcard, false); ok {
-				card = wcard
-				self.leftCard = leftCards
-				break
-			}
-		}
-		//删除这张要过的牌
-		if index >= len(self.wantCards[chairId]) {
-			self.wantCards[chairId] = nil
-		} else {
-			self.wantCards[chairId] = self.wantCards[chairId][index:]
-		}
-	}
-	if card == 0 {
-		card = self.leftCard[len(self.leftCard)-1]
-		self.leftCard = self.leftCard[:len(self.leftCard)-1]
-	}
-	return
-}
+// func (self *GameSink) popLeftCard(chairId int32) (card int32) {
+// 	if self.wantCards[chairId] != nil { //如果玩家要牌,优先发要的牌
+// 		var index int //要牌索引
+// 		for _, wcard := range self.wantCards[chairId] {
+// 			index++
+// 			if leftCards, ok := mj.RemoveCard(self.leftCard, wcard, false); ok {
+// 				card = wcard
+// 				self.leftCard = leftCards
+// 				break
+// 			}
+// 		}
+// 		//删除这张要过的牌
+// 		if index >= len(self.wantCards[chairId]) {
+// 			self.wantCards[chairId] = nil
+// 		} else {
+// 			self.wantCards[chairId] = self.wantCards[chairId][index:]
+// 		}
+// 	}
+// 	if card == 0 {
+// 		card = self.leftCard[len(self.leftCard)-1]
+// 		self.leftCard = self.leftCard[:len(self.leftCard)-1]
+// 	}
+// 	return
+// }
 
-func (self *GameSink) doWantCards(chairId int32, cards []int32) {
+func (self *GameSink) doWantCards(chairId int32, cards []int32) (errMsg string) {
+	var leftCardsStack map[int32]int32
+	if len(self.leftCard) <= 0 {
+		leftCardsStack = mj.CalStackCards(self.baseCard)
+	} else {
+		leftCardsStack = mj.CalStackCards(self.leftCard)
+	}
+	cardsStack := mj.CalStackCards(cards)
+	log.Debugf("%s 玩家要牌,cards=%v", self.logHeadUser(chairId), cards)
 	for _, v := range cards {
-		if mj.IsVaildCard(v) {
-			self.wantCards[chairId] = append(self.wantCards[chairId], v)
+		if !mj.IsVaildCard(v) {
+			errMsg = fmt.Sprintf("指定的牌%v不合法,要牌失败", v)
+			return
+		}
+		//检验每张牌,牌库是否有剩余的
+		if leftCardsStack[v] < cardsStack[v] {
+			errMsg = fmt.Sprintf("指定的牌%v牌库剩余数量为%d,不够,要牌失败", v, leftCardsStack[v])
+			return
 		}
 	}
-	log.Debugf("%s 玩家要牌,cards=%v", self.logHeadUser(chairId), cards)
+	if len(self.leftCard) > 0 { //已经发过牌
+		//调整牌库的顺序
+		tmpLeftCards := mj.DelCards(cardsStack, cards, self.leftCard)
+		self.leftCard = append(tmpLeftCards, mj.ReversaCards(cards)...)
+	} else { //没发过牌
+		cardDef.DebugCardsFromClient(gameName, cards)
+	}
+
+	return ""
 }

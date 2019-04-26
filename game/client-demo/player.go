@@ -181,12 +181,13 @@ func (self *Player) recv() {
 			case *pbgame.MakeDeskRsp:
 				desk := &deskInfo{DeskId: v.Info.ID}
 				//写入到文件中
-				buf, err := json.MarshalIndent(desk, "", "	") //格式化编码
-				if err != nil {
-					fmt.Println("err = ", err)
-					return
-				}
-				writebuf(*fileName, string(buf))
+				util.WriteJSON(*fileName, desk)
+				// buf, err := json.MarshalIndent(desk, "", "	") //格式化编码
+				// if err != nil {
+				// 	fmt.Println("err = ", err)
+				// 	return
+				// }
+				// writebuf(*fileName, string(buf))
 				self.waitchan <- 1
 			case *pbgame.JoinDeskRsp:
 				self.waitchan <- 1
