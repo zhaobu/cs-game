@@ -35,7 +35,6 @@ type gameAllInfo struct {
 	laiziCard      map[int32]int32                   //癞子牌
 	hasHu          bool                              //是否有人胡牌
 	hasFirstBuHua  []bool                            //是否已经进行过第一次补花
-	canNotOut      []map[int32]int32                 //不能打的牌,包括吃后,碰后不能打的牌
 	wantCards      [][]int32                         //玩家指定要的牌
 }
 
@@ -101,7 +100,6 @@ func (self *GameSink) reset() {
 	self.diceResult = make([][2]int32, self.game_config.PlayerCount)
 	self.hasFirstBuHua = make([]bool, self.game_config.PlayerCount)
 	self.laiziCard = make(map[int32]int32)
-	self.canNotOut = make([]map[int32]int32, self.game_config.PlayerCount)
 	self.wantCards = make([][]int32, self.game_config.PlayerCount)
 	self.bankerId = -1
 	self.curThrowDice = -1
@@ -446,21 +444,18 @@ func (self *GameSink) drawCard(chairId, last, lose_chair int32) error {
 
 	msg := &pbgame_logic.BS2CDrawCard{ChairId: chairId}
 	var huaCards, moCards []int32
-	//游戏中摸牌
-	if self.hasFirstBuHua[chairId] {
-		huaCards, moCards = self.drawOneCard(chairId)
-		log.Debugf("%s 游戏中摸牌moCards=%v,huaCards=%v,剩余[%d]张", self.logHeadUser(chairId), moCards, huaCards, len(self.leftCard))
-	} else { //第一次摸牌
+
+	tlog.Debug("玩家摸牌前手牌数据为", zap.Int32("chairId", chairId), zap.Any("cardInfo", self.players[chairId].CardInfo))
+	if !self.hasFirstBuHua[chairId] { //没有进行过第一次补花,先补掉手上的牌
 		if mj.GetHuaCount(self.players[chairId].CardInfo.StackCards) > 0 {
+			log.Debugf("%s 第一次摸牌,需要补花,补花前剩余[%d]张", self.logHeadUser(chairId), len(self.leftCard))
 			huaCards, moCards = self.firstBuHuaCards(chairId)
-			//删掉一张牌
-			self.operAction.updateCardInfo(&self.players[chairId].CardInfo, nil, moCards[len(moCards)-1:])
-		} else {
-			huaCards, moCards = self.drawOneCard(chairId)
-			self.hasFirstBuHua[chairId] = true
 		}
-		log.Debugf("%s 第一次摸牌moCards=%v,huaCards=%v,剩余[%d]张", self.logHeadUser(chairId), moCards, huaCards, len(self.leftCard))
+		self.hasFirstBuHua[chairId] = true
 	}
+	huaCards2, moCards2 := self.drawOneCard(chairId)
+	huaCards, moCards = append(huaCards, huaCards2...), append(moCards, moCards2...)
+
 	msg.LeftNum = int32(len(self.leftCard))
 	card := moCards[len(moCards)-1] //最后摸到的牌
 	//发送自己
@@ -1109,14 +1104,14 @@ func (self *GameSink) logHeadUser(chairId int32) string {
 func (self *GameSink) addCanNotOut(chairId, card int32, chiType uint32) {
 	if isFlag(chiType, uint32(pbgame_logic.ChiTypeMask_ChiMaskLeft)) { //左吃
 		if mj.IsVaildCard(card + 3) {
-			self.canNotOut[chairId][card+3] = card + 3
+			self.players[chairId].CardInfo.CanNotOut[card+3] = card + 3
 		}
 	} else if isFlag(chiType, uint32(pbgame_logic.ChiTypeMask_ChiMaskRight)) { //右吃
 		if mj.IsVaildCard(card - 3) {
-			self.canNotOut[chairId][card-3] = card - 3
+			self.players[chairId].CardInfo.CanNotOut[card-3] = card - 3
 		}
 	}
-	self.canNotOut[chairId][card] = card
+	self.players[chairId].CardInfo.CanNotOut[card] = card
 }
 
 func (self *GameSink) popLeftCard(chairId int32) (card int32) {
@@ -1136,11 +1131,11 @@ func (self *GameSink) popLeftCard(chairId int32) (card int32) {
 		} else {
 			self.wantCards[chairId] = self.wantCards[chairId][index:]
 		}
-		return
 	}
-
-	card = self.leftCard[len(self.leftCard)-1]
-	self.leftCard = self.leftCard[:len(self.leftCard)-1]
+	if card == 0 {
+		card = self.leftCard[len(self.leftCard)-1]
+		self.leftCard = self.leftCard[:len(self.leftCard)-1]
+	}
 	return
 }
 
@@ -1150,4 +1145,5 @@ func (self *GameSink) doWantCards(chairId int32, cards []int32) {
 			self.wantCards[chairId] = append(self.wantCards[chairId], v)
 		}
 	}
+	log.Debugf("%s 玩家要牌,cards=%v", self.logHeadUser(chairId), cards)
 }

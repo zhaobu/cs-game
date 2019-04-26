@@ -24,7 +24,7 @@ func (self *gameCommond) HandleCommond(uid uint64, req *pbgame.GameCommandReq) {
 //强制解散房间
 func (self *gameCommond) CmdDestroy(uid uint64, req *pbgame.GameCommandReq) {
 	type cmd struct {
-		deskId uint64 `json:"deskId"`
+		DeskId uint64 `json:"deskId"`
 	}
 	tmp := &cmd{}
 	if err := json.Unmarshal([]byte(req.CmdInfo), tmp); err != nil {
@@ -32,12 +32,12 @@ func (self *gameCommond) CmdDestroy(uid uint64, req *pbgame.GameCommandReq) {
 		return
 	}
 	//检查桌子是否存在
-	d := getDeskByID(tmp.deskId)
+	d := getDeskByID(tmp.DeskId)
 	if d == nil {
-		tlog.Error("CmdDestroy err,不存在该桌子号", zap.Uint64("deskId", tmp.deskId))
+		tlog.Error("CmdDestroy err,不存在该桌子号", zap.Uint64("deskId", tmp.DeskId))
 		return
 	}
-	realReq := &pbgame.DestroyDeskReq{DeskID: tmp.deskId, Type: pbgame.DestroyDeskType_DestroyTypeDebug}
+	realReq := &pbgame.DestroyDeskReq{DeskID: tmp.DeskId, Type: pbgame.DestroyDeskType_DestroyTypeDebug}
 	realRsp := &pbgame.DestroyDeskRsp{}
 	d.doDestroyDesk(uid, realReq, realRsp)
 	return
@@ -46,7 +46,7 @@ func (self *gameCommond) CmdDestroy(uid uint64, req *pbgame.GameCommandReq) {
 //要牌
 func (self *gameCommond) CmdWantCard(uid uint64, req *pbgame.GameCommandReq) {
 	type cmd struct {
-		cards []int32 `json:"cards"`
+		Cards []int32 `json:"cards"`
 	}
 	tmp := &cmd{}
 	if err := json.Unmarshal([]byte(req.CmdInfo), tmp); err != nil {
@@ -69,6 +69,6 @@ func (self *gameCommond) CmdWantCard(uid uint64, req *pbgame.GameCommandReq) {
 		tlog.Error("CmdWantCard err,GetChairidByUid 失败", zap.Uint64("uid", uid))
 		return
 	}
-	d.gameSink.doWantCards(chairId, tmp.cards)
+	d.gameSink.doWantCards(chairId, tmp.Cards)
 	return
 }

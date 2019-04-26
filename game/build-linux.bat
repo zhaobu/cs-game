@@ -12,4 +12,4 @@ go build -o bin/linux/initdb cy/game/script/initdb
 
 go build -tags consul -o bin/linux/changshu cy/game/logic/changshu
 
-pause
+REM pause

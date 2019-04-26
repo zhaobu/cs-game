@@ -12,4 +12,4 @@ go build -o bin/win/initdb.exe cy/game/script/initdb
 
 go build -tags consul -o bin/win/changshu.exe cy/game/logic/changshu
 
-pause
+REM pause

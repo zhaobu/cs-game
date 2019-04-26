@@ -4,6 +4,8 @@ import (
 	csession "cy/game/client-demo/session"
 	"cy/game/codec/protobuf"
 	"encoding/json"
+	"regexp"
+	"strconv"
 
 	// mj "cy/game/logic/changshu/majiang"
 	pbcommon "cy/game/pb/common"
@@ -46,6 +48,7 @@ func (self *Changshu) DispatchRecv(msg *pbgame.GameNotif) {
 	case *pbgame_logic.S2CThrowDice:
 		if v.ChairId == self.ChairId {
 			tlog.Info("recv GameNotif 轮到我投色子")
+			self.dothrowdice()
 		} else {
 			tlog.Info("recv GameNotif 轮到玩家投色子", zap.Int32("chair", v.ChairId))
 		}
@@ -180,10 +183,10 @@ func (self *Changshu) dealGangCard(msg *pbgame_logic.BS2CGangCard) {
 
 func (self *Changshu) dealHuCard(msg *pbgame_logic.BS2CHuCard) {
 	if msg.ChairId == self.ChairId {
-		tlog.Info("我胡牌", zap.Any("HandCards", msg.HandCards))
+		tlog.Info("我胡牌", zap.Any("HuCard", msg.HuCard))
 		return
 	} else {
-		tlog.Info("别人胡牌", zap.Any("HandCards", msg.HandCards), zap.Int32("chair", msg.ChairId))
+		tlog.Info("别人胡牌", zap.Any("HuCard", msg.HuCard), zap.Int32("chair", msg.ChairId))
 	}
 
 }
@@ -283,8 +286,39 @@ func (self *Changshu) DoAction(act string) {
 		self.operAction()
 	case "out":
 		self.outCard()
+	case "want":
+		self.wantCards()
 	}
 
+}
+
+func getCards(str string) (cards []int) {
+	strArr := regexp.MustCompile(`\d+`).FindAllString(str, -1)
+	for _, v := range strArr {
+		card, _ := strconv.Atoi(v)
+		cards = append(cards, card)
+	}
+	return
+}
+
+//要牌
+func (self *Changshu) wantCards() {
+	tlog.Info("我的手牌", zap.Any("self.Handcards", self.HandCards))
+	var cardsStr string
+	fmt.Printf("请输入要的牌,以,隔开,例如11,12,13,14 : \n")
+	fmt.Scan(&cardsStr)
+
+	type cmd struct {
+		Cards []int `json:"cards"`
+	}
+	jsonBuf, _ := json.Marshal(cmd{Cards: getCards(cardsStr)})
+	msg := &pbgame.GameCommandReq{
+		Head:    &pbcommon.ReqHead{Seq: 1},
+		CmdType: 2,
+		CmdInfo: string(jsonBuf),
+	}
+	log.Infof("发送的要牌数据为%s\n", msg.CmdInfo)
+	self.SendPb(msg)
 }
 
 //

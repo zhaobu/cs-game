@@ -32,6 +32,7 @@ type PlayerCardInfo struct {
 	ChiCards   [][3]int32           //{card1,card2,card3,card4,card5,card6}3个连续的能组成吃,吃的牌放第一个
 	HuaCards   []int32              //花牌
 	GuoPeng    bool                 //是否过碰
+	CanNotOut  map[int32]int32      //不能打的牌,包括吃后,碰后不能打的牌
 }
 
 func (self *PlayerCardInfo) reset() {
@@ -42,6 +43,7 @@ func (self *PlayerCardInfo) reset() {
 	self.StackCards = map[int32]int32{}
 	self.ChiCards = [][3]int32{}
 	self.HuaCards = []int32{}
+	self.CanNotOut = map[int32]int32{}
 }
 
 //单局结算信息
