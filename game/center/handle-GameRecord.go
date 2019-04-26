@@ -8,8 +8,8 @@ import (
 	sort "cy/game/util/tools/Sort"
 	"fmt"
 	"github.com/sirupsen/logrus"
-	"time"
 	"sync"
+	"time"
 )
 
 var (
@@ -27,7 +27,7 @@ type ClubStatisticsData struct {
 
 type UserStatisticsData struct {
 	UserId uint64				//用户Id
-	Name string				//姓名
+	Name string					//姓名
 	StatisticsIntegral int64	//当天输赢积分统计
 	StatisticsPlay int64		//当天本俱乐部次数统计
 }
@@ -58,6 +58,7 @@ func (p *center)WriteGameRecordReq(ctx context.Context, args *codec.Message, rep
 		Index		:   req.Index,
 		GameStartTime : req.GameStartTime,
 		GameEndTime :   req.GameEndTime,
+		PayType		:	req.PayType,
 		PlayerInfos :   []*mgo.GamePlayerInfo{},
 		RePlayData	:	req.RePlayData,
 	}
@@ -396,6 +397,10 @@ func ResetClubGameStatistics()  {
 			})
 			index++
 		}
+		err := mgo.AddClubPlayStatistics(CSData)
+		if err != nil {
+			panic("写入对局统计数据失败 err = " + err.Error())
+		}
 
 		//再排名积分
 		sort.Sort(usd, func(a interface{}, b interface{}) int8 {
@@ -422,7 +427,7 @@ func ResetClubGameStatistics()  {
 			})
 			index++
 		}
-		err := mgo.AddClubIntegralStatistics(CSData)
+		err = mgo.AddClubIntegralStatistics(CSData)
 		if err != nil {
 			panic("写入统计数据失败 err = " + err.Error())
 		}

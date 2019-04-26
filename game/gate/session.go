@@ -182,7 +182,6 @@ func (s *session) handleInput() (err error) {
 					s.isLoginSucc = true
 					s.uid = loginRsp.User.UserID
 					mgr.SetSession(s)
-
 					// TODO 通知其他gate进程
 				}
 
@@ -256,7 +255,7 @@ func (s *session) dispatch(msg *codec.Message) {
 
 	ctx := context.Background()
 
-	if serviceName == "pbcenter" {
+	if serviceName == "pbcenter" || serviceName == "pbgamerecord"  {
 		cli = cliCenter
 
 		rsp := &codec.Message{}

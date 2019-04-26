@@ -20,8 +20,9 @@ message WriteGameRecordReq {
     int32  Index = 6;                           //游戏当前局数
     int64 GameStartTime = 7;		            //开始时间 存储时间错
     int64 GameEndTime = 8;			            //结束时间 存储时间错
-    repeated GamePlayerInfo PlayerInfos = 9;    //游戏内玩家数据
-    bytes RePlayData = 10;                      //复盘数据                暂时可不写
+    int32 PayType = 9;                          //支付方式 1AA支付 2房主支付
+    repeated GamePlayerInfo PlayerInfos = 10;   //游戏内玩家数据
+    bytes RePlayData = 11;                      //复盘数据                暂时可不写
 }
 
 //查询房间游戏记录数据请求
@@ -44,9 +45,10 @@ message RoomRecord {
     uint32 RoomId	= 3; 			//房间号
     string GameId	= 4;			//游戏Id
     int32 RoomType	= 5;			//房间类型 1俱乐部房间 2好友房
-    int64 ClubId	= 6;			//俱乐部Id 当 AreaType 1 时需要填写
-    repeated RoomPlayerInfo GamePlayers =7;	//游戏参与玩家信息 为了减少查询量 将必要信息进行存储
-    repeated string GameRecordIds = 8;		//房间内游戏数据 数组
+    int32 PayType = 6;              //支付方式 1AA支付 2房主支付
+    int64 ClubId	= 7;			//俱乐部Id 当 AreaType 1 时需要填写
+    repeated RoomPlayerInfo GamePlayers =8;	//游戏参与玩家信息 为了减少查询量 将必要信息进行存储
+    repeated string GameRecordIds = 9;		//房间内游戏数据 数组
 }
 
 //查询房间游戏记录数据回应
