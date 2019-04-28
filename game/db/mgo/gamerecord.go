@@ -21,6 +21,7 @@ type WirteRecord struct {
 	 RoomType int32				        //房间类型 1 俱乐部房间  2 好友房间
 	 ClubId int64			            //俱乐部Id 当 AreaType 1 时需要填写
 	 RoomId uint32                        //房间号
+	 TotalJuNun int32						//总局数
 	 Index int32                           //游戏当前局数
 	 GameStartTime int64		            //开始时间 存储时间错
 	 GameEndTime int64			            //结束时间 存储时间错
@@ -45,6 +46,8 @@ type UserGameRecord struct {
 //房间记录
 type RoomRecord struct {
 	RoomRecordId string				//房间记录Id 关联房间的数据库唯一id
+	GameStartTime int64				//房间开始时间
+	TotalJuNun int32				//总局数
 	RoomId		uint32				//房间号
 	GameId		string				//游戏Id
 	RoomType	int32				//房间类型 1俱乐部房间 2好友房
