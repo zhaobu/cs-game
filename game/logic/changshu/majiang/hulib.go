@@ -121,7 +121,7 @@ func hasHuaCard(cardInfo *PlayerCardInfo) bool {
 	return false
 }
 
-func hasHuModeTag(huModeTags []EmHuModeTag, tag EmHuModeTag) bool {
+func HasHuModeTag(huModeTags []EmHuModeTag, tag EmHuModeTag) bool {
 	for _, v := range huModeTags {
 		if v == tag {
 			return true
@@ -166,16 +166,16 @@ func (self *HuLib) CheckHuType(cardInfo *PlayerCardInfo, balanceInfo *PlayserBal
 		if self.duiDuiHu(cardInfo) { //对对胡
 			huTypeList = append(huTypeList, HuType_DuiDuiHu)
 		}
-		if hasHuModeTag(huModeTags, HuModeTag_GangShangHua) { //杠上花
+		if HasHuModeTag(huModeTags, HuModeTag_GangShangHua) { //杠上花
 			huTypeList = append(huTypeList, HuType_GangShangKaiHua)
 		}
-		if hasHuModeTag(huModeTags, HuModeTag_QiangGangHu) { //抢杠胡
+		if HasHuModeTag(huModeTags, HuModeTag_QiangGangHu) { //抢杠胡
 			huTypeList = append(huTypeList, HuType_QiangGangHu)
 		}
 		if self.daDiaoChe(cardInfo) { //大吊车
 			huTypeList = append(huTypeList, HuType_DaDiaoChe)
 		}
-		if hasHuModeTag(huModeTags, HuModeTag_HaiDiLaoYue) { //海底捞月
+		if HasHuModeTag(huModeTags, HuModeTag_HaiDiLaoYue) { //海底捞月
 			huTypeList = append(huTypeList, HuType_HaiDiLaoYue)
 		}
 	}

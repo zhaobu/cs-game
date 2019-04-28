@@ -63,19 +63,19 @@ const (
 //胡分类型(客户端显示用)
 const (
 	//得分显示
-	HuScoreType_None           EmHuType = iota
-	HuScoreType_Zi_Mo                   //自摸
-	HuScoreType_Jie_Pao                 //接炮
-	HuScoreType_Qiang_GangHu            //抢杠胡
-	HuScoreType_Gang_Shang_Hua          //杠上花
-	HuScoreType_Men_Qing                //门清
-	HuScoreType_Gang_Shang_Pao          //杠上炮
-	HuScoreType_Dui_Dui_Hu              //对对胡
-	HuScoreType_Qing_Yi_Se              //清一色
-	HuScoreType_Xiao_Qi_Dui             //小七对
-	HuScoreType_Quan_Qiu_Ren            //全求人
-	HuScoreType_Fang_Pao                //放炮
-	HuScoreType_Bei_Qiang_Gang          //被抢杠
+	HuScoreType_None           EmHuScoreType = iota
+	HuScoreType_Zi_Mo                        //自摸
+	HuScoreType_Jie_Pao                      //接炮
+	HuScoreType_Qiang_GangHu                 //抢杠胡
+	HuScoreType_Gang_Shang_Hua               //杠上花
+	HuScoreType_Men_Qing                     //门清
+	HuScoreType_Gang_Shang_Pao               //杠上炮
+	HuScoreType_Dui_Dui_Hu                   //对对胡
+	HuScoreType_Qing_Yi_Se                   //清一色
+	HuScoreType_Xiao_Qi_Dui                  //小七对
+	HuScoreType_Quan_Qiu_Ren                 //全求人
+	HuScoreType_Fang_Pao                     //放炮
+	HuScoreType_Bei_Qiang_Gang               //被抢杠
 )
 
 // 胡牌类型(胡牌番型)

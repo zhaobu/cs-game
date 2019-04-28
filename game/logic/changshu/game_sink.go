@@ -977,24 +977,11 @@ func (self *GameSink) huCard(chairId int32) error {
 	self.gameBalance.loseChair = huInfo.LoseChair
 	self.gameBalance.huCard = huInfo.Card
 	self.gameBalance.huMode = huInfo.HuMode
-	//判断附属胡牌类型
-	// huTypeExtra := []mj.EmExtraHuType{}
-	// if huInfo.HuMode == mj.HuMode_PAOHU { //抢杠胡
-	// 	huTypeExtra = append(huTypeExtra, mj.ExtraHuType_QiangGang)
-	// 	if huInfo.LoseChair != -1 {
-	// 		self.operAction.updateCardInfo(&self.players[huInfo.LoseChair].CardInfo, nil, []int32{huInfo.Card})
-	// 	}
-	// } else if self.gameBalance.gangHuaChair == chairId { //杠上花
-	// 	huTypeExtra = append(huTypeExtra, mj.ExtraHuType_GangShangHua)
-	// }
 
-	// if huInfo.HuMode == mj.HuMode_PAOHU && self.gameBalance.gangPaoHu { //杠上炮
-	// 	huTypeExtra = append(huTypeExtra, mj.ExtraHuType_GangShangPao)
-	// }
-	// self.gameBalance.huChairs[chairId] = &HuScoreInfo{HuTypeList: huInfo.HuList, HuTypeExtra: huTypeExtra}
+	self.gameBalance.huChairs[chairId] = &HuScoreInfo{HuTypeList: huInfo.HuList}
 
 	//统计总结算次数
-	if huInfo.LoseChair == -1 {
+	if huInfo.HuMode == mj.HuMode_ZIMO {
 		self.gameBalance.AddScoreTimes(&self.players[chairId].BalanceResult, mj.ScoreTimes_ZiMo)
 	} else {
 		self.gameBalance.AddScoreTimes(&self.players[chairId].BalanceResult, mj.ScoreTimes_JiePao)
