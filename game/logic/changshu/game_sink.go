@@ -432,9 +432,9 @@ func (self *GameSink) resetOper() {
 	self.operOrder = map[PriorityOrder][]*OperPriority{}
 }
 
-//摸牌 last(-1摸最后一张 1第一次摸牌 0正常摸牌),lose_chair在明杠时为放杠玩家id,包赔
-func (self *GameSink) drawCard(chairId, last, lose_chair int32) error {
-	log.Debugf("%s,摸牌操作,last=%d, lose_chair=%d", self.logHeadUser(chairId), last, lose_chair)
+//摸牌 last(-1杠后摸牌 1第一次摸牌 0正常摸牌)
+func (self *GameSink) drawCard(chairId, last int32) error {
+	log.Debugf("%s,摸牌操作,last=%d", self.logHeadUser(chairId), last)
 	//检查游戏是否结束
 	if len(self.leftCard) <= 0 {
 		self.gameEnd()
@@ -474,8 +474,13 @@ func (self *GameSink) drawCard(chairId, last, lose_chair int32) error {
 	self.curOutChair = chairId
 	cardInfo.GuoPeng = false
 
+	//当抓到花或杠牌后，补上一张牌,能花,杠上开花
+	huModeTags := []mj.EmHuModeTag{}
+	if last == -1 || len(huaCards2) > 0 {
+		huModeTags = append(huModeTags, mj.HuModeTag_GangShangHua)
+	}
 	//分析能否暗杠,补杠,自摸胡
-	ret := self.operAction.DrawcardAnalysis(self.players[chairId], card, int32(len(self.leftCard)))
+	ret := self.operAction.DrawcardAnalysis(self.players[chairId], card, int32(len(self.leftCard)), huModeTags)
 	log.Infof("%s 摸牌后操作分析ret=%+v", self.logHeadUser(chairId), ret)
 	//发送倒计时玩家
 	// self.sendData(-1, &pbgame_logic.BS2CCurOutChair{ChairId: chairId})
@@ -574,7 +579,7 @@ func (self *GameSink) outCard(chairId, card int32) error {
 		}
 	}
 	if !willWait { //出牌后无其他人能操作
-		self.drawCard(GetNextChair(chairId, self.game_config.PlayerCount), 0, -1)
+		self.drawCard(GetNextChair(chairId, self.game_config.PlayerCount), 0)
 	}
 	return nil
 }
@@ -883,7 +888,7 @@ func (self *GameSink) gangCard(chairId, card int32) error {
 				if !ret.Empty() {
 					//统计并记录玩家可以进行的操作
 					msg := &pbgame_logic.S2CHaveOperation{ChairId: int32(k), Card: card}
-					self.countCanOper(ret, int32(k), mj.HuMode_QIANGHU, chairId, card, chairId, msg)
+					self.countCanOper(ret, int32(k), mj.HuMode_PAOHU, chairId, card, chairId, msg)
 					willWait = true
 					//发送玩家可进行的操作
 					log.Infof("%s 可进行的操作%+v", self.logHeadUser(int32(k)), ret)
@@ -920,13 +925,13 @@ func (self *GameSink) gangCard(chairId, card int32) error {
 func (self *GameSink) afterGangCard(chairId, card int32, gangType mj.EmOperType) {
 	if gangType == mj.OperType_BU_GANG { //补杠
 		self.gameBalance.AddScoreTimes(&self.players[chairId].BalanceResult, mj.ScoreTimes_BuGang)
-		self.drawCard(chairId, -1, -1)
+		self.drawCard(chairId, -1)
 	} else if gangType == mj.OperType_MING_GANG { //明杠
 		self.gameBalance.AddScoreTimes(&self.players[chairId].BalanceResult, mj.ScoreTimes_MingGang)
-		self.drawCard(chairId, -1, -1)
+		self.drawCard(chairId, -1)
 	} else if gangType == mj.OperType_AN_GANG { //暗杠
 		self.gameBalance.AddScoreTimes(&self.players[chairId].BalanceResult, mj.ScoreTimes_AnGang)
-		self.drawCard(chairId, -1, self.lastOutChair)
+		self.drawCard(chairId, -1)
 	}
 }
 
@@ -973,20 +978,20 @@ func (self *GameSink) huCard(chairId int32) error {
 	self.gameBalance.huCard = huInfo.Card
 	self.gameBalance.huMode = huInfo.HuMode
 	//判断附属胡牌类型
-	huTypeExtra := []mj.EmExtraHuType{}
-	if huInfo.HuMode == mj.HuMode_QIANGHU { //抢杠胡
-		huTypeExtra = append(huTypeExtra, mj.ExtraHuType_QiangGang)
-		if huInfo.LoseChair != -1 {
-			self.operAction.updateCardInfo(&self.players[huInfo.LoseChair].CardInfo, nil, []int32{huInfo.Card})
-		}
-	} else if self.gameBalance.gangHuaChair == chairId { //杠上花
-		huTypeExtra = append(huTypeExtra, mj.ExtraHuType_GangShangHua)
-	}
+	// huTypeExtra := []mj.EmExtraHuType{}
+	// if huInfo.HuMode == mj.HuMode_PAOHU { //抢杠胡
+	// 	huTypeExtra = append(huTypeExtra, mj.ExtraHuType_QiangGang)
+	// 	if huInfo.LoseChair != -1 {
+	// 		self.operAction.updateCardInfo(&self.players[huInfo.LoseChair].CardInfo, nil, []int32{huInfo.Card})
+	// 	}
+	// } else if self.gameBalance.gangHuaChair == chairId { //杠上花
+	// 	huTypeExtra = append(huTypeExtra, mj.ExtraHuType_GangShangHua)
+	// }
 
-	if huInfo.HuMode == mj.HuMode_PAOHU && self.gameBalance.gangPaoHu { //杠上炮
-		huTypeExtra = append(huTypeExtra, mj.ExtraHuType_GangShangPao)
-	}
-	self.gameBalance.huChairs[chairId] = &HuScoreInfo{HuTypeList: huInfo.HuList, HuTypeExtra: huTypeExtra}
+	// if huInfo.HuMode == mj.HuMode_PAOHU && self.gameBalance.gangPaoHu { //杠上炮
+	// 	huTypeExtra = append(huTypeExtra, mj.ExtraHuType_GangShangPao)
+	// }
+	// self.gameBalance.huChairs[chairId] = &HuScoreInfo{HuTypeList: huInfo.HuList, HuTypeExtra: huTypeExtra}
 
 	//统计总结算次数
 	if huInfo.LoseChair == -1 {
@@ -1051,7 +1056,7 @@ func (self *GameSink) cancelOper(chairId int32) error {
 	self.resetOper()
 
 	//取消操作后,由上次出牌玩家下家抓牌
-	self.drawCard(GetNextChair(self.lastOutChair, self.game_config.PlayerCount), 0, -1)
+	self.drawCard(GetNextChair(self.lastOutChair, self.game_config.PlayerCount), 0)
 	return nil
 }
 

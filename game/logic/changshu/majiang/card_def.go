@@ -239,3 +239,11 @@ func (self *CardDef) DebugCardsFromClient(gameName string, debugCards []int32) {
 	//写入到文件中
 	util.WriteJSON(configs.Conf.GameNode[gameName].GameTest, tmp)
 }
+
+func GetCardColor(card int32) int32 {
+	return card / 10
+}
+
+func GetCardValue(card int32) int32 {
+	return card % 10
+}

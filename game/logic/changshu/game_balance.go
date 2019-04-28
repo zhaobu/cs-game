@@ -7,8 +7,7 @@ import (
 )
 
 type HuScoreInfo struct {
-	mj.HuTypeList                    //胡牌类型
-	HuTypeExtra   []mj.EmExtraHuType //附属胡牌类型
+	mj.HuTypeList //胡牌类型
 }
 
 type (
@@ -32,7 +31,6 @@ type GameBalance struct {
 	loseChair    int32                   //丢分玩家
 	huMode       mj.EmHuMode             //胡牌方式
 	gangHuaChair int32                   //杠上花玩家
-	gangPaoHu    bool                    //杠上炮
 	huCard       int32                   //胡的牌
 	huChairs     map[int32]*HuScoreInfo  //胡牌玩家信息
 	gangTou      map[int32]int32         //玩家杠头数
