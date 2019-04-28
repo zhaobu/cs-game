@@ -305,7 +305,7 @@ message AddClubMemberRelationReq{
 //添加俱乐部成员关系
 message AddClubMemberRelationRsp{
     pbcommon.RspHead Head = 1;
-    int32 Code = 2;                         //1 成功 2俱乐部不存在 3请求用户权限不够 4用户不是本俱乐部成员 5已经存在了关联关系
+    int32 Code = 2;                         //1 成功 2俱乐部不存在 3请求用户权限不够 4用户不是本俱乐部成员 5已经存在了关联关系 6参数异常
 }
 
 //添加俱乐部成员关系

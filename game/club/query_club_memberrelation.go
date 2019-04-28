@@ -10,21 +10,18 @@ import (
 )
 
 //查询俱乐部成员关系列表
-func (p *club) QueryClubMemberRelation(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
+func (p *club) QueryClubMemberRelationReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
 		logrus.Error(err.Error())
 		return err
 	}
-
 	req, ok := pb.(*pbclub.QueryClubMemberRelationReq)
 	if !ok {
 		err = fmt.Errorf("not *pbclub.QueryClubByIDReq")
 		logrus.Error(err.Error())
 		return
 	}
-
-
 
 	rsp := &pbclub.QueryClubMemberRelationRsp{}
 	if req.Head != nil {
@@ -76,7 +73,7 @@ func (p *club) QueryClubMemberRelation(ctx context.Context, args *codec.Message,
 }
 
 //添加俱乐部成员关系
-func (p *club)AddClubMemberRelation(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
+func (p *club)AddClubMemberRelationReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
 		logrus.Error(err.Error())
@@ -115,30 +112,35 @@ func (p *club)AddClubMemberRelation(ctx context.Context, args *codec.Message, re
 		rsp.Code = 3
 		return
 	}
-	if mber,ok:=cc.Members[req.UserID];!ok{
-		rsp.Code = 4
-		return
-	}else{
-		if bmber,ok:=cc.Members[req.RelationUserID];!ok{
+	if req.UserID != req.RelationUserID {
+		if mber,ok:=cc.Members[req.UserID];!ok{
 			rsp.Code = 4
 			return
 		}else{
-			for _,v := range mber.Relation{
-				if v == bmber.UserID{
-					rsp.Code = 5
-					return
+			if bmber,ok:=cc.Members[req.RelationUserID];!ok{
+				rsp.Code = 4
+				return
+			}else{
+				for _,v := range mber.Relation{
+					if v == bmber.UserID{
+						rsp.Code = 5
+						return
+					}
 				}
+				mber.Relation = append(mber.Relation,bmber.UserID)
+				bmber.Relation = append(bmber.Relation,mber.UserID)
 			}
-			mber.Relation = append(mber.Relation,bmber.UserID)
-			bmber.Relation = append(bmber.Relation,mber.UserID)
 		}
+	}else{
+		rsp.Code = 6
+		return
 	}
 	rsp.Code = 1
 	return
 }
 
 //移除俱乐部成员关系
-func (p *club)RemoveClubMemberRelation(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
+func (p *club)RemoveClubMemberRelationReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
 		logrus.Error(err.Error())
@@ -212,7 +214,7 @@ func (p *club)RemoveClubMemberRelation(ctx context.Context, args *codec.Message,
 }
 
 //校验是否能加入俱乐部房间(判断是否有亲属关系)
-func (p *club)CheckCanJoinClubDesk(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
+func (p *club)CheckCanJoinClubDeskReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
 		logrus.Error(err.Error())
