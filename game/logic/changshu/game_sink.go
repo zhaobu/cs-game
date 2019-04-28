@@ -627,7 +627,7 @@ func (self *GameSink) shuffle_cards() {
 		self.leftCard = cardDef.DebugCards(gameName, self.baseCard, self.game_config.PlayerCount)
 		return
 	}
-	log.Debugf("*release=%v,configs.Conf.GameNode[gameName].GameTest=%v",*release,configs.Conf.GameNode[gameName].GameTest)
+	log.Debugf("*release=%v,configs.Conf.GameNode[gameName].GameTest=%v", *release, configs.Conf.GameNode[gameName].GameTest)
 	self.leftCard = mj.RandCards(self.baseCard)
 }
 
@@ -902,9 +902,9 @@ func (self *GameSink) gangCard(chairId, card int32) error {
 
 	//更新玩家card_info表
 	if gangType == mj.OperType_MING_GANG {
-		self.operAction.HandleGangCard(self.players[chairId], &self.players[self.lastOutChair].CardInfo, card, gangType)
+		self.operAction.HandleGangCard(self.players[chairId], &self.players[self.lastOutChair].CardInfo, card, gangType, loseChair)
 	} else {
-		self.operAction.HandleGangCard(self.players[chairId], nil, card, gangType)
+		self.operAction.HandleGangCard(self.players[chairId], nil, card, gangType, loseChair)
 	}
 	//回放记录
 

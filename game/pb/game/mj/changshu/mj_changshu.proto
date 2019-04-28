@@ -257,7 +257,7 @@ message BS2COutCard {
 message BS2CPengCard {
   int32 chair_id = 1;    //碰牌玩家
   int32 card = 2;        //要碰的牌
-  int32 lose_chair = 3;  //被碰玩家
+  int32 lose_chair = 3;  //被碰玩家,碰不同玩家,客户端显示不同
 }
 
 enum GangType {

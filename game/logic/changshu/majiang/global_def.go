@@ -28,7 +28,9 @@ const (
 	OperType_AN_GANG              //暗杠
 	OperType_MING_GANG            //明杠
 	OperType_PENG                 //碰
-	OperType_CHI                  //吃
+	OperType_LCHI                 //左吃
+	OperType_MCHI                 //中吃
+	OperType_RCHI                 //右吃
 )
 
 //游戏记录相关

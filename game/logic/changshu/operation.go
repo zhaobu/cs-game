@@ -322,16 +322,21 @@ func (self *OperAtion) HandleOutCard(cardInfo *mj.PlayerCardInfo, card int32) {
 //处理吃牌(cardInfo为吃牌玩家,loseCardInfo为出牌玩家)
 func (self *OperAtion) HandleChiCard(cardInfo *mj.PlayerCardInfo, loseCardInfo *mj.PlayerCardInfo, card int32, chiType uint32) {
 	eatGroup := [3]int32{}
+	var operType mj.EmOperType
 	//根据吃牌类型生成组合
 	if isFlag(chiType, uint32(pbgame_logic.ChiTypeMask_ChiMaskLeft)) {
 		eatGroup = [3]int32{card, card + 1, card + 2}
+		operType = mj.OperType_LCHI
 	} else if isFlag(chiType, uint32(pbgame_logic.ChiTypeMask_ChiMaskMiddle)) {
 		eatGroup = [3]int32{card, card - 1, card + 1}
+		operType = mj.OperType_MCHI
 	} else if isFlag(chiType, uint32(pbgame_logic.ChiTypeMask_ChiMaskRight)) {
 		eatGroup = [3]int32{card, card - 2, card - 1}
+		operType = mj.OperType_RCHI
 	}
 	self.updateCardInfo(cardInfo, nil, eatGroup[1:])
 	cardInfo.ChiCards = append(cardInfo.ChiCards, eatGroup)
+	cardInfo.RiverCards = append(cardInfo.RiverCards, &mj.OperRecord{OperType: operType, Card: card, LoseChari: -1})
 
 	//处理出牌玩家,把牌从出过的牌中拿走
 	loseCardInfo.OutCards, _ = mj.RemoveCard(loseCardInfo.OutCards, card, false)
@@ -340,8 +345,10 @@ func (self *OperAtion) HandleChiCard(cardInfo *mj.PlayerCardInfo, loseCardInfo *
 //处理碰牌(cardInfo为碰牌玩家,loseCardInfo为出牌玩家)
 func (self *OperAtion) HandlePengCard(playerInfo *mj.PlayerInfo, loseCardInfo *mj.PlayerCardInfo, card, loseChair int32) {
 	//处理碰牌玩家
-	self.updateCardInfo(&playerInfo.CardInfo, nil, []int32{card, card})
-	playerInfo.CardInfo.PengCards[card] = loseChair
+	cardInfo := &playerInfo.CardInfo
+	self.updateCardInfo(cardInfo, nil, []int32{card, card})
+	cardInfo.PengCards[card] = loseChair
+	cardInfo.RiverCards = append(cardInfo.RiverCards, &mj.OperRecord{OperType: mj.OperType_PENG, Card: card, LoseChari: loseChair})
 	//处理出牌玩家,把牌从出过的牌中拿走
 	loseCardInfo.OutCards, _ = mj.RemoveCard(loseCardInfo.OutCards, card, false)
 	if card >= 41 && card <= 46 { //东南西北中发白碰牌算1花，胡牌时留手3张算2花
@@ -350,10 +357,16 @@ func (self *OperAtion) HandlePengCard(playerInfo *mj.PlayerInfo, loseCardInfo *m
 }
 
 //处理杠牌
-func (self *OperAtion) HandleGangCard(playerInfo *mj.PlayerInfo, loseCardInfo *mj.PlayerCardInfo, card int32, gangType mj.EmOperType) {
+func (self *OperAtion) HandleGangCard(playerInfo *mj.PlayerInfo, loseCardInfo *mj.PlayerCardInfo, card int32, gangType mj.EmOperType, loseChair int32) {
 	cardInfo := &playerInfo.CardInfo
 	if gangType == mj.OperType_BU_GANG { //补杠
 		self.updateCardInfo(cardInfo, nil, []int32{card})
+		for _, v := range cardInfo.RiverCards { //补杠时去掉之前的碰
+			if v.Card == card {
+				v.OperType = mj.OperType_BU_GANG
+				break
+			}
+		}
 		delete(cardInfo.PengCards, card)
 		if card >= 41 { //万条筒补杠算1花，东南西北中发白补杠算3花
 			playerInfo.BalanceInfo.GangPoint += 3
@@ -362,6 +375,7 @@ func (self *OperAtion) HandleGangCard(playerInfo *mj.PlayerInfo, loseCardInfo *m
 		}
 	} else if gangType == mj.OperType_AN_GANG { //暗杠
 		self.updateCardInfo(cardInfo, nil, []int32{card, card, card, card})
+		cardInfo.RiverCards = append(cardInfo.RiverCards, &mj.OperRecord{OperType: gangType, Card: card, LoseChari: loseChair})
 		if card >= 41 { //万条筒暗杠算2花，东南西北中发白暗杠算4花
 			playerInfo.BalanceInfo.GangPoint += 4
 		} else {
@@ -369,6 +383,7 @@ func (self *OperAtion) HandleGangCard(playerInfo *mj.PlayerInfo, loseCardInfo *m
 		}
 	} else if gangType == mj.OperType_MING_GANG { //明杠
 		self.updateCardInfo(cardInfo, nil, []int32{card, card, card})
+		cardInfo.RiverCards = append(cardInfo.RiverCards, &mj.OperRecord{OperType: gangType, Card: card, LoseChari: loseChair})
 		//处理出牌玩家,把牌从出过的牌中拿走
 		loseCardInfo.OutCards, _ = mj.RemoveCard(loseCardInfo.OutCards, card, false)
 		if card >= 41 { //万条筒明杠算1花，东南西北中发白明杠算3花
@@ -380,6 +395,7 @@ func (self *OperAtion) HandleGangCard(playerInfo *mj.PlayerInfo, loseCardInfo *m
 		log.Errorf("杠类型错误,gangType=%d", gangType)
 	}
 	cardInfo.GangCards[card] = gangType
+
 }
 
 //处理补花
