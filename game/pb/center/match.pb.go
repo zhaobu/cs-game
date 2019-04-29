@@ -3,12 +3,10 @@
 
 package pbcenter
 
-import (
-	common "cy/game/pb/common"
-	fmt "fmt"
-	proto "github.com/golang/protobuf/proto"
-	math "math"
-)
+import proto "github.com/golang/protobuf/proto"
+import fmt "fmt"
+import math "math"
+import common "cy/game/pb/common"
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
@@ -44,7 +42,6 @@ var MatchRspCode_name = map[int32]string{
 	7: "NotEnoughMoney",
 	8: "InternalServerError",
 }
-
 var MatchRspCode_value = map[string]int32{
 	"NotUse":              0,
 	"Queued":              1,
@@ -59,9 +56,8 @@ var MatchRspCode_value = map[string]int32{
 func (x MatchRspCode) String() string {
 	return proto.EnumName(MatchRspCode_name, int32(x))
 }
-
 func (MatchRspCode) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_9e4539f188f4e851, []int{0}
+	return fileDescriptor_match_59d596d12e41ea63, []int{0}
 }
 
 // 匹配游戏 c -> s
@@ -79,17 +75,16 @@ func (m *MatchReq) Reset()         { *m = MatchReq{} }
 func (m *MatchReq) String() string { return proto.CompactTextString(m) }
 func (*MatchReq) ProtoMessage()    {}
 func (*MatchReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_9e4539f188f4e851, []int{0}
+	return fileDescriptor_match_59d596d12e41ea63, []int{0}
 }
-
 func (m *MatchReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_MatchReq.Unmarshal(m, b)
 }
 func (m *MatchReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_MatchReq.Marshal(b, m, deterministic)
 }
-func (m *MatchReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_MatchReq.Merge(m, src)
+func (dst *MatchReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MatchReq.Merge(dst, src)
 }
 func (m *MatchReq) XXX_Size() int {
 	return xxx_messageInfo_MatchReq.Size(m)
@@ -148,17 +143,16 @@ func (m *MatchRsp) Reset()         { *m = MatchRsp{} }
 func (m *MatchRsp) String() string { return proto.CompactTextString(m) }
 func (*MatchRsp) ProtoMessage()    {}
 func (*MatchRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_9e4539f188f4e851, []int{1}
+	return fileDescriptor_match_59d596d12e41ea63, []int{1}
 }
-
 func (m *MatchRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_MatchRsp.Unmarshal(m, b)
 }
 func (m *MatchRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_MatchRsp.Marshal(b, m, deterministic)
 }
-func (m *MatchRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_MatchRsp.Merge(m, src)
+func (dst *MatchRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MatchRsp.Merge(dst, src)
 }
 func (m *MatchRsp) XXX_Size() int {
 	return xxx_messageInfo_MatchRsp.Size(m)
@@ -250,17 +244,16 @@ func (m *MatchTimeOut) Reset()         { *m = MatchTimeOut{} }
 func (m *MatchTimeOut) String() string { return proto.CompactTextString(m) }
 func (*MatchTimeOut) ProtoMessage()    {}
 func (*MatchTimeOut) Descriptor() ([]byte, []int) {
-	return fileDescriptor_9e4539f188f4e851, []int{2}
+	return fileDescriptor_match_59d596d12e41ea63, []int{2}
 }
-
 func (m *MatchTimeOut) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_MatchTimeOut.Unmarshal(m, b)
 }
 func (m *MatchTimeOut) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_MatchTimeOut.Marshal(b, m, deterministic)
 }
-func (m *MatchTimeOut) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_MatchTimeOut.Merge(m, src)
+func (dst *MatchTimeOut) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MatchTimeOut.Merge(dst, src)
 }
 func (m *MatchTimeOut) XXX_Size() int {
 	return xxx_messageInfo_MatchTimeOut.Size(m)
@@ -283,17 +276,16 @@ func (m *CancelMatchReq) Reset()         { *m = CancelMatchReq{} }
 func (m *CancelMatchReq) String() string { return proto.CompactTextString(m) }
 func (*CancelMatchReq) ProtoMessage()    {}
 func (*CancelMatchReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_9e4539f188f4e851, []int{3}
+	return fileDescriptor_match_59d596d12e41ea63, []int{3}
 }
-
 func (m *CancelMatchReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CancelMatchReq.Unmarshal(m, b)
 }
 func (m *CancelMatchReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_CancelMatchReq.Marshal(b, m, deterministic)
 }
-func (m *CancelMatchReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_CancelMatchReq.Merge(m, src)
+func (dst *CancelMatchReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CancelMatchReq.Merge(dst, src)
 }
 func (m *CancelMatchReq) XXX_Size() int {
 	return xxx_messageInfo_CancelMatchReq.Size(m)
@@ -323,17 +315,16 @@ func (m *CancelMatchRsp) Reset()         { *m = CancelMatchRsp{} }
 func (m *CancelMatchRsp) String() string { return proto.CompactTextString(m) }
 func (*CancelMatchRsp) ProtoMessage()    {}
 func (*CancelMatchRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_9e4539f188f4e851, []int{4}
+	return fileDescriptor_match_59d596d12e41ea63, []int{4}
 }
-
 func (m *CancelMatchRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CancelMatchRsp.Unmarshal(m, b)
 }
 func (m *CancelMatchRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_CancelMatchRsp.Marshal(b, m, deterministic)
 }
-func (m *CancelMatchRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_CancelMatchRsp.Merge(m, src)
+func (dst *CancelMatchRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CancelMatchRsp.Merge(dst, src)
 }
 func (m *CancelMatchRsp) XXX_Size() int {
 	return xxx_messageInfo_CancelMatchRsp.Size(m)
@@ -359,17 +350,17 @@ func (m *CancelMatchRsp) GetSucc() bool {
 }
 
 func init() {
-	proto.RegisterEnum("pbcenter.MatchRspCode", MatchRspCode_name, MatchRspCode_value)
 	proto.RegisterType((*MatchReq)(nil), "pbcenter.MatchReq")
 	proto.RegisterType((*MatchRsp)(nil), "pbcenter.MatchRsp")
 	proto.RegisterType((*MatchTimeOut)(nil), "pbcenter.MatchTimeOut")
 	proto.RegisterType((*CancelMatchReq)(nil), "pbcenter.CancelMatchReq")
 	proto.RegisterType((*CancelMatchRsp)(nil), "pbcenter.CancelMatchRsp")
+	proto.RegisterEnum("pbcenter.MatchRspCode", MatchRspCode_name, MatchRspCode_value)
 }
 
-func init() { proto.RegisterFile("center/match.proto", fileDescriptor_9e4539f188f4e851) }
+func init() { proto.RegisterFile("center/match.proto", fileDescriptor_match_59d596d12e41ea63) }
 
-var fileDescriptor_9e4539f188f4e851 = []byte{
+var fileDescriptor_match_59d596d12e41ea63 = []byte{
 	// 465 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x53, 0x61, 0x6b, 0xd3, 0x50,
 	0x14, 0x35, 0x6b, 0x9a, 0x66, 0x77, 0x5d, 0x96, 0x5d, 0x65, 0x86, 0x22, 0x23, 0x04, 0x94, 0x30,

@@ -916,22 +916,8 @@ func (self *GameSink) gangCard(chairId, card int32) error {
 	self.haswaitOper[chairId] = false
 	self.resetOper()
 
-	self.afterGangCard(chairId, card, gangType)
+	self.drawCard(chairId, -1)
 	return nil
-}
-
-//杠之后,计算杠花,统计杠的次数,摸牌
-func (self *GameSink) afterGangCard(chairId, card int32, gangType mj.EmOperType) {
-	if gangType == mj.OperType_BU_GANG { //补杠
-		self.gameBalance.AddScoreTimes(&self.players[chairId].BalanceResult, mj.ScoreTimes_BuGang)
-		self.drawCard(chairId, -1)
-	} else if gangType == mj.OperType_MING_GANG { //明杠
-		self.gameBalance.AddScoreTimes(&self.players[chairId].BalanceResult, mj.ScoreTimes_MingGang)
-		self.drawCard(chairId, -1)
-	} else if gangType == mj.OperType_AN_GANG { //暗杠
-		self.gameBalance.AddScoreTimes(&self.players[chairId].BalanceResult, mj.ScoreTimes_AnGang)
-		self.drawCard(chairId, -1)
-	}
 }
 
 //胡

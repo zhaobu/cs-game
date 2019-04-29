@@ -3,11 +3,9 @@
 
 package pbcommon
 
-import (
-	fmt "fmt"
-	proto "github.com/golang/protobuf/proto"
-	math "math"
-)
+import proto "github.com/golang/protobuf/proto"
+import fmt "fmt"
+import math "math"
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
@@ -35,7 +33,6 @@ var UserStatus_name = map[int32]string{
 	2: "InMatching",
 	3: "InGameing",
 }
-
 var UserStatus_value = map[string]int32{
 	"NotLogin":   0,
 	"InHall":     1,
@@ -46,9 +43,8 @@ var UserStatus_value = map[string]int32{
 func (x UserStatus) String() string {
 	return proto.EnumName(UserStatus_name, int32(x))
 }
-
 func (UserStatus) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_8f954d82c0b891f6, []int{0}
+	return fileDescriptor_common_e01538f406e20501, []int{0}
 }
 
 // 桌子类型
@@ -67,7 +63,6 @@ var DeskType_name = map[int32]string{
 	2: "DTFriend",
 	3: "DTLadder",
 }
-
 var DeskType_value = map[string]int32{
 	"DTNone":   0,
 	"DTMatch":  1,
@@ -78,9 +73,8 @@ var DeskType_value = map[string]int32{
 func (x DeskType) String() string {
 	return proto.EnumName(DeskType_name, int32(x))
 }
-
 func (DeskType) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_8f954d82c0b891f6, []int{1}
+	return fileDescriptor_common_e01538f406e20501, []int{1}
 }
 
 // 断开提示 s -> c
@@ -97,17 +91,16 @@ func (m *BrokenTip) Reset()         { *m = BrokenTip{} }
 func (m *BrokenTip) String() string { return proto.CompactTextString(m) }
 func (*BrokenTip) ProtoMessage()    {}
 func (*BrokenTip) Descriptor() ([]byte, []int) {
-	return fileDescriptor_8f954d82c0b891f6, []int{0}
+	return fileDescriptor_common_e01538f406e20501, []int{0}
 }
-
 func (m *BrokenTip) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_BrokenTip.Unmarshal(m, b)
 }
 func (m *BrokenTip) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_BrokenTip.Marshal(b, m, deterministic)
 }
-func (m *BrokenTip) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_BrokenTip.Merge(m, src)
+func (dst *BrokenTip) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_BrokenTip.Merge(dst, src)
 }
 func (m *BrokenTip) XXX_Size() int {
 	return xxx_messageInfo_BrokenTip.Size(m)
@@ -144,17 +137,16 @@ func (m *ErrorTip) Reset()         { *m = ErrorTip{} }
 func (m *ErrorTip) String() string { return proto.CompactTextString(m) }
 func (*ErrorTip) ProtoMessage()    {}
 func (*ErrorTip) Descriptor() ([]byte, []int) {
-	return fileDescriptor_8f954d82c0b891f6, []int{1}
+	return fileDescriptor_common_e01538f406e20501, []int{1}
 }
-
 func (m *ErrorTip) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ErrorTip.Unmarshal(m, b)
 }
 func (m *ErrorTip) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ErrorTip.Marshal(b, m, deterministic)
 }
-func (m *ErrorTip) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ErrorTip.Merge(m, src)
+func (dst *ErrorTip) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ErrorTip.Merge(dst, src)
 }
 func (m *ErrorTip) XXX_Size() int {
 	return xxx_messageInfo_ErrorTip.Size(m)
@@ -186,17 +178,16 @@ func (m *SiteDownPlayerInfo) Reset()         { *m = SiteDownPlayerInfo{} }
 func (m *SiteDownPlayerInfo) String() string { return proto.CompactTextString(m) }
 func (*SiteDownPlayerInfo) ProtoMessage()    {}
 func (*SiteDownPlayerInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_8f954d82c0b891f6, []int{2}
+	return fileDescriptor_common_e01538f406e20501, []int{2}
 }
-
 func (m *SiteDownPlayerInfo) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SiteDownPlayerInfo.Unmarshal(m, b)
 }
 func (m *SiteDownPlayerInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_SiteDownPlayerInfo.Marshal(b, m, deterministic)
 }
-func (m *SiteDownPlayerInfo) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_SiteDownPlayerInfo.Merge(m, src)
+func (dst *SiteDownPlayerInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SiteDownPlayerInfo.Merge(dst, src)
 }
 func (m *SiteDownPlayerInfo) XXX_Size() int {
 	return xxx_messageInfo_SiteDownPlayerInfo.Size(m)
@@ -264,17 +255,16 @@ func (m *DeskInfo) Reset()         { *m = DeskInfo{} }
 func (m *DeskInfo) String() string { return proto.CompactTextString(m) }
 func (*DeskInfo) ProtoMessage()    {}
 func (*DeskInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_8f954d82c0b891f6, []int{3}
+	return fileDescriptor_common_e01538f406e20501, []int{3}
 }
-
 func (m *DeskInfo) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeskInfo.Unmarshal(m, b)
 }
 func (m *DeskInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_DeskInfo.Marshal(b, m, deterministic)
 }
-func (m *DeskInfo) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_DeskInfo.Merge(m, src)
+func (dst *DeskInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeskInfo.Merge(dst, src)
 }
 func (m *DeskInfo) XXX_Size() int {
 	return xxx_messageInfo_DeskInfo.Size(m)
@@ -424,17 +414,16 @@ func (m *SessionInfo) Reset()         { *m = SessionInfo{} }
 func (m *SessionInfo) String() string { return proto.CompactTextString(m) }
 func (*SessionInfo) ProtoMessage()    {}
 func (*SessionInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_8f954d82c0b891f6, []int{4}
+	return fileDescriptor_common_e01538f406e20501, []int{4}
 }
-
 func (m *SessionInfo) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SessionInfo.Unmarshal(m, b)
 }
 func (m *SessionInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_SessionInfo.Marshal(b, m, deterministic)
 }
-func (m *SessionInfo) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_SessionInfo.Merge(m, src)
+func (dst *SessionInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SessionInfo.Merge(dst, src)
 }
 func (m *SessionInfo) XXX_Size() int {
 	return xxx_messageInfo_SessionInfo.Size(m)
@@ -540,17 +529,16 @@ func (m *UserInfo) Reset()         { *m = UserInfo{} }
 func (m *UserInfo) String() string { return proto.CompactTextString(m) }
 func (*UserInfo) ProtoMessage()    {}
 func (*UserInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_8f954d82c0b891f6, []int{5}
+	return fileDescriptor_common_e01538f406e20501, []int{5}
 }
-
 func (m *UserInfo) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UserInfo.Unmarshal(m, b)
 }
 func (m *UserInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_UserInfo.Marshal(b, m, deterministic)
 }
-func (m *UserInfo) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_UserInfo.Merge(m, src)
+func (dst *UserInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UserInfo.Merge(dst, src)
 }
 func (m *UserInfo) XXX_Size() int {
 	return xxx_messageInfo_UserInfo.Size(m)
@@ -709,19 +697,19 @@ func (m *UserInfo) GetPlace() string {
 }
 
 func init() {
-	proto.RegisterEnum("pbcommon.UserStatus", UserStatus_name, UserStatus_value)
-	proto.RegisterEnum("pbcommon.DeskType", DeskType_name, DeskType_value)
 	proto.RegisterType((*BrokenTip)(nil), "pbcommon.BrokenTip")
 	proto.RegisterType((*ErrorTip)(nil), "pbcommon.ErrorTip")
 	proto.RegisterType((*SiteDownPlayerInfo)(nil), "pbcommon.SiteDownPlayerInfo")
 	proto.RegisterType((*DeskInfo)(nil), "pbcommon.DeskInfo")
 	proto.RegisterType((*SessionInfo)(nil), "pbcommon.SessionInfo")
 	proto.RegisterType((*UserInfo)(nil), "pbcommon.UserInfo")
+	proto.RegisterEnum("pbcommon.UserStatus", UserStatus_name, UserStatus_value)
+	proto.RegisterEnum("pbcommon.DeskType", DeskType_name, DeskType_value)
 }
 
-func init() { proto.RegisterFile("common/common.proto", fileDescriptor_8f954d82c0b891f6) }
+func init() { proto.RegisterFile("common/common.proto", fileDescriptor_common_e01538f406e20501) }
 
-var fileDescriptor_8f954d82c0b891f6 = []byte{
+var fileDescriptor_common_e01538f406e20501 = []byte{
 	// 825 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x7c, 0x55, 0x51, 0x6f, 0xdb, 0x36,
 	0x10, 0xae, 0x64, 0xc5, 0x96, 0x2e, 0xb1, 0xa3, 0xb2, 0xd9, 0x40, 0x0c, 0xc1, 0x60, 0xf8, 0x21,

@@ -85,20 +85,20 @@ func (self *GameBalance) DealStartDice(randRes [2]int32) {
 
 //计算杠头数
 func (self *GameBalance) CalGangTou(leftCards []int32, bankerId int32) { // 杠头  1 扳4个 2 扳8个 3 独龙杠
-	var huaShu int32 = 5
-	if self.game_config.Barhead == 3 {
-		if mj.GetCardColor(leftCards[len(leftCards)-1]) < 4 {
-			huaShu = mj.GetCardValue(int32(leftCards[len(leftCards)-1]))
-		}
-	} else {
-		var num int32 = 4
-		if self.game_config.Barhead == 2 {
-			num = 8
-		}
+	// var huaShu int32 = 5
+	// if self.game_config.Barhead == 3 {
+	// 	if mj.GetCardColor(leftCards[len(leftCards)-1]) < 4 {
+	// 		huaShu = mj.GetCardValue(int32(leftCards[len(leftCards)-1]))
+	// 	}
+	// } else {
+	// 	var num int32 = 4
+	// 	if self.game_config.Barhead == 2 {
+	// 		num = 8
+	// 	}
 
-		index := bankerId //从庄家开始算起数杠头
-		for _, v := range leftCards {
+	// 	index := bankerId //从庄家开始算起数杠头
+	// 	for _, v := range leftCards {
 
-		}
-	}
+	// 	}
+	// }
 }

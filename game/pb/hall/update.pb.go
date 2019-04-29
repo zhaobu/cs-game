@@ -3,12 +3,10 @@
 
 package pbhall
 
-import (
-	common "cy/game/pb/common"
-	fmt "fmt"
-	proto "github.com/golang/protobuf/proto"
-	math "math"
-)
+import proto "github.com/golang/protobuf/proto"
+import fmt "fmt"
+import math "math"
+import common "cy/game/pb/common"
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
@@ -36,17 +34,16 @@ func (m *UpdateBindMobileReq) Reset()         { *m = UpdateBindMobileReq{} }
 func (m *UpdateBindMobileReq) String() string { return proto.CompactTextString(m) }
 func (*UpdateBindMobileReq) ProtoMessage()    {}
 func (*UpdateBindMobileReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_619c93b66f095325, []int{0}
+	return fileDescriptor_update_3a9d0a93d5b402e9, []int{0}
 }
-
 func (m *UpdateBindMobileReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UpdateBindMobileReq.Unmarshal(m, b)
 }
 func (m *UpdateBindMobileReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_UpdateBindMobileReq.Marshal(b, m, deterministic)
 }
-func (m *UpdateBindMobileReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_UpdateBindMobileReq.Merge(m, src)
+func (dst *UpdateBindMobileReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateBindMobileReq.Merge(dst, src)
 }
 func (m *UpdateBindMobileReq) XXX_Size() int {
 	return xxx_messageInfo_UpdateBindMobileReq.Size(m)
@@ -98,17 +95,16 @@ func (m *UpdateBindMobileRsp) Reset()         { *m = UpdateBindMobileRsp{} }
 func (m *UpdateBindMobileRsp) String() string { return proto.CompactTextString(m) }
 func (*UpdateBindMobileRsp) ProtoMessage()    {}
 func (*UpdateBindMobileRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_619c93b66f095325, []int{1}
+	return fileDescriptor_update_3a9d0a93d5b402e9, []int{1}
 }
-
 func (m *UpdateBindMobileRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UpdateBindMobileRsp.Unmarshal(m, b)
 }
 func (m *UpdateBindMobileRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_UpdateBindMobileRsp.Marshal(b, m, deterministic)
 }
-func (m *UpdateBindMobileRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_UpdateBindMobileRsp.Merge(m, src)
+func (dst *UpdateBindMobileRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateBindMobileRsp.Merge(dst, src)
 }
 func (m *UpdateBindMobileRsp) XXX_Size() int {
 	return xxx_messageInfo_UpdateBindMobileRsp.Size(m)
@@ -147,17 +143,16 @@ func (m *UpdateIdCardReq) Reset()         { *m = UpdateIdCardReq{} }
 func (m *UpdateIdCardReq) String() string { return proto.CompactTextString(m) }
 func (*UpdateIdCardReq) ProtoMessage()    {}
 func (*UpdateIdCardReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_619c93b66f095325, []int{2}
+	return fileDescriptor_update_3a9d0a93d5b402e9, []int{2}
 }
-
 func (m *UpdateIdCardReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UpdateIdCardReq.Unmarshal(m, b)
 }
 func (m *UpdateIdCardReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_UpdateIdCardReq.Marshal(b, m, deterministic)
 }
-func (m *UpdateIdCardReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_UpdateIdCardReq.Merge(m, src)
+func (dst *UpdateIdCardReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateIdCardReq.Merge(dst, src)
 }
 func (m *UpdateIdCardReq) XXX_Size() int {
 	return xxx_messageInfo_UpdateIdCardReq.Size(m)
@@ -203,17 +198,16 @@ func (m *UpdateIdCardRsp) Reset()         { *m = UpdateIdCardRsp{} }
 func (m *UpdateIdCardRsp) String() string { return proto.CompactTextString(m) }
 func (*UpdateIdCardRsp) ProtoMessage()    {}
 func (*UpdateIdCardRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_619c93b66f095325, []int{3}
+	return fileDescriptor_update_3a9d0a93d5b402e9, []int{3}
 }
-
 func (m *UpdateIdCardRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UpdateIdCardRsp.Unmarshal(m, b)
 }
 func (m *UpdateIdCardRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_UpdateIdCardRsp.Marshal(b, m, deterministic)
 }
-func (m *UpdateIdCardRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_UpdateIdCardRsp.Merge(m, src)
+func (dst *UpdateIdCardRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateIdCardRsp.Merge(dst, src)
 }
 func (m *UpdateIdCardRsp) XXX_Size() int {
 	return xxx_messageInfo_UpdateIdCardRsp.Size(m)
@@ -252,9 +246,9 @@ func init() {
 	proto.RegisterType((*UpdateIdCardRsp)(nil), "pbhall.UpdateIdCardRsp")
 }
 
-func init() { proto.RegisterFile("hall/update.proto", fileDescriptor_619c93b66f095325) }
+func init() { proto.RegisterFile("hall/update.proto", fileDescriptor_update_3a9d0a93d5b402e9) }
 
-var fileDescriptor_619c93b66f095325 = []byte{
+var fileDescriptor_update_3a9d0a93d5b402e9 = []byte{
 	// 256 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xa4, 0x91, 0xc1, 0x4a, 0xc4, 0x30,
 	0x10, 0x86, 0xa9, 0x96, 0xaa, 0x11, 0x91, 0x8d, 0x20, 0x61, 0xf1, 0xb0, 0x14, 0x84, 0x3d, 0x35,

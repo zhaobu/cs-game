@@ -3,13 +3,11 @@
 
 package pbgame_mj_changshu
 
-import (
-	common "cy/game/pb/common"
-	game "cy/game/pb/game"
-	fmt "fmt"
-	proto "github.com/golang/protobuf/proto"
-	math "math"
-)
+import proto "github.com/golang/protobuf/proto"
+import fmt "fmt"
+import math "math"
+import common "cy/game/pb/common"
+import game "cy/game/pb/game"
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
@@ -40,7 +38,6 @@ var GameStatus_name = map[int32]string{
 	3: "GSPlaying",
 	4: "GSGameEnd",
 }
-
 var GameStatus_value = map[string]int32{
 	"GSNone":    0,
 	"GSWait":    1,
@@ -52,9 +49,8 @@ var GameStatus_value = map[string]int32{
 func (x GameStatus) String() string {
 	return proto.EnumName(GameStatus_name, int32(x))
 }
-
 func (GameStatus) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_424db99e24b65537, []int{0}
+	return fileDescriptor_mj_changshu_5f9d91474b1dcdb2, []int{0}
 }
 
 type CanOperMask int32
@@ -74,7 +70,6 @@ var CanOperMask_name = map[int32]string{
 	4: "OperMaskGang",
 	8: "OperMaskHu",
 }
-
 var CanOperMask_value = map[string]int32{
 	"OperMaskNone": 0,
 	"OperMaskChi":  1,
@@ -86,9 +81,8 @@ var CanOperMask_value = map[string]int32{
 func (x CanOperMask) String() string {
 	return proto.EnumName(CanOperMask_name, int32(x))
 }
-
 func (CanOperMask) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_424db99e24b65537, []int{1}
+	return fileDescriptor_mj_changshu_5f9d91474b1dcdb2, []int{1}
 }
 
 type ChiTypeMask int32
@@ -106,7 +100,6 @@ var ChiTypeMask_name = map[int32]string{
 	2: "ChiMaskMiddle",
 	4: "ChiMaskRight",
 }
-
 var ChiTypeMask_value = map[string]int32{
 	"ChiMaskNone":   0,
 	"ChiMaskLeft":   1,
@@ -117,9 +110,8 @@ var ChiTypeMask_value = map[string]int32{
 func (x ChiTypeMask) String() string {
 	return proto.EnumName(ChiTypeMask_name, int32(x))
 }
-
 func (ChiTypeMask) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_424db99e24b65537, []int{2}
+	return fileDescriptor_mj_changshu_5f9d91474b1dcdb2, []int{2}
 }
 
 type GangType int32
@@ -137,7 +129,6 @@ var GangType_name = map[int32]string{
 	2: "GangType_AN",
 	3: "GangType_Ming",
 }
-
 var GangType_value = map[string]int32{
 	"GangType_None": 0,
 	"GangType_Bu":   1,
@@ -148,9 +139,8 @@ var GangType_value = map[string]int32{
 func (x GangType) String() string {
 	return proto.EnumName(GangType_name, int32(x))
 }
-
 func (GangType) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_424db99e24b65537, []int{3}
+	return fileDescriptor_mj_changshu_5f9d91474b1dcdb2, []int{3}
 }
 
 type CyU32String struct {
@@ -165,17 +155,16 @@ func (m *CyU32String) Reset()         { *m = CyU32String{} }
 func (m *CyU32String) String() string { return proto.CompactTextString(m) }
 func (*CyU32String) ProtoMessage()    {}
 func (*CyU32String) Descriptor() ([]byte, []int) {
-	return fileDescriptor_424db99e24b65537, []int{0}
+	return fileDescriptor_mj_changshu_5f9d91474b1dcdb2, []int{0}
 }
-
 func (m *CyU32String) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CyU32String.Unmarshal(m, b)
 }
 func (m *CyU32String) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_CyU32String.Marshal(b, m, deterministic)
 }
-func (m *CyU32String) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_CyU32String.Merge(m, src)
+func (dst *CyU32String) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CyU32String.Merge(dst, src)
 }
 func (m *CyU32String) XXX_Size() int {
 	return xxx_messageInfo_CyU32String.Size(m)
@@ -212,17 +201,16 @@ func (m *RoundInfo) Reset()         { *m = RoundInfo{} }
 func (m *RoundInfo) String() string { return proto.CompactTextString(m) }
 func (*RoundInfo) ProtoMessage()    {}
 func (*RoundInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_424db99e24b65537, []int{1}
+	return fileDescriptor_mj_changshu_5f9d91474b1dcdb2, []int{1}
 }
-
 func (m *RoundInfo) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_RoundInfo.Unmarshal(m, b)
 }
 func (m *RoundInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_RoundInfo.Marshal(b, m, deterministic)
 }
-func (m *RoundInfo) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_RoundInfo.Merge(m, src)
+func (dst *RoundInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RoundInfo.Merge(dst, src)
 }
 func (m *RoundInfo) XXX_Size() int {
 	return xxx_messageInfo_RoundInfo.Size(m)
@@ -266,17 +254,16 @@ func (m *CreateArg) Reset()         { *m = CreateArg{} }
 func (m *CreateArg) String() string { return proto.CompactTextString(m) }
 func (*CreateArg) ProtoMessage()    {}
 func (*CreateArg) Descriptor() ([]byte, []int) {
-	return fileDescriptor_424db99e24b65537, []int{2}
+	return fileDescriptor_mj_changshu_5f9d91474b1dcdb2, []int{2}
 }
-
 func (m *CreateArg) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CreateArg.Unmarshal(m, b)
 }
 func (m *CreateArg) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_CreateArg.Marshal(b, m, deterministic)
 }
-func (m *CreateArg) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_CreateArg.Merge(m, src)
+func (dst *CreateArg) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CreateArg.Merge(dst, src)
 }
 func (m *CreateArg) XXX_Size() int {
 	return xxx_messageInfo_CreateArg.Size(m)
@@ -372,17 +359,16 @@ func (m *CreateArgTpl) Reset()         { *m = CreateArgTpl{} }
 func (m *CreateArgTpl) String() string { return proto.CompactTextString(m) }
 func (*CreateArgTpl) ProtoMessage()    {}
 func (*CreateArgTpl) Descriptor() ([]byte, []int) {
-	return fileDescriptor_424db99e24b65537, []int{3}
+	return fileDescriptor_mj_changshu_5f9d91474b1dcdb2, []int{3}
 }
-
 func (m *CreateArgTpl) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CreateArgTpl.Unmarshal(m, b)
 }
 func (m *CreateArgTpl) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_CreateArgTpl.Marshal(b, m, deterministic)
 }
-func (m *CreateArgTpl) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_CreateArgTpl.Merge(m, src)
+func (dst *CreateArgTpl) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CreateArgTpl.Merge(dst, src)
 }
 func (m *CreateArgTpl) XXX_Size() int {
 	return xxx_messageInfo_CreateArgTpl.Size(m)
@@ -475,17 +461,16 @@ func (m *DeskArg) Reset()         { *m = DeskArg{} }
 func (m *DeskArg) String() string { return proto.CompactTextString(m) }
 func (*DeskArg) ProtoMessage()    {}
 func (*DeskArg) Descriptor() ([]byte, []int) {
-	return fileDescriptor_424db99e24b65537, []int{4}
+	return fileDescriptor_mj_changshu_5f9d91474b1dcdb2, []int{4}
 }
-
 func (m *DeskArg) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeskArg.Unmarshal(m, b)
 }
 func (m *DeskArg) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_DeskArg.Marshal(b, m, deterministic)
 }
-func (m *DeskArg) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_DeskArg.Merge(m, src)
+func (dst *DeskArg) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeskArg.Merge(dst, src)
 }
 func (m *DeskArg) XXX_Size() int {
 	return xxx_messageInfo_DeskArg.Size(m)
@@ -559,17 +544,16 @@ func (m *DeskUserInfo) Reset()         { *m = DeskUserInfo{} }
 func (m *DeskUserInfo) String() string { return proto.CompactTextString(m) }
 func (*DeskUserInfo) ProtoMessage()    {}
 func (*DeskUserInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_424db99e24b65537, []int{5}
+	return fileDescriptor_mj_changshu_5f9d91474b1dcdb2, []int{5}
 }
-
 func (m *DeskUserInfo) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeskUserInfo.Unmarshal(m, b)
 }
 func (m *DeskUserInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_DeskUserInfo.Marshal(b, m, deterministic)
 }
-func (m *DeskUserInfo) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_DeskUserInfo.Merge(m, src)
+func (dst *DeskUserInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeskUserInfo.Merge(dst, src)
 }
 func (m *DeskUserInfo) XXX_Size() int {
 	return xxx_messageInfo_DeskUserInfo.Size(m)
@@ -619,17 +603,16 @@ func (m *GameDeskInfo) Reset()         { *m = GameDeskInfo{} }
 func (m *GameDeskInfo) String() string { return proto.CompactTextString(m) }
 func (*GameDeskInfo) ProtoMessage()    {}
 func (*GameDeskInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_424db99e24b65537, []int{6}
+	return fileDescriptor_mj_changshu_5f9d91474b1dcdb2, []int{6}
 }
-
 func (m *GameDeskInfo) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GameDeskInfo.Unmarshal(m, b)
 }
 func (m *GameDeskInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_GameDeskInfo.Marshal(b, m, deterministic)
 }
-func (m *GameDeskInfo) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GameDeskInfo.Merge(m, src)
+func (dst *GameDeskInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GameDeskInfo.Merge(dst, src)
 }
 func (m *GameDeskInfo) XXX_Size() int {
 	return xxx_messageInfo_GameDeskInfo.Size(m)
@@ -700,17 +683,16 @@ func (m *Cyint32) Reset()         { *m = Cyint32{} }
 func (m *Cyint32) String() string { return proto.CompactTextString(m) }
 func (*Cyint32) ProtoMessage()    {}
 func (*Cyint32) Descriptor() ([]byte, []int) {
-	return fileDescriptor_424db99e24b65537, []int{7}
+	return fileDescriptor_mj_changshu_5f9d91474b1dcdb2, []int{7}
 }
-
 func (m *Cyint32) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Cyint32.Unmarshal(m, b)
 }
 func (m *Cyint32) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_Cyint32.Marshal(b, m, deterministic)
 }
-func (m *Cyint32) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Cyint32.Merge(m, src)
+func (dst *Cyint32) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Cyint32.Merge(dst, src)
 }
 func (m *Cyint32) XXX_Size() int {
 	return xxx_messageInfo_Cyint32.Size(m)
@@ -740,17 +722,16 @@ func (m *C2SThrowDice) Reset()         { *m = C2SThrowDice{} }
 func (m *C2SThrowDice) String() string { return proto.CompactTextString(m) }
 func (*C2SThrowDice) ProtoMessage()    {}
 func (*C2SThrowDice) Descriptor() ([]byte, []int) {
-	return fileDescriptor_424db99e24b65537, []int{8}
+	return fileDescriptor_mj_changshu_5f9d91474b1dcdb2, []int{8}
 }
-
 func (m *C2SThrowDice) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_C2SThrowDice.Unmarshal(m, b)
 }
 func (m *C2SThrowDice) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_C2SThrowDice.Marshal(b, m, deterministic)
 }
-func (m *C2SThrowDice) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_C2SThrowDice.Merge(m, src)
+func (dst *C2SThrowDice) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_C2SThrowDice.Merge(dst, src)
 }
 func (m *C2SThrowDice) XXX_Size() int {
 	return xxx_messageInfo_C2SThrowDice.Size(m)
@@ -773,17 +754,16 @@ func (m *C2SOutCard) Reset()         { *m = C2SOutCard{} }
 func (m *C2SOutCard) String() string { return proto.CompactTextString(m) }
 func (*C2SOutCard) ProtoMessage()    {}
 func (*C2SOutCard) Descriptor() ([]byte, []int) {
-	return fileDescriptor_424db99e24b65537, []int{9}
+	return fileDescriptor_mj_changshu_5f9d91474b1dcdb2, []int{9}
 }
-
 func (m *C2SOutCard) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_C2SOutCard.Unmarshal(m, b)
 }
 func (m *C2SOutCard) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_C2SOutCard.Marshal(b, m, deterministic)
 }
-func (m *C2SOutCard) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_C2SOutCard.Merge(m, src)
+func (dst *C2SOutCard) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_C2SOutCard.Merge(dst, src)
 }
 func (m *C2SOutCard) XXX_Size() int {
 	return xxx_messageInfo_C2SOutCard.Size(m)
@@ -813,17 +793,16 @@ func (m *C2SPengCard) Reset()         { *m = C2SPengCard{} }
 func (m *C2SPengCard) String() string { return proto.CompactTextString(m) }
 func (*C2SPengCard) ProtoMessage()    {}
 func (*C2SPengCard) Descriptor() ([]byte, []int) {
-	return fileDescriptor_424db99e24b65537, []int{10}
+	return fileDescriptor_mj_changshu_5f9d91474b1dcdb2, []int{10}
 }
-
 func (m *C2SPengCard) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_C2SPengCard.Unmarshal(m, b)
 }
 func (m *C2SPengCard) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_C2SPengCard.Marshal(b, m, deterministic)
 }
-func (m *C2SPengCard) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_C2SPengCard.Merge(m, src)
+func (dst *C2SPengCard) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_C2SPengCard.Merge(dst, src)
 }
 func (m *C2SPengCard) XXX_Size() int {
 	return xxx_messageInfo_C2SPengCard.Size(m)
@@ -853,17 +832,16 @@ func (m *C2SGangCard) Reset()         { *m = C2SGangCard{} }
 func (m *C2SGangCard) String() string { return proto.CompactTextString(m) }
 func (*C2SGangCard) ProtoMessage()    {}
 func (*C2SGangCard) Descriptor() ([]byte, []int) {
-	return fileDescriptor_424db99e24b65537, []int{11}
+	return fileDescriptor_mj_changshu_5f9d91474b1dcdb2, []int{11}
 }
-
 func (m *C2SGangCard) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_C2SGangCard.Unmarshal(m, b)
 }
 func (m *C2SGangCard) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_C2SGangCard.Marshal(b, m, deterministic)
 }
-func (m *C2SGangCard) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_C2SGangCard.Merge(m, src)
+func (dst *C2SGangCard) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_C2SGangCard.Merge(dst, src)
 }
 func (m *C2SGangCard) XXX_Size() int {
 	return xxx_messageInfo_C2SGangCard.Size(m)
@@ -894,17 +872,16 @@ func (m *C2SChiCard) Reset()         { *m = C2SChiCard{} }
 func (m *C2SChiCard) String() string { return proto.CompactTextString(m) }
 func (*C2SChiCard) ProtoMessage()    {}
 func (*C2SChiCard) Descriptor() ([]byte, []int) {
-	return fileDescriptor_424db99e24b65537, []int{12}
+	return fileDescriptor_mj_changshu_5f9d91474b1dcdb2, []int{12}
 }
-
 func (m *C2SChiCard) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_C2SChiCard.Unmarshal(m, b)
 }
 func (m *C2SChiCard) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_C2SChiCard.Marshal(b, m, deterministic)
 }
-func (m *C2SChiCard) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_C2SChiCard.Merge(m, src)
+func (dst *C2SChiCard) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_C2SChiCard.Merge(dst, src)
 }
 func (m *C2SChiCard) XXX_Size() int {
 	return xxx_messageInfo_C2SChiCard.Size(m)
@@ -940,17 +917,16 @@ func (m *C2SHuCard) Reset()         { *m = C2SHuCard{} }
 func (m *C2SHuCard) String() string { return proto.CompactTextString(m) }
 func (*C2SHuCard) ProtoMessage()    {}
 func (*C2SHuCard) Descriptor() ([]byte, []int) {
-	return fileDescriptor_424db99e24b65537, []int{13}
+	return fileDescriptor_mj_changshu_5f9d91474b1dcdb2, []int{13}
 }
-
 func (m *C2SHuCard) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_C2SHuCard.Unmarshal(m, b)
 }
 func (m *C2SHuCard) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_C2SHuCard.Marshal(b, m, deterministic)
 }
-func (m *C2SHuCard) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_C2SHuCard.Merge(m, src)
+func (dst *C2SHuCard) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_C2SHuCard.Merge(dst, src)
 }
 func (m *C2SHuCard) XXX_Size() int {
 	return xxx_messageInfo_C2SHuCard.Size(m)
@@ -972,17 +948,16 @@ func (m *C2SCancelAction) Reset()         { *m = C2SCancelAction{} }
 func (m *C2SCancelAction) String() string { return proto.CompactTextString(m) }
 func (*C2SCancelAction) ProtoMessage()    {}
 func (*C2SCancelAction) Descriptor() ([]byte, []int) {
-	return fileDescriptor_424db99e24b65537, []int{14}
+	return fileDescriptor_mj_changshu_5f9d91474b1dcdb2, []int{14}
 }
-
 func (m *C2SCancelAction) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_C2SCancelAction.Unmarshal(m, b)
 }
 func (m *C2SCancelAction) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_C2SCancelAction.Marshal(b, m, deterministic)
 }
-func (m *C2SCancelAction) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_C2SCancelAction.Merge(m, src)
+func (dst *C2SCancelAction) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_C2SCancelAction.Merge(dst, src)
 }
 func (m *C2SCancelAction) XXX_Size() int {
 	return xxx_messageInfo_C2SCancelAction.Size(m)
@@ -1006,17 +981,16 @@ func (m *BS2CUpdateGameStatus) Reset()         { *m = BS2CUpdateGameStatus{} }
 func (m *BS2CUpdateGameStatus) String() string { return proto.CompactTextString(m) }
 func (*BS2CUpdateGameStatus) ProtoMessage()    {}
 func (*BS2CUpdateGameStatus) Descriptor() ([]byte, []int) {
-	return fileDescriptor_424db99e24b65537, []int{15}
+	return fileDescriptor_mj_changshu_5f9d91474b1dcdb2, []int{15}
 }
-
 func (m *BS2CUpdateGameStatus) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_BS2CUpdateGameStatus.Unmarshal(m, b)
 }
 func (m *BS2CUpdateGameStatus) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_BS2CUpdateGameStatus.Marshal(b, m, deterministic)
 }
-func (m *BS2CUpdateGameStatus) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_BS2CUpdateGameStatus.Merge(m, src)
+func (dst *BS2CUpdateGameStatus) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_BS2CUpdateGameStatus.Merge(dst, src)
 }
 func (m *BS2CUpdateGameStatus) XXX_Size() int {
 	return xxx_messageInfo_BS2CUpdateGameStatus.Size(m)
@@ -1046,17 +1020,16 @@ func (m *S2CThrowDice) Reset()         { *m = S2CThrowDice{} }
 func (m *S2CThrowDice) String() string { return proto.CompactTextString(m) }
 func (*S2CThrowDice) ProtoMessage()    {}
 func (*S2CThrowDice) Descriptor() ([]byte, []int) {
-	return fileDescriptor_424db99e24b65537, []int{16}
+	return fileDescriptor_mj_changshu_5f9d91474b1dcdb2, []int{16}
 }
-
 func (m *S2CThrowDice) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_S2CThrowDice.Unmarshal(m, b)
 }
 func (m *S2CThrowDice) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_S2CThrowDice.Marshal(b, m, deterministic)
 }
-func (m *S2CThrowDice) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_S2CThrowDice.Merge(m, src)
+func (dst *S2CThrowDice) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_S2CThrowDice.Merge(dst, src)
 }
 func (m *S2CThrowDice) XXX_Size() int {
 	return xxx_messageInfo_S2CThrowDice.Size(m)
@@ -1087,17 +1060,16 @@ func (m *BS2CThrowDiceResult) Reset()         { *m = BS2CThrowDiceResult{} }
 func (m *BS2CThrowDiceResult) String() string { return proto.CompactTextString(m) }
 func (*BS2CThrowDiceResult) ProtoMessage()    {}
 func (*BS2CThrowDiceResult) Descriptor() ([]byte, []int) {
-	return fileDescriptor_424db99e24b65537, []int{17}
+	return fileDescriptor_mj_changshu_5f9d91474b1dcdb2, []int{17}
 }
-
 func (m *BS2CThrowDiceResult) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_BS2CThrowDiceResult.Unmarshal(m, b)
 }
 func (m *BS2CThrowDiceResult) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_BS2CThrowDiceResult.Marshal(b, m, deterministic)
 }
-func (m *BS2CThrowDiceResult) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_BS2CThrowDiceResult.Merge(m, src)
+func (dst *BS2CThrowDiceResult) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_BS2CThrowDiceResult.Merge(dst, src)
 }
 func (m *BS2CThrowDiceResult) XXX_Size() int {
 	return xxx_messageInfo_BS2CThrowDiceResult.Size(m)
@@ -1134,17 +1106,16 @@ func (m *ChangePosInfo) Reset()         { *m = ChangePosInfo{} }
 func (m *ChangePosInfo) String() string { return proto.CompactTextString(m) }
 func (*ChangePosInfo) ProtoMessage()    {}
 func (*ChangePosInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_424db99e24b65537, []int{18}
+	return fileDescriptor_mj_changshu_5f9d91474b1dcdb2, []int{18}
 }
-
 func (m *ChangePosInfo) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ChangePosInfo.Unmarshal(m, b)
 }
 func (m *ChangePosInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ChangePosInfo.Marshal(b, m, deterministic)
 }
-func (m *ChangePosInfo) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ChangePosInfo.Merge(m, src)
+func (dst *ChangePosInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ChangePosInfo.Merge(dst, src)
 }
 func (m *ChangePosInfo) XXX_Size() int {
 	return xxx_messageInfo_ChangePosInfo.Size(m)
@@ -1181,17 +1152,16 @@ func (m *S2CChangePos) Reset()         { *m = S2CChangePos{} }
 func (m *S2CChangePos) String() string { return proto.CompactTextString(m) }
 func (*S2CChangePos) ProtoMessage()    {}
 func (*S2CChangePos) Descriptor() ([]byte, []int) {
-	return fileDescriptor_424db99e24b65537, []int{19}
+	return fileDescriptor_mj_changshu_5f9d91474b1dcdb2, []int{19}
 }
-
 func (m *S2CChangePos) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_S2CChangePos.Unmarshal(m, b)
 }
 func (m *S2CChangePos) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_S2CChangePos.Marshal(b, m, deterministic)
 }
-func (m *S2CChangePos) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_S2CChangePos.Merge(m, src)
+func (dst *S2CChangePos) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_S2CChangePos.Merge(dst, src)
 }
 func (m *S2CChangePos) XXX_Size() int {
 	return xxx_messageInfo_S2CChangePos.Size(m)
@@ -1225,17 +1195,16 @@ func (m *S2CHaveOperation) Reset()         { *m = S2CHaveOperation{} }
 func (m *S2CHaveOperation) String() string { return proto.CompactTextString(m) }
 func (*S2CHaveOperation) ProtoMessage()    {}
 func (*S2CHaveOperation) Descriptor() ([]byte, []int) {
-	return fileDescriptor_424db99e24b65537, []int{20}
+	return fileDescriptor_mj_changshu_5f9d91474b1dcdb2, []int{20}
 }
-
 func (m *S2CHaveOperation) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_S2CHaveOperation.Unmarshal(m, b)
 }
 func (m *S2CHaveOperation) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_S2CHaveOperation.Marshal(b, m, deterministic)
 }
-func (m *S2CHaveOperation) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_S2CHaveOperation.Merge(m, src)
+func (dst *S2CHaveOperation) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_S2CHaveOperation.Merge(dst, src)
 }
 func (m *S2CHaveOperation) XXX_Size() int {
 	return xxx_messageInfo_S2CHaveOperation.Size(m)
@@ -1292,17 +1261,16 @@ func (m *Json_UserCardInfo) Reset()         { *m = Json_UserCardInfo{} }
 func (m *Json_UserCardInfo) String() string { return proto.CompactTextString(m) }
 func (*Json_UserCardInfo) ProtoMessage()    {}
 func (*Json_UserCardInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_424db99e24b65537, []int{21}
+	return fileDescriptor_mj_changshu_5f9d91474b1dcdb2, []int{21}
 }
-
 func (m *Json_UserCardInfo) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Json_UserCardInfo.Unmarshal(m, b)
 }
 func (m *Json_UserCardInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_Json_UserCardInfo.Marshal(b, m, deterministic)
 }
-func (m *Json_UserCardInfo) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Json_UserCardInfo.Merge(m, src)
+func (dst *Json_UserCardInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Json_UserCardInfo.Merge(dst, src)
 }
 func (m *Json_UserCardInfo) XXX_Size() int {
 	return xxx_messageInfo_Json_UserCardInfo.Size(m)
@@ -1331,17 +1299,16 @@ func (m *Json_UserCardInfoCards) Reset()         { *m = Json_UserCardInfoCards{}
 func (m *Json_UserCardInfoCards) String() string { return proto.CompactTextString(m) }
 func (*Json_UserCardInfoCards) ProtoMessage()    {}
 func (*Json_UserCardInfoCards) Descriptor() ([]byte, []int) {
-	return fileDescriptor_424db99e24b65537, []int{21, 0}
+	return fileDescriptor_mj_changshu_5f9d91474b1dcdb2, []int{21, 0}
 }
-
 func (m *Json_UserCardInfoCards) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Json_UserCardInfoCards.Unmarshal(m, b)
 }
 func (m *Json_UserCardInfoCards) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_Json_UserCardInfoCards.Marshal(b, m, deterministic)
 }
-func (m *Json_UserCardInfoCards) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Json_UserCardInfoCards.Merge(m, src)
+func (dst *Json_UserCardInfoCards) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Json_UserCardInfoCards.Merge(dst, src)
 }
 func (m *Json_UserCardInfoCards) XXX_Size() int {
 	return xxx_messageInfo_Json_UserCardInfoCards.Size(m)
@@ -1379,17 +1346,16 @@ func (m *S2CStartGame) Reset()         { *m = S2CStartGame{} }
 func (m *S2CStartGame) String() string { return proto.CompactTextString(m) }
 func (*S2CStartGame) ProtoMessage()    {}
 func (*S2CStartGame) Descriptor() ([]byte, []int) {
-	return fileDescriptor_424db99e24b65537, []int{22}
+	return fileDescriptor_mj_changshu_5f9d91474b1dcdb2, []int{22}
 }
-
 func (m *S2CStartGame) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_S2CStartGame.Unmarshal(m, b)
 }
 func (m *S2CStartGame) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_S2CStartGame.Marshal(b, m, deterministic)
 }
-func (m *S2CStartGame) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_S2CStartGame.Merge(m, src)
+func (dst *S2CStartGame) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_S2CStartGame.Merge(dst, src)
 }
 func (m *S2CStartGame) XXX_Size() int {
 	return xxx_messageInfo_S2CStartGame.Size(m)
@@ -1476,17 +1442,16 @@ func (m *Json_FirstBuHua) Reset()         { *m = Json_FirstBuHua{} }
 func (m *Json_FirstBuHua) String() string { return proto.CompactTextString(m) }
 func (*Json_FirstBuHua) ProtoMessage()    {}
 func (*Json_FirstBuHua) Descriptor() ([]byte, []int) {
-	return fileDescriptor_424db99e24b65537, []int{23}
+	return fileDescriptor_mj_changshu_5f9d91474b1dcdb2, []int{23}
 }
-
 func (m *Json_FirstBuHua) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Json_FirstBuHua.Unmarshal(m, b)
 }
 func (m *Json_FirstBuHua) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_Json_FirstBuHua.Marshal(b, m, deterministic)
 }
-func (m *Json_FirstBuHua) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Json_FirstBuHua.Merge(m, src)
+func (dst *Json_FirstBuHua) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Json_FirstBuHua.Merge(dst, src)
 }
 func (m *Json_FirstBuHua) XXX_Size() int {
 	return xxx_messageInfo_Json_FirstBuHua.Size(m)
@@ -1526,17 +1491,16 @@ func (m *BS2CDrawCard) Reset()         { *m = BS2CDrawCard{} }
 func (m *BS2CDrawCard) String() string { return proto.CompactTextString(m) }
 func (*BS2CDrawCard) ProtoMessage()    {}
 func (*BS2CDrawCard) Descriptor() ([]byte, []int) {
-	return fileDescriptor_424db99e24b65537, []int{24}
+	return fileDescriptor_mj_changshu_5f9d91474b1dcdb2, []int{24}
 }
-
 func (m *BS2CDrawCard) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_BS2CDrawCard.Unmarshal(m, b)
 }
 func (m *BS2CDrawCard) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_BS2CDrawCard.Marshal(b, m, deterministic)
 }
-func (m *BS2CDrawCard) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_BS2CDrawCard.Merge(m, src)
+func (dst *BS2CDrawCard) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_BS2CDrawCard.Merge(dst, src)
 }
 func (m *BS2CDrawCard) XXX_Size() int {
 	return xxx_messageInfo_BS2CDrawCard.Size(m)
@@ -1589,17 +1553,16 @@ func (m *BS2CFirstBuHua) Reset()         { *m = BS2CFirstBuHua{} }
 func (m *BS2CFirstBuHua) String() string { return proto.CompactTextString(m) }
 func (*BS2CFirstBuHua) ProtoMessage()    {}
 func (*BS2CFirstBuHua) Descriptor() ([]byte, []int) {
-	return fileDescriptor_424db99e24b65537, []int{25}
+	return fileDescriptor_mj_changshu_5f9d91474b1dcdb2, []int{25}
 }
-
 func (m *BS2CFirstBuHua) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_BS2CFirstBuHua.Unmarshal(m, b)
 }
 func (m *BS2CFirstBuHua) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_BS2CFirstBuHua.Marshal(b, m, deterministic)
 }
-func (m *BS2CFirstBuHua) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_BS2CFirstBuHua.Merge(m, src)
+func (dst *BS2CFirstBuHua) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_BS2CFirstBuHua.Merge(dst, src)
 }
 func (m *BS2CFirstBuHua) XXX_Size() int {
 	return xxx_messageInfo_BS2CFirstBuHua.Size(m)
@@ -1644,17 +1607,16 @@ func (m *BS2COutCard) Reset()         { *m = BS2COutCard{} }
 func (m *BS2COutCard) String() string { return proto.CompactTextString(m) }
 func (*BS2COutCard) ProtoMessage()    {}
 func (*BS2COutCard) Descriptor() ([]byte, []int) {
-	return fileDescriptor_424db99e24b65537, []int{26}
+	return fileDescriptor_mj_changshu_5f9d91474b1dcdb2, []int{26}
 }
-
 func (m *BS2COutCard) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_BS2COutCard.Unmarshal(m, b)
 }
 func (m *BS2COutCard) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_BS2COutCard.Marshal(b, m, deterministic)
 }
-func (m *BS2COutCard) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_BS2COutCard.Merge(m, src)
+func (dst *BS2COutCard) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_BS2COutCard.Merge(dst, src)
 }
 func (m *BS2COutCard) XXX_Size() int {
 	return xxx_messageInfo_BS2COutCard.Size(m)
@@ -1693,17 +1655,16 @@ func (m *BS2CPengCard) Reset()         { *m = BS2CPengCard{} }
 func (m *BS2CPengCard) String() string { return proto.CompactTextString(m) }
 func (*BS2CPengCard) ProtoMessage()    {}
 func (*BS2CPengCard) Descriptor() ([]byte, []int) {
-	return fileDescriptor_424db99e24b65537, []int{27}
+	return fileDescriptor_mj_changshu_5f9d91474b1dcdb2, []int{27}
 }
-
 func (m *BS2CPengCard) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_BS2CPengCard.Unmarshal(m, b)
 }
 func (m *BS2CPengCard) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_BS2CPengCard.Marshal(b, m, deterministic)
 }
-func (m *BS2CPengCard) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_BS2CPengCard.Merge(m, src)
+func (dst *BS2CPengCard) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_BS2CPengCard.Merge(dst, src)
 }
 func (m *BS2CPengCard) XXX_Size() int {
 	return xxx_messageInfo_BS2CPengCard.Size(m)
@@ -1751,17 +1712,16 @@ func (m *BS2CGangCard) Reset()         { *m = BS2CGangCard{} }
 func (m *BS2CGangCard) String() string { return proto.CompactTextString(m) }
 func (*BS2CGangCard) ProtoMessage()    {}
 func (*BS2CGangCard) Descriptor() ([]byte, []int) {
-	return fileDescriptor_424db99e24b65537, []int{28}
+	return fileDescriptor_mj_changshu_5f9d91474b1dcdb2, []int{28}
 }
-
 func (m *BS2CGangCard) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_BS2CGangCard.Unmarshal(m, b)
 }
 func (m *BS2CGangCard) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_BS2CGangCard.Marshal(b, m, deterministic)
 }
-func (m *BS2CGangCard) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_BS2CGangCard.Merge(m, src)
+func (dst *BS2CGangCard) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_BS2CGangCard.Merge(dst, src)
 }
 func (m *BS2CGangCard) XXX_Size() int {
 	return xxx_messageInfo_BS2CGangCard.Size(m)
@@ -1814,17 +1774,16 @@ func (m *BS2CChiCard) Reset()         { *m = BS2CChiCard{} }
 func (m *BS2CChiCard) String() string { return proto.CompactTextString(m) }
 func (*BS2CChiCard) ProtoMessage()    {}
 func (*BS2CChiCard) Descriptor() ([]byte, []int) {
-	return fileDescriptor_424db99e24b65537, []int{29}
+	return fileDescriptor_mj_changshu_5f9d91474b1dcdb2, []int{29}
 }
-
 func (m *BS2CChiCard) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_BS2CChiCard.Unmarshal(m, b)
 }
 func (m *BS2CChiCard) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_BS2CChiCard.Marshal(b, m, deterministic)
 }
-func (m *BS2CChiCard) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_BS2CChiCard.Merge(m, src)
+func (dst *BS2CChiCard) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_BS2CChiCard.Merge(dst, src)
 }
 func (m *BS2CChiCard) XXX_Size() int {
 	return xxx_messageInfo_BS2CChiCard.Size(m)
@@ -1869,17 +1828,16 @@ func (m *BS2CHuCard) Reset()         { *m = BS2CHuCard{} }
 func (m *BS2CHuCard) String() string { return proto.CompactTextString(m) }
 func (*BS2CHuCard) ProtoMessage()    {}
 func (*BS2CHuCard) Descriptor() ([]byte, []int) {
-	return fileDescriptor_424db99e24b65537, []int{30}
+	return fileDescriptor_mj_changshu_5f9d91474b1dcdb2, []int{30}
 }
-
 func (m *BS2CHuCard) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_BS2CHuCard.Unmarshal(m, b)
 }
 func (m *BS2CHuCard) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_BS2CHuCard.Marshal(b, m, deterministic)
 }
-func (m *BS2CHuCard) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_BS2CHuCard.Merge(m, src)
+func (dst *BS2CHuCard) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_BS2CHuCard.Merge(dst, src)
 }
 func (m *BS2CHuCard) XXX_Size() int {
 	return xxx_messageInfo_BS2CHuCard.Size(m)
@@ -1922,17 +1880,16 @@ func (m *PlayerBalanceInfo) Reset()         { *m = PlayerBalanceInfo{} }
 func (m *PlayerBalanceInfo) String() string { return proto.CompactTextString(m) }
 func (*PlayerBalanceInfo) ProtoMessage()    {}
 func (*PlayerBalanceInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_424db99e24b65537, []int{31}
+	return fileDescriptor_mj_changshu_5f9d91474b1dcdb2, []int{31}
 }
-
 func (m *PlayerBalanceInfo) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_PlayerBalanceInfo.Unmarshal(m, b)
 }
 func (m *PlayerBalanceInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_PlayerBalanceInfo.Marshal(b, m, deterministic)
 }
-func (m *PlayerBalanceInfo) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_PlayerBalanceInfo.Merge(m, src)
+func (dst *PlayerBalanceInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_PlayerBalanceInfo.Merge(dst, src)
 }
 func (m *PlayerBalanceInfo) XXX_Size() int {
 	return xxx_messageInfo_PlayerBalanceInfo.Size(m)
@@ -2007,17 +1964,16 @@ func (m *BS2CGameEnd) Reset()         { *m = BS2CGameEnd{} }
 func (m *BS2CGameEnd) String() string { return proto.CompactTextString(m) }
 func (*BS2CGameEnd) ProtoMessage()    {}
 func (*BS2CGameEnd) Descriptor() ([]byte, []int) {
-	return fileDescriptor_424db99e24b65537, []int{32}
+	return fileDescriptor_mj_changshu_5f9d91474b1dcdb2, []int{32}
 }
-
 func (m *BS2CGameEnd) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_BS2CGameEnd.Unmarshal(m, b)
 }
 func (m *BS2CGameEnd) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_BS2CGameEnd.Marshal(b, m, deterministic)
 }
-func (m *BS2CGameEnd) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_BS2CGameEnd.Merge(m, src)
+func (dst *BS2CGameEnd) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_BS2CGameEnd.Merge(dst, src)
 }
 func (m *BS2CGameEnd) XXX_Size() int {
 	return xxx_messageInfo_BS2CGameEnd.Size(m)
@@ -2072,17 +2028,16 @@ func (m *PlayerBalanceResult) Reset()         { *m = PlayerBalanceResult{} }
 func (m *PlayerBalanceResult) String() string { return proto.CompactTextString(m) }
 func (*PlayerBalanceResult) ProtoMessage()    {}
 func (*PlayerBalanceResult) Descriptor() ([]byte, []int) {
-	return fileDescriptor_424db99e24b65537, []int{33}
+	return fileDescriptor_mj_changshu_5f9d91474b1dcdb2, []int{33}
 }
-
 func (m *PlayerBalanceResult) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_PlayerBalanceResult.Unmarshal(m, b)
 }
 func (m *PlayerBalanceResult) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_PlayerBalanceResult.Marshal(b, m, deterministic)
 }
-func (m *PlayerBalanceResult) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_PlayerBalanceResult.Merge(m, src)
+func (dst *PlayerBalanceResult) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_PlayerBalanceResult.Merge(dst, src)
 }
 func (m *PlayerBalanceResult) XXX_Size() int {
 	return xxx_messageInfo_PlayerBalanceResult.Size(m)
@@ -2148,17 +2103,16 @@ func (m *BS2CBalanceResult) Reset()         { *m = BS2CBalanceResult{} }
 func (m *BS2CBalanceResult) String() string { return proto.CompactTextString(m) }
 func (*BS2CBalanceResult) ProtoMessage()    {}
 func (*BS2CBalanceResult) Descriptor() ([]byte, []int) {
-	return fileDescriptor_424db99e24b65537, []int{34}
+	return fileDescriptor_mj_changshu_5f9d91474b1dcdb2, []int{34}
 }
-
 func (m *BS2CBalanceResult) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_BS2CBalanceResult.Unmarshal(m, b)
 }
 func (m *BS2CBalanceResult) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_BS2CBalanceResult.Marshal(b, m, deterministic)
 }
-func (m *BS2CBalanceResult) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_BS2CBalanceResult.Merge(m, src)
+func (dst *BS2CBalanceResult) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_BS2CBalanceResult.Merge(dst, src)
 }
 func (m *BS2CBalanceResult) XXX_Size() int {
 	return xxx_messageInfo_BS2CBalanceResult.Size(m)
@@ -2184,10 +2138,6 @@ func (m *BS2CBalanceResult) GetPlayerResult() []*PlayerBalanceResult {
 }
 
 func init() {
-	proto.RegisterEnum("pbgame_mj_changshu.GameStatus", GameStatus_name, GameStatus_value)
-	proto.RegisterEnum("pbgame_mj_changshu.CanOperMask", CanOperMask_name, CanOperMask_value)
-	proto.RegisterEnum("pbgame_mj_changshu.ChiTypeMask", ChiTypeMask_name, ChiTypeMask_value)
-	proto.RegisterEnum("pbgame_mj_changshu.GangType", GangType_name, GangType_value)
 	proto.RegisterType((*CyU32String)(nil), "pbgame_mj_changshu.cyU32String")
 	proto.RegisterType((*RoundInfo)(nil), "pbgame_mj_changshu.RoundInfo")
 	proto.RegisterType((*CreateArg)(nil), "pbgame_mj_changshu.CreateArg")
@@ -2225,11 +2175,17 @@ func init() {
 	proto.RegisterType((*BS2CGameEnd)(nil), "pbgame_mj_changshu.BS2CGameEnd")
 	proto.RegisterType((*PlayerBalanceResult)(nil), "pbgame_mj_changshu.PlayerBalanceResult")
 	proto.RegisterType((*BS2CBalanceResult)(nil), "pbgame_mj_changshu.BS2CBalanceResult")
+	proto.RegisterEnum("pbgame_mj_changshu.GameStatus", GameStatus_name, GameStatus_value)
+	proto.RegisterEnum("pbgame_mj_changshu.CanOperMask", CanOperMask_name, CanOperMask_value)
+	proto.RegisterEnum("pbgame_mj_changshu.ChiTypeMask", ChiTypeMask_name, ChiTypeMask_value)
+	proto.RegisterEnum("pbgame_mj_changshu.GangType", GangType_name, GangType_value)
 }
 
-func init() { proto.RegisterFile("game/mj/changshu/mj_changshu.proto", fileDescriptor_424db99e24b65537) }
+func init() {
+	proto.RegisterFile("game/mj/changshu/mj_changshu.proto", fileDescriptor_mj_changshu_5f9d91474b1dcdb2)
+}
 
-var fileDescriptor_424db99e24b65537 = []byte{
+var fileDescriptor_mj_changshu_5f9d91474b1dcdb2 = []byte{
 	// 1864 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x58, 0x4b, 0x73, 0x1c, 0x49,
 	0x11, 0xa6, 0xe7, 0x3d, 0x39, 0x23, 0x69, 0xd4, 0xeb, 0xf0, 0x8e, 0xe5, 0xf5, 0xae, 0xb6, 0x63,

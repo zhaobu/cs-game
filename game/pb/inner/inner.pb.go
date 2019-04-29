@@ -3,11 +3,9 @@
 
 package pbinner
 
-import (
-	fmt "fmt"
-	proto "github.com/golang/protobuf/proto"
-	math "math"
-)
+import proto "github.com/golang/protobuf/proto"
+import fmt "fmt"
+import math "math"
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
@@ -34,7 +32,6 @@ var UserChangeType_name = map[int32]string{
 	1: "Online",
 	2: "Offline",
 }
-
 var UserChangeType_value = map[string]int32{
 	"NotUse":  0,
 	"Online":  1,
@@ -44,9 +41,8 @@ var UserChangeType_value = map[string]int32{
 func (x UserChangeType) String() string {
 	return proto.EnumName(UserChangeType_name, int32(x))
 }
-
 func (UserChangeType) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_b3615dfd873b2a19, []int{0}
+	return fileDescriptor_inner_0cf3d218af6a8044, []int{0}
 }
 
 // center -> games
@@ -63,17 +59,16 @@ func (m *GameMatchSucc) Reset()         { *m = GameMatchSucc{} }
 func (m *GameMatchSucc) String() string { return proto.CompactTextString(m) }
 func (*GameMatchSucc) ProtoMessage()    {}
 func (*GameMatchSucc) Descriptor() ([]byte, []int) {
-	return fileDescriptor_b3615dfd873b2a19, []int{0}
+	return fileDescriptor_inner_0cf3d218af6a8044, []int{0}
 }
-
 func (m *GameMatchSucc) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GameMatchSucc.Unmarshal(m, b)
 }
 func (m *GameMatchSucc) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_GameMatchSucc.Marshal(b, m, deterministic)
 }
-func (m *GameMatchSucc) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GameMatchSucc.Merge(m, src)
+func (dst *GameMatchSucc) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GameMatchSucc.Merge(dst, src)
 }
 func (m *GameMatchSucc) XXX_Size() int {
 	return xxx_messageInfo_GameMatchSucc.Size(m)
@@ -111,17 +106,16 @@ func (m *GameMatchArgsCheckReq) Reset()         { *m = GameMatchArgsCheckReq{} }
 func (m *GameMatchArgsCheckReq) String() string { return proto.CompactTextString(m) }
 func (*GameMatchArgsCheckReq) ProtoMessage()    {}
 func (*GameMatchArgsCheckReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_b3615dfd873b2a19, []int{1}
+	return fileDescriptor_inner_0cf3d218af6a8044, []int{1}
 }
-
 func (m *GameMatchArgsCheckReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GameMatchArgsCheckReq.Unmarshal(m, b)
 }
 func (m *GameMatchArgsCheckReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_GameMatchArgsCheckReq.Marshal(b, m, deterministic)
 }
-func (m *GameMatchArgsCheckReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GameMatchArgsCheckReq.Merge(m, src)
+func (dst *GameMatchArgsCheckReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GameMatchArgsCheckReq.Merge(dst, src)
 }
 func (m *GameMatchArgsCheckReq) XXX_Size() int {
 	return xxx_messageInfo_GameMatchArgsCheckReq.Size(m)
@@ -160,17 +154,16 @@ func (m *GameMatchArgsCheckRsp) Reset()         { *m = GameMatchArgsCheckRsp{} }
 func (m *GameMatchArgsCheckRsp) String() string { return proto.CompactTextString(m) }
 func (*GameMatchArgsCheckRsp) ProtoMessage()    {}
 func (*GameMatchArgsCheckRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_b3615dfd873b2a19, []int{2}
+	return fileDescriptor_inner_0cf3d218af6a8044, []int{2}
 }
-
 func (m *GameMatchArgsCheckRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GameMatchArgsCheckRsp.Unmarshal(m, b)
 }
 func (m *GameMatchArgsCheckRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_GameMatchArgsCheckRsp.Marshal(b, m, deterministic)
 }
-func (m *GameMatchArgsCheckRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GameMatchArgsCheckRsp.Merge(m, src)
+func (dst *GameMatchArgsCheckRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GameMatchArgsCheckRsp.Merge(dst, src)
 }
 func (m *GameMatchArgsCheckRsp) XXX_Size() int {
 	return xxx_messageInfo_GameMatchArgsCheckRsp.Size(m)
@@ -214,17 +207,16 @@ func (m *UserChangeNotif) Reset()         { *m = UserChangeNotif{} }
 func (m *UserChangeNotif) String() string { return proto.CompactTextString(m) }
 func (*UserChangeNotif) ProtoMessage()    {}
 func (*UserChangeNotif) Descriptor() ([]byte, []int) {
-	return fileDescriptor_b3615dfd873b2a19, []int{3}
+	return fileDescriptor_inner_0cf3d218af6a8044, []int{3}
 }
-
 func (m *UserChangeNotif) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UserChangeNotif.Unmarshal(m, b)
 }
 func (m *UserChangeNotif) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_UserChangeNotif.Marshal(b, m, deterministic)
 }
-func (m *UserChangeNotif) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_UserChangeNotif.Merge(m, src)
+func (dst *UserChangeNotif) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UserChangeNotif.Merge(dst, src)
 }
 func (m *UserChangeNotif) XXX_Size() int {
 	return xxx_messageInfo_UserChangeNotif.Size(m)
@@ -263,17 +255,16 @@ func (m *DeskChangeNotif) Reset()         { *m = DeskChangeNotif{} }
 func (m *DeskChangeNotif) String() string { return proto.CompactTextString(m) }
 func (*DeskChangeNotif) ProtoMessage()    {}
 func (*DeskChangeNotif) Descriptor() ([]byte, []int) {
-	return fileDescriptor_b3615dfd873b2a19, []int{4}
+	return fileDescriptor_inner_0cf3d218af6a8044, []int{4}
 }
-
 func (m *DeskChangeNotif) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeskChangeNotif.Unmarshal(m, b)
 }
 func (m *DeskChangeNotif) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_DeskChangeNotif.Marshal(b, m, deterministic)
 }
-func (m *DeskChangeNotif) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_DeskChangeNotif.Merge(m, src)
+func (dst *DeskChangeNotif) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeskChangeNotif.Merge(dst, src)
 }
 func (m *DeskChangeNotif) XXX_Size() int {
 	return xxx_messageInfo_DeskChangeNotif.Size(m)
@@ -306,17 +297,17 @@ func (m *DeskChangeNotif) GetChangeTyp() int32 {
 }
 
 func init() {
-	proto.RegisterEnum("pbinner.UserChangeType", UserChangeType_name, UserChangeType_value)
 	proto.RegisterType((*GameMatchSucc)(nil), "pbinner.GameMatchSucc")
 	proto.RegisterType((*GameMatchArgsCheckReq)(nil), "pbinner.GameMatchArgsCheckReq")
 	proto.RegisterType((*GameMatchArgsCheckRsp)(nil), "pbinner.GameMatchArgsCheckRsp")
 	proto.RegisterType((*UserChangeNotif)(nil), "pbinner.UserChangeNotif")
 	proto.RegisterType((*DeskChangeNotif)(nil), "pbinner.DeskChangeNotif")
+	proto.RegisterEnum("pbinner.UserChangeType", UserChangeType_name, UserChangeType_value)
 }
 
-func init() { proto.RegisterFile("inner/inner.proto", fileDescriptor_b3615dfd873b2a19) }
+func init() { proto.RegisterFile("inner/inner.proto", fileDescriptor_inner_0cf3d218af6a8044) }
 
-var fileDescriptor_b3615dfd873b2a19 = []byte{
+var fileDescriptor_inner_0cf3d218af6a8044 = []byte{
 	// 318 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x74, 0x92, 0x4f, 0x4f, 0xf2, 0x40,
 	0x10, 0xc6, 0xdf, 0xa5, 0xbc, 0x25, 0x8c, 0xf2, 0xc7, 0x4d, 0xc4, 0x1e, 0x3c, 0x34, 0x3d, 0x98,

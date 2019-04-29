@@ -3,12 +3,10 @@
 
 package pbhall
 
-import (
-	common "cy/game/pb/common"
-	fmt "fmt"
-	proto "github.com/golang/protobuf/proto"
-	math "math"
-)
+import proto "github.com/golang/protobuf/proto"
+import fmt "fmt"
+import math "math"
+import common "cy/game/pb/common"
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
@@ -33,17 +31,16 @@ func (m *QueryGameListReq) Reset()         { *m = QueryGameListReq{} }
 func (m *QueryGameListReq) String() string { return proto.CompactTextString(m) }
 func (*QueryGameListReq) ProtoMessage()    {}
 func (*QueryGameListReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_c536f7332080545b, []int{0}
+	return fileDescriptor_query_f183c62369bd24e8, []int{0}
 }
-
 func (m *QueryGameListReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_QueryGameListReq.Unmarshal(m, b)
 }
 func (m *QueryGameListReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_QueryGameListReq.Marshal(b, m, deterministic)
 }
-func (m *QueryGameListReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryGameListReq.Merge(m, src)
+func (dst *QueryGameListReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryGameListReq.Merge(dst, src)
 }
 func (m *QueryGameListReq) XXX_Size() int {
 	return xxx_messageInfo_QueryGameListReq.Size(m)
@@ -73,17 +70,16 @@ func (m *QueryGameListRsp) Reset()         { *m = QueryGameListRsp{} }
 func (m *QueryGameListRsp) String() string { return proto.CompactTextString(m) }
 func (*QueryGameListRsp) ProtoMessage()    {}
 func (*QueryGameListRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_c536f7332080545b, []int{1}
+	return fileDescriptor_query_f183c62369bd24e8, []int{1}
 }
-
 func (m *QueryGameListRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_QueryGameListRsp.Unmarshal(m, b)
 }
 func (m *QueryGameListRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_QueryGameListRsp.Marshal(b, m, deterministic)
 }
-func (m *QueryGameListRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryGameListRsp.Merge(m, src)
+func (dst *QueryGameListRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryGameListRsp.Merge(dst, src)
 }
 func (m *QueryGameListRsp) XXX_Size() int {
 	return xxx_messageInfo_QueryGameListRsp.Size(m)
@@ -120,17 +116,16 @@ func (m *QuerySessionInfoReq) Reset()         { *m = QuerySessionInfoReq{} }
 func (m *QuerySessionInfoReq) String() string { return proto.CompactTextString(m) }
 func (*QuerySessionInfoReq) ProtoMessage()    {}
 func (*QuerySessionInfoReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_c536f7332080545b, []int{2}
+	return fileDescriptor_query_f183c62369bd24e8, []int{2}
 }
-
 func (m *QuerySessionInfoReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_QuerySessionInfoReq.Unmarshal(m, b)
 }
 func (m *QuerySessionInfoReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_QuerySessionInfoReq.Marshal(b, m, deterministic)
 }
-func (m *QuerySessionInfoReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QuerySessionInfoReq.Merge(m, src)
+func (dst *QuerySessionInfoReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QuerySessionInfoReq.Merge(dst, src)
 }
 func (m *QuerySessionInfoReq) XXX_Size() int {
 	return xxx_messageInfo_QuerySessionInfoReq.Size(m)
@@ -160,17 +155,16 @@ func (m *QuerySessionInfoRsp) Reset()         { *m = QuerySessionInfoRsp{} }
 func (m *QuerySessionInfoRsp) String() string { return proto.CompactTextString(m) }
 func (*QuerySessionInfoRsp) ProtoMessage()    {}
 func (*QuerySessionInfoRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_c536f7332080545b, []int{3}
+	return fileDescriptor_query_f183c62369bd24e8, []int{3}
 }
-
 func (m *QuerySessionInfoRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_QuerySessionInfoRsp.Unmarshal(m, b)
 }
 func (m *QuerySessionInfoRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_QuerySessionInfoRsp.Marshal(b, m, deterministic)
 }
-func (m *QuerySessionInfoRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QuerySessionInfoRsp.Merge(m, src)
+func (dst *QuerySessionInfoRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QuerySessionInfoRsp.Merge(dst, src)
 }
 func (m *QuerySessionInfoRsp) XXX_Size() int {
 	return xxx_messageInfo_QuerySessionInfoRsp.Size(m)
@@ -207,17 +201,16 @@ func (m *QueryUserInfoReq) Reset()         { *m = QueryUserInfoReq{} }
 func (m *QueryUserInfoReq) String() string { return proto.CompactTextString(m) }
 func (*QueryUserInfoReq) ProtoMessage()    {}
 func (*QueryUserInfoReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_c536f7332080545b, []int{4}
+	return fileDescriptor_query_f183c62369bd24e8, []int{4}
 }
-
 func (m *QueryUserInfoReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_QueryUserInfoReq.Unmarshal(m, b)
 }
 func (m *QueryUserInfoReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_QueryUserInfoReq.Marshal(b, m, deterministic)
 }
-func (m *QueryUserInfoReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryUserInfoReq.Merge(m, src)
+func (dst *QueryUserInfoReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryUserInfoReq.Merge(dst, src)
 }
 func (m *QueryUserInfoReq) XXX_Size() int {
 	return xxx_messageInfo_QueryUserInfoReq.Size(m)
@@ -247,17 +240,16 @@ func (m *QueryUserInfoRsp) Reset()         { *m = QueryUserInfoRsp{} }
 func (m *QueryUserInfoRsp) String() string { return proto.CompactTextString(m) }
 func (*QueryUserInfoRsp) ProtoMessage()    {}
 func (*QueryUserInfoRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_c536f7332080545b, []int{5}
+	return fileDescriptor_query_f183c62369bd24e8, []int{5}
 }
-
 func (m *QueryUserInfoRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_QueryUserInfoRsp.Unmarshal(m, b)
 }
 func (m *QueryUserInfoRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_QueryUserInfoRsp.Marshal(b, m, deterministic)
 }
-func (m *QueryUserInfoRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryUserInfoRsp.Merge(m, src)
+func (dst *QueryUserInfoRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryUserInfoRsp.Merge(dst, src)
 }
 func (m *QueryUserInfoRsp) XXX_Size() int {
 	return xxx_messageInfo_QueryUserInfoRsp.Size(m)
@@ -294,17 +286,16 @@ func (m *QueryUserOwnDeskReq) Reset()         { *m = QueryUserOwnDeskReq{} }
 func (m *QueryUserOwnDeskReq) String() string { return proto.CompactTextString(m) }
 func (*QueryUserOwnDeskReq) ProtoMessage()    {}
 func (*QueryUserOwnDeskReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_c536f7332080545b, []int{6}
+	return fileDescriptor_query_f183c62369bd24e8, []int{6}
 }
-
 func (m *QueryUserOwnDeskReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_QueryUserOwnDeskReq.Unmarshal(m, b)
 }
 func (m *QueryUserOwnDeskReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_QueryUserOwnDeskReq.Marshal(b, m, deterministic)
 }
-func (m *QueryUserOwnDeskReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryUserOwnDeskReq.Merge(m, src)
+func (dst *QueryUserOwnDeskReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryUserOwnDeskReq.Merge(dst, src)
 }
 func (m *QueryUserOwnDeskReq) XXX_Size() int {
 	return xxx_messageInfo_QueryUserOwnDeskReq.Size(m)
@@ -334,17 +325,16 @@ func (m *QueryUserOwnDeskRsp) Reset()         { *m = QueryUserOwnDeskRsp{} }
 func (m *QueryUserOwnDeskRsp) String() string { return proto.CompactTextString(m) }
 func (*QueryUserOwnDeskRsp) ProtoMessage()    {}
 func (*QueryUserOwnDeskRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_c536f7332080545b, []int{7}
+	return fileDescriptor_query_f183c62369bd24e8, []int{7}
 }
-
 func (m *QueryUserOwnDeskRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_QueryUserOwnDeskRsp.Unmarshal(m, b)
 }
 func (m *QueryUserOwnDeskRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_QueryUserOwnDeskRsp.Marshal(b, m, deterministic)
 }
-func (m *QueryUserOwnDeskRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryUserOwnDeskRsp.Merge(m, src)
+func (dst *QueryUserOwnDeskRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryUserOwnDeskRsp.Merge(dst, src)
 }
 func (m *QueryUserOwnDeskRsp) XXX_Size() int {
 	return xxx_messageInfo_QueryUserOwnDeskRsp.Size(m)
@@ -385,17 +375,16 @@ func (m *UserWealthChange) Reset()         { *m = UserWealthChange{} }
 func (m *UserWealthChange) String() string { return proto.CompactTextString(m) }
 func (*UserWealthChange) ProtoMessage()    {}
 func (*UserWealthChange) Descriptor() ([]byte, []int) {
-	return fileDescriptor_c536f7332080545b, []int{8}
+	return fileDescriptor_query_f183c62369bd24e8, []int{8}
 }
-
 func (m *UserWealthChange) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UserWealthChange.Unmarshal(m, b)
 }
 func (m *UserWealthChange) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_UserWealthChange.Marshal(b, m, deterministic)
 }
-func (m *UserWealthChange) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_UserWealthChange.Merge(m, src)
+func (dst *UserWealthChange) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UserWealthChange.Merge(dst, src)
 }
 func (m *UserWealthChange) XXX_Size() int {
 	return xxx_messageInfo_UserWealthChange.Size(m)
@@ -453,9 +442,9 @@ func init() {
 	proto.RegisterType((*UserWealthChange)(nil), "pbhall.UserWealthChange")
 }
 
-func init() { proto.RegisterFile("hall/query.proto", fileDescriptor_c536f7332080545b) }
+func init() { proto.RegisterFile("hall/query.proto", fileDescriptor_query_f183c62369bd24e8) }
 
-var fileDescriptor_c536f7332080545b = []byte{
+var fileDescriptor_query_f183c62369bd24e8 = []byte{
 	// 349 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x93, 0xdf, 0x4b, 0x02, 0x41,
 	0x10, 0xc7, 0x39, 0x3d, 0x0d, 0x27, 0x02, 0xdb, 0x28, 0x0e, 0x11, 0x91, 0xa3, 0xe2, 0x7a, 0xf1,
