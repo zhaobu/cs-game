@@ -172,4 +172,5 @@ func (self *GameBalance) CalGangTou(leftCards []int32, bankerId int32) { // 杠�
 			chairId = mj.GetNextChair(chairId, self.game_config.PlayerCount)
 		}
 	}
+	log.Debugf("扳杠头结果:self.allCards=%v,self.hitIndex=%v", self.allCards, self.hitIndex)
 }
