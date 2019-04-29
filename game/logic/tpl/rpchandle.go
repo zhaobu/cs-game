@@ -129,7 +129,7 @@ func (self *RpcHandle) DestroyDeskReq(ctx context.Context, args *codec.Message, 
 		return
 	}
 
-	rsp := &pbgame.DestroyDeskRsp{}
+	rsp := &pbgame.DestroyDeskRsp{Type: req.Type}
 	if req.Head != nil {
 		rsp.Head = &pbcommon.RspHead{Seq: req.Head.Seq}
 	}

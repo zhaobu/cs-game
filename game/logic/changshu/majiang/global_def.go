@@ -99,13 +99,13 @@ const (
 //统计次数
 const (
 	ScoreTimes_None EmScoreTimes = iota
-	ScoreTimes_HuPai
-	ScoreTimes_JiePao
-	ScoreTimes_DianPao
-	ScoreTimes_AnGang
-	ScoreTimes_MingGang
-	ScoreTimes_BuGang
-	ScoreTimes_Win
-	ScoreTimes_Lose
-	ScoreTimes_ZiMo
+	ScoreTimes_Win               //赢的次数
+	// ScoreTimes_HuPai
+	// ScoreTimes_JiePao
+	// ScoreTimes_DianPao
+	// ScoreTimes_AnGang
+	// ScoreTimes_MingGang
+	// ScoreTimes_BuGang
+	// ScoreTimes_Lose
+	// ScoreTimes_ZiMo
 )

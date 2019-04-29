@@ -137,16 +137,14 @@ func (self *CardDef) DealCard(rawcards []int32, playercount, bankerID int32) (ha
 	player_cards := make([][]int32, playercount)
 	var leftNum = len(rawcards)                                                                 //剩下的牌数量
 	for i, j := bankerID, int32(0); j < playercount; i, j = GetNextChair(i, playercount), j+1 { //保证配牌时,前14张发给庄家
+		player_cards[i] = make([]int32, 0, 14)
+		for index := 0; index < 13; index++ {
+			player_cards[i] = append(player_cards[i], rawcards[leftNum-1])
+			leftNum--
+		}
 		//庄家多摸一张牌
 		if i == bankerID {
-			player_cards[i] = make([]int32, 14)
-			player_cards[i][13] = rawcards[leftNum-1]
-			leftNum--
-		} else {
-			player_cards[i] = make([]int32, 13)
-		}
-		for index := 0; index < 13; index++ {
-			player_cards[i][index] = rawcards[leftNum-1]
+			player_cards[i] = append(player_cards[i], rawcards[leftNum-1])
 			leftNum--
 		}
 	}

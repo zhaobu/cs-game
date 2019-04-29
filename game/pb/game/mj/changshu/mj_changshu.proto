@@ -168,27 +168,13 @@ enum ChiTypeMask {
   ChiMaskRight = 4;   //右吃(11,12,13,其中13为被吃的牌)
 }
 
-//胡
-// message CanHuMsg {
-// }
-
-//吃
-message CanChiMsg {
-  uint32 chi_type = 1;  //能吃的类型
-}
-
-//杠
-message CanGangMsg {
-  repeated int32 cards = 1;  //能杠的牌
-}
-
 //玩家该轮的操作
 message S2CHaveOperation {
-  uint32 oper_mask = 1;     //操作的掩码
-  int32 chair_id = 2;       //能操作的玩家
-  int32 card = 3;           //操作的牌
-  CanChiMsg can_chi = 4;    //吃信息
-  CanGangMsg can_gang = 5;  //杠信息
+  uint32 oper_mask = 1;           //操作的掩码
+  int32 chair_id = 2;             //能操作的玩家
+  int32 card = 3;                 //吃碰的牌
+  uint32 can_chi = 4;             //能吃的类型
+  repeated cyint32 can_gang = 5;  //所有能杠的牌
 }
 
 message Json_UserCardInfo {

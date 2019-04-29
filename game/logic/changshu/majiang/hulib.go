@@ -61,15 +61,15 @@ func (self *HuLib) qingYiSe(allColor map[int32]bool) bool {
 	if len(allColor) != 1 {
 		return false
 	}
-	for color, _ := range allColor {
-		return color < 4
-	}
-	return false
+	return allColor[1] || allColor[2] || allColor[3]
 }
 
 //混一色
 func (self *HuLib) hunYiSe(allColor map[int32]bool) bool {
-	return len(allColor) == 2
+	if len(allColor) != 2 {
+		return false
+	}
+	return allColor[4]
 }
 
 //字一色
@@ -77,10 +77,7 @@ func (self *HuLib) ziYiSe(allColor map[int32]bool) bool {
 	if len(allColor) != 1 {
 		return false
 	}
-	for color, _ := range allColor {
-		return color == 4
-	}
-	return false
+	return allColor[4]
 }
 
 //门清

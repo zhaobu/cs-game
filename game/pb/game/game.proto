@@ -171,14 +171,15 @@ enum DestroyDeskRspCode {
 message DestroyDeskRsp {
   pbcommon.RspHead Head = 1;
   DestroyDeskRspCode Code = 2;
-  string ErrMsg = 3;
+  DestroyDeskType Type = 3;
+  string ErrMsg = 4;
 }
 
 //房间解散结果通知
 message DestroyDeskResultNotif {
-  uint64 DeskID = 1;  //桌子号
-  int32 Result = 2;   // 1:解散成功 2:解散失败
-  string Reason = 3;  //解散原因
+  uint64 DeskID = 1;         //桌子号
+  int32 Result = 2;          // 1:解散成功 2:解散失败
+  DestroyDeskType Type = 3;  //申请解散类型
 }
 
 //投票解散开始
@@ -248,5 +249,7 @@ message GameCommandReq {
 //发送游戏指令 s -> c
 message GameCommandRsp {
   pbcommon.RspHead Head = 1;
-  string errMsg = 2;  //指令错误原因
+  int32 CmdType = 2;  //执行的命令码
+  int32 Code = 3;     // 0表示执行成功,1表示失败
+  string ErrMsg = 4;  //指令错误原因
 }

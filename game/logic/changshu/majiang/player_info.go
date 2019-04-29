@@ -1,9 +1,9 @@
 package majiang
 
 type PlayerInfo struct {
-	CardInfo      PlayerCardInfo
-	BalanceInfo   PlayserBalanceInfo //局结算
-	BaseInfo      PlayerBaseInfo
+	CardInfo      PlayerCardInfo      //玩家牌局信息
+	BalanceInfo   PlayserBalanceInfo  //局结算
+	BaseInfo      PlayerBaseInfo      //玩家个人信息
 	BalanceResult PlayerBalanceResult //总结算
 }
 
@@ -13,12 +13,11 @@ func MakePlayers() *PlayerInfo {
 	return p
 }
 func (self *PlayerInfo) init() {
-	self.CardInfo.reset()
-	self.BalanceInfo.reset()
 	self.BalanceResult.init()
+	self.Reset()
 }
 
-func (self *PlayerInfo) reset() {
+func (self *PlayerInfo) Reset() {
 	self.CardInfo.reset()
 	self.BalanceInfo.reset()
 }
@@ -50,11 +49,13 @@ func (self *PlayerCardInfo) reset() {
 	self.ChiCards = [][3]int32{}
 	self.RiverCards = []*OperRecord{}
 	self.HuaCards = []int32{}
+	self.GuoPeng = false
 	self.CanNotOut = map[int32]int32{}
 }
 
 //单局结算信息
 type PlayserBalanceInfo struct {
+	Point        int32           //得分
 	HuCard       int32           //胡的牌
 	Baozi        int32           //豹子倍数
 	HuPoint      int32           //胡牌分
@@ -68,6 +69,7 @@ type PlayserBalanceInfo struct {
 }
 
 func (self *PlayserBalanceInfo) reset() {
+	self.Point = 0
 	self.HuCard = 0
 	self.Baozi = 0
 	self.HuPoint = 0
@@ -90,13 +92,12 @@ type PlayerBaseInfo struct {
 	ChairId  int32
 	Uid      uint64
 	Nickname string
-	Point    int32 //玩家每局得分总和
 }
 
 //总结算
 type PlayerBalanceResult struct {
 	ScoreTimes map[EmScoreTimes]int32 //统计次数
-	Point      int32                  //总得分
+	Point      int32                  //累计总得分
 }
 
 func (self *PlayerBalanceResult) init() {

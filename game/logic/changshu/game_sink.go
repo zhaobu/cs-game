@@ -38,22 +38,21 @@ type gameAllInfo struct {
 	wantCards      [][]int32                         //玩家指定要的牌
 }
 
-type mjLib struct {
-	gameBalance GameBalance      //游戏结束信息
-	operAction  OperAtion        //操作
-	record      mj.GameRecord    //游戏回放
-	players     []*mj.PlayerInfo //玩家游戏信息
+type gamePrivateInfo struct {
+	gameBalance GameBalance             //游戏结束信息
+	operAction  OperAtion               //操作
+	record      mj.GameRecord           //游戏回放
+	players     []*mj.PlayerInfo        //玩家游戏信息
+	game_config *pbgame_logic.CreateArg //游戏参数
+	baseCard    []int32                 //基础牌库
 }
 
 //游戏主逻辑
 type GameSink struct {
-	mjLib
-	desk        *Desk                   //桌子
-	gameAllInfo                         //游戏公共信息
-	game_config *pbgame_logic.CreateArg //游戏参数
-	baseCard    []int32                 //基础牌库
-	isPlaying   bool                    //是否在游戏中
-	// onlinePlayer []bool                  //在线玩家
+	desk            *Desk //桌子
+	isPlaying       bool  //是否在游戏中
+	gameAllInfo           //游戏公共信息(每局所有数据都初始化)
+	gamePrivateInfo       //游戏私有信息(每局部分数据初始化)
 }
 
 ////////////////////////调用desk接口函数START/////////////////////////////
@@ -82,7 +81,6 @@ func (self *GameSink) Ctor(config *pbgame_logic.CreateArg) error {
 	self.game_config = config
 	cardDef.Init(log)
 	self.isPlaying = false
-	// self.onlinePlayer = make([]bool, config.PlayerCount)
 	self.players = make([]*mj.PlayerInfo, config.PlayerCount)
 	self.baseCard = cardDef.GetBaseCard(config.PlayerCount)
 	self.operAction.Init(config, self.laiziCard)
@@ -92,7 +90,7 @@ func (self *GameSink) Ctor(config *pbgame_logic.CreateArg) error {
 
 //重置游戏
 func (self *GameSink) reset() {
-	//all_info
+	//AllInfo
 	self.gameAllInfo = gameAllInfo{}
 	self.operOrder = make(map[PriorityOrder][]*OperPriority, self.game_config.PlayerCount)
 	self.canOperInfo = make(map[int32]*CanOperInfo, self.game_config.PlayerCount)
@@ -105,7 +103,12 @@ func (self *GameSink) reset() {
 	self.curThrowDice = -1
 	self.curOutChair = -1
 	self.lastOutChair = -1
+
+	//PrivateInfo
 	self.gameBalance.Reset()
+	for _, v := range self.players {
+		v.Reset()
+	}
 }
 
 //开始游戏
@@ -124,8 +127,7 @@ func (self *GameSink) AddPlayer(chairId int32, uid uint64, nickName string) bool
 		return false
 	}
 	self.players[chairId] = mj.MakePlayers()
-	self.players[chairId].BaseInfo = mj.PlayerBaseInfo{ChairId: chairId, Uid: uid, Nickname: nickName, Point: 0}
-	// self.onlinePlayer[chairId] = true
+	self.players[chairId].BaseInfo = mj.PlayerBaseInfo{ChairId: chairId, Uid: uid, Nickname: nickName}
 	return true
 }
 
@@ -136,8 +138,6 @@ func (self *GameSink) Exitlayer(chairId int32) bool {
 		return false
 	}
 	self.players[chairId] = nil
-	//self.players = append(self.players[:chairId], self.players[chairId+1:]...)
-	// self.onlinePlayer[chairId] = false
 	return true
 }
 
@@ -599,7 +599,7 @@ func (self *GameSink) countCanOper(ret *CanOperInfo, chairId int32, huMode mj.Em
 	if !ret.CanChi.Empty() {
 		self.canOperInfo[chairId].CanChi = CanChiOper{Card: card, ChairId: chairId, ChiType: ret.CanChi.ChiType}
 		msg.OperMask = uint32(pbgame_logic.CanOperMask_OperMaskChi) | msg.OperMask
-		msg.CanChi = &pbgame_logic.CanChiMsg{ChiType: ret.CanChi.ChiType}
+		msg.CanChi = ret.CanChi.ChiType
 		self.addOperOrder(ChiOrder, &OperPriority{ChairId: chairId, Op: ChiOrder, Info: &self.canOperInfo[chairId].CanChi})
 	}
 	//记录能碰
@@ -612,9 +612,8 @@ func (self *GameSink) countCanOper(ret *CanOperInfo, chairId int32, huMode mj.Em
 	if !ret.CanGang.Empty() {
 		self.canOperInfo[chairId].CanGang = CanGangOper{ChairId: chairId, GangList: ret.CanGang.GangList}
 		msg.OperMask = uint32(pbgame_logic.CanOperMask_OperMaskGang) | msg.OperMask
-		msg.CanGang = &pbgame_logic.CanGangMsg{}
 		for _, gangCard := range ret.CanGang.GangList {
-			msg.CanGang.Cards = append(msg.CanGang.Cards, gangCard)
+			msg.CanGang = append(msg.CanGang, &pbgame_logic.Cyint32{T: gangCard})
 		}
 		self.addOperOrder(GangOrder, &OperPriority{ChairId: chairId, Op: GangOrder, Info: &self.canOperInfo[chairId].CanGang})
 	}
@@ -837,7 +836,7 @@ func (self *GameSink) gangCard(chairId, card int32) error {
 		return nil
 	}
 	//校验操作参数合法性
-	if card != self.canOperInfo[chairId].CanGang.GangList[card] {
+	if _, ok := self.canOperInfo[chairId].CanGang.GangList[card]; !ok {
 		log.Errorf("%s 杠牌失败,牌不对,card=%d,CanGang=%+v", self.logHeadUser(chairId), card, self.canOperInfo[chairId].CanGang)
 		return nil
 	}
@@ -981,20 +980,15 @@ func (self *GameSink) huCard(chairId int32) error {
 	self.gameBalance.huChairs[chairId] = &HuScoreInfo{HuTypeList: huInfo.HuList}
 
 	//统计总结算次数
-	if huInfo.HuMode == mj.HuMode_ZIMO {
-		self.gameBalance.AddScoreTimes(&self.players[chairId].BalanceResult, mj.ScoreTimes_ZiMo)
-	} else {
-		self.gameBalance.AddScoreTimes(&self.players[chairId].BalanceResult, mj.ScoreTimes_JiePao)
-		self.gameBalance.AddScoreTimes(&self.players[huInfo.LoseChair].BalanceResult, mj.ScoreTimes_JiePao)
-	}
+	self.gameBalance.AddScoreTimes(&self.players[chairId].BalanceResult, mj.ScoreTimes_Win)
 
 	self.sendData(-1, &pbgame_logic.BS2CHuCard{ChairId: chairId, HuCard: huInfo.Card})
 	//变量维护
 	self.haswaitOper[chairId] = false
-	self.deletePlayerOperOrder(chairId)
 
 	if len(self.operOrder[HuOrder]) == 0 {
 		self.gameBalance.lastHuChair = chairId
+		self.gameBalance.CalGangTou(self.leftCard, self.bankerId)
 		self.gameEnd()
 	}
 	return nil
@@ -1148,7 +1142,7 @@ func (self *GameSink) doWantCards(chairId int32, cards []int32) (errMsg string) 
 		}
 		//检验每张牌,牌库是否有剩余的
 		if leftCardsStack[v] < cardsStack[v] {
-			errMsg = fmt.Sprintf("指定的牌%v牌库剩余数量为%d,不够,要牌失败", v, leftCardsStack[v])
+			errMsg = fmt.Sprintf("指定的牌%v剩余数量为%d,指定数量为%d,要牌失败", v, leftCardsStack[v], cardsStack[v])
 			return
 		}
 	}

@@ -332,12 +332,12 @@ func (d *Desk) doDestroyDesk(uid uint64, req *pbgame.DestroyDeskReq, rsp *pbgame
 			rsp.ErrMsg = fmt.Sprintf("游戏开始前只有房主才能解散桌子")
 			return
 		}
-		d.dealDestroyDesk()
+		d.dealDestroyDesk(req.Type)
 	} else if req.Type == pbgame.DestroyDeskType_DestroyTypeClub { //俱乐部群主申请解散房间
 		//TODO查询俱乐部接口
-		d.dealDestroyDesk()
+		d.dealDestroyDesk(req.Type)
 	} else if req.Type == pbgame.DestroyDeskType_DestroyTypeDebug { //强制解散
-		d.dealDestroyDesk()
+		d.dealDestroyDesk(req.Type)
 	}
 	rsp.Code = pbgame.DestroyDeskRspCode_DestroyDeskSucc
 }
@@ -353,17 +353,17 @@ func (d *Desk) doVoteDestroyDesk(uid uint64, req *pbgame.VoteDestroyDeskReq) {
 	//广播选择
 	d.SendData(0, &pbgame.VoteDestroyDeskNotif{DeskID: d.deskId, VoteUser: d.voteInfo.voteUser, LeftTime: int32(leftTime.Seconds()), VoteResult: d.getVoteResult()})
 	if req.Option == pbgame.VoteOption_VoteOptionReject { //拒绝解散
-		d.SendData(0, &pbgame.DestroyDeskResultNotif{DeskID: d.deskId, Result: 2})
+		d.SendData(0, &pbgame.DestroyDeskResultNotif{DeskID: d.deskId, Result: 2, Type: pbgame.DestroyDeskType_DestroyTypeGame})
 		d.voteInfo = nil
 	} else if len(d.voteOption) == int(d.deskConfig.Args.PlayerCount) { //所有人都同意解散
-		d.dealDestroyDesk()
+		d.dealDestroyDesk(pbgame.DestroyDeskType_DestroyTypeGame)
 	}
 }
 
 //处理桌子销毁
-func (d *Desk) dealDestroyDesk() {
+func (d *Desk) dealDestroyDesk(reqType pbgame.DestroyDeskType) {
 	//处理房间所有人的状态
-	msg := &pbgame.DestroyDeskResultNotif{DeskID: d.deskId, Result: 1}
+	msg := &pbgame.DestroyDeskResultNotif{DeskID: d.deskId, Result: 1, Type: reqType}
 	for uid, _ := range d.deskPlayers {
 		delete(d.deskPlayers, uid)
 		deleteUser2desk(uid)
