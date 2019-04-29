@@ -14,7 +14,9 @@ type (
 	StartDiceType uint8 //开局色子情况
 )
 
-//定时器ID
+var hitCards []map[int32]bool //扳杠头
+
+//开局色子类型
 const (
 	StartDice_None StartDiceType = iota //不加倍
 	StartDice_One                       //本局加倍
@@ -35,12 +37,62 @@ type GameBalance struct {
 	huCard       int32                   //胡的牌
 	huMode       mj.EmHuMode             //胡牌方式
 	huChairs     map[int32]*HuScoreInfo  //胡牌玩家信息
-	gangTou      map[int32]int32         //玩家杠头数
 	pghuaShu     []int32                 //碰花,杠花
+	duLongHua    int32                   //独龙杠花
+	allCards     [][]int32               //扳的所有牌
+	hitIndex     [][]int32               //扳到的杠头的索引
 }
 
 func (self *GameBalance) Init(config *pbgame_logic.CreateArg) {
 	self.game_config = config
+	hitCards = []map[int32]bool{
+		0: map[int32]bool{ //庄家
+			11: true,
+			21: true,
+			31: true,
+			15: true,
+			25: true,
+			35: true,
+			19: true,
+			29: true,
+			39: true,
+			45: true,
+			41: true,
+			51: true,
+		},
+		1: map[int32]bool{ //下家
+			14: true,
+			24: true,
+			34: true,
+			18: true,
+			28: true,
+			38: true,
+			44: true,
+			54: true,
+		},
+		2: map[int32]bool{ //对家
+			13: true,
+			23: true,
+			33: true,
+			17: true,
+			27: true,
+			37: true,
+			47: true,
+			43: true,
+			53: true,
+		},
+		3: map[int32]bool{ //上家
+			12: true,
+			22: true,
+			32: true,
+			16: true,
+			26: true,
+			36: true,
+			46: true,
+			42: true,
+			52: true,
+		},
+	}
 }
 
 func (self *GameBalance) Reset() {
@@ -59,8 +111,10 @@ func (self *GameBalance) Reset() {
 	self.huCard = 0
 	self.huMode = mj.HuMode_None
 	self.huChairs = make(map[int32]*HuScoreInfo, self.game_config.PlayerCount)
-	self.gangTou = make(map[int32]int32, self.game_config.PlayerCount)
 	self.pghuaShu = make([]int32, self.game_config.PlayerCount)
+	self.duLongHua = 0
+	self.allCards = make([][]int32, self.game_config.PlayerCount) //扳的所有牌
+	self.hitIndex = make([][]int32, self.game_config.PlayerCount) //扳到的牌的索引
 }
 
 //统计次数
@@ -85,20 +139,37 @@ func (self *GameBalance) DealStartDice(randRes [2]int32) {
 
 //计算杠头数
 func (self *GameBalance) CalGangTou(leftCards []int32, bankerId int32) { // 杠头  1 扳4个 2 扳8个 3 独龙杠
-	// var huaShu int32 = 5
-	// if self.game_config.Barhead == 3 {
-	// 	if mj.GetCardColor(leftCards[len(leftCards)-1]) < 4 {
-	// 		huaShu = mj.GetCardValue(int32(leftCards[len(leftCards)-1]))
-	// 	}
-	// } else {
-	// 	var num int32 = 4
-	// 	if self.game_config.Barhead == 2 {
-	// 		num = 8
-	// 	}
+	if self.game_config.Barhead == 3 {
+		self.duLongHua = 5
+		if mj.GetCardColor(leftCards[len(leftCards)-1]) < 4 {
+			self.duLongHua = mj.GetCardValue(int32(leftCards[len(leftCards)-1]))
+		}
+	} else {
+		num := 4
+		if self.game_config.Barhead == 2 {
+			num = 8
+		}
 
-	// 	index := bankerId //从庄家开始算起数杠头
-	// 	for _, v := range leftCards {
-
-	// 	}
-	// }
+		getCanHit := func(chairId int32) map[int32]bool { //获取能中的牌
+			for i, j := bankerId, int32(0); j < self.game_config.PlayerCount; i, j = mj.GetNextChair(i, self.game_config.PlayerCount), j+1 {
+				if chairId == i {
+					return hitCards[j]
+				}
+			}
+			return nil
+		}
+		count := 0          //计数
+		chairId := bankerId //从庄家开始算起数杠头
+		for _, v := range leftCards {
+			self.allCards[chairId] = append(self.allCards[chairId], v)
+			if getCanHit(chairId)[v] {
+				self.hitIndex[chairId] = append(self.hitIndex[chairId], int32(len(self.allCards[chairId])-1))
+				count++
+				if count >= num {
+					break
+				}
+			}
+			chairId = mj.GetNextChair(chairId, self.game_config.PlayerCount)
+		}
+	}
 }
