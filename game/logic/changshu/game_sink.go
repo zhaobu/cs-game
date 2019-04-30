@@ -481,6 +481,7 @@ func (self *GameSink) drawCard(chairId, last int32) error {
 
 	self.curOutChair = chairId
 	cardInfo.GuoPeng = false
+	cardInfo.CanNotOut = map[int32]int32{}
 
 	//当抓到花或杠牌后，补上一张牌,能花,杠上开花
 	huModeTags := []mj.EmHuModeTag{}
@@ -562,6 +563,11 @@ func (self *GameSink) outCard(chairId, card int32) error {
 	//判断是否有这张牌
 	if _, ok := cardInfo.StackCards[card]; !ok {
 		log.Errorf("%s 出牌失败,手上没有这张牌", self.logHeadUser(chairId))
+		return nil
+	}
+	//检查是否是吃碰后不能打的牌
+	if cardInfo.CanNotOut[card] == card {
+		log.Errorf("%s 出牌失败,是吃碰后不能打的牌", self.logHeadUser(chairId))
 		return nil
 	}
 	//更新玩家card_info表
