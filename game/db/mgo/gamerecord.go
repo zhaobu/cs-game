@@ -52,7 +52,7 @@ type RoomRecord struct {
 	GameId		string				//游戏Id
 	RoomType	int32				//房间类型 1俱乐部房间 2好友房
 	ClubId		int64				//俱乐部Id 当 AreaType 1 时需要填写
-	PayType int32                   //支付方式 1AA支付 2房主支付
+	PayType 	int32               //支付方式 1AA支付 2房主支付
 	GamePlayers map[uint64]*RoomPlayerInfo	//游戏参与玩家信息 为了减少查询量 将必要信息进行存储
 	GameRecords []string			//房间内游戏数据 数组
 }
@@ -131,6 +131,8 @@ func AddGameRecord(gr *WirteRecord)(err error)  {
 	if _err != nil {
 		rrd = &RoomRecord{
 			RoomRecordId:gr.RoomRecordId,
+			GameStartTime:gr.GameStartTime,
+			TotalJuNun:gr.TotalJuNun,
 			RoomId:gr.RoomId,
 			GameId:gr.GameId,
 			RoomType:gr.RoomType,
@@ -227,6 +229,16 @@ func QueryClubRoomRecord(clubid uint64,start int64,end int64)(rsp []*RoomRecord,
 	return rsp,nil
 }
 
+//查询俱乐部的战绩数据
+func QueryClubRoomRecordByRoom(clubid uint64,roomid uint32)(rsp []*RoomRecord,err error)  {
+	rsp = make([]*RoomRecord, 0)
+	err = mgoSess.DB("").C(RoomRecordTable).Find(bson.M{"clubid": clubid,"roomid": roomid}).All(&rsp)
+	if err != nil{
+		return nil,err
+	}
+	return rsp,nil
+}
+
 //查询游戏具体详情数据
 func QueryGameRecord(gamerecordId []string) (rsp []*GameRecord,err error) {
 	rsp = []*GameRecord{}
@@ -242,7 +254,7 @@ func QueryGameRecord(gamerecordId []string) (rsp []*GameRecord,err error) {
 //查询游戏复盘数据
 func QueryGameRePlayRecord(gamerecordId string) (rsp *GameRePlayData,err error) {
 	ce := &GameRePlayData{}
-	if err := mgoSess.DB("").C(GameRePlayDataTable).Find(bson.M{"gamerecordid": gamerecordId}).One(ce); err == nil {
+	if err := mgoSess.DB("").C(GameRePlayDataTable).Find(bson.M{"gamerecordid": gamerecordId}).One(&ce); err == nil {
 		return ce,nil
 	}else{
 		return  nil,err
@@ -251,18 +263,18 @@ func QueryGameRePlayRecord(gamerecordId string) (rsp *GameRePlayData,err error) 
 
 //查询俱乐部对局统计数据
 func QueryClubPlayStatistics(clubid uint64,start int64,end int64) (rsp []*ClubStatisticsData,err error) {
-	ce := []*ClubStatisticsData{}
-	if err := mgoSess.DB("").C(ClubStatisticsPlayTable).Find(bson.M{"clubid": clubid,"statisticstime": bson.M{"$gte": start, "$lt": end}}).All(ce); err == nil {
+	ce := make([]*ClubStatisticsData,0)
+	if err := mgoSess.DB("").C(ClubStatisticsPlayTable).Find(bson.M{"clubid": clubid,"statisticstime": bson.M{"$gte": start, "$lt": end}}).All(&ce); err == nil {
 		return ce,nil
 	}else{
-		return  nil,err
+		return ce,err
 	}
 }
 
 //查询俱乐部积分统计数据
 func QueryClubIntegralStatistics(clubid uint64,start int64,end int64) (rsp []*ClubStatisticsData,err error) {
-	ce := []*ClubStatisticsData{}
-	if err := mgoSess.DB("").C(ClubStatisticsIntegralTable).Find(bson.M{"clubid": clubid,"statisticstime": bson.M{"$gte": start, "$lt": end}}).All(ce); err == nil {
+	ce := make([]*ClubStatisticsData,0)
+	if err := mgoSess.DB("").C(ClubStatisticsIntegralTable).Find(bson.M{"clubid": clubid,"statisticstime": bson.M{"$gte": start, "$lt": end}}).All(&ce); err == nil {
 		return ce,nil
 	}else{
 		return  nil,err

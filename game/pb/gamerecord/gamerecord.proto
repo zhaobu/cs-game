@@ -29,10 +29,11 @@ message WriteGameRecordReq {
 //查询房间游戏记录数据请求
 message QueryRoomRecordReq{
     uint64 UserId = 1;			    //用户Id 查询者
-    int32 QueryType = 2;            //查询类型 1 个人查询 2查询他人 3俱乐部查询
-    uint64 QueryParam = 3;          //查询参数 自己的用户id 他人的用户id 俱乐部的id
-    int64 QueryStartTime = 4;       //查询时间范围
-    int64 QueryEndTime = 5;           //查询时间范围
+    int32 QueryType = 2;            //查询类型 1 个人查询 2查询他人 3俱乐部查询 4房间号查询
+    uint64 QueryParam = 3;          //查询参数                              自己的用户id 他人的用户id 俱乐部的id 俱乐部的id
+    uint32 QueryParam2 = 4;         //扩展查询参数 为房间查询扩展的                                              房间id
+    int64 QueryStartTime = 5;       //查询时间范围
+    int64 QueryEndTime = 6;         //查询时间范围
 }
 message RoomPlayerInfo{
     uint64 UserId 	= 1;		    //用户Id
@@ -47,7 +48,7 @@ message RoomRecord {
     uint32 RoomId	= 3; 			//房间号
     string GameId	= 4;			//游戏Id
     int32 RoomType	= 5;			//房间类型 1俱乐部房间 2好友房
-    int32 TotalJuNun = 6; 				        //总局数
+    int32 TotalJuNun = 6; 			//总局数
     int32 PayType = 7;              //支付方式 1AA支付 2房主支付
     int64 ClubId	= 8;			//俱乐部Id 当 AreaType 1 时需要填写
     repeated RoomPlayerInfo GamePlayers = 9;	//游戏参与玩家信息 为了减少查询量 将必要信息进行存储

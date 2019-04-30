@@ -108,14 +108,22 @@ func (p *center)QueryRoomRecordReq(ctx context.Context, args *codec.Message, rep
 			logrus.Warn("查询用户数据失败 err = " + err.Error())
 			rsp.Error = 1
 		}
+	}else if req.QueryType == 4 {
+		querydata,err = mgo.QueryClubRoomRecordByRoom(req.QueryParam,req.QueryParam2)
+		if err != nil {
+			logrus.Warn("查询俱乐部房间数据失败 err = " + err.Error())
+			rsp.Error = 1
+		}
 	}
 	for _,v := range querydata{
 		_data := &pbgamerecord.RoomRecord{
 			RoomRecordId:v.RoomRecordId,
+			GameStartTime:v.GameStartTime,
 			RoomId:v.RoomId,
 			GameId:v.GameId,
 			RoomType:v.RoomType,
 			ClubId:v.ClubId,
+			TotalJuNun:v.TotalJuNun,
 			GamePlayers : []*pbgamerecord.RoomPlayerInfo{},
 			GameRecordIds:v.GameRecords,
 		}
@@ -166,6 +174,8 @@ func (p *center)QueryGameRecordReq(ctx context.Context, args *codec.Message, rep
 				GameId:v.GameId,
 				RoomType:v.RoomType,
 				ClubId:v.ClubId,
+				GameStartTime:v.GameStartTime,
+				GameEndTime:v.GameEndTime,
 				GamePlayers : []*pbgamerecord.GamePlayerInfo{},
 			}
 			for _,v1 := range v.GamePlayers {
@@ -254,49 +264,51 @@ func (p *center)QueryClubStatisticsReq(ctx context.Context, args *codec.Message,
 			rsp.Error = 1
 		}
 	}
-	tmp := make(map[uint64]*mgo.StatisticsData)	//统计)
-	for _,v := range querydata{
-		for _,v1 := range v.Statistics{
-			if d,ok := tmp[v1.UserId];!ok{
-				tmp[v1.UserId] = &mgo.StatisticsData{
-					UserId:v1.UserId,
-					Name:v1.Name,
-					Statistics:v1.Statistics,
+	if querydata != nil {
+		tmp := make(map[uint64]*mgo.StatisticsData)	//统计)
+		for _,v := range querydata{
+			for _,v1 := range v.Statistics{
+				if d,ok := tmp[v1.UserId];!ok{
+					tmp[v1.UserId] = &mgo.StatisticsData{
+						UserId:v1.UserId,
+						Name:v1.Name,
+						Statistics:v1.Statistics,
+					}
+				}else{
+					d.Statistics += v1.Statistics
 				}
-			}else{
-				d.Statistics += v1.Statistics
 			}
 		}
-	}
-	csd := []interface{}{}
-	for _,v2 := range tmp{
-		csd = append(csd,v2)
-	}
+		csd := []interface{}{}
+		for _,v2 := range tmp{
+			csd = append(csd,v2)
+		}
 
-	//先做对局次数排名
-	sort.Sort(csd, func(a interface{}, b interface{}) int8 {
-		_a := a.(*mgo.StatisticsData)
-		_b := b.(*mgo.StatisticsData)
-		if _a.Statistics < _b.Statistics {
-			return 1
-		}else if _a.Statistics == _b.Statistics{
-			return 0
-		}else{
-			return -1
-		}
-	})
-	index := 0
-	for _,u := range csd{
-		if index > 10 {
-			break
-		}
-		sdata := u.(*mgo.StatisticsData)
-		rsp.StatisticsDatas = append(rsp.StatisticsDatas,&pbgamerecord.StatisticsData{
-			UserId:sdata.UserId,
-			Name:sdata.Name,
-			Statistics:sdata.Statistics,
+		//先做对局次数排名
+		sort.Sort(csd, func(a interface{}, b interface{}) int8 {
+			_a := a.(*mgo.StatisticsData)
+			_b := b.(*mgo.StatisticsData)
+			if _a.Statistics < _b.Statistics {
+				return 1
+			}else if _a.Statistics == _b.Statistics{
+				return 0
+			}else{
+				return -1
+			}
 		})
-		index++
+		index := 0
+		for _,u := range csd{
+			if index > 10 {
+				break
+			}
+			sdata := u.(*mgo.StatisticsData)
+			rsp.StatisticsDatas = append(rsp.StatisticsDatas,&pbgamerecord.StatisticsData{
+				UserId:sdata.UserId,
+				Name:sdata.Name,
+				Statistics:sdata.Statistics,
+			})
+			index++
+		}
 	}
 	err = codec.Pb2Msg(rsp, reply)
 	if err != nil {
