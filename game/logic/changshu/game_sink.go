@@ -561,7 +561,7 @@ func (self *GameSink) outCard(chairId, card int32) error {
 	self.sendData(-1, &pbgame_logic.BS2COutCard{ChairId: chairId, Card: card})
 	//游戏回放记录
 
-	self.lastOutChair, self.lastOutCard, self.curOutChair = chairId, card, 0
+	self.lastOutChair, self.lastOutCard, self.curOutChair = chairId, card, -1
 	//检查出牌后能做的操作
 	willWait := false
 	for k, v := range self.players {
@@ -1022,7 +1022,9 @@ func (self *GameSink) cancelOper(chairId int32) error {
 	self.resetOper()
 
 	//取消操作后,由上次出牌玩家下家抓牌
-	self.drawCard(GetNextChair(self.lastOutChair, self.game_config.PlayerCount), 0)
+	if self.curOutChair != chairId {
+		self.drawCard(GetNextChair(self.lastOutChair, self.game_config.PlayerCount), 0)
+	}
 	return nil
 }
 

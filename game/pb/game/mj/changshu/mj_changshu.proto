@@ -211,7 +211,7 @@ message BS2CDrawCard {
   string json_draw_info = 4;  //摸牌信息(按Json_FirstBuHua格式解析)
 }
 
-//玩家第一次补花(庄家出牌,如果有人吃碰发)
+//玩家第一次补花(玩家还未进行第一次补花,可以进行吃碰,吃碰后进行第一次补花)
 message BS2CFirstBuHua {
   int32 chair_id = 1;           //补花玩家
   int32 left_num = 2;           //剩余张数
