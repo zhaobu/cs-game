@@ -4,6 +4,8 @@ package main
 import (
 	mj "cy/game/logic/changshu/majiang"
 	pbgame_logic "cy/game/pb/game/mj/changshu"
+	"math/rand"
+	"time"
 )
 
 type HuScoreInfo struct {
@@ -233,6 +235,7 @@ func (self *GameBalance) CalGameBalance(players []*mj.PlayerInfo, bankerId int32
 	}
 }
 
+//小局结算信息
 func (self *GameBalance) GetPlayerBalanceInfo(players []*mj.PlayerInfo) (jsonInfo []*pbgame_logic.Json_PlayerBalance_Info) {
 	getClientHuType := func(chairId int32) (res []pbgame_logic.HuType) {
 		for _, v := range self.huChairs[chairId].HuTypeList {
@@ -279,4 +282,22 @@ func (self *GameBalance) GetPlayerBalanceInfo(players []*mj.PlayerInfo) (jsonInf
 		jsonInfo = append(jsonInfo, info)
 	}
 	return
+}
+
+//计算下局庄家
+func (self *GameBalance) CalNextBankerId(bankerId int32) int32 {
+	if self.huChairs[bankerId] != nil { //庄家胡牌可继续连庄
+		return bankerId
+	} else if len(self.huChairs) == 0 { //荒局后下家坐庄
+		return mj.GetNextChair(bankerId, self.game_config.PlayerCount)
+	} else { //闲家胡牌后由闲家坐庄
+		huId := []int32{}
+		for k, _ := range self.huChairs {
+			if k != bankerId {
+				huId = append(huId, k)
+			}
+		}
+		rand.Seed(int64(time.Now().UnixNano()))
+		return rand.Int31n(int32(len(huId)))
+	}
 }

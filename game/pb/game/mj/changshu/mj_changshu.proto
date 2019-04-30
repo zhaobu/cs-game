@@ -126,6 +126,10 @@ message C2SHuCard {
 message C2SCancelAction {
 }
 
+//准备下一局
+message C2SGetReady {
+}
+
 ///////////////////////////s-c///////////////////////////
 //更改状态
 message BS2CUpdateGameStatus {

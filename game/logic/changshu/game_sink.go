@@ -27,6 +27,7 @@ type gameAllInfo struct {
 	haswaitOper    []bool                            //玩家是否有等待中的操作
 	diceResult     [][2]int32                        //投色子结果
 	bankerId       int32                             //庄家id
+	nextBankerId   int32                             //下局庄家id,每局游戏结束后确定
 	leftCard       []int32                           //发完牌后剩余的牌
 	curThrowDice   int32                             //当前投色子的玩家
 	curOutChair    int32                             //当前出牌玩家
@@ -36,6 +37,7 @@ type gameAllInfo struct {
 	hasHu          bool                              //是否有人胡牌
 	hasFirstBuHua  []bool                            //是否已经进行过第一次补花
 	wantCards      [][]int32                         //玩家指定要的牌
+	readyInfo      map[int32]bool                    //玩家准备下一局状态
 }
 
 type gamePrivateInfo struct {
@@ -115,9 +117,15 @@ func (self *GameSink) reset() {
 func (self *GameSink) StartGame() {
 	self.isPlaying = true
 	self.reset()
-	//通知第一个玩家投色子
-	self.sendData(-1, &pbgame_logic.S2CThrowDice{ChairId: 0})
-	self.curThrowDice = 0
+	if self.desk.curInning == 1 {
+		//通知第一个玩家投色子
+		self.sendData(-1, &pbgame_logic.S2CThrowDice{ChairId: 0})
+		self.curThrowDice = 0
+	} else {
+		//由上局确定本局庄家
+		self.bankerId = self.nextBankerId
+		self.deal_card()
+	}
 }
 
 //玩家加入游戏
@@ -1047,7 +1055,15 @@ func (self *GameSink) gameEnd() {
 
 //小局结束后数据清理
 func (self *GameSink) afterGameEnd() {
-
+	if self.desk.curInning == self.game_config.RInfo.LoopCnt {
+		// TODO发送总结算信息
+	} else {
+		self.desk.curInning++
+	}
+	//判断下一局庄家
+	self.nextBankerId = self.gameBalance.CalNextBankerId(self.bankerId)
+	self.readyInfo = make(map[int32]bool, self.game_config.PlayerCount)
+	self.desk.gameEnd()
 }
 
 //断线重连
@@ -1134,4 +1150,16 @@ func (self *GameSink) doWantCards(chairId int32, cards []int32) (errMsg string) 
 	}
 
 	return ""
+}
+
+//准备下一局
+func (self *GameSink) getReady(chairId int32) {
+	if self.readyInfo[chairId] {
+		log.Debugf("%s 准备下一局时重复准备", self.logHeadUser(chairId))
+		return
+	}
+	self.readyInfo[chairId] = true
+	if int32(len(self.readyInfo)) >= self.game_config.PlayerCount {
+		self.StartGame()
+	}
 }

@@ -167,6 +167,7 @@ func (d *Desk) doSitDown(uid uint64, chair int32, rsp *pbgame.SitDownRsp) {
 	d.sendDeskInfo(0)
 	//再判断游戏开始
 	if d.checkStart() {
+		d.curInning = 1
 		d.changUserState(0, pbgame.UserDeskStatus_UDSPlaying)
 		d.gameSink.changGameState(pbgame_logic.GameStatus_GSDice)
 		d.gameSink.StartGame()
@@ -443,6 +444,8 @@ func (d *Desk) doAction(uid uint64, actionName string, actionValue []byte) {
 		d.gameSink.cancelOper(chairId)
 	case *pbgame_logic.C2SOutCard:
 		d.gameSink.outCard(chairId, v.Card)
+	case *pbgame_logic.C2SGetReady:
+		d.gameSink.getReady(chairId)
 	default:
 		log.Warnf("invalid type %s", actionName)
 	}
@@ -557,4 +560,9 @@ func (d *Desk) doChatMessage(uid uint64, req *pbgame.ChatMessageReq) {
 			d.SendData(userInfo.info.UserID, msg)
 		}
 	}
+}
+
+//游戏结束
+func (d *Desk) gameEnd() {
+
 }
