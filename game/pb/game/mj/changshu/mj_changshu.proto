@@ -274,22 +274,63 @@ message BS2CHuCard {
   int32 hu_card = 2;   //胡的牌
 }
 
-message PlayerBalanceInfo {
-  string hu_type = 1;  // json G_HuScore_Type类型参数
-  // json {anGang:1,jieGang:1,fangGang:1,mingGang:1},暗杠数,接杠数,放杠数,明杠数
-  string gang_type = 2;
-  int32 hu_card = 3;              //显示胡的牌
-  repeated int32 hand_cards = 4;  //手牌
-  int32 point = 5;                //当局获得分数
-  int32 total_point = 6;          //玩家当前总分数
-  bool is_hu = 7;                 //是否胡牌
+//胡牌类型
+enum HuType {
+  HuType_None = 0;
+  HuType_Normal = 1;           //平胡
+  HuType_ShiSanYao = 2;        //十三幺
+  HuType_XiaoQiDui = 3;        //小七对
+  HuType_MenQing = 4;          //门清
+  HuType_QingYiSe = 5;         //清一色
+  HuType_ZiYiSe = 6;           //字一色
+  HuType_HunYiSe = 7;          //混一色
+  HuType_DuiDuiHu = 8;         //对对胡
+  HuType_GangShangKaiHua = 9;  //杠上开花
+  HuType_DaDiaoChe = 10;       //大吊车
+  HuType_HaiDiLaoYue = 11;     //海底捞月
+  HuType_QiangGangHu = 12;     //抢杠胡
+  HuType_GangShangPao = 13;    //杠上炮
 }
+
+enum HuMode {
+  HuModeNone = 0;     //没胡
+  HuModeZiMo = 1;     //自摸
+  HuModeDianPao = 2;  //点炮
+  HuModeJiePao = 3;   //接炮
+}
+
+enum ScoreType {
+  ScoreNone = 0;
+  ScoreBaoZi = 1;    //豹子翻倍
+  ScoreHuPai = 2;    //胡牌分
+  ScoreHua = 3;      //花牌分
+  ScorePaiXing = 4;  //牌型分
+  ScoreJiangMa = 5;  //奖码
+  ScoreFeng = 6;     //风花
+  ScoreDiPiao = 7;   //底飘
+}
+
+message Json_PlayerBalance {
+  message Info {
+    repeated HuType hu_type = 1;  //胡牌类型
+    map<int32, int32> score_type = 2;  //得分类型(key为ScoreType,value表示得分)
+    repeated int32 hand_cards = 3;     //手牌(胡的牌在最后一张)
+    repeated int32 hua_cards = 4;      //所有花牌
+    int32 point = 5;                   //当局获得分数
+    int32 total_point = 6;             //玩家当前总分数
+    HuMode hu_mode = 7;                //胡牌方式
+    repeated int32 ban_all_cards = 8;  //扳到的所有的牌
+    repeated int32 ban_hit_index = 9; //奖码牌的索引
+  }
+  repeated Info player_balance_info = 1;
+}
+
 //单局游戏结束
 message BS2CGameEnd {
-  uint32 curInning = 1;                           //当前局数
-  int32 banker = 2;                               //庄家id
-  repeated PlayerBalanceInfo player_balance = 3;  //玩家当局结算信息
-  bool isdeuce = 4;                               //是否平局
+  uint32 curInning = 1;            //当前局数
+  int32 banker = 2;                //庄家id
+  string json_player_balance = 3;  //玩家当局结算信息(以Json_PlayerBalance解析)
+  bool isdeuce = 4;                //是否流局
 }
 
 message PlayerBalanceResult {

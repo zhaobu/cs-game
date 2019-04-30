@@ -3,10 +3,12 @@
 
 package pbclub
 
-import proto "github.com/golang/protobuf/proto"
-import fmt "fmt"
-import math "math"
-import common "cy/game/pb/common"
+import (
+	common "cy/game/pb/common"
+	fmt "fmt"
+	proto "github.com/golang/protobuf/proto"
+	math "math"
+)
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
@@ -38,16 +40,17 @@ func (m *MemberInfo) Reset()         { *m = MemberInfo{} }
 func (m *MemberInfo) String() string { return proto.CompactTextString(m) }
 func (*MemberInfo) ProtoMessage()    {}
 func (*MemberInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{0}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{0}
 }
+
 func (m *MemberInfo) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_MemberInfo.Unmarshal(m, b)
 }
 func (m *MemberInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_MemberInfo.Marshal(b, m, deterministic)
 }
-func (dst *MemberInfo) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_MemberInfo.Merge(dst, src)
+func (m *MemberInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MemberInfo.Merge(m, src)
 }
 func (m *MemberInfo) XXX_Size() int {
 	return xxx_messageInfo_MemberInfo.Size(m)
@@ -115,16 +118,17 @@ func (m *BaseInfo) Reset()         { *m = BaseInfo{} }
 func (m *BaseInfo) String() string { return proto.CompactTextString(m) }
 func (*BaseInfo) ProtoMessage()    {}
 func (*BaseInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{1}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{1}
 }
+
 func (m *BaseInfo) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_BaseInfo.Unmarshal(m, b)
 }
 func (m *BaseInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_BaseInfo.Marshal(b, m, deterministic)
 }
-func (dst *BaseInfo) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_BaseInfo.Merge(dst, src)
+func (m *BaseInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_BaseInfo.Merge(m, src)
 }
 func (m *BaseInfo) XXX_Size() int {
 	return xxx_messageInfo_BaseInfo.Size(m)
@@ -177,16 +181,17 @@ func (m *DeskSetting) Reset()         { *m = DeskSetting{} }
 func (m *DeskSetting) String() string { return proto.CompactTextString(m) }
 func (*DeskSetting) ProtoMessage()    {}
 func (*DeskSetting) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{2}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{2}
 }
+
 func (m *DeskSetting) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DeskSetting.Unmarshal(m, b)
 }
 func (m *DeskSetting) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_DeskSetting.Marshal(b, m, deterministic)
 }
-func (dst *DeskSetting) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_DeskSetting.Merge(dst, src)
+func (m *DeskSetting) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DeskSetting.Merge(m, src)
 }
 func (m *DeskSetting) XXX_Size() int {
 	return xxx_messageInfo_DeskSetting.Size(m)
@@ -245,16 +250,17 @@ func (m *ClubInfo) Reset()         { *m = ClubInfo{} }
 func (m *ClubInfo) String() string { return proto.CompactTextString(m) }
 func (*ClubInfo) ProtoMessage()    {}
 func (*ClubInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{3}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{3}
 }
+
 func (m *ClubInfo) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ClubInfo.Unmarshal(m, b)
 }
 func (m *ClubInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ClubInfo.Marshal(b, m, deterministic)
 }
-func (dst *ClubInfo) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ClubInfo.Merge(dst, src)
+func (m *ClubInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ClubInfo.Merge(m, src)
 }
 func (m *ClubInfo) XXX_Size() int {
 	return xxx_messageInfo_ClubInfo.Size(m)
@@ -347,16 +353,17 @@ func (m *SubClubChange) Reset()         { *m = SubClubChange{} }
 func (m *SubClubChange) String() string { return proto.CompactTextString(m) }
 func (*SubClubChange) ProtoMessage()    {}
 func (*SubClubChange) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{4}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{4}
 }
+
 func (m *SubClubChange) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_SubClubChange.Unmarshal(m, b)
 }
 func (m *SubClubChange) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_SubClubChange.Marshal(b, m, deterministic)
 }
-func (dst *SubClubChange) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_SubClubChange.Merge(dst, src)
+func (m *SubClubChange) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SubClubChange.Merge(m, src)
 }
 func (m *SubClubChange) XXX_Size() int {
 	return xxx_messageInfo_SubClubChange.Size(m)
@@ -389,16 +396,17 @@ func (m *BriefInfo) Reset()         { *m = BriefInfo{} }
 func (m *BriefInfo) String() string { return proto.CompactTextString(m) }
 func (*BriefInfo) ProtoMessage()    {}
 func (*BriefInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{5}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{5}
 }
+
 func (m *BriefInfo) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_BriefInfo.Unmarshal(m, b)
 }
 func (m *BriefInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_BriefInfo.Marshal(b, m, deterministic)
 }
-func (dst *BriefInfo) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_BriefInfo.Merge(dst, src)
+func (m *BriefInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_BriefInfo.Merge(m, src)
 }
 func (m *BriefInfo) XXX_Size() int {
 	return xxx_messageInfo_BriefInfo.Size(m)
@@ -449,16 +457,17 @@ func (m *ClubList) Reset()         { *m = ClubList{} }
 func (m *ClubList) String() string { return proto.CompactTextString(m) }
 func (*ClubList) ProtoMessage()    {}
 func (*ClubList) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{6}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{6}
 }
+
 func (m *ClubList) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ClubList.Unmarshal(m, b)
 }
 func (m *ClubList) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ClubList.Marshal(b, m, deterministic)
 }
-func (dst *ClubList) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ClubList.Merge(dst, src)
+func (m *ClubList) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ClubList.Merge(m, src)
 }
 func (m *ClubList) XXX_Size() int {
 	return xxx_messageInfo_ClubList.Size(m)
@@ -492,16 +501,17 @@ func (m *ClubChangeInfo) Reset()         { *m = ClubChangeInfo{} }
 func (m *ClubChangeInfo) String() string { return proto.CompactTextString(m) }
 func (*ClubChangeInfo) ProtoMessage()    {}
 func (*ClubChangeInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{7}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{7}
 }
+
 func (m *ClubChangeInfo) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ClubChangeInfo.Unmarshal(m, b)
 }
 func (m *ClubChangeInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ClubChangeInfo.Marshal(b, m, deterministic)
 }
-func (dst *ClubChangeInfo) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ClubChangeInfo.Merge(dst, src)
+func (m *ClubChangeInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ClubChangeInfo.Merge(m, src)
 }
 func (m *ClubChangeInfo) XXX_Size() int {
 	return xxx_messageInfo_ClubChangeInfo.Size(m)
@@ -547,16 +557,17 @@ func (m *CreateClubReq) Reset()         { *m = CreateClubReq{} }
 func (m *CreateClubReq) String() string { return proto.CompactTextString(m) }
 func (*CreateClubReq) ProtoMessage()    {}
 func (*CreateClubReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{8}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{8}
 }
+
 func (m *CreateClubReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CreateClubReq.Unmarshal(m, b)
 }
 func (m *CreateClubReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_CreateClubReq.Marshal(b, m, deterministic)
 }
-func (dst *CreateClubReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_CreateClubReq.Merge(dst, src)
+func (m *CreateClubReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CreateClubReq.Merge(m, src)
 }
 func (m *CreateClubReq) XXX_Size() int {
 	return xxx_messageInfo_CreateClubReq.Size(m)
@@ -601,16 +612,17 @@ func (m *CreateClubRsp) Reset()         { *m = CreateClubRsp{} }
 func (m *CreateClubRsp) String() string { return proto.CompactTextString(m) }
 func (*CreateClubRsp) ProtoMessage()    {}
 func (*CreateClubRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{9}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{9}
 }
+
 func (m *CreateClubRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CreateClubRsp.Unmarshal(m, b)
 }
 func (m *CreateClubRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_CreateClubRsp.Marshal(b, m, deterministic)
 }
-func (dst *CreateClubRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_CreateClubRsp.Merge(dst, src)
+func (m *CreateClubRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CreateClubRsp.Merge(m, src)
 }
 func (m *CreateClubRsp) XXX_Size() int {
 	return xxx_messageInfo_CreateClubRsp.Size(m)
@@ -650,16 +662,17 @@ func (m *UpdateClubReq) Reset()         { *m = UpdateClubReq{} }
 func (m *UpdateClubReq) String() string { return proto.CompactTextString(m) }
 func (*UpdateClubReq) ProtoMessage()    {}
 func (*UpdateClubReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{10}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{10}
 }
+
 func (m *UpdateClubReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UpdateClubReq.Unmarshal(m, b)
 }
 func (m *UpdateClubReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_UpdateClubReq.Marshal(b, m, deterministic)
 }
-func (dst *UpdateClubReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_UpdateClubReq.Merge(dst, src)
+func (m *UpdateClubReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateClubReq.Merge(m, src)
 }
 func (m *UpdateClubReq) XXX_Size() int {
 	return xxx_messageInfo_UpdateClubReq.Size(m)
@@ -711,16 +724,17 @@ func (m *UpdateClubRsp) Reset()         { *m = UpdateClubRsp{} }
 func (m *UpdateClubRsp) String() string { return proto.CompactTextString(m) }
 func (*UpdateClubRsp) ProtoMessage()    {}
 func (*UpdateClubRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{11}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{11}
 }
+
 func (m *UpdateClubRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UpdateClubRsp.Unmarshal(m, b)
 }
 func (m *UpdateClubRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_UpdateClubRsp.Marshal(b, m, deterministic)
 }
-func (dst *UpdateClubRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_UpdateClubRsp.Merge(dst, src)
+func (m *UpdateClubRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateClubRsp.Merge(m, src)
 }
 func (m *UpdateClubRsp) XXX_Size() int {
 	return xxx_messageInfo_UpdateClubRsp.Size(m)
@@ -759,16 +773,17 @@ func (m *UpdateClubNoticeReq) Reset()         { *m = UpdateClubNoticeReq{} }
 func (m *UpdateClubNoticeReq) String() string { return proto.CompactTextString(m) }
 func (*UpdateClubNoticeReq) ProtoMessage()    {}
 func (*UpdateClubNoticeReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{12}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{12}
 }
+
 func (m *UpdateClubNoticeReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UpdateClubNoticeReq.Unmarshal(m, b)
 }
 func (m *UpdateClubNoticeReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_UpdateClubNoticeReq.Marshal(b, m, deterministic)
 }
-func (dst *UpdateClubNoticeReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_UpdateClubNoticeReq.Merge(dst, src)
+func (m *UpdateClubNoticeReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateClubNoticeReq.Merge(m, src)
 }
 func (m *UpdateClubNoticeReq) XXX_Size() int {
 	return xxx_messageInfo_UpdateClubNoticeReq.Size(m)
@@ -813,16 +828,17 @@ func (m *UpdateClubNoticeRsp) Reset()         { *m = UpdateClubNoticeRsp{} }
 func (m *UpdateClubNoticeRsp) String() string { return proto.CompactTextString(m) }
 func (*UpdateClubNoticeRsp) ProtoMessage()    {}
 func (*UpdateClubNoticeRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{13}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{13}
 }
+
 func (m *UpdateClubNoticeRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_UpdateClubNoticeRsp.Unmarshal(m, b)
 }
 func (m *UpdateClubNoticeRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_UpdateClubNoticeRsp.Marshal(b, m, deterministic)
 }
-func (dst *UpdateClubNoticeRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_UpdateClubNoticeRsp.Merge(dst, src)
+func (m *UpdateClubNoticeRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UpdateClubNoticeRsp.Merge(m, src)
 }
 func (m *UpdateClubNoticeRsp) XXX_Size() int {
 	return xxx_messageInfo_UpdateClubNoticeRsp.Size(m)
@@ -860,16 +876,17 @@ func (m *RemoveClubReq) Reset()         { *m = RemoveClubReq{} }
 func (m *RemoveClubReq) String() string { return proto.CompactTextString(m) }
 func (*RemoveClubReq) ProtoMessage()    {}
 func (*RemoveClubReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{14}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{14}
 }
+
 func (m *RemoveClubReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_RemoveClubReq.Unmarshal(m, b)
 }
 func (m *RemoveClubReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_RemoveClubReq.Marshal(b, m, deterministic)
 }
-func (dst *RemoveClubReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_RemoveClubReq.Merge(dst, src)
+func (m *RemoveClubReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RemoveClubReq.Merge(m, src)
 }
 func (m *RemoveClubReq) XXX_Size() int {
 	return xxx_messageInfo_RemoveClubReq.Size(m)
@@ -907,16 +924,17 @@ func (m *RemoveClubRsp) Reset()         { *m = RemoveClubRsp{} }
 func (m *RemoveClubRsp) String() string { return proto.CompactTextString(m) }
 func (*RemoveClubRsp) ProtoMessage()    {}
 func (*RemoveClubRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{15}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{15}
 }
+
 func (m *RemoveClubRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_RemoveClubRsp.Unmarshal(m, b)
 }
 func (m *RemoveClubRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_RemoveClubRsp.Marshal(b, m, deterministic)
 }
-func (dst *RemoveClubRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_RemoveClubRsp.Merge(dst, src)
+func (m *RemoveClubRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RemoveClubRsp.Merge(m, src)
 }
 func (m *RemoveClubRsp) XXX_Size() int {
 	return xxx_messageInfo_RemoveClubRsp.Size(m)
@@ -954,16 +972,17 @@ func (m *QueryClubByIDReq) Reset()         { *m = QueryClubByIDReq{} }
 func (m *QueryClubByIDReq) String() string { return proto.CompactTextString(m) }
 func (*QueryClubByIDReq) ProtoMessage()    {}
 func (*QueryClubByIDReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{16}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{16}
 }
+
 func (m *QueryClubByIDReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_QueryClubByIDReq.Unmarshal(m, b)
 }
 func (m *QueryClubByIDReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_QueryClubByIDReq.Marshal(b, m, deterministic)
 }
-func (dst *QueryClubByIDReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryClubByIDReq.Merge(dst, src)
+func (m *QueryClubByIDReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryClubByIDReq.Merge(m, src)
 }
 func (m *QueryClubByIDReq) XXX_Size() int {
 	return xxx_messageInfo_QueryClubByIDReq.Size(m)
@@ -1005,16 +1024,17 @@ func (m *QueryClubByIDRsp) Reset()         { *m = QueryClubByIDRsp{} }
 func (m *QueryClubByIDRsp) String() string { return proto.CompactTextString(m) }
 func (*QueryClubByIDRsp) ProtoMessage()    {}
 func (*QueryClubByIDRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{17}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{17}
 }
+
 func (m *QueryClubByIDRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_QueryClubByIDRsp.Unmarshal(m, b)
 }
 func (m *QueryClubByIDRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_QueryClubByIDRsp.Marshal(b, m, deterministic)
 }
-func (dst *QueryClubByIDRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryClubByIDRsp.Merge(dst, src)
+func (m *QueryClubByIDRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryClubByIDRsp.Merge(m, src)
 }
 func (m *QueryClubByIDRsp) XXX_Size() int {
 	return xxx_messageInfo_QueryClubByIDRsp.Size(m)
@@ -1073,16 +1093,17 @@ func (m *QueryClubMemberReq) Reset()         { *m = QueryClubMemberReq{} }
 func (m *QueryClubMemberReq) String() string { return proto.CompactTextString(m) }
 func (*QueryClubMemberReq) ProtoMessage()    {}
 func (*QueryClubMemberReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{18}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{18}
 }
+
 func (m *QueryClubMemberReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_QueryClubMemberReq.Unmarshal(m, b)
 }
 func (m *QueryClubMemberReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_QueryClubMemberReq.Marshal(b, m, deterministic)
 }
-func (dst *QueryClubMemberReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryClubMemberReq.Merge(dst, src)
+func (m *QueryClubMemberReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryClubMemberReq.Merge(m, src)
 }
 func (m *QueryClubMemberReq) XXX_Size() int {
 	return xxx_messageInfo_QueryClubMemberReq.Size(m)
@@ -1119,16 +1140,17 @@ func (m *QueryClubMemberRsp) Reset()         { *m = QueryClubMemberRsp{} }
 func (m *QueryClubMemberRsp) String() string { return proto.CompactTextString(m) }
 func (*QueryClubMemberRsp) ProtoMessage()    {}
 func (*QueryClubMemberRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{19}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{19}
 }
+
 func (m *QueryClubMemberRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_QueryClubMemberRsp.Unmarshal(m, b)
 }
 func (m *QueryClubMemberRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_QueryClubMemberRsp.Marshal(b, m, deterministic)
 }
-func (dst *QueryClubMemberRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryClubMemberRsp.Merge(dst, src)
+func (m *QueryClubMemberRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryClubMemberRsp.Merge(m, src)
 }
 func (m *QueryClubMemberRsp) XXX_Size() int {
 	return xxx_messageInfo_QueryClubMemberRsp.Size(m)
@@ -1166,16 +1188,17 @@ func (m *AgreeClubLawReq) Reset()         { *m = AgreeClubLawReq{} }
 func (m *AgreeClubLawReq) String() string { return proto.CompactTextString(m) }
 func (*AgreeClubLawReq) ProtoMessage()    {}
 func (*AgreeClubLawReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{20}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{20}
 }
+
 func (m *AgreeClubLawReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AgreeClubLawReq.Unmarshal(m, b)
 }
 func (m *AgreeClubLawReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_AgreeClubLawReq.Marshal(b, m, deterministic)
 }
-func (dst *AgreeClubLawReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_AgreeClubLawReq.Merge(dst, src)
+func (m *AgreeClubLawReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AgreeClubLawReq.Merge(m, src)
 }
 func (m *AgreeClubLawReq) XXX_Size() int {
 	return xxx_messageInfo_AgreeClubLawReq.Size(m)
@@ -1211,16 +1234,17 @@ func (m *AgreeClubLawRsp) Reset()         { *m = AgreeClubLawRsp{} }
 func (m *AgreeClubLawRsp) String() string { return proto.CompactTextString(m) }
 func (*AgreeClubLawRsp) ProtoMessage()    {}
 func (*AgreeClubLawRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{21}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{21}
 }
+
 func (m *AgreeClubLawRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AgreeClubLawRsp.Unmarshal(m, b)
 }
 func (m *AgreeClubLawRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_AgreeClubLawRsp.Marshal(b, m, deterministic)
 }
-func (dst *AgreeClubLawRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_AgreeClubLawRsp.Merge(dst, src)
+func (m *AgreeClubLawRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AgreeClubLawRsp.Merge(m, src)
 }
 func (m *AgreeClubLawRsp) XXX_Size() int {
 	return xxx_messageInfo_AgreeClubLawRsp.Size(m)
@@ -1251,16 +1275,17 @@ func (m *ExitClubReq) Reset()         { *m = ExitClubReq{} }
 func (m *ExitClubReq) String() string { return proto.CompactTextString(m) }
 func (*ExitClubReq) ProtoMessage()    {}
 func (*ExitClubReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{22}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{22}
 }
+
 func (m *ExitClubReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ExitClubReq.Unmarshal(m, b)
 }
 func (m *ExitClubReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ExitClubReq.Marshal(b, m, deterministic)
 }
-func (dst *ExitClubReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ExitClubReq.Merge(dst, src)
+func (m *ExitClubReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ExitClubReq.Merge(m, src)
 }
 func (m *ExitClubReq) XXX_Size() int {
 	return xxx_messageInfo_ExitClubReq.Size(m)
@@ -1298,16 +1323,17 @@ func (m *ExitClubRsp) Reset()         { *m = ExitClubRsp{} }
 func (m *ExitClubRsp) String() string { return proto.CompactTextString(m) }
 func (*ExitClubRsp) ProtoMessage()    {}
 func (*ExitClubRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{23}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{23}
 }
+
 func (m *ExitClubRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ExitClubRsp.Unmarshal(m, b)
 }
 func (m *ExitClubRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ExitClubRsp.Marshal(b, m, deterministic)
 }
-func (dst *ExitClubRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ExitClubRsp.Merge(dst, src)
+func (m *ExitClubRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ExitClubRsp.Merge(m, src)
 }
 func (m *ExitClubRsp) XXX_Size() int {
 	return xxx_messageInfo_ExitClubRsp.Size(m)
@@ -1349,16 +1375,17 @@ func (m *DealMemberIdentityReq) Reset()         { *m = DealMemberIdentityReq{} }
 func (m *DealMemberIdentityReq) String() string { return proto.CompactTextString(m) }
 func (*DealMemberIdentityReq) ProtoMessage()    {}
 func (*DealMemberIdentityReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{24}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{24}
 }
+
 func (m *DealMemberIdentityReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DealMemberIdentityReq.Unmarshal(m, b)
 }
 func (m *DealMemberIdentityReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_DealMemberIdentityReq.Marshal(b, m, deterministic)
 }
-func (dst *DealMemberIdentityReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_DealMemberIdentityReq.Merge(dst, src)
+func (m *DealMemberIdentityReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DealMemberIdentityReq.Merge(m, src)
 }
 func (m *DealMemberIdentityReq) XXX_Size() int {
 	return xxx_messageInfo_DealMemberIdentityReq.Size(m)
@@ -1417,16 +1444,17 @@ func (m *DealMemberIdentityRsp) Reset()         { *m = DealMemberIdentityRsp{} }
 func (m *DealMemberIdentityRsp) String() string { return proto.CompactTextString(m) }
 func (*DealMemberIdentityRsp) ProtoMessage()    {}
 func (*DealMemberIdentityRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{25}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{25}
 }
+
 func (m *DealMemberIdentityRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_DealMemberIdentityRsp.Unmarshal(m, b)
 }
 func (m *DealMemberIdentityRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_DealMemberIdentityRsp.Marshal(b, m, deterministic)
 }
-func (dst *DealMemberIdentityRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_DealMemberIdentityRsp.Merge(dst, src)
+func (m *DealMemberIdentityRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DealMemberIdentityRsp.Merge(m, src)
 }
 func (m *DealMemberIdentityRsp) XXX_Size() int {
 	return xxx_messageInfo_DealMemberIdentityRsp.Size(m)
@@ -1465,16 +1493,17 @@ func (m *JoinClubReq) Reset()         { *m = JoinClubReq{} }
 func (m *JoinClubReq) String() string { return proto.CompactTextString(m) }
 func (*JoinClubReq) ProtoMessage()    {}
 func (*JoinClubReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{26}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{26}
 }
+
 func (m *JoinClubReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_JoinClubReq.Unmarshal(m, b)
 }
 func (m *JoinClubReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_JoinClubReq.Marshal(b, m, deterministic)
 }
-func (dst *JoinClubReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_JoinClubReq.Merge(dst, src)
+func (m *JoinClubReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_JoinClubReq.Merge(m, src)
 }
 func (m *JoinClubReq) XXX_Size() int {
 	return xxx_messageInfo_JoinClubReq.Size(m)
@@ -1512,16 +1541,17 @@ func (m *JoinClubRsp) Reset()         { *m = JoinClubRsp{} }
 func (m *JoinClubRsp) String() string { return proto.CompactTextString(m) }
 func (*JoinClubRsp) ProtoMessage()    {}
 func (*JoinClubRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{27}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{27}
 }
+
 func (m *JoinClubRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_JoinClubRsp.Unmarshal(m, b)
 }
 func (m *JoinClubRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_JoinClubRsp.Marshal(b, m, deterministic)
 }
-func (dst *JoinClubRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_JoinClubRsp.Merge(dst, src)
+func (m *JoinClubRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_JoinClubRsp.Merge(m, src)
 }
 func (m *JoinClubRsp) XXX_Size() int {
 	return xxx_messageInfo_JoinClubRsp.Size(m)
@@ -1561,16 +1591,17 @@ func (m *InviteJoinClubReq) Reset()         { *m = InviteJoinClubReq{} }
 func (m *InviteJoinClubReq) String() string { return proto.CompactTextString(m) }
 func (*InviteJoinClubReq) ProtoMessage()    {}
 func (*InviteJoinClubReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{28}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{28}
 }
+
 func (m *InviteJoinClubReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_InviteJoinClubReq.Unmarshal(m, b)
 }
 func (m *InviteJoinClubReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_InviteJoinClubReq.Marshal(b, m, deterministic)
 }
-func (dst *InviteJoinClubReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_InviteJoinClubReq.Merge(dst, src)
+func (m *InviteJoinClubReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_InviteJoinClubReq.Merge(m, src)
 }
 func (m *InviteJoinClubReq) XXX_Size() int {
 	return xxx_messageInfo_InviteJoinClubReq.Size(m)
@@ -1615,16 +1646,17 @@ func (m *InviteJoinClubRsp) Reset()         { *m = InviteJoinClubRsp{} }
 func (m *InviteJoinClubRsp) String() string { return proto.CompactTextString(m) }
 func (*InviteJoinClubRsp) ProtoMessage()    {}
 func (*InviteJoinClubRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{29}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{29}
 }
+
 func (m *InviteJoinClubRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_InviteJoinClubRsp.Unmarshal(m, b)
 }
 func (m *InviteJoinClubRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_InviteJoinClubRsp.Marshal(b, m, deterministic)
 }
-func (dst *InviteJoinClubRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_InviteJoinClubRsp.Merge(dst, src)
+func (m *InviteJoinClubRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_InviteJoinClubRsp.Merge(m, src)
 }
 func (m *InviteJoinClubRsp) XXX_Size() int {
 	return xxx_messageInfo_InviteJoinClubRsp.Size(m)
@@ -1664,16 +1696,17 @@ func (m *TransferMasterReq) Reset()         { *m = TransferMasterReq{} }
 func (m *TransferMasterReq) String() string { return proto.CompactTextString(m) }
 func (*TransferMasterReq) ProtoMessage()    {}
 func (*TransferMasterReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{30}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{30}
 }
+
 func (m *TransferMasterReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TransferMasterReq.Unmarshal(m, b)
 }
 func (m *TransferMasterReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_TransferMasterReq.Marshal(b, m, deterministic)
 }
-func (dst *TransferMasterReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_TransferMasterReq.Merge(dst, src)
+func (m *TransferMasterReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TransferMasterReq.Merge(m, src)
 }
 func (m *TransferMasterReq) XXX_Size() int {
 	return xxx_messageInfo_TransferMasterReq.Size(m)
@@ -1718,16 +1751,17 @@ func (m *TransferMasterRsp) Reset()         { *m = TransferMasterRsp{} }
 func (m *TransferMasterRsp) String() string { return proto.CompactTextString(m) }
 func (*TransferMasterRsp) ProtoMessage()    {}
 func (*TransferMasterRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{31}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{31}
 }
+
 func (m *TransferMasterRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_TransferMasterRsp.Unmarshal(m, b)
 }
 func (m *TransferMasterRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_TransferMasterRsp.Marshal(b, m, deterministic)
 }
-func (dst *TransferMasterRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_TransferMasterRsp.Merge(dst, src)
+func (m *TransferMasterRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TransferMasterRsp.Merge(m, src)
 }
 func (m *TransferMasterRsp) XXX_Size() int {
 	return xxx_messageInfo_TransferMasterRsp.Size(m)
@@ -1766,16 +1800,17 @@ func (m *AckClubEmailReq) Reset()         { *m = AckClubEmailReq{} }
 func (m *AckClubEmailReq) String() string { return proto.CompactTextString(m) }
 func (*AckClubEmailReq) ProtoMessage()    {}
 func (*AckClubEmailReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{32}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{32}
 }
+
 func (m *AckClubEmailReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AckClubEmailReq.Unmarshal(m, b)
 }
 func (m *AckClubEmailReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_AckClubEmailReq.Marshal(b, m, deterministic)
 }
-func (dst *AckClubEmailReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_AckClubEmailReq.Merge(dst, src)
+func (m *AckClubEmailReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AckClubEmailReq.Merge(m, src)
 }
 func (m *AckClubEmailReq) XXX_Size() int {
 	return xxx_messageInfo_AckClubEmailReq.Size(m)
@@ -1820,16 +1855,17 @@ func (m *AckClubEmailRsp) Reset()         { *m = AckClubEmailRsp{} }
 func (m *AckClubEmailRsp) String() string { return proto.CompactTextString(m) }
 func (*AckClubEmailRsp) ProtoMessage()    {}
 func (*AckClubEmailRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{33}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{33}
 }
+
 func (m *AckClubEmailRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AckClubEmailRsp.Unmarshal(m, b)
 }
 func (m *AckClubEmailRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_AckClubEmailRsp.Marshal(b, m, deterministic)
 }
-func (dst *AckClubEmailRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_AckClubEmailRsp.Merge(dst, src)
+func (m *AckClubEmailRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AckClubEmailRsp.Merge(m, src)
 }
 func (m *AckClubEmailRsp) XXX_Size() int {
 	return xxx_messageInfo_AckClubEmailRsp.Size(m)
@@ -1865,16 +1901,17 @@ func (m *CyI64) Reset()         { *m = CyI64{} }
 func (m *CyI64) String() string { return proto.CompactTextString(m) }
 func (*CyI64) ProtoMessage()    {}
 func (*CyI64) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{34}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{34}
 }
+
 func (m *CyI64) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CyI64.Unmarshal(m, b)
 }
 func (m *CyI64) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_CyI64.Marshal(b, m, deterministic)
 }
-func (dst *CyI64) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_CyI64.Merge(dst, src)
+func (m *CyI64) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CyI64.Merge(m, src)
 }
 func (m *CyI64) XXX_Size() int {
 	return xxx_messageInfo_CyI64.Size(m)
@@ -1904,16 +1941,17 @@ func (m *BatchAckClubEmail) Reset()         { *m = BatchAckClubEmail{} }
 func (m *BatchAckClubEmail) String() string { return proto.CompactTextString(m) }
 func (*BatchAckClubEmail) ProtoMessage()    {}
 func (*BatchAckClubEmail) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{35}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{35}
 }
+
 func (m *BatchAckClubEmail) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_BatchAckClubEmail.Unmarshal(m, b)
 }
 func (m *BatchAckClubEmail) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_BatchAckClubEmail.Marshal(b, m, deterministic)
 }
-func (dst *BatchAckClubEmail) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_BatchAckClubEmail.Merge(dst, src)
+func (m *BatchAckClubEmail) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_BatchAckClubEmail.Merge(m, src)
 }
 func (m *BatchAckClubEmail) XXX_Size() int {
 	return xxx_messageInfo_BatchAckClubEmail.Size(m)
@@ -1951,16 +1989,17 @@ func (m *ClubEmail) Reset()         { *m = ClubEmail{} }
 func (m *ClubEmail) String() string { return proto.CompactTextString(m) }
 func (*ClubEmail) ProtoMessage()    {}
 func (*ClubEmail) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{36}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{36}
 }
+
 func (m *ClubEmail) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ClubEmail.Unmarshal(m, b)
 }
 func (m *ClubEmail) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ClubEmail.Marshal(b, m, deterministic)
 }
-func (dst *ClubEmail) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ClubEmail.Merge(dst, src)
+func (m *ClubEmail) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ClubEmail.Merge(m, src)
 }
 func (m *ClubEmail) XXX_Size() int {
 	return xxx_messageInfo_ClubEmail.Size(m)
@@ -2024,16 +2063,17 @@ func (m *ClubEmailChangeInfo) Reset()         { *m = ClubEmailChangeInfo{} }
 func (m *ClubEmailChangeInfo) String() string { return proto.CompactTextString(m) }
 func (*ClubEmailChangeInfo) ProtoMessage()    {}
 func (*ClubEmailChangeInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{37}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{37}
 }
+
 func (m *ClubEmailChangeInfo) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ClubEmailChangeInfo.Unmarshal(m, b)
 }
 func (m *ClubEmailChangeInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ClubEmailChangeInfo.Marshal(b, m, deterministic)
 }
-func (dst *ClubEmailChangeInfo) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ClubEmailChangeInfo.Merge(dst, src)
+func (m *ClubEmailChangeInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ClubEmailChangeInfo.Merge(m, src)
 }
 func (m *ClubEmailChangeInfo) XXX_Size() int {
 	return xxx_messageInfo_ClubEmailChangeInfo.Size(m)
@@ -2063,16 +2103,17 @@ func (m *ClubEmailReq) Reset()         { *m = ClubEmailReq{} }
 func (m *ClubEmailReq) String() string { return proto.CompactTextString(m) }
 func (*ClubEmailReq) ProtoMessage()    {}
 func (*ClubEmailReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{38}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{38}
 }
+
 func (m *ClubEmailReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ClubEmailReq.Unmarshal(m, b)
 }
 func (m *ClubEmailReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ClubEmailReq.Marshal(b, m, deterministic)
 }
-func (dst *ClubEmailReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ClubEmailReq.Merge(dst, src)
+func (m *ClubEmailReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ClubEmailReq.Merge(m, src)
 }
 func (m *ClubEmailReq) XXX_Size() int {
 	return xxx_messageInfo_ClubEmailReq.Size(m)
@@ -2102,16 +2143,17 @@ func (m *ClubEmailRsp) Reset()         { *m = ClubEmailRsp{} }
 func (m *ClubEmailRsp) String() string { return proto.CompactTextString(m) }
 func (*ClubEmailRsp) ProtoMessage()    {}
 func (*ClubEmailRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{39}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{39}
 }
+
 func (m *ClubEmailRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ClubEmailRsp.Unmarshal(m, b)
 }
 func (m *ClubEmailRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ClubEmailRsp.Marshal(b, m, deterministic)
 }
-func (dst *ClubEmailRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ClubEmailRsp.Merge(dst, src)
+func (m *ClubEmailRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ClubEmailRsp.Merge(m, src)
 }
 func (m *ClubEmailRsp) XXX_Size() int {
 	return xxx_messageInfo_ClubEmailRsp.Size(m)
@@ -2150,16 +2192,17 @@ func (m *CheckCanDestoryDeskReq) Reset()         { *m = CheckCanDestoryDeskReq{}
 func (m *CheckCanDestoryDeskReq) String() string { return proto.CompactTextString(m) }
 func (*CheckCanDestoryDeskReq) ProtoMessage()    {}
 func (*CheckCanDestoryDeskReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{40}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{40}
 }
+
 func (m *CheckCanDestoryDeskReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CheckCanDestoryDeskReq.Unmarshal(m, b)
 }
 func (m *CheckCanDestoryDeskReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_CheckCanDestoryDeskReq.Marshal(b, m, deterministic)
 }
-func (dst *CheckCanDestoryDeskReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_CheckCanDestoryDeskReq.Merge(dst, src)
+func (m *CheckCanDestoryDeskReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CheckCanDestoryDeskReq.Merge(m, src)
 }
 func (m *CheckCanDestoryDeskReq) XXX_Size() int {
 	return xxx_messageInfo_CheckCanDestoryDeskReq.Size(m)
@@ -2203,16 +2246,17 @@ func (m *CheckCanDestoryDeskRsp) Reset()         { *m = CheckCanDestoryDeskRsp{}
 func (m *CheckCanDestoryDeskRsp) String() string { return proto.CompactTextString(m) }
 func (*CheckCanDestoryDeskRsp) ProtoMessage()    {}
 func (*CheckCanDestoryDeskRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{41}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{41}
 }
+
 func (m *CheckCanDestoryDeskRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CheckCanDestoryDeskRsp.Unmarshal(m, b)
 }
 func (m *CheckCanDestoryDeskRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_CheckCanDestoryDeskRsp.Marshal(b, m, deterministic)
 }
-func (dst *CheckCanDestoryDeskRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_CheckCanDestoryDeskRsp.Merge(dst, src)
+func (m *CheckCanDestoryDeskRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CheckCanDestoryDeskRsp.Merge(m, src)
 }
 func (m *CheckCanDestoryDeskRsp) XXX_Size() int {
 	return xxx_messageInfo_CheckCanDestoryDeskRsp.Size(m)
@@ -2243,16 +2287,17 @@ func (m *RefreshClubDesks) Reset()         { *m = RefreshClubDesks{} }
 func (m *RefreshClubDesks) String() string { return proto.CompactTextString(m) }
 func (*RefreshClubDesks) ProtoMessage()    {}
 func (*RefreshClubDesks) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{42}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{42}
 }
+
 func (m *RefreshClubDesks) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_RefreshClubDesks.Unmarshal(m, b)
 }
 func (m *RefreshClubDesks) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_RefreshClubDesks.Marshal(b, m, deterministic)
 }
-func (dst *RefreshClubDesks) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_RefreshClubDesks.Merge(dst, src)
+func (m *RefreshClubDesks) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RefreshClubDesks.Merge(m, src)
 }
 func (m *RefreshClubDesks) XXX_Size() int {
 	return xxx_messageInfo_RefreshClubDesks.Size(m)
@@ -2291,16 +2336,17 @@ func (m *QueryClubMemberRelationReq) Reset()         { *m = QueryClubMemberRelat
 func (m *QueryClubMemberRelationReq) String() string { return proto.CompactTextString(m) }
 func (*QueryClubMemberRelationReq) ProtoMessage()    {}
 func (*QueryClubMemberRelationReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{43}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{43}
 }
+
 func (m *QueryClubMemberRelationReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_QueryClubMemberRelationReq.Unmarshal(m, b)
 }
 func (m *QueryClubMemberRelationReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_QueryClubMemberRelationReq.Marshal(b, m, deterministic)
 }
-func (dst *QueryClubMemberRelationReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryClubMemberRelationReq.Merge(dst, src)
+func (m *QueryClubMemberRelationReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryClubMemberRelationReq.Merge(m, src)
 }
 func (m *QueryClubMemberRelationReq) XXX_Size() int {
 	return xxx_messageInfo_QueryClubMemberRelationReq.Size(m)
@@ -2346,16 +2392,17 @@ func (m *QueryClubMemberRelationRsp) Reset()         { *m = QueryClubMemberRelat
 func (m *QueryClubMemberRelationRsp) String() string { return proto.CompactTextString(m) }
 func (*QueryClubMemberRelationRsp) ProtoMessage()    {}
 func (*QueryClubMemberRelationRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{44}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{44}
 }
+
 func (m *QueryClubMemberRelationRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_QueryClubMemberRelationRsp.Unmarshal(m, b)
 }
 func (m *QueryClubMemberRelationRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_QueryClubMemberRelationRsp.Marshal(b, m, deterministic)
 }
-func (dst *QueryClubMemberRelationRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryClubMemberRelationRsp.Merge(dst, src)
+func (m *QueryClubMemberRelationRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryClubMemberRelationRsp.Merge(m, src)
 }
 func (m *QueryClubMemberRelationRsp) XXX_Size() int {
 	return xxx_messageInfo_QueryClubMemberRelationRsp.Size(m)
@@ -2402,16 +2449,17 @@ func (m *AddClubMemberRelationReq) Reset()         { *m = AddClubMemberRelationR
 func (m *AddClubMemberRelationReq) String() string { return proto.CompactTextString(m) }
 func (*AddClubMemberRelationReq) ProtoMessage()    {}
 func (*AddClubMemberRelationReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{45}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{45}
 }
+
 func (m *AddClubMemberRelationReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AddClubMemberRelationReq.Unmarshal(m, b)
 }
 func (m *AddClubMemberRelationReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_AddClubMemberRelationReq.Marshal(b, m, deterministic)
 }
-func (dst *AddClubMemberRelationReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_AddClubMemberRelationReq.Merge(dst, src)
+func (m *AddClubMemberRelationReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AddClubMemberRelationReq.Merge(m, src)
 }
 func (m *AddClubMemberRelationReq) XXX_Size() int {
 	return xxx_messageInfo_AddClubMemberRelationReq.Size(m)
@@ -2463,16 +2511,17 @@ func (m *AddClubMemberRelationRsp) Reset()         { *m = AddClubMemberRelationR
 func (m *AddClubMemberRelationRsp) String() string { return proto.CompactTextString(m) }
 func (*AddClubMemberRelationRsp) ProtoMessage()    {}
 func (*AddClubMemberRelationRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{46}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{46}
 }
+
 func (m *AddClubMemberRelationRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_AddClubMemberRelationRsp.Unmarshal(m, b)
 }
 func (m *AddClubMemberRelationRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_AddClubMemberRelationRsp.Marshal(b, m, deterministic)
 }
-func (dst *AddClubMemberRelationRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_AddClubMemberRelationRsp.Merge(dst, src)
+func (m *AddClubMemberRelationRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AddClubMemberRelationRsp.Merge(m, src)
 }
 func (m *AddClubMemberRelationRsp) XXX_Size() int {
 	return xxx_messageInfo_AddClubMemberRelationRsp.Size(m)
@@ -2512,16 +2561,17 @@ func (m *RemoveClubMemberRelationReq) Reset()         { *m = RemoveClubMemberRel
 func (m *RemoveClubMemberRelationReq) String() string { return proto.CompactTextString(m) }
 func (*RemoveClubMemberRelationReq) ProtoMessage()    {}
 func (*RemoveClubMemberRelationReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{47}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{47}
 }
+
 func (m *RemoveClubMemberRelationReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_RemoveClubMemberRelationReq.Unmarshal(m, b)
 }
 func (m *RemoveClubMemberRelationReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_RemoveClubMemberRelationReq.Marshal(b, m, deterministic)
 }
-func (dst *RemoveClubMemberRelationReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_RemoveClubMemberRelationReq.Merge(dst, src)
+func (m *RemoveClubMemberRelationReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RemoveClubMemberRelationReq.Merge(m, src)
 }
 func (m *RemoveClubMemberRelationReq) XXX_Size() int {
 	return xxx_messageInfo_RemoveClubMemberRelationReq.Size(m)
@@ -2573,16 +2623,17 @@ func (m *RemoveClubMemberRelationRsp) Reset()         { *m = RemoveClubMemberRel
 func (m *RemoveClubMemberRelationRsp) String() string { return proto.CompactTextString(m) }
 func (*RemoveClubMemberRelationRsp) ProtoMessage()    {}
 func (*RemoveClubMemberRelationRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{48}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{48}
 }
+
 func (m *RemoveClubMemberRelationRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_RemoveClubMemberRelationRsp.Unmarshal(m, b)
 }
 func (m *RemoveClubMemberRelationRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_RemoveClubMemberRelationRsp.Marshal(b, m, deterministic)
 }
-func (dst *RemoveClubMemberRelationRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_RemoveClubMemberRelationRsp.Merge(dst, src)
+func (m *RemoveClubMemberRelationRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RemoveClubMemberRelationRsp.Merge(m, src)
 }
 func (m *RemoveClubMemberRelationRsp) XXX_Size() int {
 	return xxx_messageInfo_RemoveClubMemberRelationRsp.Size(m)
@@ -2621,16 +2672,17 @@ func (m *CheckCanJoinClubDeskReq) Reset()         { *m = CheckCanJoinClubDeskReq
 func (m *CheckCanJoinClubDeskReq) String() string { return proto.CompactTextString(m) }
 func (*CheckCanJoinClubDeskReq) ProtoMessage()    {}
 func (*CheckCanJoinClubDeskReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{49}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{49}
 }
+
 func (m *CheckCanJoinClubDeskReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CheckCanJoinClubDeskReq.Unmarshal(m, b)
 }
 func (m *CheckCanJoinClubDeskReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_CheckCanJoinClubDeskReq.Marshal(b, m, deterministic)
 }
-func (dst *CheckCanJoinClubDeskReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_CheckCanJoinClubDeskReq.Merge(dst, src)
+func (m *CheckCanJoinClubDeskReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CheckCanJoinClubDeskReq.Merge(m, src)
 }
 func (m *CheckCanJoinClubDeskReq) XXX_Size() int {
 	return xxx_messageInfo_CheckCanJoinClubDeskReq.Size(m)
@@ -2674,16 +2726,17 @@ func (m *CheckCanJoinClubDeskRsp) Reset()         { *m = CheckCanJoinClubDeskRsp
 func (m *CheckCanJoinClubDeskRsp) String() string { return proto.CompactTextString(m) }
 func (*CheckCanJoinClubDeskRsp) ProtoMessage()    {}
 func (*CheckCanJoinClubDeskRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_club_104d7d4d5ee0a71c, []int{50}
+	return fileDescriptor_47c5ad7bb8a580e2, []int{50}
 }
+
 func (m *CheckCanJoinClubDeskRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_CheckCanJoinClubDeskRsp.Unmarshal(m, b)
 }
 func (m *CheckCanJoinClubDeskRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_CheckCanJoinClubDeskRsp.Marshal(b, m, deterministic)
 }
-func (dst *CheckCanJoinClubDeskRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_CheckCanJoinClubDeskRsp.Merge(dst, src)
+func (m *CheckCanJoinClubDeskRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CheckCanJoinClubDeskRsp.Merge(m, src)
 }
 func (m *CheckCanJoinClubDeskRsp) XXX_Size() int {
 	return xxx_messageInfo_CheckCanJoinClubDeskRsp.Size(m)
@@ -2755,9 +2808,9 @@ func init() {
 	proto.RegisterType((*CheckCanJoinClubDeskRsp)(nil), "pbclub.CheckCanJoinClubDeskRsp")
 }
 
-func init() { proto.RegisterFile("club/club.proto", fileDescriptor_club_104d7d4d5ee0a71c) }
+func init() { proto.RegisterFile("club/club.proto", fileDescriptor_47c5ad7bb8a580e2) }
 
-var fileDescriptor_club_104d7d4d5ee0a71c = []byte{
+var fileDescriptor_47c5ad7bb8a580e2 = []byte{
 	// 1284 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xcc, 0x58, 0xdd, 0x6f, 0xe3, 0x44,
 	0x10, 0x97, 0x3f, 0x92, 0x3a, 0x93, 0x7e, 0xba, 0x50, 0xac, 0x72, 0x2a, 0xd1, 0x8a, 0x3b, 0x72,

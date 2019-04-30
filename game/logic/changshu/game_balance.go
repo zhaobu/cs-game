@@ -14,7 +14,10 @@ type (
 	StartDiceType uint8 //开局色子情况
 )
 
-var hitCards []map[int32]bool //扳杠头
+var (
+	hitCards    []map[int32]bool      //扳杠头
+	huTypeScore map[mj.EmHuType]int32 //牌型分
+)
 
 //开局色子类型
 const (
@@ -30,8 +33,6 @@ type GameBalance struct {
 	huangzhuang  bool                    //是否荒庄
 	baozi        int32                   //本局豹子倍数
 	gameIndex    int32                   //第几局
-	lastHuChair  int32                   //最后一个胡牌玩家
-	bankerId     int32                   //庄家
 	loseChair    int32                   //丢分玩家
 	gangHuaChair int32                   //杠上花玩家
 	huCard       int32                   //胡的牌
@@ -43,8 +44,7 @@ type GameBalance struct {
 	hitIndex     [][]int32               //扳到的杠头的索引
 }
 
-func (self *GameBalance) Init(config *pbgame_logic.CreateArg) {
-	self.game_config = config
+func init() {
 	hitCards = []map[int32]bool{
 		0: map[int32]bool{ //庄家
 			11: true,
@@ -93,6 +93,21 @@ func (self *GameBalance) Init(config *pbgame_logic.CreateArg) {
 			52: true,
 		},
 	}
+	huTypeScore = map[mj.EmHuType]int32{
+		mj.HuType_Normal:          1,
+		mj.HuType_MenQing:         5,
+		mj.HuType_QingYiSe:        10,
+		mj.HuType_ZiYiSe:          15,
+		mj.HuType_HunYiSe:         5,
+		mj.HuType_DuiDuiHu:        5,
+		mj.HuType_GangShangKaiHua: 5,
+		mj.HuType_DaDiaoChe:       5,
+		mj.HuType_HaiDiLaoYue:     5,
+	}
+}
+
+func (self *GameBalance) Init(config *pbgame_logic.CreateArg) {
+	self.game_config = config
 }
 
 func (self *GameBalance) Reset() {
@@ -104,8 +119,6 @@ func (self *GameBalance) Reset() {
 	}
 	self.startDice = StartDice_None
 	self.huangzhuang = false
-	self.lastHuChair = -1
-	self.bankerId = -1
 	self.loseChair = -1
 	self.gangHuaChair = -1
 	self.huCard = 0
@@ -172,5 +185,98 @@ func (self *GameBalance) CalGangTou(leftCards []int32, bankerId int32) { // 杠�
 			chairId = mj.GetNextChair(chairId, self.game_config.PlayerCount)
 		}
 	}
-	log.Debugf("扳杠头结果:self.allCards=%v,self.hitIndex=%v", self.allCards, self.hitIndex)
+	log.Debugf("扳杠头结果:self.duLongHua=%d,\nself.allCards=%+v,\nself.hitIndex=%+v", self.duLongHua, self.allCards, self.hitIndex)
+}
+
+//算分
+func (self *GameBalance) CalGameBalance(players []*mj.PlayerInfo, bankerId int32) {
+	getHuTypeScore := func(huInfo *HuScoreInfo) (score int32) {
+		for _, v := range huInfo.HuTypeList {
+			score += huTypeScore[v]
+		}
+		return
+	}
+	for winChair, v := range self.huChairs {
+		balanceInfo := &players[winChair].BalanceInfo
+		winSocre := 1 + balanceInfo.GetPingHuHua() //胡牌1分+补花+杠花+风花
+		//奖码花
+		balanceInfo.JiangMaPoint = int32(len(self.hitIndex[winChair]))
+		winSocre += balanceInfo.JiangMaPoint
+		//特殊牌型花
+		balanceInfo.SpecialPoint = getHuTypeScore(v)
+		winSocre += balanceInfo.SpecialPoint
+		//豹子翻倍
+		balanceInfo.Baozi = self.baozi
+		winChair *= self.baozi
+		//底飘
+		winSocre += int32(self.game_config.Dipiao) * 2
+
+		//赢
+		if self.huMode == mj.HuMode_ZIMO {
+			for i := int32(0); i < self.game_config.PlayerCount; i++ {
+				if i == winChair {
+					continue
+				}
+				balanceInfo.Point += winSocre            //赢
+				players[i].BalanceInfo.Point -= winSocre //输
+				//总分
+				players[winChair].BalanceResult.Point += winSocre
+				players[i].BalanceResult.Point -= winSocre
+			}
+		} else {
+			balanceInfo.Point += winSocre                         //赢
+			players[self.loseChair].BalanceInfo.Point -= winSocre //输
+			//总分
+			players[winChair].BalanceResult.Point += winSocre
+			players[self.loseChair].BalanceResult.Point -= winSocre
+		}
+	}
+}
+
+func (self *GameBalance) GetPlayerBalanceInfo(players []*mj.PlayerInfo) (jsonInfo []*pbgame_logic.Json_PlayerBalance_Info) {
+	getClientHuType := func(chairId int32) (res []pbgame_logic.HuType) {
+		for _, v := range self.huChairs[chairId].HuTypeList {
+			res = append(res, pbgame_logic.HuType(v))
+		}
+		return
+	}
+	getClientScoreType := func(info *mj.PlayserBalanceInfo) map[int32]int32 {
+		res := map[int32]int32{
+			1: info.Baozi,
+			2: 1,
+			3: info.BuHuaPoint,
+			4: info.SpecialPoint,
+			5: info.JiangMaPoint,
+			6: info.FengPoint,
+			7: info.DiPiaoPoint,
+		}
+		return res
+	}
+	for k, v := range players {
+		chairId := int32(k)
+		info := &pbgame_logic.Json_PlayerBalance_Info{}
+		if self.huMode == mj.HuMode_ZIMO {
+			if self.huChairs[chairId] != nil {
+				info.HuMode = pbgame_logic.HuMode_HuModeZiMo
+			}
+		} else {
+			if self.huChairs[chairId] != nil {
+				info.HuMode = pbgame_logic.HuMode_HuModeJiePao
+			} else if self.loseChair == chairId {
+				info.HuMode = pbgame_logic.HuMode_HuModeDianPao
+			}
+		}
+		if self.huChairs[chairId] != nil {
+			info.HuType = getClientHuType(chairId)
+			info.ScoreType = getClientScoreType(&v.BalanceInfo)
+		}
+		info.HandCards = v.CardInfo.HandCards
+		info.HuaCards = v.CardInfo.HuaCards
+		info.Point = v.BalanceInfo.Point
+		info.TotalPoint = v.BalanceResult.Point
+		info.BanAllCards = self.allCards[chairId]
+		info.BanHitIndex = self.hitIndex[chairId]
+		jsonInfo = append(jsonInfo, info)
+	}
+	return
 }

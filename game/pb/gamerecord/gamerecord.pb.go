@@ -3,9 +3,11 @@
 
 package pbgamerecord
 
-import proto "github.com/golang/protobuf/proto"
-import fmt "fmt"
-import math "math"
+import (
+	fmt "fmt"
+	proto "github.com/golang/protobuf/proto"
+	math "math"
+)
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
@@ -32,16 +34,17 @@ func (m *GamePlayerInfo) Reset()         { *m = GamePlayerInfo{} }
 func (m *GamePlayerInfo) String() string { return proto.CompactTextString(m) }
 func (*GamePlayerInfo) ProtoMessage()    {}
 func (*GamePlayerInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_gamerecord_7a5c0dd57a35f5ae, []int{0}
+	return fileDescriptor_7d42389f4cea3718, []int{0}
 }
+
 func (m *GamePlayerInfo) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GamePlayerInfo.Unmarshal(m, b)
 }
 func (m *GamePlayerInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_GamePlayerInfo.Marshal(b, m, deterministic)
 }
-func (dst *GamePlayerInfo) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GamePlayerInfo.Merge(dst, src)
+func (m *GamePlayerInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GamePlayerInfo.Merge(m, src)
 }
 func (m *GamePlayerInfo) XXX_Size() int {
 	return xxx_messageInfo_GamePlayerInfo.Size(m)
@@ -103,16 +106,17 @@ func (m *WriteGameRecordReq) Reset()         { *m = WriteGameRecordReq{} }
 func (m *WriteGameRecordReq) String() string { return proto.CompactTextString(m) }
 func (*WriteGameRecordReq) ProtoMessage()    {}
 func (*WriteGameRecordReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_gamerecord_7a5c0dd57a35f5ae, []int{1}
+	return fileDescriptor_7d42389f4cea3718, []int{1}
 }
+
 func (m *WriteGameRecordReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_WriteGameRecordReq.Unmarshal(m, b)
 }
 func (m *WriteGameRecordReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_WriteGameRecordReq.Marshal(b, m, deterministic)
 }
-func (dst *WriteGameRecordReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_WriteGameRecordReq.Merge(dst, src)
+func (m *WriteGameRecordReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_WriteGameRecordReq.Merge(m, src)
 }
 func (m *WriteGameRecordReq) XXX_Size() int {
 	return xxx_messageInfo_WriteGameRecordReq.Size(m)
@@ -223,16 +227,17 @@ func (m *QueryRoomRecordReq) Reset()         { *m = QueryRoomRecordReq{} }
 func (m *QueryRoomRecordReq) String() string { return proto.CompactTextString(m) }
 func (*QueryRoomRecordReq) ProtoMessage()    {}
 func (*QueryRoomRecordReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_gamerecord_7a5c0dd57a35f5ae, []int{2}
+	return fileDescriptor_7d42389f4cea3718, []int{2}
 }
+
 func (m *QueryRoomRecordReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_QueryRoomRecordReq.Unmarshal(m, b)
 }
 func (m *QueryRoomRecordReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_QueryRoomRecordReq.Marshal(b, m, deterministic)
 }
-func (dst *QueryRoomRecordReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryRoomRecordReq.Merge(dst, src)
+func (m *QueryRoomRecordReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryRoomRecordReq.Merge(m, src)
 }
 func (m *QueryRoomRecordReq) XXX_Size() int {
 	return xxx_messageInfo_QueryRoomRecordReq.Size(m)
@@ -291,16 +296,17 @@ func (m *RoomPlayerInfo) Reset()         { *m = RoomPlayerInfo{} }
 func (m *RoomPlayerInfo) String() string { return proto.CompactTextString(m) }
 func (*RoomPlayerInfo) ProtoMessage()    {}
 func (*RoomPlayerInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_gamerecord_7a5c0dd57a35f5ae, []int{3}
+	return fileDescriptor_7d42389f4cea3718, []int{3}
 }
+
 func (m *RoomPlayerInfo) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_RoomPlayerInfo.Unmarshal(m, b)
 }
 func (m *RoomPlayerInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_RoomPlayerInfo.Marshal(b, m, deterministic)
 }
-func (dst *RoomPlayerInfo) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_RoomPlayerInfo.Merge(dst, src)
+func (m *RoomPlayerInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RoomPlayerInfo.Merge(m, src)
 }
 func (m *RoomPlayerInfo) XXX_Size() int {
 	return xxx_messageInfo_RoomPlayerInfo.Size(m)
@@ -353,16 +359,17 @@ func (m *RoomRecord) Reset()         { *m = RoomRecord{} }
 func (m *RoomRecord) String() string { return proto.CompactTextString(m) }
 func (*RoomRecord) ProtoMessage()    {}
 func (*RoomRecord) Descriptor() ([]byte, []int) {
-	return fileDescriptor_gamerecord_7a5c0dd57a35f5ae, []int{4}
+	return fileDescriptor_7d42389f4cea3718, []int{4}
 }
+
 func (m *RoomRecord) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_RoomRecord.Unmarshal(m, b)
 }
 func (m *RoomRecord) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_RoomRecord.Marshal(b, m, deterministic)
 }
-func (dst *RoomRecord) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_RoomRecord.Merge(dst, src)
+func (m *RoomRecord) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RoomRecord.Merge(m, src)
 }
 func (m *RoomRecord) XXX_Size() int {
 	return xxx_messageInfo_RoomRecord.Size(m)
@@ -456,16 +463,17 @@ func (m *QueryRoomRecordRsp) Reset()         { *m = QueryRoomRecordRsp{} }
 func (m *QueryRoomRecordRsp) String() string { return proto.CompactTextString(m) }
 func (*QueryRoomRecordRsp) ProtoMessage()    {}
 func (*QueryRoomRecordRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_gamerecord_7a5c0dd57a35f5ae, []int{5}
+	return fileDescriptor_7d42389f4cea3718, []int{5}
 }
+
 func (m *QueryRoomRecordRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_QueryRoomRecordRsp.Unmarshal(m, b)
 }
 func (m *QueryRoomRecordRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_QueryRoomRecordRsp.Marshal(b, m, deterministic)
 }
-func (dst *QueryRoomRecordRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryRoomRecordRsp.Merge(dst, src)
+func (m *QueryRoomRecordRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryRoomRecordRsp.Merge(m, src)
 }
 func (m *QueryRoomRecordRsp) XXX_Size() int {
 	return xxx_messageInfo_QueryRoomRecordRsp.Size(m)
@@ -502,16 +510,17 @@ func (m *QueryGameRecordReq) Reset()         { *m = QueryGameRecordReq{} }
 func (m *QueryGameRecordReq) String() string { return proto.CompactTextString(m) }
 func (*QueryGameRecordReq) ProtoMessage()    {}
 func (*QueryGameRecordReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_gamerecord_7a5c0dd57a35f5ae, []int{6}
+	return fileDescriptor_7d42389f4cea3718, []int{6}
 }
+
 func (m *QueryGameRecordReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_QueryGameRecordReq.Unmarshal(m, b)
 }
 func (m *QueryGameRecordReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_QueryGameRecordReq.Marshal(b, m, deterministic)
 }
-func (dst *QueryGameRecordReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryGameRecordReq.Merge(dst, src)
+func (m *QueryGameRecordReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryGameRecordReq.Merge(m, src)
 }
 func (m *QueryGameRecordReq) XXX_Size() int {
 	return xxx_messageInfo_QueryGameRecordReq.Size(m)
@@ -549,16 +558,17 @@ func (m *GameRecord) Reset()         { *m = GameRecord{} }
 func (m *GameRecord) String() string { return proto.CompactTextString(m) }
 func (*GameRecord) ProtoMessage()    {}
 func (*GameRecord) Descriptor() ([]byte, []int) {
-	return fileDescriptor_gamerecord_7a5c0dd57a35f5ae, []int{7}
+	return fileDescriptor_7d42389f4cea3718, []int{7}
 }
+
 func (m *GameRecord) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_GameRecord.Unmarshal(m, b)
 }
 func (m *GameRecord) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_GameRecord.Marshal(b, m, deterministic)
 }
-func (dst *GameRecord) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GameRecord.Merge(dst, src)
+func (m *GameRecord) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GameRecord.Merge(m, src)
 }
 func (m *GameRecord) XXX_Size() int {
 	return xxx_messageInfo_GameRecord.Size(m)
@@ -645,16 +655,17 @@ func (m *QueryGameRecordRsp) Reset()         { *m = QueryGameRecordRsp{} }
 func (m *QueryGameRecordRsp) String() string { return proto.CompactTextString(m) }
 func (*QueryGameRecordRsp) ProtoMessage()    {}
 func (*QueryGameRecordRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_gamerecord_7a5c0dd57a35f5ae, []int{8}
+	return fileDescriptor_7d42389f4cea3718, []int{8}
 }
+
 func (m *QueryGameRecordRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_QueryGameRecordRsp.Unmarshal(m, b)
 }
 func (m *QueryGameRecordRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_QueryGameRecordRsp.Marshal(b, m, deterministic)
 }
-func (dst *QueryGameRecordRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryGameRecordRsp.Merge(dst, src)
+func (m *QueryGameRecordRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryGameRecordRsp.Merge(m, src)
 }
 func (m *QueryGameRecordRsp) XXX_Size() int {
 	return xxx_messageInfo_QueryGameRecordRsp.Size(m)
@@ -691,16 +702,17 @@ func (m *QueryGameRePlaydReq) Reset()         { *m = QueryGameRePlaydReq{} }
 func (m *QueryGameRePlaydReq) String() string { return proto.CompactTextString(m) }
 func (*QueryGameRePlaydReq) ProtoMessage()    {}
 func (*QueryGameRePlaydReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_gamerecord_7a5c0dd57a35f5ae, []int{9}
+	return fileDescriptor_7d42389f4cea3718, []int{9}
 }
+
 func (m *QueryGameRePlaydReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_QueryGameRePlaydReq.Unmarshal(m, b)
 }
 func (m *QueryGameRePlaydReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_QueryGameRePlaydReq.Marshal(b, m, deterministic)
 }
-func (dst *QueryGameRePlaydReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryGameRePlaydReq.Merge(dst, src)
+func (m *QueryGameRePlaydReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryGameRePlaydReq.Merge(m, src)
 }
 func (m *QueryGameRePlaydReq) XXX_Size() int {
 	return xxx_messageInfo_QueryGameRePlaydReq.Size(m)
@@ -730,16 +742,17 @@ func (m *QueryGameRePlaydRsp) Reset()         { *m = QueryGameRePlaydRsp{} }
 func (m *QueryGameRePlaydRsp) String() string { return proto.CompactTextString(m) }
 func (*QueryGameRePlaydRsp) ProtoMessage()    {}
 func (*QueryGameRePlaydRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_gamerecord_7a5c0dd57a35f5ae, []int{10}
+	return fileDescriptor_7d42389f4cea3718, []int{10}
 }
+
 func (m *QueryGameRePlaydRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_QueryGameRePlaydRsp.Unmarshal(m, b)
 }
 func (m *QueryGameRePlaydRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_QueryGameRePlaydRsp.Marshal(b, m, deterministic)
 }
-func (dst *QueryGameRePlaydRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryGameRePlaydRsp.Merge(dst, src)
+func (m *QueryGameRePlaydRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryGameRePlaydRsp.Merge(m, src)
 }
 func (m *QueryGameRePlaydRsp) XXX_Size() int {
 	return xxx_messageInfo_QueryGameRePlaydRsp.Size(m)
@@ -780,16 +793,17 @@ func (m *QueryClubStatisticsReq) Reset()         { *m = QueryClubStatisticsReq{}
 func (m *QueryClubStatisticsReq) String() string { return proto.CompactTextString(m) }
 func (*QueryClubStatisticsReq) ProtoMessage()    {}
 func (*QueryClubStatisticsReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_gamerecord_7a5c0dd57a35f5ae, []int{11}
+	return fileDescriptor_7d42389f4cea3718, []int{11}
 }
+
 func (m *QueryClubStatisticsReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_QueryClubStatisticsReq.Unmarshal(m, b)
 }
 func (m *QueryClubStatisticsReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_QueryClubStatisticsReq.Marshal(b, m, deterministic)
 }
-func (dst *QueryClubStatisticsReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryClubStatisticsReq.Merge(dst, src)
+func (m *QueryClubStatisticsReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryClubStatisticsReq.Merge(m, src)
 }
 func (m *QueryClubStatisticsReq) XXX_Size() int {
 	return xxx_messageInfo_QueryClubStatisticsReq.Size(m)
@@ -849,16 +863,17 @@ func (m *StatisticsData) Reset()         { *m = StatisticsData{} }
 func (m *StatisticsData) String() string { return proto.CompactTextString(m) }
 func (*StatisticsData) ProtoMessage()    {}
 func (*StatisticsData) Descriptor() ([]byte, []int) {
-	return fileDescriptor_gamerecord_7a5c0dd57a35f5ae, []int{12}
+	return fileDescriptor_7d42389f4cea3718, []int{12}
 }
+
 func (m *StatisticsData) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_StatisticsData.Unmarshal(m, b)
 }
 func (m *StatisticsData) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_StatisticsData.Marshal(b, m, deterministic)
 }
-func (dst *StatisticsData) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_StatisticsData.Merge(dst, src)
+func (m *StatisticsData) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_StatisticsData.Merge(m, src)
 }
 func (m *StatisticsData) XXX_Size() int {
 	return xxx_messageInfo_StatisticsData.Size(m)
@@ -903,16 +918,17 @@ func (m *QueryClubStatisticsRsp) Reset()         { *m = QueryClubStatisticsRsp{}
 func (m *QueryClubStatisticsRsp) String() string { return proto.CompactTextString(m) }
 func (*QueryClubStatisticsRsp) ProtoMessage()    {}
 func (*QueryClubStatisticsRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_gamerecord_7a5c0dd57a35f5ae, []int{13}
+	return fileDescriptor_7d42389f4cea3718, []int{13}
 }
+
 func (m *QueryClubStatisticsRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_QueryClubStatisticsRsp.Unmarshal(m, b)
 }
 func (m *QueryClubStatisticsRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_QueryClubStatisticsRsp.Marshal(b, m, deterministic)
 }
-func (dst *QueryClubStatisticsRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryClubStatisticsRsp.Merge(dst, src)
+func (m *QueryClubStatisticsRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryClubStatisticsRsp.Merge(m, src)
 }
 func (m *QueryClubStatisticsRsp) XXX_Size() int {
 	return xxx_messageInfo_QueryClubStatisticsRsp.Size(m)
@@ -954,11 +970,9 @@ func init() {
 	proto.RegisterType((*QueryClubStatisticsRsp)(nil), "pbgamerecord.QueryClubStatisticsRsp")
 }
 
-func init() {
-	proto.RegisterFile("gamerecord/gamerecord.proto", fileDescriptor_gamerecord_7a5c0dd57a35f5ae)
-}
+func init() { proto.RegisterFile("gamerecord/gamerecord.proto", fileDescriptor_7d42389f4cea3718) }
 
-var fileDescriptor_gamerecord_7a5c0dd57a35f5ae = []byte{
+var fileDescriptor_7d42389f4cea3718 = []byte{
 	// 691 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x56, 0xdf, 0x6a, 0xd4, 0x4e,
 	0x14, 0x26, 0xc9, 0x66, 0xff, 0x9c, 0xdd, 0x6e, 0x61, 0x7e, 0x3f, 0xca, 0xa0, 0xa5, 0x84, 0x20,

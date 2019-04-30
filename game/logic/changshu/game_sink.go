@@ -973,7 +973,6 @@ func (self *GameSink) huCard(chairId int32) error {
 	self.haswaitOper[chairId] = false
 
 	if len(self.operOrder[HuOrder]) == 0 {
-		self.gameBalance.lastHuChair = chairId
 		self.gameBalance.CalGangTou(self.leftCard, self.bankerId)
 		self.gameEnd()
 	}
@@ -1029,27 +1028,19 @@ func (self *GameSink) cancelOper(chairId int32) error {
 
 //游戏结束
 func (self *GameSink) gameEnd() {
-	log.Debugf("%s 第%d局游戏结束", self.logHeadUser(self.gameBalance.lastHuChair), self.desk.curInning)
+	log.Debugf("%s 第%d局游戏结束", self.logHeadUser(-1), self.desk.curInning)
 	self.isPlaying = false
-	self.dealGameBalance()
-
-	msg := &pbgame_logic.BS2CGameEnd{CurInning: self.desk.curInning, Banker: self.bankerId, Isdeuce: self.gameBalance.lastHuChair == -1}
-	msg.PlayerBalance = []*pbgame_logic.PlayerBalanceInfo{}
-	for _, v := range self.players {
-		Info := &pbgame_logic.PlayerBalanceInfo{}
-		Info.HandCards = v.CardInfo.HandCards
-		Info.HuCard = v.BalanceInfo.HuCard
-		Info.Point = v.BalanceInfo.HuPoint
+	if self.hasHu {
+		self.gameBalance.CalGameBalance(self.players, self.bankerId)
+		//发送小结算信息
+		msg := &pbgame_logic.BS2CGameEnd{CurInning: self.desk.curInning, Banker: self.bankerId, Isdeuce: self.hasHu}
+		strPlayerBalance := &pbgame_logic.Json_PlayerBalance{PlayerBalanceInfo: self.gameBalance.GetPlayerBalanceInfo(self.players)}
+		msg.JsonPlayerBalance = util.PB2JSON(strPlayerBalance, false)
+		self.sendData(-1, msg)
 	}
 
 	//游戏记录
-	self.sendData(-1, msg)
 	self.afterGameEnd()
-}
-
-//处理算分
-func (self *GameSink) dealGameBalance() {
-
 }
 
 //小局结束后数据清理
