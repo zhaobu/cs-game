@@ -131,6 +131,11 @@ message C2SGetReady {
 }
 
 ///////////////////////////s-c///////////////////////////
+//玩家准备下一局
+message BS2CGetReady {
+  int32 chair_id = 1;  //准备玩家
+}
+
 //更改状态
 message BS2CUpdateGameStatus {
   GameStatus game_status = 1;  //当前游戏状态
@@ -324,7 +329,7 @@ message Json_PlayerBalance {
     int32 total_point = 6;             //玩家当前总分数
     HuMode hu_mode = 7;                //胡牌方式
     repeated int32 ban_all_cards = 8;  //扳到的所有的牌
-    repeated int32 ban_hit_index = 9; //奖码牌的索引
+    repeated int32 ban_hit_index = 9;  //奖码牌的索引
   }
   repeated Info player_balance_info = 1;
 }

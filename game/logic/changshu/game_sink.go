@@ -1159,6 +1159,7 @@ func (self *GameSink) getReady(chairId int32) {
 		return
 	}
 	self.readyInfo[chairId] = true
+	self.sendData(-1, &pbgame_logic.BS2CGetReady{ChairId: chairId})
 	if int32(len(self.readyInfo)) >= self.game_config.PlayerCount {
 		self.StartGame()
 	}
