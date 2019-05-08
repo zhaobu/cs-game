@@ -446,6 +446,8 @@ func (d *Desk) doAction(uid uint64, actionName string, actionValue []byte) {
 		d.gameSink.outCard(chairId, v.Card)
 	case *pbgame_logic.C2SGetReady:
 		d.gameSink.getReady(chairId)
+	case *pbgame_logic.C2SGetGameRecord:
+		d.gameSink.getGameRecord()
 	default:
 		log.Warnf("invalid type %s", actionName)
 	}

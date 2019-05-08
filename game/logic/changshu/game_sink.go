@@ -43,7 +43,7 @@ type gameAllInfo struct {
 type gamePrivateInfo struct {
 	gameBalance GameBalance             //游戏结束信息
 	operAction  OperAtion               //操作
-	record      mj.GameRecord           //游戏回放
+	record      mj.GameRecord           //游戏战绩回放
 	players     []*mj.PlayerInfo        //玩家游戏信息
 	game_config *pbgame_logic.CreateArg //游戏参数
 	baseCard    []int32                 //基础牌库
@@ -445,7 +445,7 @@ func (self *GameSink) drawCard(chairId, last int32) error {
 	log.Debugf("%s,摸牌操作,last=%d", self.logHeadUser(chairId), last)
 	//检查游戏是否结束
 	if len(self.leftCard) <= 0 {
-		self.gameEnd()
+		self.gameEnd(pbgame_logic.GameEndType_EndDeuce)
 		return nil
 	}
 
@@ -763,7 +763,7 @@ func (self *GameSink) chiCard(chairId, card int32, chiType uint32) error {
 	//判断是否已经胡
 	if self.hasHu {
 		log.Debugf("%s 操作吃,因为已经有人胡牌,游戏结束", self.logHeadUser(chairId))
-		self.gameEnd()
+		self.gameEnd(pbgame_logic.GameEndType_EndHu)
 		return nil
 	}
 	//更新玩家card_info表
@@ -817,7 +817,7 @@ func (self *GameSink) pengCard(chairId, card int32) error {
 	//判断是否已经胡
 	if self.hasHu {
 		log.Debugf("%s 操作碰,因为已经有人胡牌,游戏结束", self.logHeadUser(chairId))
-		self.gameEnd()
+		self.gameEnd(pbgame_logic.GameEndType_EndHu)
 		return nil
 	}
 	//更新玩家card_info表
@@ -870,7 +870,7 @@ func (self *GameSink) gangCard(chairId, card int32) error {
 	//判断是否已经胡
 	if self.hasHu {
 		log.Debugf("%s 操作杠,因为已经有人胡牌,游戏结束", self.logHeadUser(chairId))
-		self.gameEnd()
+		self.gameEnd(pbgame_logic.GameEndType_EndHu)
 		return nil
 	}
 
@@ -988,7 +988,7 @@ func (self *GameSink) huCard(chairId int32) error {
 
 	if len(self.operOrder[HuOrder]) == 0 {
 		self.gameBalance.CalGangTou(self.leftCard, self.bankerId)
-		self.gameEnd()
+		self.gameEnd(pbgame_logic.GameEndType_EndHu)
 	}
 	return nil
 }
@@ -1025,7 +1025,7 @@ func (self *GameSink) cancelOper(chairId int32) error {
 	//判断是否已经胡
 	if self.hasHu {
 		log.Debugf("%s 取消操作,因为已经有人胡牌,游戏结束", self.logHeadUser(chairId))
-		self.gameEnd()
+		self.gameEnd(pbgame_logic.GameEndType_EndHu)
 		return nil
 	}
 
@@ -1043,17 +1043,22 @@ func (self *GameSink) cancelOper(chairId int32) error {
 }
 
 //游戏结束
-func (self *GameSink) gameEnd() {
+func (self *GameSink) gameEnd(endType pbgame_logic.GameEndType) {
 	log.Debugf("%s 第%d局游戏结束", self.logHeadUser(-1), self.desk.curInning)
 	self.isPlaying = false
+	//发送小结算信息
+	msg := &pbgame_logic.BS2CGameEnd{CurInning: self.desk.curInning, Banker: self.bankerId, EndType: endType}
 	if self.hasHu {
 		self.gameBalance.CalGameBalance(self.players, self.bankerId)
-		//发送小结算信息
-		msg := &pbgame_logic.BS2CGameEnd{CurInning: self.desk.curInning, Banker: self.bankerId, Isdeuce: self.hasHu}
 		strPlayerBalance := &pbgame_logic.Json_PlayerBalance{PlayerBalanceInfo: self.gameBalance.GetPlayerBalanceInfo(self.players)}
 		msg.JsonPlayerBalance = util.PB2JSON(strPlayerBalance, false)
 		self.sendData(-1, msg)
 	}
+	scoreInfo := map[int32]int32{}
+	for k, v := range self.players {
+		scoreInfo[int32(k)] = v.BalanceInfo.HuPoint
+	}
+	self.record.AddGameEnd(scoreInfo)
 
 	//游戏记录
 	self.afterGameEnd()
@@ -1169,4 +1174,9 @@ func (self *GameSink) getReady(chairId int32) {
 	if int32(len(self.readyInfo)) >= self.game_config.PlayerCount {
 		self.StartGame()
 	}
+}
+
+// 查询战绩
+func (self *GameSink) getGameRecord() {
+	msg := pbgame_logic.GameRecord{TotalInning: self.desk.curInning}
 }

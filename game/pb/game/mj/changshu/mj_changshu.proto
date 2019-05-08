@@ -130,6 +130,10 @@ message C2SCancelAction {
 message C2SGetReady {
 }
 
+//查询战绩
+message C2SGetGameRecord {
+}
+
 ///////////////////////////s-c///////////////////////////
 //玩家准备下一局
 message BS2CGetReady {
@@ -334,27 +338,59 @@ message Json_PlayerBalance {
   repeated Info player_balance_info = 1;
 }
 
+enum GameEndType {
+  EndNone = 0;
+  EndHu = 1;        //胡了
+  EndDeuce = 2;     //流局
+  EndDissmiss = 3;  //解散
+}
 //单局游戏结束
 message BS2CGameEnd {
-  uint32 curInning = 1;            //当前局数
-  int32 banker = 2;                //庄家id
+  uint32 cur_inning = 1;  //当前局数
+  int32 banker = 2;       //庄家id
   string json_player_balance = 3;  //玩家当局结算信息(以Json_PlayerBalance解析)
-  bool isdeuce = 4;                //是否流局
+  GameEndType end_type = 4;  //是否流局
 }
 
-message PlayerBalanceResult {
-  int32 uid = 1;       //玩家uid
-  int32 point = 2;     //得分
-  int32 huPai = 3;     //胡牌次数
-  int32 dianPao = 4;   //点炮次数
-  int32 anGang = 5;    //暗杠次数
-  int32 mingGang = 6;  //明杠次数
+message GameRecordUserName {
+  int32 chair_id = 1;  //座位号
+  string name = 2;     //昵称
 }
-//大局结算
-message BS2CBalanceResult {
-  string room_name = 1;                            //房间名称
-  repeated PlayerBalanceResult player_result = 2;  //大结算结果
+
+message GameRecordRank {
+  int32 win_times = 1;    //胜局
+  int32 chair_id = 2;     //座位号
+  int32 total_score = 3;  //累计总分
 }
+
+message Json_GameRecord {
+  message InningInfo {
+    map<int32, int32> score = 1;  //本局分数(key:座位号,value:分数)
+  }
+  repeated InningInfo user_score = 1;  //玩家本局得分
+}
+
+//战绩记录
+message GameRecord {
+  uint32 total_inning = 2;                     //当前对局总数
+  repeated GameRecordRank rank_info = 3;      //总分排行(降序排列)
+  string json_record_info = 4;                //战绩流水
+}
+
+// message PlayerBalanceResult {
+//   int32 uid = 1;        //玩家uid
+//   int32 point = 2;      //得分
+//   int32 hu_pai = 3;     //胡牌次数
+//   int32 dian_pao = 4;   //点炮次数
+//   int32 an_gang = 5;    //暗杠次数
+//   int32 ming_gang = 6;  //明杠次数
+// }
+
+// //大局结算
+// message BS2CBalanceResult {
+//   string room_name = 1;                            //房间名称
+//   repeated PlayerBalanceResult player_result = 2;  //大结算结果
+// }
 
 // message CardInfo {
 //   int32 chair_id = 1;  //玩家chair_id
