@@ -2,6 +2,7 @@ package majiang
 
 import (
 	pbgame_logic "cy/game/pb/game/mj/changshu"
+	"cy/game/util"
 	"sort"
 )
 
@@ -15,8 +16,9 @@ type RankCell struct {
 }
 
 type GameRecord struct {
-	RankInfo  []*RankCell       //总分排行
-	UserScore []map[int32]int32 //战绩流水
+	TotalInning uint32
+	RankInfo    []*RankCell       //总分排行
+	UserScore   []map[int32]int32 //战绩流水
 }
 
 func (self *GameRecord) Init(config *pbgame_logic.CreateArg) {
@@ -27,7 +29,8 @@ func (self *GameRecord) Init(config *pbgame_logic.CreateArg) {
 	self.UserScore = make([]map[int32]int32, 0, config.RInfo.LoopCnt)
 }
 
-func (self *GameRecord) AddGameEnd(info map[int32]int32) {
+//记录游戏战绩
+func (self *GameRecord) AddGameRecord(info map[int32]int32) {
 	self.UserScore = append(self.UserScore, info)
 	for k, v := range info {
 		self.RankInfo[k].TotalScore += v
@@ -35,6 +38,7 @@ func (self *GameRecord) AddGameEnd(info map[int32]int32) {
 			self.RankInfo[k].WinTimes++
 		}
 	}
+	self.TotalInning++
 	//重新排名
 	sort.Slice(self.RankInfo, func(i, j int) bool {
 		if self.RankInfo[i].TotalScore == self.RankInfo[j].TotalScore {
@@ -42,4 +46,22 @@ func (self *GameRecord) AddGameEnd(info map[int32]int32) {
 		}
 		return self.RankInfo[i].TotalScore > self.RankInfo[j].TotalScore
 	})
+}
+
+//查询游戏记录
+func (self *GameRecord) GetGameRecord() *pbgame_logic.S2CGameRecord {
+	msg := &pbgame_logic.S2CGameRecord{TotalInning: self.TotalInning}
+	rankInfo := make([]*pbgame_logic.GameRecordRank, 0, len(self.RankInfo))
+	for _, v := range self.RankInfo {
+		rankInfo = append(rankInfo, &pbgame_logic.GameRecordRank{ChairId: v.ChairId, TotalScore: v.TotalScore, WinTimes: v.WinTimes})
+	}
+	msg.RankInfo = rankInfo
+	gameRecord := &pbgame_logic.Json_GameRecord{}
+	gameRecord.UserScore = make([]*pbgame_logic.Json_GameRecord_InningInfo, 0, len(self.UserScore))
+	for _, v := range self.UserScore {
+		tmp := &pbgame_logic.Json_GameRecord_InningInfo{Score: v}
+		gameRecord.UserScore = append(gameRecord.UserScore, tmp)
+	}
+	msg.JsonRecordInfo = util.PB2JSON(gameRecord, false)
+	return msg
 }

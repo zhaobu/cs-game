@@ -317,11 +317,11 @@ func (d *Desk) doDestroyDesk(uid uint64, req *pbgame.DestroyDeskReq, rsp *pbgame
 			msg := &pbgame.VoteDestroyDeskNotif{DeskID: d.deskId, VoteUser: uid, LeftTime: int32(dissTimeOut.Seconds()), VoteResult: d.getVoteResult()}
 			d.SendData(0, msg)
 			d.set_timer(mj.TID_Destory, 15*time.Second, func() {
-				msg := &pbgame.VoteDestroyDeskReq{Option: pbgame.VoteOption_VoteOptionAgree}
+				tmpReq := &pbgame.VoteDestroyDeskReq{Option: pbgame.VoteOption_VoteOptionAgree}
 				for _, v := range d.playChair {
 					//超时默认为同意解散
 					if _, ok := d.voteOption[v.info.UserID]; !ok {
-						d.doVoteDestroyDesk(v.info.UserID, msg)
+						d.doVoteDestroyDesk(v.info.UserID, tmpReq)
 					}
 				}
 			})
@@ -363,6 +363,9 @@ func (d *Desk) doVoteDestroyDesk(uid uint64, req *pbgame.VoteDestroyDeskReq) {
 
 //处理桌子销毁
 func (d *Desk) dealDestroyDesk(reqType pbgame.DestroyDeskType) {
+	if d.gameStatus > pbgame_logic.GameStatus_GSWait {
+		d.gameSink.gameEnd(pbgame_logic.GameEndType_EndDissmiss)
+	}
 	//处理房间所有人的状态
 	msg := &pbgame.DestroyDeskResultNotif{DeskID: d.deskId, Result: 1, Type: reqType}
 	for uid, _ := range d.deskPlayers {
@@ -447,7 +450,7 @@ func (d *Desk) doAction(uid uint64, actionName string, actionValue []byte) {
 	case *pbgame_logic.C2SGetReady:
 		d.gameSink.getReady(chairId)
 	case *pbgame_logic.C2SGetGameRecord:
-		d.gameSink.getGameRecord()
+		d.gameSink.getGameRecord(chairId)
 	default:
 		log.Warnf("invalid type %s", actionName)
 	}

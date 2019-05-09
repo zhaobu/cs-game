@@ -84,6 +84,8 @@ func (self *Changshu) DispatchRecv(msg *pbgame.GameNotif) {
 	case *pbgame_logic.BS2CFirstBuHua:
 		tlog.Info("recv GameNotif 玩家第一次补花")
 		self.dealFirstBuHua(v)
+	case *pbgame_logic.S2CGameRecord:
+		log.Infof("recv GameNotif 战绩查询结果:%v", v)
 	default:
 		tlog.Info("recv GameNotif 未处理", zap.String("NotifName", msg.NotifName))
 	}
@@ -230,7 +232,9 @@ func (self *Changshu) S2CStartGame(msg *pbgame_logic.S2CStartGame) {
 	json.Unmarshal([]byte(msg.JsonAllCards), &tmp)
 	self.HandCards = tmp.HandCards[self.ChairId].Cards
 	tlog.Info("self.HandCards", zap.Any("handcards", self.HandCards))
-	self.readHaveOper(msg.BankerOper)
+	if msg.BankerId == self.ChairId {
+		self.readHaveOper(msg.BankerOper)
+	}
 }
 
 func isFlag(mask, typeFlag uint32) bool {
@@ -288,6 +292,10 @@ func (self *Changshu) DoAction(act string) {
 		self.outCard()
 	case "want":
 		self.wantCards()
+	case "record":
+		self.getGameRecord()
+	case "ready":
+		self.getReady()
 	}
 
 }
@@ -299,6 +307,16 @@ func getCards(str string) (cards []int) {
 		cards = append(cards, card)
 	}
 	return
+}
+
+//准备下一局
+func (self *Changshu) getReady() {
+	self.SendGameAction(&pbgame_logic.C2SGetReady{})
+}
+
+//查询战绩
+func (self *Changshu) getGameRecord() {
+	self.SendGameAction(&pbgame_logic.C2SGetGameRecord{})
 }
 
 //要牌
@@ -338,13 +356,13 @@ func (self *Changshu) operAction() {
 	switch pick {
 	case "c":
 		str := "我能"
-		if isFlag(oper.CanChi.ChiType, uint32(pbgame_logic.ChiTypeMask_ChiMaskLeft)) {
+		if isFlag(oper.CanChi, uint32(pbgame_logic.ChiTypeMask_ChiMaskLeft)) {
 			str = str + "左吃,"
 		}
-		if isFlag(oper.CanChi.ChiType, uint32(pbgame_logic.ChiTypeMask_ChiMaskMiddle)) {
+		if isFlag(oper.CanChi, uint32(pbgame_logic.ChiTypeMask_ChiMaskMiddle)) {
 			str = str + "中吃,"
 		}
-		if isFlag(oper.CanChi.ChiType, uint32(pbgame_logic.ChiTypeMask_ChiMaskRight)) {
+		if isFlag(oper.CanChi, uint32(pbgame_logic.ChiTypeMask_ChiMaskRight)) {
 			str = str + "右吃"
 		}
 		tlog.Info(str)
@@ -364,7 +382,7 @@ func (self *Changshu) operAction() {
 	case "p":
 		self.SendGameAction(&pbgame_logic.C2SPengCard{Card: oper.Card})
 	case "g":
-		tlog.Info("能杠的牌", zap.Any("Cards", oper.CanGang.Cards))
+		tlog.Info("能杠的牌", zap.Any("Cards", oper.CanGang))
 		var card int32
 		fmt.Printf("请选择杠的牌: ")
 		fmt.Scan(&card)

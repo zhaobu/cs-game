@@ -200,6 +200,8 @@ func (self *GameBalance) CalGameBalance(players []*mj.PlayerInfo, bankerId int32
 	}
 	for winChair, v := range self.huChairs {
 		balanceInfo := &players[winChair].BalanceInfo
+		//胡牌分
+		balanceInfo.HuPoint = 1
 		winSocre := 1 + balanceInfo.GetPingHuHua() //胡牌1分+补花+杠花+风花
 		//奖码花
 		balanceInfo.JiangMaPoint = int32(len(self.hitIndex[winChair]))

@@ -87,6 +87,7 @@ func (self *GameSink) Ctor(config *pbgame_logic.CreateArg) error {
 	self.baseCard = cardDef.GetBaseCard(config.PlayerCount)
 	self.operAction.Init(config, self.laiziCard)
 	self.gameBalance.Init(config)
+	self.record.Init(config)
 	return nil
 }
 
@@ -1044,7 +1045,11 @@ func (self *GameSink) cancelOper(chairId int32) error {
 
 //游戏结束
 func (self *GameSink) gameEnd(endType pbgame_logic.GameEndType) {
-	log.Debugf("%s 第%d局游戏结束", self.logHeadUser(-1), self.desk.curInning)
+	log.Debugf("%s 第%d局游戏结束,结束原因%v", self.logHeadUser(-1), self.desk.curInning, endType)
+	if !self.isPlaying { //可能是解散导致游戏结束
+		self.desk.gameEnd()
+		return
+	}
 	self.isPlaying = false
 	//发送小结算信息
 	msg := &pbgame_logic.BS2CGameEnd{CurInning: self.desk.curInning, Banker: self.bankerId, EndType: endType}
@@ -1056,9 +1061,9 @@ func (self *GameSink) gameEnd(endType pbgame_logic.GameEndType) {
 	}
 	scoreInfo := map[int32]int32{}
 	for k, v := range self.players {
-		scoreInfo[int32(k)] = v.BalanceInfo.HuPoint
+		scoreInfo[int32(k)] = v.BalanceInfo.Point
 	}
-	self.record.AddGameEnd(scoreInfo)
+	self.record.AddGameRecord(scoreInfo)
 
 	//游戏记录
 	self.afterGameEnd()
@@ -1177,6 +1182,6 @@ func (self *GameSink) getReady(chairId int32) {
 }
 
 // 查询战绩
-func (self *GameSink) getGameRecord() {
-	msg := pbgame_logic.GameRecord{TotalInning: self.desk.curInning}
+func (self *GameSink) getGameRecord(chairId int32) {
+	self.sendData(chairId, self.record.GetGameRecord())
 }

@@ -371,10 +371,10 @@ message Json_GameRecord {
 }
 
 //战绩记录
-message GameRecord {
+message S2CGameRecord {
   uint32 total_inning = 2;                     //当前对局总数
   repeated GameRecordRank rank_info = 3;      //总分排行(降序排列)
-  string json_record_info = 4;                //战绩流水
+  string json_record_info = 4;                //战绩流水(按照Json_GameRecord解析)
 }
 
 // message PlayerBalanceResult {
