@@ -101,7 +101,7 @@ func (p *club) RefreshClubDesks(ctx context.Context, args *codec.Message, reply 
 	}
 
 	//在查询时 做一下俱乐部桌子校验 防止游戏服务器重启 自动开放俱乐部的桌子不存在的情况
-	if cc.IsAutoCreate {		//自动创建桌子 但是当前不存在桌子
+	if cc.IsAutoCreate && cc.f == nil {		//自动创建桌子 但是当前不存在桌子
 		haveEmptyTable := false
 		for _,v :=range cc.desks {
 			if v.Status == "1" {	//有空桌子
