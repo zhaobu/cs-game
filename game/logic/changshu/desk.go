@@ -281,7 +281,6 @@ func (d *Desk) sendDeskInfo(uid uint64) {
 		return
 	}
 	msg := &pbgame_logic.GameDeskInfo{GameName: gameName, Arg: d.deskConfig, GameStatus: d.gameStatus, CurInning: d.curInning}
-	msg.BankerId = d.gameSink.bankerId
 	msg.MasterUid = d.masterUid
 	msg.GameUser = []*pbgame_logic.DeskUserInfo{}
 	for chair, user := range d.playChair {

@@ -289,11 +289,11 @@ func (self *GameSink) deal_card() {
 	self.curOutChair = self.bankerId
 	self.resetOper()
 	//分析庄家能做的操作
-	ret := self.operAction.BankerAnalysis(self.players[self.bankerId])
+	ret := self.operAction.BankerAnalysis(self.players[self.bankerId], self.bankerId, mj.HuMode_ZIMO)
 	//统计能做的操作
 	if !ret.Empty() {
 		msg.BankerOper = &pbgame_logic.S2CHaveOperation{ChairId: self.bankerId}
-		self.countCanOper(ret, self.bankerId, mj.HuMode_ZIMO, -1, bankerCardInfo.HandCards[13], -1, msg.BankerOper)
+		self.countCanOper(ret, self.bankerId, msg.BankerOper)
 	}
 
 	for k, v := range self.players {
@@ -490,7 +490,7 @@ func (self *GameSink) drawCard(chairId, last int32) error {
 		huModeTags = append(huModeTags, mj.HuModeTag_GangShangHua)
 	}
 	//分析能否暗杠,补杠,自摸胡
-	ret := self.operAction.DrawcardAnalysis(self.players[chairId], card, int32(len(self.leftCard)), huModeTags)
+	ret := self.operAction.DrawcardAnalysis(self.players[chairId], chairId, card, int32(len(self.leftCard)), huModeTags)
 	log.Infof("%s 摸牌后操作分析ret=%+v", self.logHeadUser(chairId), ret)
 	//发送倒计时玩家
 	// self.sendData(-1, &pbgame_logic.BS2CCurOutChair{ChairId: chairId})
@@ -502,8 +502,8 @@ func (self *GameSink) drawCard(chairId, last int32) error {
 		if last == -1 && !ret.CanHu.Empty() {
 			//杠上开花
 		}
-		msg := &pbgame_logic.S2CHaveOperation{ChairId: chairId, Card: card}
-		self.countCanOper(ret, chairId, mj.HuMode_ZIMO, -1, card, -1, msg)
+		msg := &pbgame_logic.S2CHaveOperation{ChairId: chairId}
+		self.countCanOper(ret, chairId, msg)
 		//发送玩家可进行的操作
 		self.sendData(chairId, msg)
 	}
@@ -528,7 +528,7 @@ func (self *GameSink) checkAfterChiPeng(chairId int32) {
 
 	cardInfo := &self.players[chairId].CardInfo
 	//分析能否暗杠,补杠
-	ret := self.operAction.AfterChiPengAnalysis(cardInfo)
+	ret := self.operAction.AfterChiPengAnalysis(cardInfo, chairId)
 	log.Infof("%s 吃碰后操作分析ret=%+v", self.logHeadUser(chairId), ret)
 	//发送倒计时玩家
 	// self.sendData(-1, &pbgame_logic.BS2CCurOutChair{ChairId: chairId})
@@ -536,7 +536,7 @@ func (self *GameSink) checkAfterChiPeng(chairId int32) {
 	//统计能做的操作
 	if !ret.Empty() {
 		msg := &pbgame_logic.S2CHaveOperation{ChairId: chairId}
-		self.countCanOper(ret, chairId, mj.HuMode_ZIMO, -1, 0, -1, msg)
+		self.countCanOper(ret, chairId, msg)
 		//发送玩家可进行的操作
 		self.sendData(chairId, msg)
 	}
@@ -584,8 +584,8 @@ func (self *GameSink) outCard(chairId, card int32) error {
 			ret := self.operAction.OutCardAnalysis(v, card, int32(k), chairId, int32(len(self.leftCard)))
 			if !ret.Empty() {
 				//统计并记录玩家可以进行的操作
-				msg := &pbgame_logic.S2CHaveOperation{ChairId: int32(k), Card: card}
-				self.countCanOper(ret, int32(k), mj.HuMode_PAOHU, chairId, card, chairId, msg)
+				msg := &pbgame_logic.S2CHaveOperation{ChairId: int32(k)}
+				self.countCanOper(ret, int32(k), msg)
 				willWait = true
 				//发送玩家可进行的操作
 				log.Infof("%s 可进行的操作%+v", self.logHeadUser(int32(k)), ret)
@@ -608,36 +608,56 @@ func (self *GameSink) addOperOrder(order PriorityOrder, oper *OperPriority) {
 	}
 }
 
-//统计并记录玩家可以进行的操作
-func (self *GameSink) countCanOper(ret *CanOperInfo, chairId int32, huMode mj.EmHuMode, loseChair, card, opChair int32, msg *pbgame_logic.S2CHaveOperation) {
+//构建玩家可进行操作消息
+func (self *GameSink) countCanOperMsg(ret *CanOperInfo, msg *pbgame_logic.S2CHaveOperation) {
 	//记录能吃
 	if !ret.CanChi.Empty() {
-		self.canOperInfo[chairId].CanChi = CanChiOper{Card: card, ChairId: chairId, ChiType: ret.CanChi.ChiType}
 		msg.OperMask = uint32(pbgame_logic.CanOperMask_OperMaskChi) | msg.OperMask
 		msg.CanChi = ret.CanChi.ChiType
-		self.addOperOrder(ChiOrder, &OperPriority{ChairId: chairId, Op: ChiOrder, Info: &self.canOperInfo[chairId].CanChi})
+		msg.Card = ret.CanChi.Card
 	}
 	//记录能碰
 	if !ret.CanPeng.Empty() {
-		self.canOperInfo[chairId].CanPeng = CanPengOper{ChairId: chairId, LoseChair: loseChair, Card: card}
 		msg.OperMask = uint32(pbgame_logic.CanOperMask_OperMaskPeng) | msg.OperMask
-		self.addOperOrder(PengOrder, &OperPriority{ChairId: chairId, Op: PengOrder, Info: &self.canOperInfo[chairId].CanPeng})
+		msg.Card = ret.CanPeng.Card
 	}
 	//记录能杠
 	if !ret.CanGang.Empty() {
-		self.canOperInfo[chairId].CanGang = CanGangOper{ChairId: chairId, GangList: ret.CanGang.GangList}
 		msg.OperMask = uint32(pbgame_logic.CanOperMask_OperMaskGang) | msg.OperMask
 		for _, gangCard := range ret.CanGang.GangList {
 			msg.CanGang = append(msg.CanGang, &pbgame_logic.Cyint32{T: gangCard})
 		}
+	}
+	//记录能胡
+	if !ret.CanHu.Empty() {
+		msg.OperMask = uint32(pbgame_logic.CanOperMask_OperMaskHu) | msg.OperMask
+		msg.Card = ret.CanHu.Card
+	}
+}
+
+//统计并记录玩家可以进行的操作
+func (self *GameSink) countCanOper(ret *CanOperInfo, chairId int32, msg *pbgame_logic.S2CHaveOperation) {
+	//记录能吃
+	if !ret.CanChi.Empty() {
+		self.canOperInfo[chairId].CanChi = ret.CanChi
+		self.addOperOrder(ChiOrder, &OperPriority{ChairId: chairId, Op: ChiOrder, Info: &self.canOperInfo[chairId].CanChi})
+	}
+	//记录能碰
+	if !ret.CanPeng.Empty() {
+		self.canOperInfo[chairId].CanPeng = ret.CanPeng
+		self.addOperOrder(PengOrder, &OperPriority{ChairId: chairId, Op: PengOrder, Info: &self.canOperInfo[chairId].CanPeng})
+	}
+	//记录能杠
+	if !ret.CanGang.Empty() {
+		self.canOperInfo[chairId].CanGang = ret.CanGang
 		self.addOperOrder(GangOrder, &OperPriority{ChairId: chairId, Op: GangOrder, Info: &self.canOperInfo[chairId].CanGang})
 	}
 	//记录能胡
 	if !ret.CanHu.Empty() {
-		self.canOperInfo[chairId].CanHu = CanHuOper{HuMode: huMode, LoseChair: loseChair, Card: card, OpChair: opChair, HuList: ret.CanHu.HuList}
-		msg.OperMask = uint32(pbgame_logic.CanOperMask_OperMaskHu) | msg.OperMask
+		self.canOperInfo[chairId].CanHu = ret.CanHu
 		self.addOperOrder(HuOrder, &OperPriority{ChairId: chairId, Op: HuOrder, Info: &self.canOperInfo[chairId].CanHu})
 	}
+	self.countCanOperMsg(ret, msg)
 }
 
 //洗牌
@@ -882,27 +902,27 @@ func (self *GameSink) gangCard(chairId, card int32) error {
 	self.curOutChair = -1 //玩家杠牌后 当前出牌玩家还不是自己 要摸牌后才能出牌
 	gangType := self.operAction.GetGangType(&self.players[chairId].CardInfo, card)
 
-	var loseChair int32 = -1             //如果是补杠,为碰牌时被碰玩家
-	if gangType == mj.OperType_BU_GANG { //补杠
+	var loseChair int32 = -1                            //如果是补杠,为碰牌时被碰玩家
+	if gangType == pbgame_logic.OperType_Oper_BU_GANG { //补杠
 		log.Debugf("%s 补杠,杠牌为%d", self.logHeadUser(chairId), card)
 		loseChair = self.players[chairId].CardInfo.PengCards[card]
-	} else if gangType == mj.OperType_MING_GANG { //明杠
+	} else if gangType == pbgame_logic.OperType_Oper_MING_GANG { //明杠
 		log.Debugf("%s 明杠,杠牌为%d", self.logHeadUser(chairId), card)
 		loseChair = self.lastOutChair
-	} else if gangType == mj.OperType_AN_GANG { //暗杠
+	} else if gangType == pbgame_logic.OperType_Oper_AN_GANG { //暗杠
 		log.Debugf("%s 暗杠,杠牌为%d", self.logHeadUser(chairId), card)
 	}
 
 	willWait := false
 	//判断抢杠胡
-	if gangType == mj.OperType_BU_GANG {
+	if gangType == pbgame_logic.OperType_Oper_BU_GANG {
 		for k, v := range self.players {
 			if int32(k) != chairId {
 				ret := self.operAction.QiangGangAnalysis(v, card, int32(k), int32(chairId))
 				if !ret.Empty() {
 					//统计并记录玩家可以进行的操作
-					msg := &pbgame_logic.S2CHaveOperation{ChairId: int32(k), Card: card}
-					self.countCanOper(ret, int32(k), mj.HuMode_PAOHU, chairId, card, chairId, msg)
+					msg := &pbgame_logic.S2CHaveOperation{ChairId: int32(k)}
+					self.countCanOper(ret, int32(k), msg)
 					willWait = true
 					//发送玩家可进行的操作
 					log.Infof("%s 可进行的操作%+v", self.logHeadUser(int32(k)), ret)
@@ -920,7 +940,7 @@ func (self *GameSink) gangCard(chairId, card int32) error {
 	self.sendData(-1, &pbgame_logic.BS2CGangCard{ChairId: chairId, Card: card, Type: pbgame_logic.GangType(gangType), LoseChair: loseChair})
 
 	//更新玩家card_info表
-	if gangType == mj.OperType_MING_GANG {
+	if gangType == pbgame_logic.OperType_Oper_MING_GANG {
 		self.operAction.HandleGangCard(self.players[chairId], &self.players[self.lastOutChair].CardInfo, card, gangType, loseChair)
 	} else {
 		self.operAction.HandleGangCard(self.players[chairId], nil, card, gangType, loseChair)
@@ -1084,8 +1104,48 @@ func (self *GameSink) afterGameEnd() {
 
 //断线重连
 func (self *GameSink) gameReconnect(recInfo *pbgame_logic.GameDeskInfo, uid uint64) {
+	chairId := self.desk.GetChairidByUid(uid)
+	if -1 == chairId {
+		return
+	}
 	switch recInfo.GameStatus {
-	case pbgame_logic.GameStatus_GSWait:
+	case pbgame_logic.GameStatus_GSDice: //投色子
+		recInfo.CurDiceUid = self.desk.GetUidByChairid(self.curThrowDice)
+		for k, v := range recInfo.GameUser {
+			if mj.GetNextChair(int32(k), self.game_config.PlayerCount) == self.curThrowDice {
+				recInfo.LastDiceValue = switchToCyint32(self.diceResult[int32(k)][:])
+			}
+			v.DiceValue = self.diceResult[int32(k)][0] + self.diceResult[int32(k)][1]
+		}
+	case pbgame_logic.GameStatus_GSPlaying: //行牌中
+		recInfo.BankerId = self.bankerId
+		canOper := &pbgame_logic.S2CHaveOperation{ChairId: chairId}
+		if info, ok := self.canOperInfo[chairId]; ok {
+			self.countCanOperMsg(info, canOper)
+			recInfo.CanOper = canOper
+		}
+		recInfo.LastOutUid = self.desk.GetUidByChairid(self.lastOutChair)
+		recInfo.CurOutUid = self.desk.GetUidByChairid(self.curOutChair)
+		recInfo.LastOutCard = self.lastOutCard
+		recInfo.LeftNum = int32(len(self.leftCard))
+		canNotOut := make([]int32, 0, len(self.players[chairId].CardInfo.CanNotOut))
+		for _, v := range self.players[chairId].CardInfo.CanNotOut {
+			canNotOut = append(canNotOut, v)
+		}
+		recInfo.UnableOutCards = switchToCyint32(canNotOut)
+		for k, v := range recInfo.GameUser {
+			userInfo := self.players[k]
+			v.CardNum = int32(len(userInfo.CardInfo.HandCards))
+			v.Point = userInfo.BalanceResult.Point
+			v.RecordCards = userInfo.CardInfo.RiverCards
+			tmp := &pbgame_logic.Json_PlayerCard{}
+			tmp.HuaCards = userInfo.CardInfo.HuaCards
+			tmp.OutCards = userInfo.CardInfo.OutCards
+			if int32(k) == chairId {
+				tmp.HandCards = userInfo.CardInfo.HandCards
+			}
+			v.JsonCardInfo = util.PB2JSON(tmp, false)
+		}
 	default:
 	}
 }

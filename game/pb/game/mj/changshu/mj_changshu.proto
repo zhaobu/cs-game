@@ -51,14 +51,13 @@ message CreateArgTpl {
 
 // 桌子参数
 message DeskArg {
-  // 创建房间参数
-  CreateArg args = 1;
-  bool Enable = 2;
-  pbcommon.DeskType Type = 3;
-  pbgame.FeeType FeeType = 4;
-  uint64 DeskID = 5;
-  uint32 RoomId = 6;    // 匹配场时才有用
-  string RoomName = 7;  // 匹配场时才有用
+  CreateArg args = 1;          // 创建房间参数
+  bool Enable = 2;             //能否建房
+  pbcommon.DeskType Type = 3;  //桌子类型
+  pbgame.FeeType FeeType = 4;  //房费类型
+  uint64 DeskID = 5;           //桌子号
+  uint32 RoomId = 6;           // 匹配场时才有用
+  string RoomName = 7;         // 匹配场时才有用
 }
 
 //游戏状态
@@ -68,24 +67,6 @@ enum GameStatus {
   GSDice = 2;     //打色子
   GSPlaying = 3;  // 游戏中
   GSGameEnd = 4;  //游戏结束
-}
-
-// 玩家信息 s -> c
-message DeskUserInfo {
-  pbcommon.UserInfo info = 1;
-  int32 chair_id = 2;
-  pbgame.UserDeskStatus user_status = 3;
-}
-
-// 断线重连、进入桌子 桌子信息 s -> c
-message GameDeskInfo {
-  string game_name = 1;  // 游戏名称
-  DeskArg arg = 2;
-  GameStatus game_status = 3;
-  uint32 cur_inning = 4;                 //当前局数
-  int32 banker_id = 5;                   //庄家(庄家chairid)
-  uint64 master_uid = 6;                 //房主(房主uid)
-  repeated DeskUserInfo game_user = 14;  // 准备的玩家信息
 }
 
 message cyint32 {
@@ -372,9 +353,63 @@ message Json_GameRecord {
 
 //战绩记录
 message S2CGameRecord {
-  uint32 total_inning = 2;                     //当前对局总数
-  repeated GameRecordRank rank_info = 3;      //总分排行(降序排列)
-  string json_record_info = 4;                //战绩流水(按照Json_GameRecord解析)
+  uint32 total_inning = 2;                //当前对局总数
+  repeated GameRecordRank rank_info = 3;  //总分排行(降序排列)
+  string json_record_info = 4;  //战绩流水(按照Json_GameRecord解析)
+}
+
+enum OperType {
+  Oper_None = 0;
+  Oper_BU_GANG = 1;    //补杠
+  Oper_AN_GANG = 2;    //暗杠
+  Oper_MING_GANG = 3;  //明杠
+  Oper_PENG = 4;       //碰
+  Oper_LCHI = 5;       //左吃
+  Oper_MCHI = 6;       //中吃
+  Oper_RCHI = 7;       //右吃
+}
+
+message Json_PlayerCard {
+  repeated int32 hand_cards = 1;  //手牌
+  repeated int32 out_cards = 2;  //出過的牌(不包括被碰，杠，吃掉的牌)
+  repeated int32 hua_cards = 3;  //花牌
+}
+
+message OperRecord {
+  OperType type = 1;     //操作类型
+  int32 card = 2;        //操作的牌
+  int32 lose_chair = 3;  //操作来源玩家
+}
+
+// 玩家信息 s -> c
+message DeskUserInfo {
+  pbcommon.UserInfo info = 1;             //玩家基本信息
+  int32 chair_id = 2;                     //座位号
+  pbgame.UserDeskStatus user_status = 3;  //玩家状态
+  int32 card_num = 4;                     //牌数
+  int32 point = 5;                        //当前分数
+  string json_card_info = 6;  //手牌信息(按Json_PlayerCard解析)
+  repeated OperRecord record_cards = 7;  //操作记录
+  int32 dice_value = 8;                  //打色子结果
+}
+
+// 断线重连、进入桌子 桌子信息 s -> c
+message GameDeskInfo {
+  string game_name = 1;                    // 游戏名称
+  DeskArg arg = 2;                         //桌子参数
+  GameStatus game_status = 3;              //桌子状态
+  repeated DeskUserInfo game_user = 4;     //准备的玩家信息
+  uint32 cur_inning = 5;                   //当前局数
+  int32 banker_id = 6;                     //庄家(庄家chairid)
+  uint64 master_uid = 7;                   //房主(房主uid)
+  S2CHaveOperation can_oper = 8;           //玩家能做的操作
+  uint64 last_out_uid = 9;                 //上次出牌玩家
+  uint64 cur_out_uid = 10;                 //当前出牌玩家
+  int32 last_out_card = 11;                //上次出的牌
+  int32 left_num = 12;                     //剩下的牌数
+  repeated cyint32 unable_out_cards = 13;  //当前不能出的牌
+  uint64 cur_dice_uid = 14;                //当前摇色子玩家
+  repeated cyint32 last_dice_value = 15;   //上一个玩家打色子结果
 }
 
 // message PlayerBalanceResult {
@@ -402,12 +437,13 @@ message S2CGameRecord {
 //   //玩家吃的牌[11,12,13;22,23,24],3个连续的组成吃
 //   repeated cyint32 chi_cards = 5;
 //   repeated cyint32 hand_cards = 6;  //玩家的手牌
-//   int32 card_num = 7;               //玩家当前手上的牌数
-//   int32 point = 8;                  //玩家当前分数
+//   repeated cyint32 riverCards = 7;  //玩家操作记录
+//   int32 card_num = 8;               //玩家当前手上的牌数
+//   int32 point = 9;                  //玩家当前分数
 // }
 // //重连获取牌局信息
 // message S2CReconnectGame {
-//   CardInfo player_card = 1;  //玩家的牌
+//   repeated CardInfo player_card = 1;  //玩家的牌
 //   //玩家可執行的操作 json  [{"canPeng":true}] [{"canGang":[42]}]
 //   string can_operation = 2;
 //   int32 cur_out_chair = 3;   //當前該出牌的玩家
@@ -416,4 +452,5 @@ message S2CGameRecord {
 //   int32 banker = 6;          //庄家
 //   int32 left_num = 7;        //剩下的牌數
 //   int32 game_index = 8;      //當前局數
+//   repeated int32 unable_out=9;	//玩家当局不能出的牌列表
 // }

@@ -1,5 +1,7 @@
 package majiang
 
+import pbgame_logic "cy/game/pb/game/mj/changshu"
+
 type PlayerInfo struct {
 	CardInfo      PlayerCardInfo      //玩家牌局信息
 	BalanceInfo   PlayserBalanceInfo  //局结算
@@ -22,32 +24,32 @@ func (self *PlayerInfo) Reset() {
 	self.BalanceInfo.reset()
 }
 
-type OperRecord struct {
-	OperType  EmOperType //操作类型
-	Card      int32      //操作的牌
-	LoseChari int32      //操作来源玩家
-}
+// type OperRecord struct {
+// 	OperType  pbgame_logic.OperType //操作类型
+// 	Card      int32                 //操作的牌
+// 	LoseChari int32                 //操作来源玩家
+// }
 type PlayerCardInfo struct {
-	HandCards  []int32              //玩家手牌
-	OutCards   []int32              //出过的牌
-	PengCards  map[int32]int32      // {card=chair_id,..}
-	GangCards  map[int32]EmOperType // {card=G_OP_TYPE类型,...}
-	StackCards map[int32]int32      //玩家手牌数量统计 {card=num,...}
-	ChiCards   [][3]int32           //{card1,card2,card3,card4,card5,card6}3个连续的能组成吃,吃的牌放第一个
-	RiverCards []*OperRecord        //操作记录
-	HuaCards   []int32              //花牌
-	GuoPeng    bool                 //是否过碰
-	CanNotOut  map[int32]int32      //不能打的牌,包括吃后,碰后不能打的牌
+	HandCards  []int32                         //玩家手牌
+	OutCards   []int32                         //出过的牌
+	PengCards  map[int32]int32                 // {card=chair_id,..}
+	GangCards  map[int32]pbgame_logic.OperType // {card=G_OP_TYPE类型,...}
+	StackCards map[int32]int32                 //玩家手牌数量统计 {card=num,...}
+	ChiCards   [][3]int32                      //{card1,card2,card3,card4,card5,card6}3个连续的能组成吃,吃的牌放第一个
+	RiverCards []*pbgame_logic.OperRecord      //操作记录
+	HuaCards   []int32                         //花牌
+	GuoPeng    bool                            //是否过碰
+	CanNotOut  map[int32]int32                 //不能打的牌,包括吃后,碰后不能打的牌
 }
 
 func (self *PlayerCardInfo) reset() {
 	self.HandCards = []int32{}
 	self.OutCards = []int32{}
 	self.PengCards = map[int32]int32{}
-	self.GangCards = map[int32]EmOperType{}
+	self.GangCards = map[int32]pbgame_logic.OperType{}
 	self.StackCards = map[int32]int32{}
 	self.ChiCards = [][3]int32{}
-	self.RiverCards = []*OperRecord{}
+	self.RiverCards = []*pbgame_logic.OperRecord{}
 	self.HuaCards = []int32{}
 	self.GuoPeng = false
 	self.CanNotOut = map[int32]int32{}

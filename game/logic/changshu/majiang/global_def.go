@@ -1,7 +1,7 @@
 package majiang
 
 type (
-	EmOperType     uint8  //操作类型
+	// EmOperType     uint8  //操作类型
 	EmRecordAction uint8  //战绩回放
 	EmHuScoreType  uint8  //胡牌得分类型
 	EmtimerID      uint32 //定时器枚举
@@ -21,16 +21,16 @@ const (
 )
 
 //杠类型
-const (
-	OperType_None      EmOperType = iota
-	OperType_BU_GANG              //补杠
-	OperType_AN_GANG              //暗杠
-	OperType_MING_GANG            //明杠
-	OperType_PENG                 //碰
-	OperType_LCHI                 //左吃
-	OperType_MCHI                 //中吃
-	OperType_RCHI                 //右吃
-)
+// const (
+// 	OperType_None      EmOperType = iota
+// 	OperType_BU_GANG              //补杠
+// 	OperType_AN_GANG              //暗杠
+// 	OperType_MING_GANG            //明杠
+// 	OperType_PENG                 //碰
+// 	OperType_LCHI                 //左吃
+// 	OperType_MCHI                 //中吃
+// 	OperType_RCHI                 //右吃
+// )
 
 //游戏记录相关
 const (

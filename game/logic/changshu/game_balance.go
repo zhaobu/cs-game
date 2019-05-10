@@ -177,12 +177,9 @@ func (self *GameBalance) CalGangTou(leftCards []int32, bankerId int32) { // 杠�
 		chairId := bankerId //从庄家开始算起数杠头
 		for _, v := range leftCards {
 			self.allCards[chairId] = append(self.allCards[chairId], v)
-			if self.huChairs[chairId] != nil && getCanHit(chairId)[v] {
+			if count < num && self.huChairs[chairId] != nil && getCanHit(chairId)[v] {
 				self.hitIndex[chairId] = append(self.hitIndex[chairId], int32(len(self.allCards[chairId])-1))
 				count++
-				if count >= num {
-					break
-				}
 			}
 			chairId = mj.GetNextChair(chairId, self.game_config.PlayerCount)
 		}
@@ -259,7 +256,7 @@ func (self *GameBalance) GetPlayerBalanceInfo(players []*mj.PlayerInfo) (jsonInf
 	}
 	for k, v := range players {
 		chairId := int32(k)
-		info := &pbgame_logic.Json_PlayerBalance_Info{}
+		info := &pbgame_logic.Json_PlayerBalance_Info{HuMode: pbgame_logic.HuMode_HuModeNone}
 		if self.huMode == mj.HuMode_ZIMO {
 			if self.huChairs[chairId] != nil {
 				info.HuMode = pbgame_logic.HuMode_HuModeZiMo
