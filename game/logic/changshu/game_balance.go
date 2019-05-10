@@ -177,7 +177,7 @@ func (self *GameBalance) CalGangTou(leftCards []int32, bankerId int32) { // 杠�
 		chairId := bankerId //从庄家开始算起数杠头
 		for _, v := range leftCards {
 			self.allCards[chairId] = append(self.allCards[chairId], v)
-			if count < num && self.huChairs[chairId] != nil && getCanHit(chairId)[v] {
+			if count < num && getCanHit(chairId)[v] {
 				self.hitIndex[chairId] = append(self.hitIndex[chairId], int32(len(self.allCards[chairId])-1))
 				count++
 			}
@@ -201,7 +201,11 @@ func (self *GameBalance) CalGameBalance(players []*mj.PlayerInfo, bankerId int32
 		balanceInfo.HuPoint = 1
 		winSocre := 1 + balanceInfo.GetPingHuHua() //胡牌1分+补花+杠花+风花
 		//奖码花
-		balanceInfo.JiangMaPoint = int32(len(self.hitIndex[winChair]))
+		if self.game_config.Barhead == 3 {
+			balanceInfo.JiangMaPoint = self.duLongHua
+		} else {
+			balanceInfo.JiangMaPoint = int32(len(self.hitIndex[winChair]))
+		}
 		winSocre += balanceInfo.JiangMaPoint
 		//特殊牌型花
 		balanceInfo.SpecialPoint = getHuTypeScore(v)

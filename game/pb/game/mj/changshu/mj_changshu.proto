@@ -330,7 +330,8 @@ message BS2CGameEnd {
   uint32 cur_inning = 1;  //当前局数
   int32 banker = 2;       //庄家id
   string json_player_balance = 3;  //玩家当局结算信息(以Json_PlayerBalance解析)
-  GameEndType end_type = 4;  //是否流局
+  GameEndType end_type = 4;  //游戏结束类型
+  int32 dulong_card=5; //独龙杠
 }
 
 message GameRecordUserName {

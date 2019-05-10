@@ -1077,6 +1077,7 @@ func (self *GameSink) gameEnd(endType pbgame_logic.GameEndType) {
 		self.gameBalance.CalGameBalance(self.players, self.bankerId)
 		strPlayerBalance := &pbgame_logic.Json_PlayerBalance{PlayerBalanceInfo: self.gameBalance.GetPlayerBalanceInfo(self.players)}
 		msg.JsonPlayerBalance = util.PB2JSON(strPlayerBalance, false)
+		msg.DulongCard = self.leftCard[len(self.leftCard)-1]
 		self.sendData(-1, msg)
 	}
 	scoreInfo := map[int32]int32{}
