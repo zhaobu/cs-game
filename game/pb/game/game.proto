@@ -9,8 +9,9 @@ package pbgame;
 enum UserDeskStatus {
   UDSNone = 0;
   UDSLook = 1;     //观察者
-  UDSSitDown = 2;  //已坐下准备中
+  UDSSitDown = 2;  //已坐下准备中/准备好下一局中
   UDSPlaying = 3;  //游戏中
+  UDSGameEnd = 4;  //游戏结束等待下局中
 }
 
 //扣费类型

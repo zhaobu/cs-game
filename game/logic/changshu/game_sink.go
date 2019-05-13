@@ -3,6 +3,7 @@ package main
 import (
 	"cy/game/configs"
 	mj "cy/game/logic/changshu/majiang"
+	pbgame "cy/game/pb/game"
 	pbgame_logic "cy/game/pb/game/mj/changshu"
 	"cy/game/util"
 	"fmt"
@@ -37,7 +38,7 @@ type gameAllInfo struct {
 	hasHu          bool                              //是否有人胡牌
 	hasFirstBuHua  []bool                            //是否已经进行过第一次补花
 	wantCards      [][]int32                         //玩家指定要的牌
-	readyInfo      map[int32]bool                    //玩家准备下一局状态
+	// readyInfo      map[int32]bool                    //玩家准备下一局状态
 }
 
 type gamePrivateInfo struct {
@@ -153,9 +154,9 @@ func (self *GameSink) Exitlayer(chairId int32) bool {
 //改变游戏状态
 func (self *GameSink) changGameState(gState pbgame_logic.GameStatus) {
 	self.desk.gameStatus = gState
-	if gState > pbgame_logic.GameStatus_GSWait {
-		self.sendData(-1, &pbgame_logic.BS2CUpdateGameStatus{GameStatus: gState})
-	}
+	// if gState > pbgame_logic.GameStatus_GSWait {
+	self.sendData(-1, &pbgame_logic.BS2CUpdateGameStatus{GameStatus: gState})
+	// }
 }
 
 //玩家投色子
@@ -245,7 +246,6 @@ func (self *GameSink) dealDiceResult() {
 	self.sendData(-1, msg)
 	//1s后发送游戏开始消息
 	self.desk.set_timer(mj.TID_Common, 2*time.Second, func() {
-		self.changGameState(pbgame_logic.GameStatus_GSPlaying)
 		self.deal_card()
 	})
 }
@@ -262,6 +262,7 @@ func (self *GameSink) randDice() [2]int32 {
 
 //开始发牌
 func (self *GameSink) deal_card() {
+	self.changGameState(pbgame_logic.GameStatus_GSPlaying)
 	//随机2个色子,用于客户端选择从牌堆摸牌的方向
 	msg := &pbgame_logic.S2CStartGame{BankerId: self.bankerId, CurInning: self.desk.curInning, LeftTime: 15}
 	msg.DiceValue = make([]*pbgame_logic.Cyint32, 2)
@@ -1065,6 +1066,7 @@ func (self *GameSink) cancelOper(chairId int32) error {
 
 //游戏结束
 func (self *GameSink) gameEnd(endType pbgame_logic.GameEndType) {
+	self.changGameState(pbgame_logic.GameStatus_GSGameEnd)
 	log.Debugf("%s 第%d局游戏结束,结束原因%v", self.logHeadUser(-1), self.desk.curInning, endType)
 	if !self.isPlaying { //可能是解散导致游戏结束
 		self.desk.gameEnd()
@@ -1101,7 +1103,7 @@ func (self *GameSink) afterGameEnd() {
 	}
 	//判断下一局庄家
 	self.nextBankerId = self.gameBalance.CalNextBankerId(self.bankerId)
-	self.readyInfo = make(map[int32]bool, self.game_config.PlayerCount)
+	// self.readyInfo = make(map[int32]bool, self.game_config.PlayerCount)
 	self.desk.gameEnd()
 }
 
@@ -1232,14 +1234,27 @@ func (self *GameSink) doWantCards(chairId int32, cards []int32) (errMsg string) 
 }
 
 //准备下一局
-func (self *GameSink) getReady(chairId int32) {
-	if self.readyInfo[chairId] {
-		log.Debugf("%s 准备下一局时重复准备", self.logHeadUser(chairId))
+func (self *GameSink) getReady(uid uint64) {
+	if self.desk.deskPlayers[uid].userStatus == pbgame.UserDeskStatus_UDSSitDown {
+		log.Debugf("%s 准备下一局时重复准备", self.logHeadUser(self.desk.GetChairidByUid(uid)))
 		return
 	}
-	self.readyInfo[chairId] = true
-	self.sendData(-1, &pbgame_logic.BS2CGetReady{ChairId: chairId})
-	if int32(len(self.readyInfo)) >= self.game_config.PlayerCount {
+	// if self.readyInfo[chairId] {
+	// }
+	self.desk.changUserState(uid, pbgame.UserDeskStatus_UDSSitDown)
+
+	// self.readyInfo[chairId] = true
+	self.sendData(-1, &pbgame_logic.BS2CGetReady{UserId: uid})
+	var readyNum int32 = 0
+	for _, v := range self.desk.playChair {
+		if v.userStatus == pbgame.UserDeskStatus_UDSSitDown {
+			readyNum++
+		}
+	}
+	if readyNum == 1 {
+		self.changGameState(pbgame_logic.GameStatus_GSWait)
+	} else if readyNum == self.game_config.PlayerCount {
+		self.desk.changUserState(0, pbgame.UserDeskStatus_UDSPlaying)
 		self.StartGame()
 	}
 }

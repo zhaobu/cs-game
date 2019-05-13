@@ -157,7 +157,9 @@ func (d *Desk) doSitDown(uid uint64, chair int32, rsp *pbgame.SitDownRsp) {
 	}
 	dUserInfo.chairId = chair
 	d.changUserState(uid, pbgame.UserDeskStatus_UDSSitDown)
-	d.gameSink.changGameState(pbgame_logic.GameStatus_GSWait)
+	if len(d.playChair) == 0 {
+		d.gameSink.changGameState(pbgame_logic.GameStatus_GSWait)
+	}
 	d.playChair[chair] = dUserInfo
 	d.gameSink.AddPlayer(chair, uid, dUserInfo.info.GetName())
 	//先发送加入成功消息
@@ -447,7 +449,7 @@ func (d *Desk) doAction(uid uint64, actionName string, actionValue []byte) {
 	case *pbgame_logic.C2SOutCard:
 		d.gameSink.outCard(chairId, v.Card)
 	case *pbgame_logic.C2SGetReady:
-		d.gameSink.getReady(chairId)
+		d.gameSink.getReady(uid)
 	case *pbgame_logic.C2SGetGameRecord:
 		d.gameSink.getGameRecord(chairId)
 	default:
@@ -568,5 +570,5 @@ func (d *Desk) doChatMessage(uid uint64, req *pbgame.ChatMessageReq) {
 
 //游戏结束
 func (d *Desk) gameEnd() {
-
+	d.changUserState(0, pbgame.UserDeskStatus_UDSGameEnd)
 }

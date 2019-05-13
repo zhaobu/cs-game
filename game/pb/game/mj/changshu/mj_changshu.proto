@@ -51,22 +51,22 @@ message CreateArgTpl {
 
 // 桌子参数
 message DeskArg {
-  CreateArg args = 1;          // 创建房间参数
+  CreateArg args = 1;          //创建房间参数
   bool Enable = 2;             //能否建房
   pbcommon.DeskType Type = 3;  //桌子类型
   pbgame.FeeType FeeType = 4;  //房费类型
   uint64 DeskID = 5;           //桌子号
-  uint32 RoomId = 6;           // 匹配场时才有用
-  string RoomName = 7;         // 匹配场时才有用
+  uint32 RoomId = 6;           //匹配场时才有用
+  string RoomName = 7;         //匹配场时才有用
 }
 
 //游戏状态
 enum GameStatus {
   GSNone = 0;
-  GSWait = 1;     // 等待中
+  GSWait = 1;     //等待中(第一局为1个或多个点坐下,第二局后为一个或多个点下一局)
   GSDice = 2;     //打色子
-  GSPlaying = 3;  // 游戏中
-  GSGameEnd = 4;  //游戏结束
+  GSPlaying = 3;  //游戏中
+  GSGameEnd = 4;  //游戏结束,没有人准备好下一局
 }
 
 message cyint32 {
@@ -118,7 +118,7 @@ message C2SGetGameRecord {
 ///////////////////////////s-c///////////////////////////
 //玩家准备下一局
 message BS2CGetReady {
-  int32 chair_id = 1;  //准备玩家
+  uint64 userId = 1;  //准备玩家
 }
 
 //更改状态
