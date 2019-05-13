@@ -3,9 +3,11 @@
 
 package pbcommon
 
-import proto "github.com/golang/protobuf/proto"
-import fmt "fmt"
-import math "math"
+import (
+	fmt "fmt"
+	proto "github.com/golang/protobuf/proto"
+	math "math"
+)
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
@@ -32,16 +34,17 @@ func (m *ReqHead) Reset()         { *m = ReqHead{} }
 func (m *ReqHead) String() string { return proto.CompactTextString(m) }
 func (*ReqHead) ProtoMessage()    {}
 func (*ReqHead) Descriptor() ([]byte, []int) {
-	return fileDescriptor_head_b5bdc7747084f875, []int{0}
+	return fileDescriptor_475b2844d3e2c1ff, []int{0}
 }
+
 func (m *ReqHead) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_ReqHead.Unmarshal(m, b)
 }
 func (m *ReqHead) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_ReqHead.Marshal(b, m, deterministic)
 }
-func (dst *ReqHead) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ReqHead.Merge(dst, src)
+func (m *ReqHead) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ReqHead.Merge(m, src)
 }
 func (m *ReqHead) XXX_Size() int {
 	return xxx_messageInfo_ReqHead.Size(m)
@@ -85,16 +88,17 @@ func (m *RspHead) Reset()         { *m = RspHead{} }
 func (m *RspHead) String() string { return proto.CompactTextString(m) }
 func (*RspHead) ProtoMessage()    {}
 func (*RspHead) Descriptor() ([]byte, []int) {
-	return fileDescriptor_head_b5bdc7747084f875, []int{1}
+	return fileDescriptor_475b2844d3e2c1ff, []int{1}
 }
+
 func (m *RspHead) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_RspHead.Unmarshal(m, b)
 }
 func (m *RspHead) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_RspHead.Marshal(b, m, deterministic)
 }
-func (dst *RspHead) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_RspHead.Merge(dst, src)
+func (m *RspHead) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RspHead.Merge(m, src)
 }
 func (m *RspHead) XXX_Size() int {
 	return xxx_messageInfo_RspHead.Size(m)
@@ -117,9 +121,9 @@ func init() {
 	proto.RegisterType((*RspHead)(nil), "pbcommon.RspHead")
 }
 
-func init() { proto.RegisterFile("common/head.proto", fileDescriptor_head_b5bdc7747084f875) }
+func init() { proto.RegisterFile("common/head.proto", fileDescriptor_475b2844d3e2c1ff) }
 
-var fileDescriptor_head_b5bdc7747084f875 = []byte{
+var fileDescriptor_475b2844d3e2c1ff = []byte{
 	// 128 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x12, 0x4c, 0xce, 0xcf, 0xcd,
 	0xcd, 0xcf, 0xd3, 0xcf, 0x48, 0x4d, 0x4c, 0xd1, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0xe2, 0x28,

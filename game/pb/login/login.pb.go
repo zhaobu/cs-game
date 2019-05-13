@@ -3,10 +3,12 @@
 
 package pblogin
 
-import proto "github.com/golang/protobuf/proto"
-import fmt "fmt"
-import math "math"
-import common "cy/game/pb/common"
+import (
+	common "cy/game/pb/common"
+	fmt "fmt"
+	proto "github.com/golang/protobuf/proto"
+	math "math"
+)
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
@@ -37,6 +39,7 @@ var LoginType_name = map[int32]string{
 	3: "Phone",
 	4: "Email",
 }
+
 var LoginType_value = map[string]int32{
 	"NotUse1": 0,
 	"WX":      1,
@@ -48,8 +51,9 @@ var LoginType_value = map[string]int32{
 func (x LoginType) String() string {
 	return proto.EnumName(LoginType_name, int32(x))
 }
+
 func (LoginType) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_login_b4ef7d431c3f8589, []int{0}
+	return fileDescriptor_6fe61ab550dd3bc4, []int{0}
 }
 
 // 登陆回应code
@@ -70,6 +74,7 @@ var LoginRspCode_name = map[int32]string{
 	3: "Other",
 	4: "MobileNoBind",
 }
+
 var LoginRspCode_value = map[string]int32{
 	"NotUse2":       0,
 	"IdOrPwdFailed": 1,
@@ -81,8 +86,9 @@ var LoginRspCode_value = map[string]int32{
 func (x LoginRspCode) String() string {
 	return proto.EnumName(LoginRspCode_name, int32(x))
 }
+
 func (LoginRspCode) EnumDescriptor() ([]byte, []int) {
-	return fileDescriptor_login_b4ef7d431c3f8589, []int{1}
+	return fileDescriptor_6fe61ab550dd3bc4, []int{1}
 }
 
 // 登陆请求 c -> s
@@ -111,16 +117,17 @@ func (m *LoginReq) Reset()         { *m = LoginReq{} }
 func (m *LoginReq) String() string { return proto.CompactTextString(m) }
 func (*LoginReq) ProtoMessage()    {}
 func (*LoginReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_login_b4ef7d431c3f8589, []int{0}
+	return fileDescriptor_6fe61ab550dd3bc4, []int{0}
 }
+
 func (m *LoginReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_LoginReq.Unmarshal(m, b)
 }
 func (m *LoginReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_LoginReq.Marshal(b, m, deterministic)
 }
-func (dst *LoginReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_LoginReq.Merge(dst, src)
+func (m *LoginReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_LoginReq.Merge(m, src)
 }
 func (m *LoginReq) XXX_Size() int {
 	return xxx_messageInfo_LoginReq.Size(m)
@@ -251,16 +258,17 @@ func (m *LoginRsp) Reset()         { *m = LoginRsp{} }
 func (m *LoginRsp) String() string { return proto.CompactTextString(m) }
 func (*LoginRsp) ProtoMessage()    {}
 func (*LoginRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_login_b4ef7d431c3f8589, []int{1}
+	return fileDescriptor_6fe61ab550dd3bc4, []int{1}
 }
+
 func (m *LoginRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_LoginRsp.Unmarshal(m, b)
 }
 func (m *LoginRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_LoginRsp.Marshal(b, m, deterministic)
 }
-func (dst *LoginRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_LoginRsp.Merge(dst, src)
+func (m *LoginRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_LoginRsp.Merge(m, src)
 }
 func (m *LoginRsp) XXX_Size() int {
 	return xxx_messageInfo_LoginRsp.Size(m)
@@ -310,16 +318,17 @@ func (m *KeepAliveReq) Reset()         { *m = KeepAliveReq{} }
 func (m *KeepAliveReq) String() string { return proto.CompactTextString(m) }
 func (*KeepAliveReq) ProtoMessage()    {}
 func (*KeepAliveReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_login_b4ef7d431c3f8589, []int{2}
+	return fileDescriptor_6fe61ab550dd3bc4, []int{2}
 }
+
 func (m *KeepAliveReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_KeepAliveReq.Unmarshal(m, b)
 }
 func (m *KeepAliveReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_KeepAliveReq.Marshal(b, m, deterministic)
 }
-func (dst *KeepAliveReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_KeepAliveReq.Merge(dst, src)
+func (m *KeepAliveReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_KeepAliveReq.Merge(m, src)
 }
 func (m *KeepAliveReq) XXX_Size() int {
 	return xxx_messageInfo_KeepAliveReq.Size(m)
@@ -340,16 +349,17 @@ func (m *KeepAliveRsp) Reset()         { *m = KeepAliveRsp{} }
 func (m *KeepAliveRsp) String() string { return proto.CompactTextString(m) }
 func (*KeepAliveRsp) ProtoMessage()    {}
 func (*KeepAliveRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_login_b4ef7d431c3f8589, []int{3}
+	return fileDescriptor_6fe61ab550dd3bc4, []int{3}
 }
+
 func (m *KeepAliveRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_KeepAliveRsp.Unmarshal(m, b)
 }
 func (m *KeepAliveRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_KeepAliveRsp.Marshal(b, m, deterministic)
 }
-func (dst *KeepAliveRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_KeepAliveRsp.Merge(dst, src)
+func (m *KeepAliveRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_KeepAliveRsp.Merge(m, src)
 }
 func (m *KeepAliveRsp) XXX_Size() int {
 	return xxx_messageInfo_KeepAliveRsp.Size(m)
@@ -373,16 +383,17 @@ func (m *MobileCaptchaReq) Reset()         { *m = MobileCaptchaReq{} }
 func (m *MobileCaptchaReq) String() string { return proto.CompactTextString(m) }
 func (*MobileCaptchaReq) ProtoMessage()    {}
 func (*MobileCaptchaReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_login_b4ef7d431c3f8589, []int{4}
+	return fileDescriptor_6fe61ab550dd3bc4, []int{4}
 }
+
 func (m *MobileCaptchaReq) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_MobileCaptchaReq.Unmarshal(m, b)
 }
 func (m *MobileCaptchaReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_MobileCaptchaReq.Marshal(b, m, deterministic)
 }
-func (dst *MobileCaptchaReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_MobileCaptchaReq.Merge(dst, src)
+func (m *MobileCaptchaReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MobileCaptchaReq.Merge(m, src)
 }
 func (m *MobileCaptchaReq) XXX_Size() int {
 	return xxx_messageInfo_MobileCaptchaReq.Size(m)
@@ -421,16 +432,17 @@ func (m *MobileCaptchaRsp) Reset()         { *m = MobileCaptchaRsp{} }
 func (m *MobileCaptchaRsp) String() string { return proto.CompactTextString(m) }
 func (*MobileCaptchaRsp) ProtoMessage()    {}
 func (*MobileCaptchaRsp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_login_b4ef7d431c3f8589, []int{5}
+	return fileDescriptor_6fe61ab550dd3bc4, []int{5}
 }
+
 func (m *MobileCaptchaRsp) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_MobileCaptchaRsp.Unmarshal(m, b)
 }
 func (m *MobileCaptchaRsp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	return xxx_messageInfo_MobileCaptchaRsp.Marshal(b, m, deterministic)
 }
-func (dst *MobileCaptchaRsp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_MobileCaptchaRsp.Merge(dst, src)
+func (m *MobileCaptchaRsp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MobileCaptchaRsp.Merge(m, src)
 }
 func (m *MobileCaptchaRsp) XXX_Size() int {
 	return xxx_messageInfo_MobileCaptchaRsp.Size(m)
@@ -463,19 +475,19 @@ func (m *MobileCaptchaRsp) GetTestCaptcha() string {
 }
 
 func init() {
+	proto.RegisterEnum("pblogin.LoginType", LoginType_name, LoginType_value)
+	proto.RegisterEnum("pblogin.LoginRspCode", LoginRspCode_name, LoginRspCode_value)
 	proto.RegisterType((*LoginReq)(nil), "pblogin.LoginReq")
 	proto.RegisterType((*LoginRsp)(nil), "pblogin.LoginRsp")
 	proto.RegisterType((*KeepAliveReq)(nil), "pblogin.KeepAliveReq")
 	proto.RegisterType((*KeepAliveRsp)(nil), "pblogin.KeepAliveRsp")
 	proto.RegisterType((*MobileCaptchaReq)(nil), "pblogin.MobileCaptchaReq")
 	proto.RegisterType((*MobileCaptchaRsp)(nil), "pblogin.MobileCaptchaRsp")
-	proto.RegisterEnum("pblogin.LoginType", LoginType_name, LoginType_value)
-	proto.RegisterEnum("pblogin.LoginRspCode", LoginRspCode_name, LoginRspCode_value)
 }
 
-func init() { proto.RegisterFile("login/login.proto", fileDescriptor_login_b4ef7d431c3f8589) }
+func init() { proto.RegisterFile("login/login.proto", fileDescriptor_6fe61ab550dd3bc4) }
 
-var fileDescriptor_login_b4ef7d431c3f8589 = []byte{
+var fileDescriptor_6fe61ab550dd3bc4 = []byte{
 	// 565 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x53, 0x5d, 0x8f, 0xd2, 0x40,
 	0x14, 0xdd, 0x42, 0x97, 0x8f, 0xcb, 0x2e, 0x0e, 0x93, 0xb8, 0x99, 0x6c, 0x36, 0x9b, 0x86, 0x44,
