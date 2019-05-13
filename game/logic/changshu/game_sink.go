@@ -1082,8 +1082,8 @@ func (self *GameSink) gameEnd(endType pbgame_logic.GameEndType) {
 		if self.game_config.Barhead == 3 {
 			msg.DulongCard = self.leftCard[len(self.leftCard)-1]
 		}
-		self.sendData(-1, msg)
 	}
+	self.sendData(-1, msg)
 	scoreInfo := map[int32]int32{}
 	for k, v := range self.players {
 		scoreInfo[int32(k)] = v.BalanceInfo.Point
