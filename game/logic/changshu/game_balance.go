@@ -177,7 +177,7 @@ func (self *GameBalance) CalGangTou(leftCards []int32, bankerId int32) { // 杠�
 		chairId := bankerId //从庄家开始算起数杠头
 		for _, v := range leftCards {
 			self.allCards[chairId] = append(self.allCards[chairId], v)
-			if count < num && getCanHit(chairId)[v] {
+			if self.game_config.Barhead != 3 && count < num && getCanHit(chairId)[v] {
 				self.hitIndex[chairId] = append(self.hitIndex[chairId], int32(len(self.allCards[chairId])-1))
 				count++
 			}
