@@ -146,9 +146,10 @@ message ExitDeskRsp {
 
 //点击解散按钮方式
 enum DestroyDeskType {
-  DestroyTypeGame = 0;   //在桌子发起解散
-  DestroyTypeClub = 1;   //在俱乐部发起解散
-  DestroyTypeDebug = 2;  //强制解散,调试用
+  DestroyTypeGame = 0;     //在桌子发起解散
+  DestroyTypeClub = 1;     //在俱乐部发起解散
+  DestroyTypeDebug = 2;    //强制解散,调试用
+  DestroyTypeGameEnd = 3;  //游戏大局结束解散房间
 }
 // 申请解散 c -> s (包括游戏开始前房主解散和游戏中投票解散)
 message DestroyDeskReq {

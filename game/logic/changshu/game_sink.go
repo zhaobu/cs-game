@@ -1089,7 +1089,8 @@ func (self *GameSink) gameEnd(endType pbgame_logic.GameEndType) {
 		scoreInfo[int32(k)] = v.BalanceInfo.Point
 	}
 	self.record.AddGameRecord(scoreInfo)
-
+	//主动发送一下战绩
+	self.getGameRecord(-1)
 	//游戏记录
 	self.afterGameEnd()
 }

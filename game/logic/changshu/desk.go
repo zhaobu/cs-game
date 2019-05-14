@@ -364,9 +364,16 @@ func (d *Desk) doVoteDestroyDesk(uid uint64, req *pbgame.VoteDestroyDeskReq) {
 
 //处理桌子销毁
 func (d *Desk) dealDestroyDesk(reqType pbgame.DestroyDeskType) {
+	//在游戏中解散
 	if d.gameStatus > pbgame_logic.GameStatus_GSWait {
 		d.gameSink.gameEnd(pbgame_logic.GameEndType_EndDissmiss)
+	} else {
+		d.realDestroyDesk(reqType)
 	}
+}
+
+//真正销毁桌子
+func (d *Desk) realDestroyDesk(reqType pbgame.DestroyDeskType) {
 	//处理房间所有人的状态
 	msg := &pbgame.DestroyDeskResultNotif{DeskID: d.deskId, Result: 1, Type: reqType}
 	for uid, _ := range d.deskPlayers {
@@ -570,6 +577,10 @@ func (d *Desk) doChatMessage(uid uint64, req *pbgame.ChatMessageReq) {
 
 //游戏结束
 func (d *Desk) gameEnd() {
-	d.curInning++
 	d.changUserState(0, pbgame.UserDeskStatus_UDSGameEnd)
+	if d.curInning == d.deskConfig.Args.RInfo.LoopCnt {
+		d.realDestroyDesk(pbgame.DestroyDeskType_DestroyTypeGameEnd)
+	} else {
+		d.curInning++
+	}
 }
