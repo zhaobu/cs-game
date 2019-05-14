@@ -265,7 +265,7 @@ func (self *GameBalance) GetPlayerBalanceInfo(players []*mj.PlayerInfo) (jsonInf
 			if self.huChairs[chairId] != nil {
 				info.HuMode = pbgame_logic.HuMode_HuModeZiMo
 			}
-		} else {
+		} else if self.huMode == mj.HuMode_PAOHU {
 			if self.huChairs[chairId] != nil {
 				info.HuMode = pbgame_logic.HuMode_HuModeJiePao
 			} else if self.loseChair == chairId {

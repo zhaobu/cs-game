@@ -570,5 +570,6 @@ func (d *Desk) doChatMessage(uid uint64, req *pbgame.ChatMessageReq) {
 
 //游戏结束
 func (d *Desk) gameEnd() {
+	d.curInning++
 	d.changUserState(0, pbgame.UserDeskStatus_UDSGameEnd)
 }

@@ -1096,11 +1096,6 @@ func (self *GameSink) gameEnd(endType pbgame_logic.GameEndType) {
 
 //小局结束后数据清理
 func (self *GameSink) afterGameEnd() {
-	if self.desk.curInning == self.game_config.RInfo.LoopCnt {
-		// TODO发送总结算信息
-	} else {
-		self.desk.curInning++
-	}
 	//判断下一局庄家
 	self.nextBankerId = self.gameBalance.CalNextBankerId(self.bankerId)
 	// self.readyInfo = make(map[int32]bool, self.game_config.PlayerCount)
