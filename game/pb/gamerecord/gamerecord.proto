@@ -1,4 +1,3 @@
-// 此文件为服务器内部使用，客户端调用无响应
 syntax = "proto3";
 
 package pbgamerecord;

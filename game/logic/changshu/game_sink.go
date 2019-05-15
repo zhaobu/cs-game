@@ -38,6 +38,7 @@ type gameAllInfo struct {
 	hasHu          bool                              //是否有人胡牌
 	hasFirstBuHua  []bool                            //是否已经进行过第一次补花
 	wantCards      [][]int32                         //玩家指定要的牌
+	drawDiceValue  [2]int32                          //发牌色子
 	// readyInfo      map[int32]bool                    //玩家准备下一局状态
 }
 
@@ -100,6 +101,7 @@ func (self *GameSink) reset() {
 	self.canOperInfo = make(map[int32]*CanOperInfo, self.game_config.PlayerCount)
 	self.haswaitOper = make([]bool, self.game_config.PlayerCount)
 	self.diceResult = make([][2]int32, self.game_config.PlayerCount)
+	self.drawDiceValue = [2]int32{}
 	self.hasFirstBuHua = make([]bool, self.game_config.PlayerCount)
 	self.laiziCard = make(map[int32]int32)
 	self.wantCards = make([][]int32, self.game_config.PlayerCount)
@@ -266,9 +268,9 @@ func (self *GameSink) deal_card() {
 	//随机2个色子,用于客户端选择从牌堆摸牌的方向
 	msg := &pbgame_logic.S2CStartGame{BankerId: self.bankerId, CurInning: self.desk.curInning, LeftTime: 15}
 	msg.DiceValue = make([]*pbgame_logic.Cyint32, 2)
-	randRes := self.randDice()
-	self.gameBalance.DealStartDice(randRes)
-	for i, rnd := range randRes {
+	self.drawDiceValue = self.randDice()
+	self.gameBalance.DealStartDice(self.drawDiceValue)
+	for i, rnd := range self.drawDiceValue {
 		msg.DiceValue[i] = &pbgame_logic.Cyint32{T: rnd}
 	}
 
@@ -1111,7 +1113,7 @@ func (self *GameSink) gameReconnect(recInfo *pbgame_logic.GameDeskInfo, uid uint
 	}
 	switch recInfo.GameStatus {
 	case pbgame_logic.GameStatus_GSDice: //投色子
-		recInfo.CurDiceUid = self.desk.GetUidByChairid(self.curThrowDice)
+		recInfo.CurDiceChair = self.curThrowDice
 		for k, v := range recInfo.GameUser {
 			if mj.GetNextChair(int32(k), self.game_config.PlayerCount) == self.curThrowDice {
 				recInfo.LastDiceValue = switchToCyint32(self.diceResult[int32(k)][:])
@@ -1125,8 +1127,10 @@ func (self *GameSink) gameReconnect(recInfo *pbgame_logic.GameDeskInfo, uid uint
 			self.countCanOperMsg(info, canOper)
 			recInfo.CanOper = canOper
 		}
-		recInfo.LastOutUid = self.desk.GetUidByChairid(self.lastOutChair)
-		recInfo.CurOutUid = self.desk.GetUidByChairid(self.curOutChair)
+		recInfo.LeftOperTime = 15
+		recInfo.DrawDiceValue = switchToCyint32(self.drawDiceValue[:])
+		recInfo.LastOutChair = self.lastOutChair
+		recInfo.CurOutChair = self.curOutChair
 		recInfo.LastOutCard = self.lastOutCard
 		recInfo.LeftNum = int32(len(self.leftCard))
 		canNotOut := make([]int32, 0, len(self.players[chairId].CardInfo.CanNotOut))

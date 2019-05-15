@@ -404,13 +404,15 @@ message GameDeskInfo {
   int32 banker_id = 6;                     //庄家(庄家chairid)
   uint64 master_uid = 7;                   //房主(房主uid)
   S2CHaveOperation can_oper = 8;           //玩家能做的操作
-  uint64 last_out_uid = 9;                 //上次出牌玩家
-  uint64 cur_out_uid = 10;                 //当前出牌玩家
+  int32 last_out_chair = 9;                //上次出牌玩家
+  int32 cur_out_chair = 10;                //当前出牌玩家
   int32 last_out_card = 11;                //上次出的牌
   int32 left_num = 12;                     //剩下的牌数
   repeated cyint32 unable_out_cards = 13;  //当前不能出的牌
-  uint64 cur_dice_uid = 14;                //当前摇色子玩家
+  int32 cur_dice_chair = 14;               //当前摇色子玩家
   repeated cyint32 last_dice_value = 15;   //上一个玩家打色子结果
+  repeated cyint32 draw_dice_value = 16;   //摸牌色子
+  int32 left_oper_time = 17;               //剩余操作时间
 }
 
 // message PlayerBalanceResult {

@@ -213,9 +213,10 @@ func (m *WriteGameRecordReq) GetRePlayData() []byte {
 
 // 查询房间游戏记录数据请求
 type QueryRoomRecordReq struct {
-	UserId               uint64   `protobuf:"varint,1,opt,name=UserId,proto3" json:"UserId,omitempty"`
-	QueryType            int32    `protobuf:"varint,2,opt,name=QueryType,proto3" json:"QueryType,omitempty"`
-	QueryParam           uint64   `protobuf:"varint,3,opt,name=QueryParam,proto3" json:"QueryParam,omitempty"`
+	UserId     uint64 `protobuf:"varint,1,opt,name=UserId,proto3" json:"UserId,omitempty"`
+	QueryType  int32  `protobuf:"varint,2,opt,name=QueryType,proto3" json:"QueryType,omitempty"`
+	QueryParam uint64 `protobuf:"varint,3,opt,name=QueryParam,proto3" json:"QueryParam,omitempty"`
+	// 他人的用户id 俱乐部的id 俱乐部的id
 	QueryParam2          uint32   `protobuf:"varint,4,opt,name=QueryParam2,proto3" json:"QueryParam2,omitempty"`
 	QueryStartTime       int64    `protobuf:"varint,5,opt,name=QueryStartTime,proto3" json:"QueryStartTime,omitempty"`
 	QueryEndTime         int64    `protobuf:"varint,6,opt,name=QueryEndTime,proto3" json:"QueryEndTime,omitempty"`

@@ -203,10 +203,8 @@ func (s *session) handleInput() (err error) {
 }
 
 func (s *session) afterLoginRsp(loginRsp *pblogin.LoginRsp) {
-	var sessInfo *pbcommon.SessionInfo
 	if s.isLoginSucc {
-		var err error
-		sessInfo, err = cache.QuerySessionInfo(s.uid)
+		sessInfo, err := cache.QuerySessionInfo(s.uid)
 		if err == nil {
 			s.sendPb(sessInfo) // 客户端要求这个顺序 我也没办法 1
 		}
