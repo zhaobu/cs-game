@@ -3,117 +3,117 @@ syntax = "proto3";
 
 package pbgamerecord;
 
-message GamePlayerInfo  {
-    uint64 UserId = 1;			    //用户Id
-    string Name = 2; 				//姓名
-    int32 BringinIntegral = 3;	    //带入积分
-    int32 WinIntegral = 4;			//输赢积分
+message GamePlayerInfo {
+  uint64 UserId = 1;          //用户Id
+  string Name = 2;            //姓名
+  int32 BringinIntegral = 3;  //带入积分
+  int32 WinIntegral = 4;      //输赢积分
 }
 
-//games -> center
+// games -> center
 message WriteGameRecordReq {
-    string RoomRecordId = 1;                    //游戏房间创建时生成的唯一Id 用户关联该房间
-    string GameId = 2;	 			            //游戏Id
-    int32 RoomType = 3;				            //房间类型 1 俱乐部房间  2 好友房间
-    int64 ClubId = 4;				            //俱乐部Id 当 AreaType 1 时需要填写
-    uint32 RoomId = 5;                          //房间号
-    int32 TotalJuNun = 6; 				        //总局数
-    int32 Index = 7;                           //游戏当前局数
-    int64 GameStartTime = 8;		            //开始时间 存储时间错
-    int64 GameEndTime = 9;			            //结束时间 存储时间错
-    int32 PayType = 10;                          //支付方式 1AA支付 2房主支付
-    repeated GamePlayerInfo PlayerInfos = 11;   //游戏内玩家数据
-    bytes RePlayData = 12;                      //复盘数据                暂时可不写
+  string RoomRecordId = 1;  //游戏房间创建时生成的唯一Id 用户关联该房间
+  string GameId = 2;        //游戏Id
+  int32 RoomType = 3;       //房间类型 1 俱乐部房间  2 好友房间
+  int64 ClubId = 4;         //俱乐部Id 当 AreaType 1 时需要填写
+  uint32 RoomId = 5;        //房间号
+  int32 TotalJuNun = 6;     //总局数
+  int32 Index = 7;          //游戏当前局数
+  int64 GameStartTime = 8;  //开始时间 存储时间错
+  int64 GameEndTime = 9;    //结束时间 存储时间错
+  int32 PayType = 10;       //支付方式 1AA支付 2房主支付
+  repeated GamePlayerInfo PlayerInfos = 11;  //游戏内玩家数据
+  bytes RePlayData = 12;  //复盘数据                暂时可不写
 }
 
 //查询房间游戏记录数据请求
-message QueryRoomRecordReq{
-    uint64 UserId = 1;			    //用户Id 查询者
-    int32 QueryType = 2;            //查询类型 1 个人查询 2查询他人 3俱乐部查询 4房间号查询
-    uint64 QueryParam = 3;          //查询参数                              自己的用户id 他人的用户id 俱乐部的id 俱乐部的id
-    uint32 QueryParam2 = 4;         //扩展查询参数 为房间查询扩展的                                              房间id
-    int64 QueryStartTime = 5;       //查询时间范围
-    int64 QueryEndTime = 6;         //查询时间范围
+message QueryRoomRecordReq {
+  uint64 UserId = 1;  //用户Id 查询者
+  int32 QueryType = 2;  //查询类型 1 个人查询 2查询他人 3俱乐部查询 4房间号查询
+  uint64 QueryParam = 3;  //查询参数                              自己的用户id
+                          //他人的用户id 俱乐部的id 俱乐部的id
+  uint32 QueryParam2 = 4;  //扩展查询参数 为房间查询扩展的 房间id
+  int64 QueryStartTime = 5;  //查询时间范围
+  int64 QueryEndTime = 6;    //查询时间范围
 }
-message RoomPlayerInfo{
-    uint64 UserId 	= 1;		    //用户Id
-    string Name = 2;				//姓名
-    int32 WinIntegral = 3;			//输赢积分 房间内的统计数据
+message RoomPlayerInfo {
+  uint64 UserId = 1;      //用户Id
+  string Name = 2;        //姓名
+  int32 WinIntegral = 3;  //输赢积分 房间内的统计数据
 }
 
 //房间记录
 message RoomRecord {
-    string RoomRecordId = 1; 		//房间记录Id 关联房间的数据库唯一id
-    int64 GameStartTime = 2;		//开始时间
-    uint32 RoomId	= 3; 			//房间号
-    string GameId	= 4;			//游戏Id
-    int32 RoomType	= 5;			//房间类型 1俱乐部房间 2好友房
-    int32 TotalJuNun = 6; 			//总局数
-    int32 PayType = 7;              //支付方式 1AA支付 2房主支付
-    int64 ClubId	= 8;			//俱乐部Id 当 AreaType 1 时需要填写
-    repeated RoomPlayerInfo GamePlayers = 9;	//游戏参与玩家信息 为了减少查询量 将必要信息进行存储
-    repeated string GameRecordIds = 10;		//房间内游戏数据 数组
+  string RoomRecordId = 1;  //房间记录Id 关联房间的数据库唯一id
+  int64 GameStartTime = 2;  //开始时间
+  uint32 RoomId = 3;        //房间号
+  string GameId = 4;        //游戏Id
+  int32 RoomType = 5;       //房间类型 1俱乐部房间 2好友房
+  int32 TotalJuNun = 6;     //总局数
+  int32 PayType = 7;        //支付方式 1AA支付 2房主支付
+  int64 ClubId = 8;         //俱乐部Id 当 AreaType 1 时需要填写
+  repeated RoomPlayerInfo GamePlayers =
+      9;  //游戏参与玩家信息 为了减少查询量 将必要信息进行存储
+  repeated string GameRecordIds = 10;  //房间内游戏数据 数组
 }
 
 //查询房间游戏记录数据回应
-message QueryRoomRecordRsp{
-    int32 Error = 1;                //0 查询成功 1参数异常(不存在此人或者此俱乐部) 2权限不足
-    repeated RoomRecord Datas = 2;  //房间记录数据
+message QueryRoomRecordRsp {
+  int32 Error = 1;  // 0 查询成功 1参数异常(不存在此人或者此俱乐部) 2权限不足
+  repeated RoomRecord Datas = 2;  //房间记录数据
 }
 
 //查询游戏记录请求
-message QueryGameRecordReq{
-    repeated string GameRecordIds = 1;		//记录数组
+message QueryGameRecordReq {
+  repeated string GameRecordIds = 1;  //记录数组
 }
 
 //房间记录
 message GameRecord {
-    string GameRecordId = 1; 		//游戏记录Id
-    string GameId	= 2; 			//游戏Id
-    int32 RoomType	= 3;			//房间类型
-    int64 ClubId	= 4;			///俱乐部Id 当 AreaType 1 时需要填写
-    uint32 RoomId	= 5;			//房间号
-    int32 Index	    = 6;			//第几局
-    int64 GameStartTime = 7;			//开始时间 存储时间错
-    int64 GameEndTime 	= 8;		//结束时间 存储时间错
-    repeated GamePlayerInfo GamePlayers =9;	//游戏参与玩家信息 为了减少查询量 将必要信息进行存储
+  string GameRecordId = 1;  //游戏记录Id
+  string GameId = 2;        //游戏Id
+  int32 RoomType = 3;       //房间类型
+  int64 ClubId = 4;         ///俱乐部Id 当 AreaType 1 时需要填写
+  uint32 RoomId = 5;        //房间号
+  int32 Index = 6;          //第几局
+  int64 GameStartTime = 7;  //开始时间 存储时间错
+  int64 GameEndTime = 8;    //结束时间 存储时间错
+  repeated GamePlayerInfo GamePlayers =
+      9;  //游戏参与玩家信息 为了减少查询量 将必要信息进行存储
 }
 
 //查询游戏记录请求
-message QueryGameRecordRsp{
-    int32 Error = 1;                    //0 查询成功 1 参数异常
-    repeated GameRecord Records = 2;    //游戏记录
+message QueryGameRecordRsp {
+  int32 Error = 1;                  // 0 查询成功 1 参数异常
+  repeated GameRecord Records = 2;  //游戏记录
 }
 
 //查询游戏复盘数据请求
-message QueryGameRePlaydReq{
-    string GameRecordIds = 1;		//游戏记录id
+message QueryGameRePlaydReq {
+  string GameRecordIds = 1;  //游戏记录id
 }
 
-message QueryGameRePlaydRsp{
-    int32 Error = 1;                    //0查询成功 2记录不存在
-    bytes RePlayData = 2;               //复盘数据
+message QueryGameRePlaydRsp {
+  int32 Error = 1;       // 0查询成功 2记录不存在
+  bytes RePlayData = 2;  //复盘数据
 }
-
-
 
 //查询俱乐部统计请求
-message QueryClubStatisticsReq{
-    uint64 UserId = 1;			    //用户Id 查询者
-    int32 QueryType = 2;            //查询类型 1 对局排名 2 积分排名
-    uint64 QueryClubId = 3;         //查询俱乐部Id
-    int64 QueryStartTime = 4;       //查询时间范围
-    int64 QueryEndTime = 5;           //查询时间范围
+message QueryClubStatisticsReq {
+  uint64 UserId = 1;         //用户Id 查询者
+  int32 QueryType = 2;       //查询类型 1 对局排名 2 积分排名
+  uint64 QueryClubId = 3;    //查询俱乐部Id
+  int64 QueryStartTime = 4;  //查询时间范围
+  int64 QueryEndTime = 5;    //查询时间范围
 }
 //统计数据
-message StatisticsData  {
-    uint64 UserId = 1;			    //用户Id
-    string Name = 2;				//姓名
-    int64 Statistics = 3;		    //统计数据  积分统计 为积分 对局次数统计 为对局数
+message StatisticsData {
+  uint64 UserId = 1;  //用户Id
+  string Name = 2;    //姓名
+  int64 Statistics = 3;  //统计数据  积分统计 为积分 对局次数统计 为对局数
 }
 //查询俱乐部统计回应
-message QueryClubStatisticsRsp{
-    int32 Error = 1;                //0 查询成功 1参数异常(不存在此人或者此俱乐部) 2权限不足
-    repeated StatisticsData StatisticsDatas = 8;			//统计结果数据
+message QueryClubStatisticsRsp {
+  int32 Error = 1;  // 0 查询成功 1参数异常(不存在此人或者此俱乐部) 2权限不足
+  repeated StatisticsData StatisticsDatas = 8;  //统计结果数据
 }
-

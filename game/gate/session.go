@@ -255,7 +255,7 @@ func (s *session) dispatch(msg *codec.Message) {
 
 	ctx := context.Background()
 
-	if serviceName == "pbcenter" || serviceName == "pbgamerecord"  {
+	if serviceName == "pbcenter" || serviceName == "pbgamerecord" {
 		cli = cliCenter
 
 		rsp := &codec.Message{}
