@@ -122,6 +122,8 @@ func (p *center) QueryRoomRecordReq(ctx context.Context, args *codec.Message, re
 			GameId:        v.GameId,
 			ClubId:        v.ClubId,
 			TotalJuNun:    v.TotalJuNun,
+			PayType:	   v.PayType,
+			RoomRule:	   v.RoonRule,
 			GamePlayers:   []*pbgamerecord.RoomPlayerInfo{},
 			GameRecordIds: v.GameRecords,
 		}

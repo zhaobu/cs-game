@@ -26,6 +26,7 @@ type WirteRecord struct {
 	GameStartTime int64             //开始时间 存储时间错
 	GameEndTime   int64             //结束时间 存储时间错
 	PayType       int32             //支付方式 1AA支付 2房主支付
+	RoomRule	  string			//房间规则
 	PlayerInfos   []*GamePlayerInfo //游戏内玩家数据
 	RePlayData    []byte            //复盘数据                暂时可不写
 }
@@ -51,6 +52,7 @@ type RoomRecord struct {
 	GameId        string                     //游戏Id
 	ClubId        int64                      //俱乐部Id 当 AreaType 1 时需要填写
 	PayType       int32                      //支付方式 1AA支付 2房主支付
+	RoonRule	  string					 //房间规则
 	GamePlayers   map[uint64]*RoomPlayerInfo //游戏参与玩家信息 为了减少查询量 将必要信息进行存储
 	GameRecords   []string                   //房间内游戏数据 数组
 }
@@ -145,6 +147,7 @@ func AddGameRecord(gr *WirteRecord) (err error) {
 			GameId:        gr.GameId,
 			ClubId:        gr.ClubId,
 			PayType:       gr.PayType,
+			RoonRule:      gr.RoomRule,
 			GamePlayers:   make(map[uint64]*RoomPlayerInfo),
 			GameRecords:   []string{},
 		}
