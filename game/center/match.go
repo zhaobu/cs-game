@@ -4,17 +4,18 @@ import (
 	"context"
 	"cy/game/cache"
 	"cy/game/codec"
-	"cy/game/pb/center"
-	"cy/game/pb/common"
-	"cy/game/pb/inner"
+	pbcenter "cy/game/pb/center"
+	pbcommon "cy/game/pb/common"
+	pbinner "cy/game/pb/inner"
 	"encoding/json"
 	"fmt"
 	"math/rand"
 	"sync"
 	"time"
 
+	"go.uber.org/zap"
+
 	"github.com/gomodule/redigo/redis"
-	"github.com/sirupsen/logrus"
 )
 
 type attr struct {
@@ -120,16 +121,11 @@ func (r *matchRoom) doReadyGame() {
 		req := &codec.Message{}
 		codec.Pb2Msg(gameMatchSucc, req)
 
-		logrus.WithFields(logrus.Fields{
-			"uids":     gameMatchSucc.UserIDs,
-			"gamename": r.gameName,
-			"roomid":   r.roomID,
-		}).Info("GameMatchSucc")
-
+		tlog.Info("GameMatchSucc", zap.Any("uids", gameMatchSucc.UserIDs), zap.String("gamename", r.gameName), zap.Uint32("roomid", r.roomID))
 		_, err = cli.Go(context.Background(), "GameMatchSucc", req, nil, nil)
 		if err != nil {
 			clearMatchStatus(uids)
-			logrus.Error(err.Error())
+			tlog.Error(err.Error())
 		}
 	}
 }
@@ -183,7 +179,7 @@ func (r *matchRoom) deleteLongTime() {
 		defer c.Close()
 		_, err = c.Do("PUBLISH", "backend_to_gate", data)
 		if err != nil {
-			logrus.Error(err.Error())
+			tlog.Error(err.Error())
 		}
 	}
 	return
@@ -201,7 +197,7 @@ func enterMatch(uid uint64, gn string, rid uint32, matchRsp *pbcenter.MatchRsp) 
 	if err != nil {
 		matchRsp.Code = pbcenter.MatchRspCode_InternalServerError
 		matchRsp.StrCode = err.Error()
-		logrus.Error(err.Error())
+		tlog.Error(err.Error())
 		return
 	}
 

@@ -4,25 +4,23 @@ import (
 	"context"
 	"cy/game/cache"
 	"cy/game/codec"
-	"cy/game/pb/center"
-	"cy/game/pb/common"
+	pbcenter "cy/game/pb/center"
+	pbcommon "cy/game/pb/common"
 	"fmt"
 	"runtime/debug"
-
-	"github.com/sirupsen/logrus"
 )
 
 func (p *center) CancelMatchReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
-		logrus.Error(err.Error())
+		tlog.Error(err.Error())
 		return err
 	}
 
 	req, ok := pb.(*pbcenter.CancelMatchReq)
 	if !ok {
 		err = fmt.Errorf("not *pbcenter.CancelMatchReq")
-		logrus.Error(err.Error())
+		tlog.Error(err.Error())
 		return
 	}
 
@@ -40,13 +38,7 @@ func (p *center) CancelMatchReq(ctx context.Context, args *codec.Message, reply 
 
 		codec.Pb2Msg(rsp, reply)
 
-		logrus.WithFields(logrus.Fields{
-			"req":   *req,
-			"rsp":   *rsp,
-			"err":   err,
-			"r":     r,
-			"stack": stack,
-		}).Info(args.Name)
+		log.Infof("args.Name:%s:req:%v,rsp:%v,err:%v,r:%v,stack:%v", args.Name, *req, *rsp, err, r, stack)
 	}()
 
 	// ###############################

@@ -9,8 +9,6 @@ import (
 	"fmt"
 	"sync"
 	"time"
-
-	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -41,13 +39,13 @@ func GameRecord_Init() {
 func (p *center) WriteGameRecordReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
-		logrus.Error(err.Error())
+		tlog.Error(err.Error())
 		return err
 	}
 	req, ok := pb.(*pbgamerecord.WriteGameRecordReq)
 	if !ok {
 		err = fmt.Errorf("not *pbcenter.CancelMatchReq")
-		logrus.Error(err.Error())
+		tlog.Error(err.Error())
 		return err
 	}
 	gr := &mgo.WirteRecord{
@@ -83,13 +81,13 @@ func (p *center) WriteGameRecordReq(ctx context.Context, args *codec.Message, re
 func (p *center) QueryRoomRecordReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
-		logrus.Error("解析消息 1 失败" + err.Error())
+		tlog.Error("解析消息 1 失败" + err.Error())
 		return err
 	}
 	req, ok := pb.(*pbgamerecord.QueryRoomRecordReq)
 	if !ok {
 		err = fmt.Errorf("not *pbcenter.CancelMatchReq")
-		logrus.Error(err.Error())
+		tlog.Error(err.Error())
 		return
 	}
 	rsp := &pbgamerecord.QueryRoomRecordRsp{
@@ -100,19 +98,19 @@ func (p *center) QueryRoomRecordReq(ctx context.Context, args *codec.Message, re
 	if req.QueryType == 1 || req.QueryType == 2 {
 		querydata, err = mgo.QueryUserRoomRecord(req.QueryParam, req.QueryStartTime, req.QueryEndTime)
 		if err != nil {
-			logrus.Warn("查询用户数据失败 err = " + err.Error())
+			tlog.Warn("查询用户数据失败 err = " + err.Error())
 			rsp.Error = 1
 		}
 	} else if req.QueryType == 3 {
 		querydata, err = mgo.QueryClubRoomRecord(req.QueryParam, req.QueryStartTime, req.QueryEndTime)
 		if err != nil {
-			logrus.Warn("查询用户数据失败 err = " + err.Error())
+			tlog.Warn("查询用户数据失败 err = " + err.Error())
 			rsp.Error = 1
 		}
 	} else if req.QueryType == 4 {
 		querydata, err = mgo.QueryClubRoomRecordByRoom(req.QueryParam, req.QueryParam2)
 		if err != nil {
-			logrus.Warn("查询俱乐部房间数据失败 err = " + err.Error())
+			tlog.Warn("查询俱乐部房间数据失败 err = " + err.Error())
 			rsp.Error = 1
 		}
 	}
@@ -148,13 +146,13 @@ func (p *center) QueryRoomRecordReq(ctx context.Context, args *codec.Message, re
 func (p *center) QueryGameRecordReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
-		logrus.Error("解析消息 1 失败" + err.Error())
+		tlog.Error("解析消息 1 失败" + err.Error())
 		return err
 	}
 	req, ok := pb.(*pbgamerecord.QueryGameRecordReq)
 	if !ok {
 		err = fmt.Errorf("not *pbcenter.CancelMatchReq")
-		logrus.Error(err.Error())
+		tlog.Error(err.Error())
 		return
 	}
 	rsp := &pbgamerecord.QueryGameRecordRsp{
@@ -165,7 +163,7 @@ func (p *center) QueryGameRecordReq(ctx context.Context, args *codec.Message, re
 	if len(req.GameRecordIds) > 0 {
 		querydata, err = mgo.QueryGameRecord(req.GameRecordIds)
 		if err != nil {
-			logrus.Warn("查询用户数据失败 err = " + err.Error())
+			tlog.Warn("查询用户数据失败 err = " + err.Error())
 			rsp.Error = 1
 		}
 		for _, v := range querydata {
@@ -203,13 +201,13 @@ func (p *center) QueryGameRecordReq(ctx context.Context, args *codec.Message, re
 func (p *center) QueryGameRePlayRecord(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
-		logrus.Error("解析消息 1 失败" + err.Error())
+		tlog.Error("解析消息 1 失败" + err.Error())
 		return err
 	}
 	req, ok := pb.(*pbgamerecord.QueryGameRePlaydReq)
 	if !ok {
 		err = fmt.Errorf("not *pbcenter.CancelMatchReq")
-		logrus.Error(err.Error())
+		tlog.Error(err.Error())
 		return
 	}
 	rsp := &pbgamerecord.QueryGameRePlaydRsp{
@@ -220,7 +218,7 @@ func (p *center) QueryGameRePlayRecord(ctx context.Context, args *codec.Message,
 	if len(req.GameRecordIds) > 0 {
 		querydata, err = mgo.QueryGameRePlayRecord(req.GameRecordIds)
 		if err != nil {
-			logrus.Warn("查询复盘数据失败 err = " + err.Error())
+			tlog.Warn("查询复盘数据失败 err = " + err.Error())
 			rsp.Error = 1
 		}
 		rsp.RePlayData = querydata.RePlayData
@@ -238,13 +236,13 @@ func (p *center) QueryGameRePlayRecord(ctx context.Context, args *codec.Message,
 func (p *center) QueryClubStatisticsReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
-		logrus.Error(err.Error())
+		tlog.Error(err.Error())
 		return err
 	}
 	req, ok := pb.(*pbgamerecord.QueryClubStatisticsReq)
 	if !ok {
 		err = fmt.Errorf("not *pbcenter.CancelMatchReq")
-		logrus.Error(err.Error())
+		tlog.Error(err.Error())
 		return
 	}
 	rsp := &pbgamerecord.QueryClubStatisticsRsp{
@@ -255,13 +253,13 @@ func (p *center) QueryClubStatisticsReq(ctx context.Context, args *codec.Message
 	if req.QueryType == 1 {
 		querydata, err = mgo.QueryClubPlayStatistics(req.QueryClubId, req.QueryStartTime, req.QueryEndTime)
 		if err != nil {
-			logrus.Warn("查询俱乐部对局统计数据失败 err = " + err.Error())
+			tlog.Warn("查询俱乐部对局统计数据失败 err = " + err.Error())
 			rsp.Error = 1
 		}
 	} else if req.QueryType == 2 {
 		querydata, err = mgo.QueryClubIntegralStatistics(req.QueryClubId, req.QueryStartTime, req.QueryEndTime)
 		if err != nil {
-			logrus.Warn("查询俱乐部积分统计数据失败 err = " + err.Error())
+			tlog.Warn("查询俱乐部积分统计数据失败 err = " + err.Error())
 			rsp.Error = 1
 		}
 	}

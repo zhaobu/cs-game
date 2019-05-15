@@ -7,16 +7,17 @@ import (
 	"cy/game/util"
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"runtime/debug"
 	"time"
 
+	zaplog "cy/game/common/logger"
+
 	"github.com/gomodule/redigo/redis"
 	metrics "github.com/rcrowley/go-metrics"
-	"github.com/sirupsen/logrus"
 	"github.com/smallnest/rpcx/server"
 	"github.com/smallnest/rpcx/serverplugin"
+	"go.uber.org/zap"
 )
 
 var (
@@ -27,6 +28,9 @@ var (
 	redisAddr  = flag.String("redisaddr", "192.168.0.90:6379", "redis address")
 	redisDb    = flag.Int("redisDb", 1, "redis db select")
 	mgoURI     = flag.String("mgo", "mongodb://192.168.0.90:27017/game", "mongo connection URI")
+
+	log  *zap.SugaredLogger //printf风格
+	tlog *zap.Logger        //structured 风格
 )
 
 func init() {
@@ -41,25 +45,38 @@ func init() {
 
 type center int
 
+// func initLog() {
+// 	logrus.SetFormatter(&logrus.JSONFormatter{})
+// 	if *release {
+// 		logName := fmt.Sprintf("center_%d_%d.log", os.Getpid(), time.Now().Unix())
+// 		file, err := os.OpenFile(logName, os.O_CREATE|os.O_WRONLY, 0666)
+// 		if err == nil {
+// 			logrus.SetOutput(file)
+// 		} else {
+// 			logrus.SetOutput(os.Stdout)
+// 		}
+// 	} else {
+// 		logName := fmt.Sprintf("./log/center.log")
+// 		file, err := os.OpenFile(logName, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
+// 		if err == nil {
+// 			logrus.SetOutput(file)
+// 		} else {
+// 			logrus.SetOutput(os.Stdout)
+// 		}
+// 	}
+// }
+
 func initLog() {
-	logrus.SetFormatter(&logrus.JSONFormatter{})
+	var logName, logLevel string
 	if *release {
-		logName := fmt.Sprintf("center_%d_%d.log", os.Getpid(), time.Now().Unix())
-		file, err := os.OpenFile(logName, os.O_CREATE|os.O_WRONLY, 0666)
-		if err == nil {
-			logrus.SetOutput(file)
-		} else {
-			logrus.SetOutput(os.Stdout)
-		}
+		logLevel = "info"
+		logName = fmt.Sprintf("./log/center_%d_%d.log", os.Getpid(), time.Now().Format("2006_01_02"))
 	} else {
-		logName := fmt.Sprintf("./log/center.log")
-		file, err := os.OpenFile(logName, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
-		if err == nil {
-			logrus.SetOutput(file)
-		} else {
-			logrus.SetOutput(os.Stdout)
-		}
+		logName = fmt.Sprintf("./log/center.log")
+		logLevel = "debug"
 	}
+	tlog = zaplog.InitLogger(logName, logLevel, !*release)
+	log = tlog.Sugar()
 }
 
 func main() {
@@ -68,7 +85,7 @@ func main() {
 	defer func() {
 		r := recover()
 		if r != nil {
-			logrus.Warn(string(debug.Stack()))
+			tlog.Warn(string(debug.Stack()))
 		}
 
 	}()
@@ -99,19 +116,19 @@ func main() {
 
 	err = mgo.Init(*mgoURI)
 	if err != nil {
-		logrus.Error(err.Error())
+		tlog.Error(err.Error())
 		return
 	}
 
 	if *release && *addr == "" {
 		taddr, err := util.AllocListenAddr()
 		if err != nil {
-			logrus.Warn(err.Error())
+			tlog.Warn(err.Error())
 			return
 		}
 		*addr = taddr.String()
 	}
-	logrus.Infof("listen at %s", *addr)
+	log.Infof("listen at %s", *addr)
 
 	s := server.NewServer()
 	addRegistryPlugin(s)

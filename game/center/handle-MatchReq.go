@@ -4,26 +4,24 @@ import (
 	"context"
 	"cy/game/codec"
 	"cy/game/codec/protobuf"
-	"cy/game/pb/center"
-	"cy/game/pb/common"
-	"cy/game/pb/inner"
+	pbcenter "cy/game/pb/center"
+	pbcommon "cy/game/pb/common"
+	pbinner "cy/game/pb/inner"
 	"fmt"
 	"runtime/debug"
-
-	"github.com/sirupsen/logrus"
 )
 
 func (p *center) MatchReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
-		logrus.Error(err.Error())
+		tlog.Error(err.Error())
 		return err
 	}
 
 	matchReq, ok := pb.(*pbcenter.MatchReq)
 	if !ok {
 		err = fmt.Errorf("not *pbcenter.MatchReq")
-		logrus.Error(err.Error())
+		tlog.Error(err.Error())
 		return
 	}
 
@@ -42,13 +40,7 @@ func (p *center) MatchReq(ctx context.Context, args *codec.Message, reply *codec
 
 		codec.Pb2Msg(matchRsp, reply)
 
-		logrus.WithFields(logrus.Fields{
-			"req":   *matchReq,
-			"rsp":   *matchRsp,
-			"err":   err,
-			"r":     r,
-			"stack": stack,
-		}).Info(args.Name)
+		log.Infof("args.Name:%s:req:%v,rsp:%v,err:%v,r:%v,stack:%v", args.Name, *matchReq, *matchRsp, err, r, stack)
 	}()
 
 	// 1> 向逻辑游戏检查参数
@@ -56,7 +48,7 @@ func (p *center) MatchReq(ctx context.Context, args *codec.Message, reply *codec
 	if err != nil {
 		matchRsp.Code = pbcenter.MatchRspCode_InvalidGame
 		matchRsp.StrCode = err.Error()
-		logrus.Warnf("bad gamename %s", matchReq.GameName)
+		log.Warnf("bad gamename %s", matchReq.GameName)
 		return nil
 	}
 
@@ -68,7 +60,7 @@ func (p *center) MatchReq(ctx context.Context, args *codec.Message, reply *codec
 	if err != nil {
 		matchRsp.Code = pbcenter.MatchRspCode_InternalServerError
 		matchRsp.StrCode = err.Error()
-		logrus.Error(err.Error())
+		tlog.Error(err.Error())
 		return nil
 	}
 
@@ -76,7 +68,7 @@ func (p *center) MatchReq(ctx context.Context, args *codec.Message, reply *codec
 	if err != nil {
 		matchRsp.Code = pbcenter.MatchRspCode_InternalServerError
 		matchRsp.StrCode = err.Error()
-		logrus.Error(err.Error())
+		tlog.Error(err.Error())
 		return nil
 	}
 
