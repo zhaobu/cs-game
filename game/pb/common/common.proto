@@ -38,21 +38,20 @@ enum DeskType {
 
 // 桌子信息
 message DeskInfo {
-  uint64 Uuid = 1;          // 版本号
-  uint64 ID = 2;            // 桌子ID
-  uint64 CreateUserID = 3;  // 创建人 0表示系统创建
-  string CreateUserName = 4;
-  string CreateUserProfile = 5;
-  int64 CreateTime = 6;
-  int64 CreateFee = 7;  // 费用 创建时预扣的
-  string ArgName = 8;   // 具体游戏参数 如 pbgame_ddz.RoomArg
-  bytes ArgValue = 9;
-  // 1 等待中 2 开始了
-  string Status = 10;
-  string GameName = 11;
-  string GameID = 12;
-  int64 ClubID = 13;                         // 所属俱乐部
-  DeskType Kind = 14;                        // 桌子类型 1匹配 2好友
+  uint64 Uuid = 1;               // 版本号
+  uint64 ID = 2;                 // 桌子ID
+  uint64 CreateUserID = 3;       // 创建人 0表示系统创建
+  string CreateUserName = 4;     //创建人名字
+  string CreateUserProfile = 5;  //创建人头像
+  int64 CreateTime = 6;          //创建时间
+  int64 CreateFee = 7;           // 费用 创建时预扣的
+  string ArgName = 8;    // 桌子参数名称 如 pbgame_mj_changshu.DeskArg
+  bytes ArgValue = 9;    //桌子参数
+  string Status = 10;    // 1 等待中 2 开始了
+  string GameName = 11;  //游戏id
+  string GameID = 12;    //游戏ip+port
+  int64 ClubID = 13;     // 所属俱乐部
+  DeskType Kind = 14;    // 桌子类型 1匹配 2好友
   repeated SiteDownPlayerInfo SdInfos = 15;  // 桌子中坐下的玩家
   int64 TotalLoop = 16;                      // 总局数
   int64 CurrLoop = 17;                       // 当前局数

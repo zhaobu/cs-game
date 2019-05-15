@@ -237,16 +237,15 @@ func (m *SiteDownPlayerInfo) GetProfile() string {
 
 // 桌子信息
 type DeskInfo struct {
-	Uuid              uint64 `protobuf:"varint,1,opt,name=Uuid,proto3" json:"Uuid,omitempty"`
-	ID                uint64 `protobuf:"varint,2,opt,name=ID,proto3" json:"ID,omitempty"`
-	CreateUserID      uint64 `protobuf:"varint,3,opt,name=CreateUserID,proto3" json:"CreateUserID,omitempty"`
-	CreateUserName    string `protobuf:"bytes,4,opt,name=CreateUserName,proto3" json:"CreateUserName,omitempty"`
-	CreateUserProfile string `protobuf:"bytes,5,opt,name=CreateUserProfile,proto3" json:"CreateUserProfile,omitempty"`
-	CreateTime        int64  `protobuf:"varint,6,opt,name=CreateTime,proto3" json:"CreateTime,omitempty"`
-	CreateFee         int64  `protobuf:"varint,7,opt,name=CreateFee,proto3" json:"CreateFee,omitempty"`
-	ArgName           string `protobuf:"bytes,8,opt,name=ArgName,proto3" json:"ArgName,omitempty"`
-	ArgValue          []byte `protobuf:"bytes,9,opt,name=ArgValue,proto3" json:"ArgValue,omitempty"`
-	// 1 等待中 2 开始了
+	Uuid                 uint64                `protobuf:"varint,1,opt,name=Uuid,proto3" json:"Uuid,omitempty"`
+	ID                   uint64                `protobuf:"varint,2,opt,name=ID,proto3" json:"ID,omitempty"`
+	CreateUserID         uint64                `protobuf:"varint,3,opt,name=CreateUserID,proto3" json:"CreateUserID,omitempty"`
+	CreateUserName       string                `protobuf:"bytes,4,opt,name=CreateUserName,proto3" json:"CreateUserName,omitempty"`
+	CreateUserProfile    string                `protobuf:"bytes,5,opt,name=CreateUserProfile,proto3" json:"CreateUserProfile,omitempty"`
+	CreateTime           int64                 `protobuf:"varint,6,opt,name=CreateTime,proto3" json:"CreateTime,omitempty"`
+	CreateFee            int64                 `protobuf:"varint,7,opt,name=CreateFee,proto3" json:"CreateFee,omitempty"`
+	ArgName              string                `protobuf:"bytes,8,opt,name=ArgName,proto3" json:"ArgName,omitempty"`
+	ArgValue             []byte                `protobuf:"bytes,9,opt,name=ArgValue,proto3" json:"ArgValue,omitempty"`
 	Status               string                `protobuf:"bytes,10,opt,name=Status,proto3" json:"Status,omitempty"`
 	GameName             string                `protobuf:"bytes,11,opt,name=GameName,proto3" json:"GameName,omitempty"`
 	GameID               string                `protobuf:"bytes,12,opt,name=GameID,proto3" json:"GameID,omitempty"`

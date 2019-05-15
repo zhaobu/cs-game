@@ -4,9 +4,10 @@ import (
 	"context"
 	"cy/game/codec"
 	"cy/game/db/mgo"
-	pbgamerecord "cy/game/pb/gamerecord"
+	"cy/game/pb/gamerecord"
 	sort "cy/game/util/tools/Sort"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"sync"
 	"time"
 )
@@ -39,19 +40,18 @@ func GameRecord_Init() {
 func (p *center) WriteGameRecordReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
-		tlog.Error(err.Error())
+		logrus.Error(err.Error())
 		return err
 	}
 	req, ok := pb.(*pbgamerecord.WriteGameRecordReq)
 	if !ok {
 		err = fmt.Errorf("not *pbcenter.CancelMatchReq")
-		tlog.Error(err.Error())
+		logrus.Error(err.Error())
 		return err
 	}
 	gr := &mgo.WirteRecord{
 		RoomRecordId:  req.RoomRecordId,
 		GameId:        req.GameId,
-		RoomType:      req.RoomType,
 		ClubId:        req.ClubId,
 		RoomId:        req.RoomId,
 		Index:         req.Index,
@@ -81,13 +81,13 @@ func (p *center) WriteGameRecordReq(ctx context.Context, args *codec.Message, re
 func (p *center) QueryRoomRecordReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
-		tlog.Error("解析消息 1 失败" + err.Error())
+		logrus.Error("解析消息 1 失败" + err.Error())
 		return err
 	}
 	req, ok := pb.(*pbgamerecord.QueryRoomRecordReq)
 	if !ok {
 		err = fmt.Errorf("not *pbcenter.CancelMatchReq")
-		tlog.Error(err.Error())
+		logrus.Error(err.Error())
 		return
 	}
 	rsp := &pbgamerecord.QueryRoomRecordRsp{
@@ -98,19 +98,19 @@ func (p *center) QueryRoomRecordReq(ctx context.Context, args *codec.Message, re
 	if req.QueryType == 1 || req.QueryType == 2 {
 		querydata, err = mgo.QueryUserRoomRecord(req.QueryParam, req.QueryStartTime, req.QueryEndTime)
 		if err != nil {
-			tlog.Warn("查询用户数据失败 err = " + err.Error())
+			logrus.Warn("查询用户数据失败 err = " + err.Error())
 			rsp.Error = 1
 		}
 	} else if req.QueryType == 3 {
 		querydata, err = mgo.QueryClubRoomRecord(req.QueryParam, req.QueryStartTime, req.QueryEndTime)
 		if err != nil {
-			tlog.Warn("查询用户数据失败 err = " + err.Error())
+			logrus.Warn("查询用户数据失败 err = " + err.Error())
 			rsp.Error = 1
 		}
 	} else if req.QueryType == 4 {
 		querydata, err = mgo.QueryClubRoomRecordByRoom(req.QueryParam, req.QueryParam2)
 		if err != nil {
-			tlog.Warn("查询俱乐部房间数据失败 err = " + err.Error())
+			logrus.Warn("查询俱乐部房间数据失败 err = " + err.Error())
 			rsp.Error = 1
 		}
 	}
@@ -120,7 +120,6 @@ func (p *center) QueryRoomRecordReq(ctx context.Context, args *codec.Message, re
 			GameStartTime: v.GameStartTime,
 			RoomId:        v.RoomId,
 			GameId:        v.GameId,
-			RoomType:      v.RoomType,
 			ClubId:        v.ClubId,
 			TotalJuNun:    v.TotalJuNun,
 			GamePlayers:   []*pbgamerecord.RoomPlayerInfo{},
@@ -146,13 +145,13 @@ func (p *center) QueryRoomRecordReq(ctx context.Context, args *codec.Message, re
 func (p *center) QueryGameRecordReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
-		tlog.Error("解析消息 1 失败" + err.Error())
+		logrus.Error("解析消息 1 失败" + err.Error())
 		return err
 	}
 	req, ok := pb.(*pbgamerecord.QueryGameRecordReq)
 	if !ok {
 		err = fmt.Errorf("not *pbcenter.CancelMatchReq")
-		tlog.Error(err.Error())
+		logrus.Error(err.Error())
 		return
 	}
 	rsp := &pbgamerecord.QueryGameRecordRsp{
@@ -163,7 +162,7 @@ func (p *center) QueryGameRecordReq(ctx context.Context, args *codec.Message, re
 	if len(req.GameRecordIds) > 0 {
 		querydata, err = mgo.QueryGameRecord(req.GameRecordIds)
 		if err != nil {
-			tlog.Warn("查询用户数据失败 err = " + err.Error())
+			logrus.Warn("查询用户数据失败 err = " + err.Error())
 			rsp.Error = 1
 		}
 		for _, v := range querydata {
@@ -171,7 +170,6 @@ func (p *center) QueryGameRecordReq(ctx context.Context, args *codec.Message, re
 				GameRecordId:  v.GameRecordId,
 				RoomId:        v.RoomId,
 				GameId:        v.GameId,
-				RoomType:      v.RoomType,
 				ClubId:        v.ClubId,
 				GameStartTime: v.GameStartTime,
 				GameEndTime:   v.GameEndTime,
@@ -201,13 +199,13 @@ func (p *center) QueryGameRecordReq(ctx context.Context, args *codec.Message, re
 func (p *center) QueryGameRePlayRecord(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
-		tlog.Error("解析消息 1 失败" + err.Error())
+		logrus.Error("解析消息 1 失败" + err.Error())
 		return err
 	}
 	req, ok := pb.(*pbgamerecord.QueryGameRePlaydReq)
 	if !ok {
 		err = fmt.Errorf("not *pbcenter.CancelMatchReq")
-		tlog.Error(err.Error())
+		logrus.Error(err.Error())
 		return
 	}
 	rsp := &pbgamerecord.QueryGameRePlaydRsp{
@@ -218,7 +216,7 @@ func (p *center) QueryGameRePlayRecord(ctx context.Context, args *codec.Message,
 	if len(req.GameRecordIds) > 0 {
 		querydata, err = mgo.QueryGameRePlayRecord(req.GameRecordIds)
 		if err != nil {
-			tlog.Warn("查询复盘数据失败 err = " + err.Error())
+			logrus.Warn("查询复盘数据失败 err = " + err.Error())
 			rsp.Error = 1
 		}
 		rsp.RePlayData = querydata.RePlayData
@@ -236,13 +234,13 @@ func (p *center) QueryGameRePlayRecord(ctx context.Context, args *codec.Message,
 func (p *center) QueryClubStatisticsReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
-		tlog.Error(err.Error())
+		logrus.Error(err.Error())
 		return err
 	}
 	req, ok := pb.(*pbgamerecord.QueryClubStatisticsReq)
 	if !ok {
 		err = fmt.Errorf("not *pbcenter.CancelMatchReq")
-		tlog.Error(err.Error())
+		logrus.Error(err.Error())
 		return
 	}
 	rsp := &pbgamerecord.QueryClubStatisticsRsp{
@@ -253,13 +251,13 @@ func (p *center) QueryClubStatisticsReq(ctx context.Context, args *codec.Message
 	if req.QueryType == 1 {
 		querydata, err = mgo.QueryClubPlayStatistics(req.QueryClubId, req.QueryStartTime, req.QueryEndTime)
 		if err != nil {
-			tlog.Warn("查询俱乐部对局统计数据失败 err = " + err.Error())
+			logrus.Warn("查询俱乐部对局统计数据失败 err = " + err.Error())
 			rsp.Error = 1
 		}
 	} else if req.QueryType == 2 {
 		querydata, err = mgo.QueryClubIntegralStatistics(req.QueryClubId, req.QueryStartTime, req.QueryEndTime)
 		if err != nil {
-			tlog.Warn("查询俱乐部积分统计数据失败 err = " + err.Error())
+			logrus.Warn("查询俱乐部积分统计数据失败 err = " + err.Error())
 			rsp.Error = 1
 		}
 	}
@@ -319,11 +317,9 @@ func (p *center) QueryClubStatisticsReq(ctx context.Context, args *codec.Message
 //--------------------------------------------------统计数据------------------------------------------------------------
 //写入俱乐部统计数据到缓存
 func WriteClubGameStatistics(gr *mgo.WirteRecord) {
-
 	defer clublock.Unlock()
 	clublock.Lock()
-
-	if gr.RoomType != 1 {
+	if gr.ClubId == 0 {
 		return
 	}
 	if ClubStatistics == nil {
@@ -361,88 +357,92 @@ func StartTimer_ResetClubStatistics() {
 		<-timer.C
 		ResetClubGameStatistics()
 	}()
-
 }
 
 //每天定时重置统计数据并写入到数据库中
 func ResetClubGameStatistics() {
-	clublock.Lock()
-	if ClubStatistics == nil {
-		return
-	}
-	_ClubStatistics := ClubStatistics
-	ClubStatistics = nil
-	clublock.Unlock()
-	for i, v1 := range _ClubStatistics.ClubSD {
-		CSData := &mgo.ClubStatisticsData{
-			ClubId:         i,
-			StatisticsTime: time.Now().Unix(),
-			Statistics:     []*mgo.StatisticsData{},
-		}
-
-		usd := []interface{}{}
-		for _, v2 := range v1.UserSD {
-			usd = append(usd, v2)
-		}
-
-		//先做对局次数排名
-		sort.Sort(usd, func(a interface{}, b interface{}) int8 {
-			_a := a.(*UserStatisticsData)
-			_b := b.(*UserStatisticsData)
-			if _a.StatisticsPlay < _b.StatisticsPlay {
-				return 1
-			} else if _a.StatisticsPlay == _b.StatisticsPlay {
-				return 0
-			} else {
-				return -1
+	//if ClubStatistics == nil {
+	//	return
+	//}
+	//_ClubStatistics := ClubStatistics
+	//ClubStatistics = nil
+	cds, err := mgo.QueryAndClearAllClubCurrDayStatistics()
+	if err != nil {
+		for _, v1 := range cds {
+			CSData := &mgo.ClubStatisticsData{
+				ClubId:         v1.ClubId,
+				StatisticsTime: time.Now().Unix(),
+				Statistics:     []*mgo.StatisticsData{},
 			}
-		})
-		index := 0
-		for _, u := range usd {
-			if index > 10 {
+
+			usd := []interface{}{}
+			for _, v2 := range v1.UserSD {
+				usd = append(usd, v2)
+			}
+
+			//先做对局次数排名
+			sort.Sort(usd, func(a interface{}, b interface{}) int8 {
+				_a := a.(*UserStatisticsData)
+				_b := b.(*UserStatisticsData)
+				if _a.StatisticsPlay < _b.StatisticsPlay {
+					return 1
+				} else if _a.StatisticsPlay == _b.StatisticsPlay {
+					return 0
+				} else {
+					return -1
+				}
+			})
+			index := 0
+			for _, u := range usd {
+				if index > 10 {
+					break
+				}
+				userdata := u.(*UserStatisticsData)
+				CSData.Statistics = append(CSData.Statistics, &mgo.StatisticsData{
+					UserId:     userdata.UserId,
+					Statistics: userdata.StatisticsPlay,
+				})
+				index++
+			}
+			err := mgo.AddClubPlayStatistics(CSData)
+			if err != nil {
+				logrus.Errorf("写入对局统计数据失败 err = " + err.Error())
 				break
 			}
-			userdata := u.(*UserStatisticsData)
-			CSData.Statistics = append(CSData.Statistics, &mgo.StatisticsData{
-				UserId:     userdata.UserId,
-				Statistics: userdata.StatisticsPlay,
-			})
-			index++
-		}
-		err := mgo.AddClubPlayStatistics(CSData)
-		if err != nil {
-			panic("写入对局统计数据失败 err = " + err.Error())
-		}
 
-		//再排名积分
-		sort.Sort(usd, func(a interface{}, b interface{}) int8 {
-			_a := a.(*UserStatisticsData)
-			_b := b.(*UserStatisticsData)
-			if _a.StatisticsIntegral < _b.StatisticsIntegral {
-				return 1
-			} else if _a.StatisticsIntegral == _b.StatisticsIntegral {
-				return 0
-			} else {
-				return -1
+			//再排名积分
+			sort.Sort(usd, func(a interface{}, b interface{}) int8 {
+				_a := a.(*UserStatisticsData)
+				_b := b.(*UserStatisticsData)
+				if _a.StatisticsIntegral < _b.StatisticsIntegral {
+					return 1
+				} else if _a.StatisticsIntegral == _b.StatisticsIntegral {
+					return 0
+				} else {
+					return -1
+				}
+			})
+			index = 0
+			for _, u := range usd {
+				if index > 10 {
+					break
+				}
+				userdata := u.(*UserStatisticsData)
+				CSData.Statistics = append(CSData.Statistics, &mgo.StatisticsData{
+					UserId:     userdata.UserId,
+					Name:       userdata.Name,
+					Statistics: userdata.StatisticsIntegral,
+				})
+				index++
 			}
-		})
-		index = 0
-		for _, u := range usd {
-			if index > 10 {
+			err = mgo.AddClubIntegralStatistics(CSData)
+			if err != nil {
+				logrus.Errorf("写入战绩数据库失败")
 				break
 			}
-			userdata := u.(*UserStatisticsData)
-			CSData.Statistics = append(CSData.Statistics, &mgo.StatisticsData{
-				UserId:     userdata.UserId,
-				Name:       userdata.Name,
-				Statistics: userdata.StatisticsIntegral,
-			})
-			index++
 		}
-		err = mgo.AddClubIntegralStatistics(CSData)
-		if err != nil {
-			panic("写入统计数据失败 err = " + err.Error())
-		}
+	} else {
+		logrus.Errorf("查询当日俱乐部游戏统计数据错误", err)
 	}
 	StartTimer_ResetClubStatistics() //重新计算下一次时间
 }

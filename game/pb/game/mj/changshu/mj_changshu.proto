@@ -413,6 +413,7 @@ message GameDeskInfo {
   repeated cyint32 last_dice_value = 15;   //上一个玩家打色子结果
   repeated cyint32 draw_dice_value = 16;   //摸牌色子
   int32 left_oper_time = 17;               //剩余操作时间
+  int32 total_num = 18;                    //总牌数
 }
 
 // message PlayerBalanceResult {

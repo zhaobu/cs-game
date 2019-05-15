@@ -13,24 +13,22 @@ message GamePlayerInfo {
 message WriteGameRecordReq {
   string RoomRecordId = 1;  //游戏房间创建时生成的唯一Id 用户关联该房间
   string GameId = 2;        //游戏Id
-  int32 RoomType = 3;       //房间类型 1 俱乐部房间  2 好友房间
-  int64 ClubId = 4;         //俱乐部Id 当 AreaType 1 时需要填写
-  uint32 RoomId = 5;        //房间号
-  int32 TotalJuNun = 6;     //总局数
-  int32 Index = 7;          //游戏当前局数
-  int64 GameStartTime = 8;  //开始时间 存储时间错
-  int64 GameEndTime = 9;    //结束时间 存储时间错
-  int32 PayType = 10;       //支付方式 1AA支付 2房主支付
-  repeated GamePlayerInfo PlayerInfos = 11;  //游戏内玩家数据
-  bytes RePlayData = 12;  //复盘数据                暂时可不写
+  int64 ClubId = 3;         //俱乐部Id 当 AreaType 1 时需要填写
+  uint64 RoomId = 4;        //房间号
+  int32 TotalJuNun = 5;     //总局数
+  int32 Index = 6;          //游戏当前局数
+  int64 GameStartTime = 7;  //开始时间 存储时间错
+  int64 GameEndTime = 8;    //结束时间 存储时间错
+  int32 PayType = 9;       //支付方式 1AA支付 2房主支付
+  repeated GamePlayerInfo PlayerInfos = 10;  //游戏内玩家数据
+  bytes RePlayData = 11;  //复盘数据                暂时可不写
 }
 
-//查询房间游戏记录数据请求
+//查询房间游戏记录数据请求(点击战绩按钮或者俱乐部内查找)
 message QueryRoomRecordReq {
   uint64 UserId = 1;  //用户Id 查询者
   int32 QueryType = 2;  //查询类型 1 个人查询 2查询他人 3俱乐部查询 4房间号查询
-  uint64 QueryParam = 3;  //查询参数                              自己的用户id
-                          //他人的用户id 俱乐部的id 俱乐部的id
+  uint64 QueryParam = 3;  //查询参数:自己的用户id/他人的用户id/俱乐部的id/房间号
   uint32 QueryParam2 = 4;  //扩展查询参数 为房间查询扩展的 房间id
   int64 QueryStartTime = 5;  //查询时间范围
   int64 QueryEndTime = 6;    //查询时间范围
@@ -45,15 +43,13 @@ message RoomPlayerInfo {
 message RoomRecord {
   string RoomRecordId = 1;  //房间记录Id 关联房间的数据库唯一id
   int64 GameStartTime = 2;  //开始时间
-  uint32 RoomId = 3;        //房间号
+  uint64 RoomId = 3;        //房间号
   string GameId = 4;        //游戏Id
-  int32 RoomType = 5;       //房间类型 1俱乐部房间 2好友房
-  int32 TotalJuNun = 6;     //总局数
-  int32 PayType = 7;        //支付方式 1AA支付 2房主支付
-  int64 ClubId = 8;         //俱乐部Id 当 AreaType 1 时需要填写
-  repeated RoomPlayerInfo GamePlayers =
-      9;  //游戏参与玩家信息 为了减少查询量 将必要信息进行存储
-  repeated string GameRecordIds = 10;  //房间内游戏数据 数组
+  int32 TotalJuNun = 5;     //总局数
+  int32 PayType = 6;        //支付方式 1AA支付 2房主支付
+  int64 ClubId = 7;         //俱乐部Id 当 AreaType 1 时需要填写
+  repeated RoomPlayerInfo GamePlayers = 8;  //游戏参与玩家信息
+  repeated string GameRecordIds = 9;       //房间内游戏数据 数组
 }
 
 //查询房间游戏记录数据回应
@@ -62,7 +58,7 @@ message QueryRoomRecordRsp {
   repeated RoomRecord Datas = 2;  //房间记录数据
 }
 
-//查询游戏记录请求
+//查询游戏记录请求(点击详情按钮)
 message QueryGameRecordReq {
   repeated string GameRecordIds = 1;  //记录数组
 }
@@ -71,14 +67,12 @@ message QueryGameRecordReq {
 message GameRecord {
   string GameRecordId = 1;  //游戏记录Id
   string GameId = 2;        //游戏Id
-  int32 RoomType = 3;       //房间类型
-  int64 ClubId = 4;         ///俱乐部Id 当 AreaType 1 时需要填写
-  uint32 RoomId = 5;        //房间号
-  int32 Index = 6;          //第几局
-  int64 GameStartTime = 7;  //开始时间 存储时间错
-  int64 GameEndTime = 8;    //结束时间 存储时间错
-  repeated GamePlayerInfo GamePlayers =
-      9;  //游戏参与玩家信息 为了减少查询量 将必要信息进行存储
+  int64 ClubId = 3;         ///俱乐部Id 当 AreaType 1 时需要填写
+  uint64 RoomId = 4;        //房间号
+  int32 Index = 5;          //第几局
+  int64 GameStartTime = 6;  //开始时间 存储时间错
+  int64 GameEndTime = 7;    //结束时间 存储时间错
+  repeated GamePlayerInfo GamePlayers = 8;  //游戏参与玩家信息
 }
 
 //查询游戏记录请求
@@ -87,13 +81,13 @@ message QueryGameRecordRsp {
   repeated GameRecord Records = 2;  //游戏记录
 }
 
-//查询游戏复盘数据请求
+//查询游戏复盘数据请求(点击有戏回放按钮)
 message QueryGameRePlaydReq {
   string GameRecordIds = 1;  //游戏记录id
 }
 
 message QueryGameRePlaydRsp {
-  int32 Error = 1;       // 0查询成功 2记录不存在
+  int32 Error = 1;             // 0查询成功 2记录不存在
   bytes RePlayData = 2;  //复盘数据
 }
 
@@ -114,5 +108,5 @@ message StatisticsData {
 //查询俱乐部统计回应
 message QueryClubStatisticsRsp {
   int32 Error = 1;  // 0 查询成功 1参数异常(不存在此人或者此俱乐部) 2权限不足
-  repeated StatisticsData StatisticsDatas = 8;  //统计结果数据
+  repeated StatisticsData StatisticsDatas = 2;  //统计结果数据
 }

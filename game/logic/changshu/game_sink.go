@@ -1127,6 +1127,7 @@ func (self *GameSink) gameReconnect(recInfo *pbgame_logic.GameDeskInfo, uid uint
 			self.countCanOperMsg(info, canOper)
 			recInfo.CanOper = canOper
 		}
+		recInfo.TotalNum = int32(len(self.baseCard))
 		recInfo.LeftOperTime = 15
 		recInfo.DrawDiceValue = switchToCyint32(self.drawDiceValue[:])
 		recInfo.LastOutChair = self.lastOutChair
