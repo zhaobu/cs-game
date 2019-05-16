@@ -1114,11 +1114,12 @@ func (self *GameSink) gameReconnect(recInfo *pbgame_logic.GameDeskInfo, uid uint
 	switch recInfo.GameStatus {
 	case pbgame_logic.GameStatus_GSDice: //投色子
 		recInfo.CurDiceChair = self.curThrowDice
-		for k, v := range recInfo.GameUser {
-			if mj.GetNextChair(int32(k), self.game_config.PlayerCount) == self.curThrowDice {
-				recInfo.LastDiceValue = switchToCyint32(self.diceResult[int32(k)][:])
+		for _, v := range recInfo.GameUser {
+			k := v.ChairId
+			if mj.GetNextChair(k, self.game_config.PlayerCount) == self.curThrowDice {
+				recInfo.LastDiceValue = switchToCyint32(self.diceResult[k][:])
 			}
-			v.DiceValue = self.diceResult[int32(k)][0] + self.diceResult[int32(k)][1]
+			v.DiceValue = self.diceResult[k][0] + self.diceResult[k][1]
 		}
 	case pbgame_logic.GameStatus_GSPlaying: //行牌中
 		recInfo.BankerId = self.bankerId
@@ -1139,7 +1140,8 @@ func (self *GameSink) gameReconnect(recInfo *pbgame_logic.GameDeskInfo, uid uint
 			canNotOut = append(canNotOut, v)
 		}
 		recInfo.UnableOutCards = switchToCyint32(canNotOut)
-		for k, v := range recInfo.GameUser {
+		for _, v := range recInfo.GameUser {
+			k := v.ChairId
 			userInfo := self.players[k]
 			v.CardNum = int32(len(userInfo.CardInfo.HandCards))
 			v.Point = userInfo.BalanceResult.Point
@@ -1147,7 +1149,7 @@ func (self *GameSink) gameReconnect(recInfo *pbgame_logic.GameDeskInfo, uid uint
 			tmp := &pbgame_logic.Json_PlayerCard{}
 			tmp.HuaCards = userInfo.CardInfo.HuaCards
 			tmp.OutCards = userInfo.CardInfo.OutCards
-			if int32(k) == chairId {
+			if k == chairId {
 				tmp.HandCards = userInfo.CardInfo.HandCards
 			}
 			v.JsonCardInfo = util.PB2JSON(tmp, false)

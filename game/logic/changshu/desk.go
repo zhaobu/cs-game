@@ -284,7 +284,8 @@ func (d *Desk) sendDeskInfo(uid uint64) {
 	}
 	msg := &pbgame_logic.GameDeskInfo{GameName: gameName, Arg: d.deskConfig, GameStatus: d.gameStatus, CurInning: d.curInning}
 	msg.MasterUid = d.masterUid
-	msg.GameUser = []*pbgame_logic.DeskUserInfo{}
+	msg.GameUser = make([]*pbgame_logic.DeskUserInfo, 0, d.deskConfig.Args.PlayerCount)
+	// 按照座位号从0开始遍历d.playChair
 	for chair, user := range d.playChair {
 		userInfo := &pbgame_logic.DeskUserInfo{}
 		userInfo.Info = user.info
@@ -365,7 +366,7 @@ func (d *Desk) doVoteDestroyDesk(uid uint64, req *pbgame.VoteDestroyDeskReq) {
 //处理桌子销毁
 func (d *Desk) dealDestroyDesk(reqType pbgame.DestroyDeskType) {
 	//在游戏中解散
-	if d.gameStatus > pbgame_logic.GameStatus_GSWait {
+	if reqType != pbgame.DestroyDeskType_DestroyTypeDebug && d.gameStatus > pbgame_logic.GameStatus_GSWait {
 		d.gameSink.gameEnd(pbgame_logic.GameEndType_EndDissmiss)
 	} else {
 		d.realDestroyDesk(reqType)
