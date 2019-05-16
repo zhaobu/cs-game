@@ -196,8 +196,7 @@ func (self *roomHandle) HandleMakeDeskReq(uid uint64, deskID uint64, req *pbgame
 
 	//构建桌子参数
 	deskArg := &pbgame_logic.DeskArg{Args: arg, Enable: true, Type: pbcommon.DeskType_DTFriend, FeeType: pbgame.FeeType_FTMasonry, DeskID: deskID}
-	newD := makeDesk(deskArg, uid, deskID, req.ClubID)
-	newD.gameNode = self.RoomServie
+	newD := makeDesk(deskArg, uid, deskID, req.ClubID, self.RoomServie)
 	//把桌子加入管理
 	updateID2desk(newD)
 

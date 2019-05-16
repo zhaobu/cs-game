@@ -89,7 +89,9 @@ func (self *GameSink) Ctor(config *pbgame_logic.CreateArg) error {
 	self.baseCard = cardDef.GetBaseCard(config.PlayerCount)
 	self.operAction.Init(config, self.laiziCard)
 	self.gameBalance.Init(config)
-	self.record.Init(config)
+	initArg := &mj.GameRecordArgs{GameId: self.desk.gameNode.GameName, ClubId: self.desk.clubId}
+	initArg.DeskArg = self.desk.deskConfig
+	self.record.Init(initArg)
 	return nil
 }
 

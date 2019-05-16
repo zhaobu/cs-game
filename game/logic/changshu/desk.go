@@ -55,11 +55,10 @@ type Desk struct {
 	*voteInfo
 }
 
-func makeDesk(deskArg *pbgame_logic.DeskArg, masterUid, deskID uint64, clubID int64) *Desk {
-	d := &Desk{deskId: deskID, clubId: clubID, masterUid: masterUid, deskConfig: deskArg}
-	d.gameSink = &GameSink{}
+func makeDesk(deskArg *pbgame_logic.DeskArg, masterUid, deskID uint64, clubID int64, gameNode *tpl.RoomServie) *Desk {
+	d := &Desk{deskId: deskID, clubId: clubID, masterUid: masterUid, deskConfig: deskArg, gameNode: gameNode}
+	d.gameSink = &GameSink{desk: d}
 	d.gameSink.Ctor(deskArg.Args)
-	d.gameSink.desk = d
 	d.playChair = make(map[int32]*deskUserInfo)
 	d.deskPlayers = make(map[uint64]*deskUserInfo)
 	d.timerManger = make(map[mj.EmtimerID]*timingwheel.Timer)
@@ -555,13 +554,19 @@ func (d *Desk) timerMangerDelete(tID mj.EmtimerID) {
 func (d *Desk) OnOffLine(uid uint64, online bool) {
 	dUserInfo := d.deskPlayers[uid]
 	dUserInfo.online = online
-	if dUserInfo.userStatus == pbgame.UserDeskStatus_UDSPlaying { //游戏玩家
-		if online { //上线
-			d.sendDeskInfo(uid)
-		}
-	} else { //观察者
+	if d.curInning == 0 { //游戏开始前
 		if !online { //下线
 			d.doExit(uid, &pbgame.ExitDeskRsp{})
+		}
+	} else { //游戏中
+		if dUserInfo.userStatus >= pbgame.UserDeskStatus_UDSSitDown {
+			if online { //游戏玩家上线
+				d.sendDeskInfo(uid)
+			}
+		} else {
+			if !online { //观察者下线
+				d.doExit(uid, &pbgame.ExitDeskRsp{})
+			}
 		}
 	}
 }

@@ -39,7 +39,7 @@ message CreateArgTpl {
   repeated cyU32String Dipiao = 4;
   // 局数
   repeated RoundInfo RInfo = 5;
-  // 支付方式 1 个人支付 2 平局支付
+  // 支付方式 1 个人支付 2 AA支付
   repeated cyU32String PaymentType = 6;
   // 语音 1 普通场 2 语音场
   repeated cyU32String Voice = 7;

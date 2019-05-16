@@ -1,13 +1,14 @@
 package mgo
 
 import (
-	"github.com/globalsign/mgo/bson"
 	"strconv"
+
+	"github.com/globalsign/mgo/bson"
 )
 
 const (
-	RoomRecordTable             = "roomrecord"             //游戏记录数据
-	GameRecordTable             = "gamerecord"             //游戏记录数据
+	RoomRecordTable             = "roomrecord"             //游戏房间记录
+	GameRecordTable             = "gamerecord"             //游戏单局记录
 	UserGameRecordTable         = "usergamerecord"         //用户游戏记录
 	GameRePlayDataTable         = "gamereplay"             //游戏复盘数据
 	ClubCurrDayStatisticsTable  = "clubcurrdaystatistics"  //俱乐部当日统计数据
@@ -19,60 +20,60 @@ const (
 type WirteRecord struct {
 	RoomRecordId  string            //游戏房间创建时生成的唯一Id 用户关联该房间
 	GameId        string            //游戏Id
-	ClubId        int64             //俱乐部Id 当 AreaType 1 时需要填写
-	RoomId        uint64            //房间号
-	TotalJuNun    int32             //总局数
+	ClubId        int64             //俱乐部Id
+	DeskId        uint64            //房间号
+	TotalJuNun    uint32            //总局数
+	PayType       uint32            //支付方式1 个人支付 2 AA支付
+	RoomRule      []byte            //房间规则
+	PlayerInfos   []*GamePlayerInfo //游戏内玩家数据
 	Index         int32             //游戏当前局数
 	GameStartTime int64             //开始时间 存储时间错
 	GameEndTime   int64             //结束时间 存储时间错
-	PayType       int32             //支付方式 1AA支付 2房主支付
-	RoomRule	  string			//房间规则
-	PlayerInfos   []*GamePlayerInfo //游戏内玩家数据
-	RePlayData    []byte            //复盘数据                暂时可不写
+	RePlayData    []*GameAction     //复盘数据
 }
 
 //用户游戏记录
 type UserGameRecord struct {
 	UserId        uint64   //用户Id
 	GameId        string   //游戏Id
-	RoomType      int32    //房间类型 1俱乐部房间 2好友房
-	RoomId        uint64   //房间号
+	DeskId        uint64   //房间号
 	GameStartTime int64    //开始时间 存储时间错
 	WinIntegral   int32    //该房间内累计输赢积分
-	RoomRecord    string   //房间记录关联Id
-	GameRecord    []uint64 //游戏记录关联Id
+	RoomRecordId  string   //房间记录关联Id
+	GameRecordIds []uint64 //游戏记录关联Id
 }
 
 //房间记录
 type RoomRecord struct {
 	RoomRecordId  string                     //房间记录Id 关联房间的数据库唯一id
 	GameStartTime int64                      //房间开始时间
-	TotalJuNun    int32                      //总局数
-	RoomId        uint64                     //房间号
+	TotalJuNun    uint32                     //总局数
+	DeskId        uint64                     //房间号
 	GameId        string                     //游戏Id
-	ClubId        int64                      //俱乐部Id 当 AreaType 1 时需要填写
-	PayType       int32                      //支付方式 1AA支付 2房主支付
-	RoonRule	  string					 //房间规则
+	ClubId        int64                      //俱乐部Id
+	PayType       uint32                     //支付方式1 个人支付 2 AA支付
+	RoonRule      []byte                     //房间规则
 	GamePlayers   map[uint64]*RoomPlayerInfo //游戏参与玩家信息 为了减少查询量 将必要信息进行存储
 	GameRecords   []string                   //房间内游戏数据 数组
 }
 type RoomPlayerInfo struct {
 	UserId      uint64 //用户Id
 	Name        string //姓名
-	WinIntegral int32  //输赢积分 房间内的统计数据
+	WinIntegral int32  //总的输赢积分
 }
 
-//游戏记录
+//游戏单局记录
 type GameRecord struct {
 	GameRecordId  string            //游戏记录ID 主键
 	GameId        string            //游戏Id
-	ClubId        int64             //俱乐部Id 当 AreaType 1 时需要填写
-	RoomId        uint64            //房间号
+	ClubId        int64             //俱乐部Id
+	DeskId        uint64            //房间号
 	Index         int32             //第几局
 	GameStartTime int64             //开始时间 存储时间错
 	GameEndTime   int64             //结束时间 存储时间错
 	GamePlayers   []*GamePlayerInfo //游戏参与玩家信息 为了减少查询量 将必要信息进行存储
 }
+
 type GamePlayerInfo struct {
 	UserId          uint64 //用户Id
 	Name            string //姓名
@@ -80,10 +81,15 @@ type GamePlayerInfo struct {
 	WinIntegral     int32  //输赢积分
 }
 
+type GameAction struct {
+	ActName  string //消息名称
+	ActValue []byte //消息序列化后的值
+}
+
 //游戏复盘记录					由于复盘数据过大 采取拆分单独数据表
 type GameRePlayData struct {
-	GameRecordId string //游戏记录ID
-	RePlayData   []byte //复盘协议数据
+	GameRecordId string        //游戏记录ID
+	RePlayData   []*GameAction //复盘协议数据
 }
 
 //俱乐部当日统计数据-----------------------------------------------------------------------------------------------------
@@ -100,7 +106,7 @@ type UserStatisticsData struct {
 
 //俱乐部统计数据 现在只统计7天内的----------------------------------------------------------------------------------------
 type ClubStatisticsData struct {
-	ClubId         int64             //俱乐部Id 当 AreaType 1 时需要填写
+	ClubId         int64             //俱乐部Id
 	StatisticsTime int64             //统计时间 到天 2019,20,26
 	Statistics     []*StatisticsData //统计
 }
@@ -122,18 +128,18 @@ type ClubStatisticsRedisItemData struct {
 
 //添加游戏记录
 func AddGameRecord(gr *WirteRecord) (err error) {
-	rgd := &GameRecord{
+	rgd := &GameRecord{ //游戏单局记录
 		GameRecordId:  gr.RoomRecordId + strconv.Itoa(int(gr.Index)),
 		GameId:        gr.GameId,
 		ClubId:        gr.ClubId,
-		RoomId:        gr.RoomId,
+		DeskId:        gr.DeskId,
 		Index:         gr.Index,
 		GameStartTime: gr.GameStartTime,
 		GameEndTime:   gr.GameEndTime,
 		GamePlayers:   []*GamePlayerInfo{},
 	}
-	rrd := &RoomRecord{}
-	grp := &GameRePlayData{
+	rrd := &RoomRecord{}    //房间记录
+	grp := &GameRePlayData{ //游戏复盘记录
 		GameRecordId: rgd.GameRecordId,
 		RePlayData:   gr.RePlayData,
 	}
@@ -143,7 +149,7 @@ func AddGameRecord(gr *WirteRecord) (err error) {
 			RoomRecordId:  gr.RoomRecordId,
 			GameStartTime: gr.GameStartTime,
 			TotalJuNun:    gr.TotalJuNun,
-			RoomId:        gr.RoomId,
+			DeskId:        gr.DeskId,
 			GameId:        gr.GameId,
 			ClubId:        gr.ClubId,
 			PayType:       gr.PayType,
@@ -156,18 +162,18 @@ func AddGameRecord(gr *WirteRecord) (err error) {
 
 	for _, v := range gr.PlayerInfos {
 		ugr := &UserGameRecord{}
-		_err1 := mgoSess.DB("").C(UserGameRecordTable).Find(bson.M{"userid": v.UserId, "roomrecord": gr.RoomRecordId}).One(ugr)
+		_err1 := mgoSess.DB("").C(UserGameRecordTable).Find(bson.M{"userid": v.UserId, "roomrecordid": gr.RoomRecordId}).One(ugr)
 		if _err1 != nil {
 			ugr = &UserGameRecord{
 				UserId:        v.UserId,
 				GameId:        gr.GameId,
-				RoomId:        gr.RoomId,
+				DeskId:        gr.DeskId,
 				GameStartTime: gr.GameStartTime,
 				WinIntegral:   v.WinIntegral,
-				RoomRecord:    gr.RoomRecordId,
+				RoomRecordId:  gr.RoomRecordId,
 			}
 		}
-		_, err = mgoSess.DB("").C(UserGameRecordTable).Upsert(bson.M{"userid": ugr.UserId, "roomrecord": ugr.RoomRecord}, ugr)
+		_, err = mgoSess.DB("").C(UserGameRecordTable).Upsert(bson.M{"userid": ugr.UserId, "roomrecordid": ugr.RoomRecordId}, ugr)
 		if err != nil {
 			return err
 		}
@@ -263,7 +269,7 @@ func QueryUserRoomRecord(uid uint64, start int64, end int64) (rsp []*RoomRecord,
 	}
 	for _, f := range find {
 		ce := &RoomRecord{}
-		if err := mgoSess.DB("").C(RoomRecordTable).Find(bson.M{"roomrecordid": f.RoomRecord}).One(ce); err == nil {
+		if err := mgoSess.DB("").C(RoomRecordTable).Find(bson.M{"roomrecordid": f.RoomRecordId}).One(ce); err == nil {
 			rsp = append(rsp, ce)
 		}
 	}
@@ -271,7 +277,7 @@ func QueryUserRoomRecord(uid uint64, start int64, end int64) (rsp []*RoomRecord,
 }
 
 //查询俱乐部的战绩数据
-func QueryClubRoomRecord(clubid uint64, start int64, end int64) (rsp []*RoomRecord, err error) {
+func QueryClubRoomRecord(clubid int64, start int64, end int64) (rsp []*RoomRecord, err error) {
 	rsp = make([]*RoomRecord, 0)
 	err = mgoSess.DB("").C(RoomRecordTable).Find(bson.M{"clubid": clubid, "gamestarttime": bson.M{"$gte": start, "$lt": end}}).All(&rsp)
 	if err != nil {
@@ -281,9 +287,9 @@ func QueryClubRoomRecord(clubid uint64, start int64, end int64) (rsp []*RoomReco
 }
 
 //查询俱乐部的战绩数据
-func QueryClubRoomRecordByRoom(clubid uint64, roomid uint32) (rsp []*RoomRecord, err error) {
+func QueryClubRoomRecordByRoom(clubid int64, deskid uint64) (rsp []*RoomRecord, err error) {
 	rsp = make([]*RoomRecord, 0)
-	err = mgoSess.DB("").C(RoomRecordTable).Find(bson.M{"clubid": clubid, "roomid": roomid}).All(&rsp)
+	err = mgoSess.DB("").C(RoomRecordTable).Find(bson.M{"clubid": clubid, "deskid": deskid}).All(&rsp)
 	if err != nil {
 		return nil, err
 	}
