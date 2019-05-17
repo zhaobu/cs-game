@@ -5,8 +5,8 @@ package pbgamerecord;
 message GamePlayerInfo {
   uint64 UserId = 1;          //用户Id
   string Name = 2;            //姓名
-  int32 BringinIntegral = 3;  //带入积分
-  int32 WinIntegral = 4;      //输赢积分
+  int32 InitScore = 3;  //带入积分
+  int32 Score = 4;      //输赢积分
 }
 
 // games -> center
@@ -15,8 +15,8 @@ message WriteGameRecordReq {
   string GameId = 2;        //游戏Id
   int64 ClubId = 3;         //俱乐部Id 当 AreaType 1 时需要填写
   uint64 DeskId = 4;        //房间号
-  uint32 TotalJuNun = 5;    //总局数
-  int32 Index = 6;          //游戏当前局数
+  uint32 TotalInning = 5;    //总局数
+  uint32 Index = 6;          //游戏当前局数
   int64 GameStartTime = 7;  //开始时间 存储时间错
   int64 GameEndTime = 8;    //结束时间 存储时间错
   uint32 PayType = 9;       //支付方式 1 个人支付 2 AA支付
@@ -38,7 +38,8 @@ message QueryRoomRecordReq {
 message RoomPlayerInfo {
   uint64 UserId = 1;      //用户Id
   string Name = 2;        //姓名
-  int32 WinIntegral = 3;  //输赢积分 房间内的统计数据
+  int32 Score = 3;  //输赢积分 房间内的统计数据
+  int32 ChairId = 4;      //在房间内的座位号
 }
 
 //房间记录
@@ -47,7 +48,7 @@ message RoomRecord {
   int64 GameStartTime = 2;  //开始时间
   uint64 DeskId = 3;        //房间号
   string GameId = 4;        //游戏Id
-  uint32 TotalJuNun = 5;    //总局数
+  uint32 TotalInning = 5;    //总局数
   uint32 PayType = 6;       //支付方式 1 个人支付 2 AA支付
   int64 ClubId = 7;         //俱乐部Id 当 AreaType 1 时需要填写
   bytes RoomRule = 8;       //房间规则
@@ -72,7 +73,7 @@ message GameRecord {
   string GameId = 2;        //游戏Id
   int64 ClubId = 3;         ///俱乐部Id 当 AreaType 1 时需要填写
   uint64 DeskId = 4;        //房间号
-  int32 Index = 5;          //第几局
+  uint32 Index = 5;          //第几局
   int64 GameStartTime = 6;  //开始时间 存储时间错
   int64 GameEndTime = 7;    //结束时间 存储时间错
   repeated GamePlayerInfo GamePlayers = 8;  //游戏参与玩家信息

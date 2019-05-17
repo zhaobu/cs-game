@@ -116,14 +116,17 @@ const (
 	HuOrder
 )
 
+//记录唤醒操作
+type WaitOperRecord struct {
+	Card    int32  //玩家选择吃碰杠的牌
+	ChiType uint32 //吃牌时的吃类型
+}
+
 //操作优先级
 type OperPriority struct {
 	ChairId int32
 	Op      PriorityOrder
-	Info    interface{} //操作信息
-	// Card     int32
-	// GangType string
-	// ChiCard  ChiCardTb
+	Info    interface{} //操作信息,记录环境操作时对应WaitOper结构
 }
 
 // type OperPriority struct {

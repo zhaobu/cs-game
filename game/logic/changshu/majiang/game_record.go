@@ -1,6 +1,7 @@
 package majiang
 
 import (
+	"cy/game/codec/protobuf"
 	"cy/game/db/mgo"
 	pbgame_logic "cy/game/pb/game/mj/changshu"
 	"cy/game/util"
@@ -9,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gogo/protobuf/proto"
+	"go.uber.org/zap"
 )
 
 //GameRecord文件写战绩回放
@@ -24,7 +26,7 @@ type GameRecord struct {
 	TotalInning uint32
 	RankInfo    []*RankCell       //总分排行
 	UserScore   []map[int32]int32 //战绩流水
-	*mgo.WirteRecord
+	record      *mgo.WirteRecord
 }
 
 type GameRecordArgs struct {
@@ -33,18 +35,33 @@ type GameRecordArgs struct {
 	ClubId int64
 }
 
-func (self *GameRecord) Init(args *GameRecordArgs) {
+func (self *GameRecord) Init(args *GameRecordArgs, players []*PlayerInfo) {
 	self.RankInfo = make([]*RankCell, args.Args.PlayerCount)
 	for i := int32(0); i < args.Args.PlayerCount; i++ {
 		self.RankInfo[i] = &RankCell{ChairId: i}
 	}
 	self.UserScore = make([]map[int32]int32, 0, args.Args.RInfo.LoopCnt)
-	self.WirteRecord = &mgo.WirteRecord{GameId: args.GameId, ClubId: args.ClubId, DeskId: args.DeskID, TotalJuNun: args.Args.RInfo.LoopCnt}
+	self.record = &mgo.WirteRecord{GameId: args.GameId, ClubId: args.ClubId, DeskId: args.DeskID, TotalInning: args.Args.RInfo.LoopCnt}
 	//房间号+时间戳生成RoomRecordId
-	self.WirteRecord.RoomRecordId = strconv.FormatUint(args.DeskID, 10) + strconv.FormatInt(time.Now().Unix(), 10)
-	self.PayType = args.Args.PaymentType
-	self.RoomRule, _ = proto.Marshal(args.Args)
-	self.PlayerInfos = make([]*mgo.GamePlayerInfo, args.Args.PlayerCount)
+	self.record.RoomRecordId = strconv.FormatUint(args.DeskID, 10) + strconv.FormatInt(time.Now().Unix(), 10)
+	self.record.PayType = args.Args.PaymentType
+	self.record.RoomRule, _ = proto.Marshal(args.Args)
+	self.record.PlayerInfos = make([]*mgo.GamePlayerInfo, 0, len(players))
+	for k, v := range players {
+		info := &mgo.GamePlayerInfo{UserId: v.BaseInfo.Uid, Name: v.BaseInfo.Nickname, InitScore: 0, Score: v.BalanceInfo.Point, ChairId: int32(k)}
+		self.record.PlayerInfos = append(self.record.PlayerInfos, info)
+	}
+}
+
+//每局重置
+func (self *GameRecord) Reset(curinning uint32) {
+	for _, v := range self.record.PlayerInfos {
+		v.Score = 0
+	}
+	self.record.Index = curinning
+	self.record.GameStartTime = 0
+	self.record.GameEndTime = 0
+	self.record.RePlayData = nil
 }
 
 //记录游戏战绩
@@ -85,19 +102,26 @@ func (self *GameRecord) GetGameRecord() *pbgame_logic.S2CGameRecord {
 }
 
 //记录游戏动作
-func (self *GameRecord) RecordGameAction(pb proto.Message) {
-	switch pb.(type) {
+func (self *GameRecord) RecordGameAction(msg proto.Message) {
+	switch msg.(type) {
 	case *pbgame_logic.S2CStartGame:
-		self.WirteRecord.GameStartTime = time.Now().Unix()
+		self.record.GameStartTime = time.Now().Unix()
 	case *pbgame_logic.BS2CGameEnd:
-		self.WirteRecord.GameEndTime = time.Now().Unix()
+		self.record.GameEndTime = time.Now().Unix()
 	}
-	act := &mgo.GameAction{ActName: proto.MessageName(pb)}
-	act.ActValue, _ = proto.Marshal(pb)
-	self.RePlayData = append(self.RePlayData, act)
+	act := &mgo.GameAction{}
+	var err error
+	act.ActName, act.ActValue, err = protobuf.Marshal(msg)
+	if err != nil {
+		log.Error("protobuf.Marshal err", zap.Error(err))
+	}
+	self.record.RePlayData = append(self.record.RePlayData, act)
 }
 
 //游戏结束
-func (self *GameRecord) RecordGameEnd() {
-
+func (self *GameRecord) RecordGameEnd(players []*PlayerInfo) {
+	for k, v := range players {
+		self.record.PlayerInfos[k].Score = v.BalanceInfo.Point
+	}
+	mgo.AddGameRecord(self.record)
 }

@@ -22,11 +22,11 @@ type WirteRecord struct {
 	GameId        string            //游戏Id
 	ClubId        int64             //俱乐部Id
 	DeskId        uint64            //房间号
-	TotalJuNun    uint32            //总局数
+	TotalInning   uint32            //总局数
 	PayType       uint32            //支付方式1 个人支付 2 AA支付
 	RoomRule      []byte            //房间规则
 	PlayerInfos   []*GamePlayerInfo //游戏内玩家数据
-	Index         int32             //游戏当前局数
+	Index         uint32            //游戏当前局数
 	GameStartTime int64             //开始时间 存储时间错
 	GameEndTime   int64             //结束时间 存储时间错
 	RePlayData    []*GameAction     //复盘数据
@@ -38,7 +38,7 @@ type UserGameRecord struct {
 	GameId        string   //游戏Id
 	DeskId        uint64   //房间号
 	GameStartTime int64    //开始时间 存储时间错
-	WinIntegral   int32    //该房间内累计输赢积分
+	Score         int32    //该房间内累计输赢积分
 	RoomRecordId  string   //房间记录关联Id
 	GameRecordIds []uint64 //游戏记录关联Id
 }
@@ -47,19 +47,20 @@ type UserGameRecord struct {
 type RoomRecord struct {
 	RoomRecordId  string                     //房间记录Id 关联房间的数据库唯一id
 	GameStartTime int64                      //房间开始时间
-	TotalJuNun    uint32                     //总局数
+	TotalInning   uint32                     //总局数
 	DeskId        uint64                     //房间号
 	GameId        string                     //游戏Id
 	ClubId        int64                      //俱乐部Id
 	PayType       uint32                     //支付方式1 个人支付 2 AA支付
-	RoonRule      []byte                     //房间规则
+	RoomRule      []byte                     //房间规则
 	GamePlayers   map[uint64]*RoomPlayerInfo //游戏参与玩家信息 为了减少查询量 将必要信息进行存储
 	GameRecords   []string                   //房间内游戏数据 数组
 }
 type RoomPlayerInfo struct {
-	UserId      uint64 //用户Id
-	Name        string //姓名
-	WinIntegral int32  //总的输赢积分
+	UserId  uint64 //用户Id
+	Name    string //姓名
+	Score   int32  //总的输赢积分
+	ChairId int32  //座位号
 }
 
 //游戏单局记录
@@ -68,17 +69,18 @@ type GameRecord struct {
 	GameId        string            //游戏Id
 	ClubId        int64             //俱乐部Id
 	DeskId        uint64            //房间号
-	Index         int32             //第几局
+	Index         uint32            //第几局
 	GameStartTime int64             //开始时间 存储时间错
 	GameEndTime   int64             //结束时间 存储时间错
 	GamePlayers   []*GamePlayerInfo //游戏参与玩家信息 为了减少查询量 将必要信息进行存储
 }
 
 type GamePlayerInfo struct {
-	UserId          uint64 //用户Id
-	Name            string //姓名
-	BringinIntegral int32  //带入积分
-	WinIntegral     int32  //输赢积分
+	UserId    uint64 //用户Id
+	Name      string //姓名
+	InitScore int32  //带入积分
+	Score     int32  //输赢积分
+	ChairId   int32  //在房间内的座位号
 }
 
 type GameAction struct {
@@ -148,12 +150,12 @@ func AddGameRecord(gr *WirteRecord) (err error) {
 		rrd = &RoomRecord{
 			RoomRecordId:  gr.RoomRecordId,
 			GameStartTime: gr.GameStartTime,
-			TotalJuNun:    gr.TotalJuNun,
+			TotalInning:   gr.TotalInning,
 			DeskId:        gr.DeskId,
 			GameId:        gr.GameId,
 			ClubId:        gr.ClubId,
 			PayType:       gr.PayType,
-			RoonRule:      gr.RoomRule,
+			RoomRule:      gr.RoomRule,
 			GamePlayers:   make(map[uint64]*RoomPlayerInfo),
 			GameRecords:   []string{},
 		}
@@ -169,7 +171,7 @@ func AddGameRecord(gr *WirteRecord) (err error) {
 				GameId:        gr.GameId,
 				DeskId:        gr.DeskId,
 				GameStartTime: gr.GameStartTime,
-				WinIntegral:   v.WinIntegral,
+				Score:         v.Score,
 				RoomRecordId:  gr.RoomRecordId,
 			}
 		}
@@ -178,19 +180,20 @@ func AddGameRecord(gr *WirteRecord) (err error) {
 			return err
 		}
 		if p, ok := rrd.GamePlayers[v.UserId]; ok {
-			p.WinIntegral += v.WinIntegral
+			p.Score += v.Score
 		} else {
 			rrd.GamePlayers[v.UserId] = &RoomPlayerInfo{
-				UserId:      v.UserId,
-				Name:        v.Name,
-				WinIntegral: v.WinIntegral,
+				UserId:  v.UserId,
+				Name:    v.Name,
+				Score:   v.Score,
+				ChairId: v.ChairId,
 			}
 		}
 		rgd.GamePlayers = append(rgd.GamePlayers, &GamePlayerInfo{
-			UserId:          v.UserId,
-			Name:            v.Name,
-			BringinIntegral: v.BringinIntegral,
-			WinIntegral:     v.WinIntegral,
+			UserId:    v.UserId,
+			Name:      v.Name,
+			InitScore: v.InitScore,
+			Score:     v.Score,
 		})
 
 	}
@@ -222,13 +225,13 @@ func AddClubCurrDayStatistics(gr *WirteRecord) (err error) {
 	for _, v := range gr.PlayerInfos {
 		if u, ok := csd.UserSD[v.UserId]; ok {
 			u.StatisticsPlay++
-			u.StatisticsIntegral += int64(v.WinIntegral)
+			u.StatisticsIntegral += int64(v.Score)
 		} else {
 			csd.UserSD[v.UserId] = &UserStatisticsData{
 				UserId:             v.UserId,
 				Name:               v.Name,
 				StatisticsPlay:     1,
-				StatisticsIntegral: int64(v.WinIntegral),
+				StatisticsIntegral: int64(v.Score),
 			}
 		}
 	}

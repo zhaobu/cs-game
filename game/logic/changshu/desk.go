@@ -572,6 +572,8 @@ func (d *Desk) OnOffLine(uid uint64, online bool) {
 	} else { //游戏中
 		if dUserInfo.userStatus >= pbgame.UserDeskStatus_UDSSitDown {
 			if online { //游戏玩家上线
+				//重新从mgo获取session信息
+				dUserInfo.info, _ = mgo.QueryUserInfo(uid)
 				d.sendDeskInfo(uid)
 			}
 		} else {

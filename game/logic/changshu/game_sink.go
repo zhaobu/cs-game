@@ -94,14 +94,17 @@ func (self *GameSink) Ctor(config *pbgame_logic.CreateArg) error {
 	self.baseCard = cardDef.GetBaseCard(config.PlayerCount)
 	self.operAction.Init(config, self.laiziCard)
 	self.gameBalance.Init(config)
-	initArg := &mj.GameRecordArgs{GameId: self.desk.gameNode.GameName, ClubId: self.desk.clubId}
-	initArg.DeskArg = self.desk.deskConfig
-	self.record.Init(initArg)
 	return nil
 }
 
 //重置游戏
 func (self *GameSink) reset() {
+	if self.desk.curInning == 1 {
+		//所有玩家坐下后才初始化战绩记录
+		initArg := &mj.GameRecordArgs{GameId: self.desk.gameNode.GameName, ClubId: self.desk.clubId, DeskArg: self.desk.deskConfig}
+		self.record.Init(initArg, self.players)
+	}
+	self.record.Reset(self.desk.curInning)
 	//AllInfo
 	self.gameAllInfo = gameAllInfo{}
 	self.operOrder = make(map[PriorityOrder][]*OperPriority, self.game_config.PlayerCount)
@@ -307,6 +310,8 @@ func (self *GameSink) deal_card() {
 	}
 	//发送观察者
 	self.sendDataAllLook(msg)
+	//回放记录所有人手牌
+	recordCard := &pbgame_logic.Json_UserCardInfo{HandCards: map[int32]*pbgame_logic.Json_UserCardInfoCards{}}
 	for k, v := range self.players {
 		if int32(k) != self.bankerId {
 			v.CardInfo.HandCards = player_cards[k]
@@ -315,12 +320,15 @@ func (self *GameSink) deal_card() {
 
 		tmp := &pbgame_logic.Json_UserCardInfo{HandCards: map[int32]*pbgame_logic.Json_UserCardInfoCards{}}
 		tmp.HandCards[int32(k)] = &pbgame_logic.Json_UserCardInfoCards{Cards: v.CardInfo.HandCards}
+		recordCard.HandCards[int32(k)] = tmp.HandCards[int32(k)]
 		msg.JsonAllCards = util.PB2JSON(tmp, false)
 		log.Warnf("%s手牌为:%v", self.logHeadUser(int32(k)), player_cards[k])
 		//给每个玩家发送游戏开始消息
 		self.sendData(int32(k), msg)
 	}
 	//游戏回放记录
+	msg.JsonAllCards = util.PB2JSON(recordCard, false)
+	self.record.RecordGameAction(msg)
 }
 
 func switchToCyint32(cards []int32) []*pbgame_logic.Cyint32 {
@@ -482,6 +490,8 @@ func (self *GameSink) drawCard(chairId, last int32) error {
 	//发送自己
 	msg.JsonDrawInfo = util.PB2JSON(&pbgame_logic.Json_FirstBuHua{HuaCards: huaCards, MoCards: moCards}, false)
 	self.sendData(chairId, msg)
+	//游戏回放记录
+	self.record.RecordGameAction(msg)
 	//发送别人
 	msg.JsonDrawInfo = util.PB2JSON(&pbgame_logic.Json_FirstBuHua{HuaCards: huaCards, MoCards: make([]int32, len(moCards))}, false)
 	self.sendDataOther(chairId, msg)
@@ -505,7 +515,7 @@ func (self *GameSink) drawCard(chairId, last int32) error {
 	log.Infof("%s 摸牌后操作分析ret=%+v", self.logHeadUser(chairId), ret)
 	//更新玩家card_info表
 	self.operAction.HandleDrawCard(cardInfo, card)
-	//游戏回放记录
+
 	//统计能做的操作
 	if !ret.Empty() {
 		if last == -1 && !ret.CanHu.Empty() {
@@ -529,6 +539,8 @@ func (self *GameSink) checkAfterChiPeng(chairId int32) {
 			//发给自己
 			msg.JsonFirstBuhua = util.PB2JSON(&pbgame_logic.Json_FirstBuHua{HuaCards: huaCards, MoCards: moCards}, false)
 			self.sendData(chairId, msg)
+			//游戏回放记录
+			self.record.RecordGameAction(msg)
 			//发给别人
 			msg.JsonFirstBuhua = util.PB2JSON(&pbgame_logic.Json_FirstBuHua{HuaCards: huaCards, MoCards: make([]int32, len(moCards))}, false)
 			self.sendDataOther(chairId, msg)
@@ -539,7 +551,6 @@ func (self *GameSink) checkAfterChiPeng(chairId int32) {
 	//分析能否暗杠,补杠
 	ret := self.operAction.AfterChiPengAnalysis(cardInfo, chairId)
 	log.Infof("%s 吃碰后操作分析ret=%+v", self.logHeadUser(chairId), ret)
-	//游戏回放记录
 	//统计能做的操作
 	if !ret.Empty() {
 		msg := &pbgame_logic.S2CHaveOperation{ChairId: chairId}
@@ -580,9 +591,10 @@ func (self *GameSink) outCard(chairId, card int32) error {
 	}
 	//更新玩家card_info表
 	self.operAction.HandleOutCard(cardInfo, card)
-	self.sendData(-1, &pbgame_logic.BS2COutCard{ChairId: chairId, Card: card})
+	msg := &pbgame_logic.BS2COutCard{ChairId: chairId, Card: card}
+	self.sendData(-1, msg)
 	//游戏回放记录
-
+	self.record.RecordGameAction(msg)
 	self.lastOutChair, self.lastOutCard, self.curOutChair = chairId, card, -1
 	//检查出牌后能做的操作
 	willWait := false
@@ -739,17 +751,20 @@ func (self *GameSink) dealWaitOper(chairId int32) {
 	if self.waitHigestOper == nil {
 		log.Errorf("%s 唤醒操作时self.waitHigestOper == nil", self.logHeadUser(chairId))
 	}
-	switch info := self.waitHigestOper.Info.(type) {
-	case *CanChiOper:
+	info, _ := self.waitHigestOper.Info.(*WaitOperRecord)
+	switch self.waitHigestOper.Op {
+	case ChiOrder:
 		log.Debugf("%s 唤醒操作吃", self.logHeadUser(chairId))
-		self.chiCard(info.ChairId, info.Card, info.ChiType)
-	case *CanPengOper:
+		self.chiCard(self.waitHigestOper.ChairId, info.Card, info.ChiType)
+	case PengOrder:
 		log.Debugf("%s 唤醒操作碰", self.logHeadUser(chairId))
-	case *CanGangOper:
+		self.pengCard(self.waitHigestOper.ChairId, info.Card)
+	case GangOrder:
 		log.Debugf("%s 唤醒操作杠", self.logHeadUser(chairId))
-	case *CanHuOper:
+		self.gangCard(self.waitHigestOper.ChairId, info.Card)
+	case HuOrder:
 		log.Debugf("%s 唤醒操作胡", self.logHeadUser(chairId))
-
+		self.huCard(self.waitHigestOper.ChairId)
 	default:
 		log.Debugf("%s 唤醒操作时,类型转换失败", self.logHeadUser(chairId))
 		return
@@ -780,7 +795,7 @@ func (self *GameSink) chiCard(chairId, card int32, chiType uint32) error {
 	res := self.checkPlayerOperationNeedWait(chairId, ChiOrder)
 	if res == 2 { //需要等待其他人操作
 		log.Debugf("%s 操作吃需要等待其他人", self.logHeadUser(chairId))
-		self.insertWaitOper(chairId, ChiOrder, &self.canOperInfo[chairId].CanChi)
+		self.insertWaitOper(chairId, ChiOrder, &WaitOperRecord{Card: card, ChiType: chiType})
 		self.haswaitOper[chairId] = true
 		return nil
 	} else if res == 3 { //唤醒等待中的操作
@@ -804,8 +819,10 @@ func (self *GameSink) chiCard(chairId, card int32, chiType uint32) error {
 	self.haswaitOper[chairId] = false
 	self.resetOper()
 
-	self.sendData(-1, &pbgame_logic.BS2CChiCard{ChairId: chairId, Card: card, ChiType: chiType})
-
+	msg := &pbgame_logic.BS2CChiCard{ChairId: chairId, Card: card, ChiType: chiType}
+	self.sendData(-1, msg)
+	//游戏回放记录
+	self.record.RecordGameAction(msg)
 	self.checkAfterChiPeng(chairId)
 	return nil
 }
@@ -833,7 +850,7 @@ func (self *GameSink) pengCard(chairId, card int32) error {
 	res := self.checkPlayerOperationNeedWait(chairId, PengOrder)
 	if res == 2 { //需要等待其他人操作
 		log.Debugf("%s 操作碰需要等待其他人", self.logHeadUser(chairId))
-		self.insertWaitOper(chairId, PengOrder, &self.canOperInfo[chairId].CanPeng)
+		self.insertWaitOper(chairId, PengOrder, &WaitOperRecord{Card: card})
 		self.haswaitOper[chairId] = true
 		return nil
 	} else if res == 3 { //唤醒等待中的操作
@@ -851,7 +868,11 @@ func (self *GameSink) pengCard(chairId, card int32) error {
 	self.operAction.HandlePengCard(self.players[chairId], &self.players[self.lastOutChair].CardInfo, card, self.canOperInfo[chairId].CanPeng.LoseChair)
 	//回放记录
 
-	self.sendData(-1, &pbgame_logic.BS2CPengCard{ChairId: chairId, LoseChair: self.lastOutChair, Card: card})
+	msg := &pbgame_logic.BS2CPengCard{ChairId: chairId, LoseChair: self.lastOutChair, Card: card}
+	self.sendData(-1, msg)
+	//游戏回放记录
+	self.record.RecordGameAction(msg)
+
 	//变量维护
 	self.addCanNotOut(chairId, card, 0)
 	self.curOutChair = chairId
@@ -885,7 +906,7 @@ func (self *GameSink) gangCard(chairId, card int32) error {
 	res := self.checkPlayerOperationNeedWait(chairId, GangOrder)
 	if res == 2 { //需要等待其他人操作
 		log.Debugf("%s 操作杠需要等待其他人", self.logHeadUser(chairId))
-		self.insertWaitOper(chairId, GangOrder, &self.canOperInfo[chairId].CanGang)
+		self.insertWaitOper(chairId, GangOrder, &WaitOperRecord{Card: card})
 		self.haswaitOper[chairId] = true
 		return nil
 	} else if res == 3 { //唤醒等待中的操作
@@ -942,7 +963,10 @@ func (self *GameSink) gangCard(chairId, card int32) error {
 		return nil
 	}
 
-	self.sendData(-1, &pbgame_logic.BS2CGangCard{ChairId: chairId, Card: card, Type: pbgame_logic.GangType(gangType), LoseChair: loseChair})
+	msg := &pbgame_logic.BS2CGangCard{ChairId: chairId, Card: card, Type: pbgame_logic.GangType(gangType), LoseChair: loseChair}
+	self.sendData(-1, msg)
+	//游戏回放记录
+	self.record.RecordGameAction(msg)
 
 	//更新玩家card_info表
 	if gangType == pbgame_logic.OperType_Oper_MING_GANG {
@@ -950,7 +974,6 @@ func (self *GameSink) gangCard(chairId, card int32) error {
 	} else {
 		self.operAction.HandleGangCard(self.players[chairId], nil, card, gangType, loseChair)
 	}
-	//回放记录
 
 	//变量维护
 	self.haswaitOper[chairId] = false
@@ -978,7 +1001,7 @@ func (self *GameSink) huCard(chairId int32) error {
 	res := self.checkPlayerOperationNeedWait(chairId, HuOrder)
 	if res == 2 { //需要等待其他人操作
 		log.Debugf("%s 操作胡需要等待其他人", self.logHeadUser(chairId))
-		self.insertWaitOper(chairId, HuOrder, &self.canOperInfo[chairId].CanGang)
+		self.insertWaitOper(chairId, HuOrder, nil)
 		self.haswaitOper[chairId] = true
 		return nil
 	} else if res == 3 { //唤醒等待中的操作
@@ -1008,7 +1031,11 @@ func (self *GameSink) huCard(chairId int32) error {
 	//统计总结算次数
 	self.gameBalance.AddScoreTimes(&self.players[chairId].BalanceResult, mj.ScoreTimes_Win)
 
-	self.sendData(-1, &pbgame_logic.BS2CHuCard{ChairId: chairId, HuCard: huInfo.Card})
+	msg := &pbgame_logic.BS2CHuCard{ChairId: chairId, HuCard: huInfo.Card}
+	self.sendData(-1, msg)
+	//游戏回放记录
+	self.record.RecordGameAction(msg)
+
 	//变量维护
 	self.haswaitOper[chairId] = false
 
@@ -1040,8 +1067,6 @@ func (self *GameSink) cancelOper(chairId int32) error {
 	res := self.checkPlayerOperationNeedWait(chairId, NoneOrder)
 	if res == 2 { //需要等待其他人操作
 		log.Debugf("%s 取消操作需要等待其他人", self.logHeadUser(chairId))
-		// self.insertWaitOper(chairId, GangOrder, &self.canOperInfo[chairId].CanGang)
-		// self.haswaitOper[chairId] = true
 		return nil
 	} else if res == 3 { //唤醒等待中的操作
 		log.Debugf("%s 取消操作,唤醒等待中的操作", self.logHeadUser(chairId))
@@ -1079,20 +1104,23 @@ func (self *GameSink) gameEnd(endType pbgame_logic.GameEndType) {
 	self.isPlaying = false
 	//发送小结算信息
 	msg := &pbgame_logic.BS2CGameEnd{CurInning: self.desk.curInning, Banker: self.bankerId, EndType: endType}
-	if self.hasHu {
-		self.gameBalance.CalGameBalance(self.players, self.bankerId)
-		strPlayerBalance := &pbgame_logic.Json_PlayerBalance{PlayerBalanceInfo: self.gameBalance.GetPlayerBalanceInfo(self.players)}
-		msg.JsonPlayerBalance = util.PB2JSON(strPlayerBalance, false)
-		if self.game_config.Barhead == 3 {
-			msg.DulongCard = self.leftCard[len(self.leftCard)-1]
-		}
+	// if self.hasHu {
+	self.gameBalance.CalGameBalance(self.players, self.bankerId)
+	strPlayerBalance := &pbgame_logic.Json_PlayerBalance{PlayerBalanceInfo: self.gameBalance.GetPlayerBalanceInfo(self.players)}
+	msg.JsonPlayerBalance = util.PB2JSON(strPlayerBalance, false)
+	if self.game_config.Barhead == 3 {
+		msg.DulongCard = self.leftCard[len(self.leftCard)-1]
 	}
+	// }
 	self.sendData(-1, msg)
+	//游戏回放记录
+	self.record.RecordGameAction(msg)
 	scoreInfo := map[int32]int32{}
 	for k, v := range self.players {
 		scoreInfo[int32(k)] = v.BalanceInfo.Point
 	}
 	self.record.AddGameRecord(scoreInfo)
+	self.record.RecordGameEnd(self.players)
 	//主动发送一下战绩
 	self.getGameRecord(-1)
 	//游戏记录
@@ -1110,9 +1138,7 @@ func (self *GameSink) afterGameEnd() {
 //断线重连
 func (self *GameSink) gameReconnect(recInfo *pbgame_logic.GameDeskInfo, uid uint64) {
 	chairId := self.desk.GetChairidByUid(uid)
-	if -1 == chairId {
-		return
-	}
+	//chairId为-1时为观察者游戏中途进入房间
 	switch recInfo.GameStatus {
 	case pbgame_logic.GameStatus_GSDice: //投色子
 		recInfo.CurDiceChair = self.curThrowDice
@@ -1137,11 +1163,13 @@ func (self *GameSink) gameReconnect(recInfo *pbgame_logic.GameDeskInfo, uid uint
 		recInfo.CurOutChair = self.curOutChair
 		recInfo.LastOutCard = self.lastOutCard
 		recInfo.LeftNum = int32(len(self.leftCard))
-		canNotOut := make([]int32, 0, len(self.players[chairId].CardInfo.CanNotOut))
-		for _, v := range self.players[chairId].CardInfo.CanNotOut {
-			canNotOut = append(canNotOut, v)
+		if chairId != -1 {
+			canNotOut := make([]int32, 0, len(self.players[chairId].CardInfo.CanNotOut))
+			for _, v := range self.players[chairId].CardInfo.CanNotOut {
+				canNotOut = append(canNotOut, v)
+			}
+			recInfo.UnableOutCards = switchToCyint32(canNotOut)
 		}
-		recInfo.UnableOutCards = switchToCyint32(canNotOut)
 		for _, v := range recInfo.GameUser {
 			k := v.ChairId
 			userInfo := self.players[k]

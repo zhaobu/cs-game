@@ -122,17 +122,17 @@ func (p *center) QueryRoomRecordReq(ctx context.Context, args *codec.Message, re
 			DeskId:        v.DeskId,
 			GameId:        v.GameId,
 			ClubId:        v.ClubId,
-			TotalJuNun:    v.TotalJuNun,
+			TotalInning:   v.TotalInning,
 			PayType:       v.PayType,
-			RoomRule:      v.RoonRule,
+			RoomRule:      v.RoomRule,
 			GamePlayers:   []*pbgamerecord.RoomPlayerInfo{},
 			GameRecordIds: v.GameRecords,
 		}
 		for _, v1 := range v.GamePlayers {
 			_data.GamePlayers = append(_data.GamePlayers, &pbgamerecord.RoomPlayerInfo{
-				UserId:      v1.UserId,
-				Name:        v1.Name,
-				WinIntegral: v1.WinIntegral,
+				UserId: v1.UserId,
+				Name:   v1.Name,
+				Score:  v1.Score,
 			})
 		}
 		rsp.Datas = append(rsp.Datas, _data)
@@ -180,10 +180,10 @@ func (p *center) QueryGameRecordReq(ctx context.Context, args *codec.Message, re
 			}
 			for _, v1 := range v.GamePlayers {
 				_data.GamePlayers = append(_data.GamePlayers, &pbgamerecord.GamePlayerInfo{
-					UserId:          v1.UserId,
-					Name:            v1.Name,
-					BringinIntegral: v1.BringinIntegral,
-					WinIntegral:     v1.WinIntegral,
+					UserId:    v1.UserId,
+					Name:      v1.Name,
+					InitScore: v1.InitScore,
+					Score:     v1.Score,
 				})
 			}
 			rsp.Records = append(rsp.Records, _data)
@@ -344,7 +344,7 @@ func WriteClubGameStatistics(gr *mgo.WirteRecord) {
 				StatisticsPlay:     0,
 			}
 		}
-		ClubStatistics.ClubSD[gr.ClubId].UserSD[v.UserId].StatisticsIntegral += int64(v.WinIntegral)
+		ClubStatistics.ClubSD[gr.ClubId].UserSD[v.UserId].StatisticsIntegral += int64(v.Score)
 		ClubStatistics.ClubSD[gr.ClubId].UserSD[v.UserId].StatisticsPlay++
 	}
 }
