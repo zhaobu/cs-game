@@ -60,7 +60,7 @@ type GameSink struct {
 }
 
 ////////////////////////调用desk接口函数START/////////////////////////////
-//发送消息给玩家(chairId为-1时发送给所有玩家)
+//发送消息给玩家(chairId为-1时发送给所有玩家,包括观察者)
 func (self *GameSink) sendData(chairId int32, msg proto.Message) {
 	if -1 == chairId {
 		self.desk.SendGameMessage(0, msg)
@@ -69,7 +69,12 @@ func (self *GameSink) sendData(chairId int32, msg proto.Message) {
 	}
 }
 
-//发送消息给其他人
+//发送消息给所有观察者
+func (self *GameSink) sendDataAllLook(msg proto.Message) {
+	self.desk.SendDataAllLook(msg)
+}
+
+//发送消息给其他人,包括观察者
 func (self *GameSink) sendDataOther(chairId int32, msg proto.Message) {
 	uid := self.desk.GetUidByChairid(chairId)
 	if uid == 0 {
@@ -300,7 +305,8 @@ func (self *GameSink) deal_card() {
 		msg.BankerOper = &pbgame_logic.S2CHaveOperation{ChairId: self.bankerId}
 		self.countCanOper(ret, self.bankerId, msg.BankerOper)
 	}
-
+	//发送观察者
+	self.sendDataAllLook(msg)
 	for k, v := range self.players {
 		if int32(k) != self.bankerId {
 			v.CardInfo.HandCards = player_cards[k]
@@ -497,8 +503,6 @@ func (self *GameSink) drawCard(chairId, last int32) error {
 	//分析能否暗杠,补杠,自摸胡
 	ret := self.operAction.DrawcardAnalysis(self.players[chairId], chairId, card, int32(len(self.leftCard)), huModeTags)
 	log.Infof("%s 摸牌后操作分析ret=%+v", self.logHeadUser(chairId), ret)
-	//发送倒计时玩家
-	// self.sendData(-1, &pbgame_logic.BS2CCurOutChair{ChairId: chairId})
 	//更新玩家card_info表
 	self.operAction.HandleDrawCard(cardInfo, card)
 	//游戏回放记录
@@ -535,8 +539,6 @@ func (self *GameSink) checkAfterChiPeng(chairId int32) {
 	//分析能否暗杠,补杠
 	ret := self.operAction.AfterChiPengAnalysis(cardInfo, chairId)
 	log.Infof("%s 吃碰后操作分析ret=%+v", self.logHeadUser(chairId), ret)
-	//发送倒计时玩家
-	// self.sendData(-1, &pbgame_logic.BS2CCurOutChair{ChairId: chairId})
 	//游戏回放记录
 	//统计能做的操作
 	if !ret.Empty() {
@@ -796,7 +798,6 @@ func (self *GameSink) chiCard(chairId, card int32, chiType uint32) error {
 	self.operAction.HandleChiCard(&self.players[chairId].CardInfo, &self.players[self.lastOutChair].CardInfo, card, chiType)
 	//回放记录
 
-	// self.sendData(-1, &pbgame_logic.BS2CCurOutChair{ChairId: chairId})
 	//变量维护
 	self.addCanNotOut(chairId, card, chiType)
 	self.curOutChair = chairId
@@ -850,7 +851,6 @@ func (self *GameSink) pengCard(chairId, card int32) error {
 	self.operAction.HandlePengCard(self.players[chairId], &self.players[self.lastOutChair].CardInfo, card, self.canOperInfo[chairId].CanPeng.LoseChair)
 	//回放记录
 
-	// self.sendData(-1, &pbgame_logic.BS2CCurOutChair{ChairId: chairId})
 	self.sendData(-1, &pbgame_logic.BS2CPengCard{ChairId: chairId, LoseChair: self.lastOutChair, Card: card})
 	//变量维护
 	self.addCanNotOut(chairId, card, 0)

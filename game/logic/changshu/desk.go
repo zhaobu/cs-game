@@ -494,6 +494,17 @@ func (d *Desk) SendGameMessage(_uid uint64, pb proto.Message) {
 	d.gameNode.ToGate(pb, _uid)
 }
 
+//发送消息给除所有观察者
+func (d *Desk) SendDataAllLook(pb proto.Message) {
+	uids := []uint64{}
+	for uid, v := range d.deskPlayers {
+		if v.userStatus == pbgame.UserDeskStatus_UDSLook {
+			uids = append(uids, uid)
+		}
+	}
+	d.gameNode.ToGate(pb, uids...)
+}
+
 //发送消息给除_uid其他所有人
 func (d *Desk) SendGameMessageOther(_uid uint64, pb proto.Message) {
 	uids := []uint64{}
