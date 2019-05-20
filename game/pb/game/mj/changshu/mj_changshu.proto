@@ -31,7 +31,7 @@ message CreateArg {
 message CreateArgTpl {
   // 玩法  1 二摸三冲 2 豹子翻倍
   repeated cyU32String Rule = 1;
-  // 杠头  1 扳4个 2 扳8个 3 独龙杠
+  // 杠头 0 不选 1 扳4个 2 扳8个 3 独龙杠
   repeated cyU32String Barhead = 2;
   // 人数 2人 3人 4人
   repeated cyU32String PlayerCount = 3;
@@ -396,10 +396,11 @@ message DeskUserInfo {
 
 // 断线重连、进入桌子 桌子信息 s -> c
 message GameDeskInfo {
-  string game_name = 1;                    // 游戏名称
-  DeskArg arg = 2;                         //桌子参数
-  GameStatus game_status = 3;              //桌子状态
-  repeated DeskUserInfo game_user = 4;     //准备的玩家信息(数组索引和chair_id不一定相同)
+  string game_name = 1;        // 游戏名称
+  DeskArg arg = 2;             //桌子参数
+  GameStatus game_status = 3;  //桌子状态
+  repeated DeskUserInfo game_user =
+      4;  //准备的玩家信息(数组索引和chair_id不一定相同)
   uint32 cur_inning = 5;                   //当前局数
   int32 banker_id = 6;                     //庄家(庄家chairid)
   uint64 master_uid = 7;                   //房主(房主uid)

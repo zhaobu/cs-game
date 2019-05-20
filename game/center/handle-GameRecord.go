@@ -4,13 +4,13 @@ import (
 	"context"
 	"cy/game/codec"
 	"cy/game/db/mgo"
+	pbcommon "cy/game/pb/common"
 	pbgamerecord "cy/game/pb/gamerecord"
 	sort "cy/game/util/tools/Sort"
 	"fmt"
+	"go.uber.org/zap"
 	"sync"
 	"time"
-
-	"go.uber.org/zap"
 )
 
 var (
@@ -95,6 +95,9 @@ func (p *center) QueryRoomRecordReq(ctx context.Context, args *codec.Message, re
 		Error: 0,
 		Datas: []*pbgamerecord.RoomRecord{},
 	}
+	if req.Head != nil {
+		rsp.Head = &pbcommon.RspHead{Seq: req.Head.Seq}
+	}
 	querydata := []*mgo.RoomRecord{}
 	if req.QueryType == 1 { //按userId查询
 		querydata, err = mgo.QueryUserRoomRecord(req.QueryUserId, req.QueryStartTime, req.QueryEndTime)
@@ -161,6 +164,9 @@ func (p *center) QueryGameRecordReq(ctx context.Context, args *codec.Message, re
 		Error:   0,
 		Records: []*pbgamerecord.GameRecord{},
 	}
+	if req.Head != nil {
+		rsp.Head = &pbcommon.RspHead{Seq: req.Head.Seq}
+	}
 	querydata := []*mgo.GameRecord{}
 	if len(req.GameRecordIds) > 0 {
 		querydata, err = mgo.QueryGameRecord(req.GameRecordIds)
@@ -174,6 +180,7 @@ func (p *center) QueryGameRecordReq(ctx context.Context, args *codec.Message, re
 				DeskId:        v.DeskId,
 				GameId:        v.GameId,
 				ClubId:        v.ClubId,
+				Index:         v.Index,
 				GameStartTime: v.GameStartTime,
 				GameEndTime:   v.GameEndTime,
 				GamePlayers:   []*pbgamerecord.GamePlayerInfo{},
@@ -212,6 +219,9 @@ func (p *center) QueryGameRePlayRecord(ctx context.Context, args *codec.Message,
 		return
 	}
 	rsp := &pbgamerecord.QueryGameRePlaydRsp{}
+	if req.Head != nil {
+		rsp.Head = &pbcommon.RspHead{Seq: req.Head.Seq}
+	}
 	querydata := &mgo.GameRePlayData{}
 	if len(req.GameRecordIds) > 0 {
 		querydata, err = mgo.QueryGameRePlayRecord(req.GameRecordIds)
@@ -249,6 +259,9 @@ func (p *center) QueryClubStatisticsReq(ctx context.Context, args *codec.Message
 	rsp := &pbgamerecord.QueryClubStatisticsRsp{
 		Error:           0,
 		StatisticsDatas: []*pbgamerecord.StatisticsData{},
+	}
+	if req.Head != nil {
+		rsp.Head = &pbcommon.RspHead{Seq: req.Head.Seq}
 	}
 	querydata := []*mgo.ClubStatisticsData{}
 	if req.QueryType == 1 {

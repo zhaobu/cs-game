@@ -121,3 +121,52 @@ func QueryClubByID(id int64) (c *Club, err error) {
 	err = mgoSess.DB("").C("clubinfo").Find(bson.M{"id": id}).One(c)
 	return
 }
+
+//校验创建房间接口 code 0 校验成功 1俱乐部不存在 2用户不是本俱乐部的 3用户无权创建房间
+func CheckCreateClubRoom(cId int64,uId uint64)(code int32){
+	c := &Club{}
+	err := mgoSess.DB("").C("clubinfo").Find(bson.M{"id": cId}).One(c)
+	if err != nil{
+		return 1
+	}else{
+		for _,u:=range c.Members{
+			if u.UserID == uId{
+				if u.Identity != 4 {	//不是黑名单用户
+					return 0
+				}else{
+					return 3
+				}
+			}
+		}
+		return 2
+	}
+}
+
+//校验加入房间接口 code 0 校验成功 1俱乐部不存在 2用户不是本俱乐部的 3用户无权加入房间 4房间中有亲属成员存在
+func CheckJoinClubRoom(uId uint64, cId int64,roomusers []uint64)(code int32){
+	c := &Club{}
+	err := mgoSess.DB("").C("clubinfo").Find(bson.M{"id": cId}).One(c)
+	if err != nil{
+		return 1
+	}else{
+		for _,u:=range c.Members{
+			if u.UserID == uId{
+				if u.Identity != 4 {	//不是黑名单用户
+					if roomusers != nil{
+						for _,v := range u.Relation{
+							for _,v1 := range roomusers {
+								if v == v1 {
+									return 4
+								}
+							}
+						}
+					}
+					return 0
+				}else{
+					return 3
+				}
+			}
+		}
+		return 2
+	}
+}

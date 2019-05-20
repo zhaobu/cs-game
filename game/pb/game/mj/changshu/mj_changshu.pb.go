@@ -557,7 +557,7 @@ func (m *CreateArg) GetLimitIP() uint32 {
 type CreateArgTpl struct {
 	// 玩法  1 二摸三冲 2 豹子翻倍
 	Rule []*CyU32String `protobuf:"bytes,1,rep,name=Rule,proto3" json:"Rule,omitempty"`
-	// 杠头  1 扳4个 2 扳8个 3 独龙杠
+	// 杠头 0 不选 1 扳4个 2 扳8个 3 独龙杠
 	Barhead []*CyU32String `protobuf:"bytes,2,rep,name=Barhead,proto3" json:"Barhead,omitempty"`
 	// 人数 2人 3人 4人
 	PlayerCount []*CyU32String `protobuf:"bytes,3,rep,name=PlayerCount,proto3" json:"PlayerCount,omitempty"`
