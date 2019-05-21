@@ -2731,9 +2731,10 @@ func (m *DeskUserInfo) GetDiceValue() int32 {
 
 // 断线重连、进入桌子 桌子信息 s -> c
 type GameDeskInfo struct {
-	GameName             string            `protobuf:"bytes,1,opt,name=game_name,json=gameName,proto3" json:"game_name,omitempty"`
-	Arg                  *DeskArg          `protobuf:"bytes,2,opt,name=arg,proto3" json:"arg,omitempty"`
-	GameStatus           GameStatus        `protobuf:"varint,3,opt,name=game_status,json=gameStatus,proto3,enum=pbgame_mj_changshu.GameStatus" json:"game_status,omitempty"`
+	GameName   string     `protobuf:"bytes,1,opt,name=game_name,json=gameName,proto3" json:"game_name,omitempty"`
+	Arg        *DeskArg   `protobuf:"bytes,2,opt,name=arg,proto3" json:"arg,omitempty"`
+	GameStatus GameStatus `protobuf:"varint,3,opt,name=game_status,json=gameStatus,proto3,enum=pbgame_mj_changshu.GameStatus" json:"game_status,omitempty"`
+	// 准备的玩家信息(数组索引和chair_id不一定相同)
 	GameUser             []*DeskUserInfo   `protobuf:"bytes,4,rep,name=game_user,json=gameUser,proto3" json:"game_user,omitempty"`
 	CurInning            uint32            `protobuf:"varint,5,opt,name=cur_inning,json=curInning,proto3" json:"cur_inning,omitempty"`
 	BankerId             int32             `protobuf:"varint,6,opt,name=banker_id,json=bankerId,proto3" json:"banker_id,omitempty"`

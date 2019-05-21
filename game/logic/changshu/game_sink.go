@@ -1237,10 +1237,10 @@ func (self *GameSink) addCanNotOut(chairId, card int32, chiType uint32) {
 
 func (self *GameSink) doWantCards(chairId int32, cards []int32) (errMsg string) {
 	var leftCardsStack map[int32]int32
-	if len(self.leftCard) <= 0 {
-		leftCardsStack = mj.CalStackCards(self.baseCard)
-	} else {
+	if self.desk.gameStatus == pbgame_logic.GameStatus_GSPlaying { //游戏中要牌
 		leftCardsStack = mj.CalStackCards(self.leftCard)
+	} else { //游戏开始前配牌
+		leftCardsStack = mj.CalStackCards(self.baseCard)
 	}
 	cardsStack := mj.CalStackCards(cards)
 	log.Debugf("%s 玩家要牌,cards=%v", self.logHeadUser(chairId), cards)

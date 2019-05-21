@@ -48,7 +48,7 @@ func (self *GameRecord) Init(args *GameRecordArgs, players []*PlayerInfo) {
 	self.record.CurGameInfo.RoomRecordId = strconv.FormatUint(args.DeskID, 10) + strconv.FormatInt(time.Now().Unix(), 10)
 	self.record.CreateInfo.PayType = args.Args.PaymentType
 	tmp := &mgo.GameAction{}
-	tmp.ActName, tmp.ActValue, _ = protobuf.Marshal(args)
+	tmp.ActName, tmp.ActValue, _ = protobuf.Marshal(args.DeskArg)
 	self.record.CreateInfo.RoomRule = tmp
 	self.record.CurGameInfo.GamePlayers = make([]*mgo.RoomPlayerInfo, 0, len(players))
 	for k, v := range players {
