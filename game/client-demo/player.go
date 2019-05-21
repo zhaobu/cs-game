@@ -7,7 +7,10 @@ import (
 	zaplog "cy/game/common/logger"
 	pbcommon "cy/game/pb/common"
 	pbgame "cy/game/pb/game"
+	pbgamerecord "cy/game/pb/gamerecord"
 	pblogin "cy/game/pb/login"
+	"time"
+
 	"cy/game/util"
 	"encoding/json"
 	"fmt"
@@ -84,12 +87,61 @@ func (self *Player) GameStart() {
 			self.exitdesk()
 		case "5":
 			self.destroyDesk()
+		case "record":
+			self.queryGameRecord()
 		default:
 			self.curgame.DoAction(a)
 		}
 	}
 }
 
+//查询战绩
+func (self *Player) queryGameRecord() {
+	tlog.Info("查询战绩类型:1按userid查,2按俱乐部id查,3按俱乐部+房间号查")
+	var (
+		queryType      int32
+		queryUid       uint64 //要查询的uid
+		queryClubId    int64  //俱乐部Id
+		queryRoomId    uint64 //房间号
+		queryStartTime int64  //查询时间范围
+		queryEndTime   int64  //查询时间范围
+	)
+
+	for {
+		fmt.Printf("请选择查询类型:")
+		fmt.Scan(&queryType)
+		if queryType != 1 && queryType != 2 && queryType != 3 {
+			fmt.Printf("查询类型错误:")
+			continue
+		}
+		break
+	}
+	queryStartTime = time.Now().Unix()
+	queryEndTime = time.Now().Unix()
+	if queryType == 1 {
+		fmt.Printf("请输入要查询的uid,默认查询自己:")
+		fmt.Scan(&queryUid)
+		if queryUid == 0 {
+			queryUid = self.UserId
+		}
+	} else if queryType == 2 {
+		fmt.Printf("请输入要查询的俱乐部id:")
+		fmt.Scan(&queryClubId)
+	} else if queryType == 3 {
+		fmt.Printf("请输入要查询的俱乐部id:")
+		fmt.Scan(&queryClubId)
+		fmt.Printf("请输入要查询的房间号:")
+		fmt.Scan(&queryRoomId)
+	}
+	self.SendPb(&pbgamerecord.QueryRoomRecordReq{Head: &pbcommon.ReqHead{Seq: 1},
+		QueryType:      queryType,
+		QueryUserId:    queryUid,
+		QueryClubId:    queryClubId,
+		QueryRoomId:    queryRoomId,
+		QueryStartTime: queryStartTime,
+		QueryEndTime:   queryEndTime,
+	})
+}
 func (self *Player) login() {
 	self.SendPb(&pblogin.LoginReq{
 		Head:      &pbcommon.ReqHead{Seq: 1},

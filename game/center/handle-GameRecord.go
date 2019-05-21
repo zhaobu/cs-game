@@ -8,9 +8,10 @@ import (
 	pbgamerecord "cy/game/pb/gamerecord"
 	sort "cy/game/util/tools/Sort"
 	"fmt"
-	"go.uber.org/zap"
 	"sync"
 	"time"
+
+	"go.uber.org/zap"
 )
 
 var (
@@ -37,49 +38,8 @@ func GameRecord_Init() {
 	StartTimer_ResetClubStatistics()
 }
 
-//游戏服务器请求写入战绩
-// func (p *center) WriteGameRecordReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
-// 	pb, err := codec.Msg2Pb(args)
-// 	if err != nil {
-// 		tlog.Error(err.Error())
-// 		return err
-// 	}
-// 	req, ok := pb.(*pbgamerecord.WriteGameRecordReq)
-// 	if !ok {
-// 		err = fmt.Errorf("not *pbcenter.CancelMatchReq")
-// 		tlog.Error(err.Error())
-// 		return err
-// 	}
-// 	gr := &mgo.WirteRecord{
-// 		RoomRecordId:  req.RoomRecordId,
-// 		GameId:        req.GameId,
-// 		ClubId:        req.ClubId,
-// 		DeskId:        req.DeskId,
-// 		Index:         req.Index,
-// 		GameStartTime: req.GameStartTime,
-// 		GameEndTime:   req.GameEndTime,
-// 		PayType:       req.PayType,
-// 		PlayerInfos:   []*mgo.GamePlayerInfo{},
-// 		RePlayData:    req.RePlayData,
-// 	}
-// 	for _, v := range req.PlayerInfos {
-// 		gr.PlayerInfos = append(gr.PlayerInfos, &mgo.GamePlayerInfo{
-// 			UserId:          v.UserId,          //用户Id
-// 			Name:            v.Name,            //姓名
-// 			BringinIntegral: v.BringinIntegral, //带入积分
-// 			WinIntegral:     v.WinIntegral,     //输赢积分
-// 		})
-// 	}
-// 	err = mgo.AddGameRecord(gr)
-// 	if err != nil {
-// 		panic("写入战绩错误 err = " + err.Error())
-// 	}
-// 	WriteClubGameStatistics(gr) //写入统计数据
-// 	return
-// }
-
 //请求查询房间记录(点击战绩按钮或者俱乐部内查找)
-func (p *center) QueryRoomRecordReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
+func (p *center) QueryRoomRecordReq(ctx context.Context, args *codec.Message, reply *codec.Message) error {
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
 		tlog.Error("解析消息 1 失败" + err.Error())
@@ -89,11 +49,11 @@ func (p *center) QueryRoomRecordReq(ctx context.Context, args *codec.Message, re
 	if !ok {
 		err = fmt.Errorf("not *pbgamerecord.QueryRoomRecordReq")
 		tlog.Error(err.Error())
-		return
+		return err
 	}
+	log.Debugf("QueryRoomRecordReq请求参数:req:%v", req)
 	rsp := &pbgamerecord.QueryRoomRecordRsp{
 		Error: 0,
-		Datas: []*pbgamerecord.RoomRecord{},
 	}
 	if req.Head != nil {
 		rsp.Head = &pbcommon.RspHead{Seq: req.Head.Seq}
@@ -117,7 +77,10 @@ func (p *center) QueryRoomRecordReq(ctx context.Context, args *codec.Message, re
 			tlog.Warn("查询俱乐部房间数据失败 err = " + err.Error())
 			rsp.Error = 1
 		}
+	} else {
+		rsp.Error = 1
 	}
+	rsp.Datas = make([]*pbgamerecord.RoomRecord, 0, len(querydata))
 	for _, v := range querydata {
 		_data := &pbgamerecord.RoomRecord{
 			RoomRecordId:  v.RoomRecordId,
@@ -127,15 +90,16 @@ func (p *center) QueryRoomRecordReq(ctx context.Context, args *codec.Message, re
 			ClubId:        v.ClubId,
 			TotalInning:   v.TotalInning,
 			PayType:       v.PayType,
-			RoomRule:      v.RoomRule,
-			GamePlayers:   []*pbgamerecord.RoomPlayerInfo{},
+			RoomRule:      &pbgamerecord.GameAction{ActName: v.RoomRule.ActName, ActValue: v.RoomRule.ActValue},
+			GamePlayers:   make([]*pbgamerecord.RoomPlayerInfo, 0, len(v.GamePlayers)),
 			GameRecordIds: v.GameRecords,
 		}
 		for _, v1 := range v.GamePlayers {
 			_data.GamePlayers = append(_data.GamePlayers, &pbgamerecord.RoomPlayerInfo{
-				UserId: v1.UserId,
-				Name:   v1.Name,
-				Score:  v1.Score,
+				UserId:     v1.UserId,
+				Name:       v1.Name,
+				TotalScore: v1.TotalScore,
+				ChairId:    v1.ChairId,
 			})
 		}
 		rsp.Datas = append(rsp.Datas, _data)
@@ -144,11 +108,12 @@ func (p *center) QueryRoomRecordReq(ctx context.Context, args *codec.Message, re
 	if err != nil {
 		tlog.Error("消息封装失败", zap.Error(err))
 	}
-	return
+	log.Debugf("QueryRoomRecordReq请求结果:rsp:%v", rsp)
+	return err
 }
 
 //请求查询游戏详情记录(点击详情按钮)
-func (p *center) QueryGameRecordReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
+func (p *center) QueryGameRecordReq(ctx context.Context, args *codec.Message, reply *codec.Message) error {
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
 		tlog.Error("解析消息 1 失败" + err.Error())
@@ -158,55 +123,49 @@ func (p *center) QueryGameRecordReq(ctx context.Context, args *codec.Message, re
 	if !ok {
 		err = fmt.Errorf("not *pbgamerecord.QueryGameRecordReq")
 		tlog.Error(err.Error())
-		return
+		return err
 	}
 	rsp := &pbgamerecord.QueryGameRecordRsp{
-		Error:   0,
-		Records: []*pbgamerecord.GameRecord{},
+		Error: 0,
 	}
 	if req.Head != nil {
 		rsp.Head = &pbcommon.RspHead{Seq: req.Head.Seq}
 	}
+	log.Debugf("QueryGameRecordReq请求参数req:%v", req)
 	querydata := []*mgo.GameRecord{}
-	if len(req.GameRecordIds) > 0 {
-		querydata, err = mgo.QueryGameRecord(req.GameRecordIds)
-		if err != nil {
-			tlog.Error("查询用户数据失败 err = " + err.Error())
-			rsp.Error = 1
-		}
-		for _, v := range querydata {
-			_data := &pbgamerecord.GameRecord{
-				GameRecordId:  v.GameRecordId,
-				DeskId:        v.DeskId,
-				GameId:        v.GameId,
-				ClubId:        v.ClubId,
-				Index:         v.Index,
-				GameStartTime: v.GameStartTime,
-				GameEndTime:   v.GameEndTime,
-				GamePlayers:   []*pbgamerecord.GamePlayerInfo{},
-			}
-			for _, v1 := range v.GamePlayers {
-				_data.GamePlayers = append(_data.GamePlayers, &pbgamerecord.GamePlayerInfo{
-					UserId:    v1.UserId,
-					Name:      v1.Name,
-					InitScore: v1.InitScore,
-					Score:     v1.Score,
-				})
-			}
-			rsp.Records = append(rsp.Records, _data)
-		}
-	} else {
+	if querydata, err = mgo.QueryGameRecord(req.RoomRecordId); err != nil {
+		tlog.Error("查询用户数据失败 err = " + err.Error())
 		rsp.Error = 1
+		return err
 	}
-	err = codec.Pb2Msg(rsp, reply)
-	if err != nil {
+	rsp.Records = make([]*pbgamerecord.GameRecord, 0, len(querydata))
+	for _, v := range querydata {
+		_data := &pbgamerecord.GameRecord{
+			GameRecordId:  v.GameRecordId,
+			Index:         v.Index,
+			GameStartTime: v.GameStartTime,
+			GameEndTime:   v.GameEndTime,
+			GamePlayers:   make([]*pbgamerecord.GamePlayerInfo, 0, len(v.GamePlayers)),
+		}
+		for _, v1 := range v.GamePlayers {
+			_data.GamePlayers = append(_data.GamePlayers, &pbgamerecord.GamePlayerInfo{
+				UserId:  v1.UserId,
+				ChairId: v1.ChairId,
+				Score:   v1.Score,
+			})
+		}
+		rsp.Records = append(rsp.Records, _data)
+	}
+
+	if err = codec.Pb2Msg(rsp, reply); err != nil {
 		tlog.Error("消息封装失败", zap.Error(err))
 	}
-	return
+	log.Debugf("QueryGameRecordReq请求结果:rsp:%v", rsp)
+	return err
 }
 
 //请求查询游戏复盘记录(点击游戏回放按钮)
-func (p *center) QueryGameRePlayRecord(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
+func (p *center) QueryGameRePlaydReq(ctx context.Context, args *codec.Message, reply *codec.Message) error {
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
 		tlog.Error("解析消息 1 失败" + err.Error())
@@ -216,31 +175,29 @@ func (p *center) QueryGameRePlayRecord(ctx context.Context, args *codec.Message,
 	if !ok {
 		err = fmt.Errorf("not *pbgamerecord.QueryGameRePlaydReq")
 		tlog.Error(err.Error())
-		return
+		return err
 	}
 	rsp := &pbgamerecord.QueryGameRePlaydRsp{}
 	if req.Head != nil {
 		rsp.Head = &pbcommon.RspHead{Seq: req.Head.Seq}
 	}
-	querydata := &mgo.GameRePlayData{}
-	if len(req.GameRecordIds) > 0 {
-		querydata, err = mgo.QueryGameRePlayRecord(req.GameRecordIds)
-		if err != nil {
-			tlog.Warn("查询复盘数据失败 err = " + err.Error())
-			rsp.Error = 1
-		}
-		rsp.RePlayData = make([]*pbgamerecord.GameAction, 0, len(querydata.RePlayData))
-		for _, v := range querydata.RePlayData {
-			rsp.RePlayData = append(rsp.RePlayData, &pbgamerecord.GameAction{ActName: v.ActName, ActValue: v.ActValue})
-		}
-	} else {
+	log.Debugf("QueryGameRePlayRecord请求参数:req:%v", req)
+	querydata := &mgo.GameRecord{}
+	if querydata, err = mgo.QueryGameRePlayRecord(req.GameRecordId); err != nil {
+		tlog.Warn("查询复盘数据失败 err = " + err.Error())
 		rsp.Error = 1
+		return err
+	}
+	rsp.RePlayData = make([]*pbgamerecord.GameAction, 0, len(querydata.RePlayData))
+	for _, v := range querydata.RePlayData {
+		rsp.RePlayData = append(rsp.RePlayData, &pbgamerecord.GameAction{ActName: v.ActName, ActValue: v.ActValue})
 	}
 	err = codec.Pb2Msg(rsp, reply)
 	if err != nil {
 		tlog.Error("消息封装失败", zap.Error(err))
 	}
-	return
+	log.Debugf("QueryGameRePlayRecord请求结果:rsp:%v", rsp)
+	return err
 }
 
 //查询俱乐部统计结果数据
@@ -335,7 +292,7 @@ func (p *center) QueryClubStatisticsReq(ctx context.Context, args *codec.Message
 func WriteClubGameStatistics(gr *mgo.WirteRecord) {
 	defer clublock.Unlock()
 	clublock.Lock()
-	if gr.ClubId == 0 {
+	if gr.CreateInfo.ClubId == 0 {
 		return
 	}
 	if ClubStatistics == nil {
@@ -343,22 +300,22 @@ func WriteClubGameStatistics(gr *mgo.WirteRecord) {
 			ClubSD: make(map[int64]*ClubStatisticsData),
 		}
 	}
-	if _, ok := ClubStatistics.ClubSD[gr.ClubId]; !ok {
-		ClubStatistics.ClubSD[gr.ClubId] = &ClubStatisticsData{
+	if _, ok := ClubStatistics.ClubSD[gr.CreateInfo.ClubId]; !ok {
+		ClubStatistics.ClubSD[gr.CreateInfo.ClubId] = &ClubStatisticsData{
 			UserSD: make(map[uint64]*UserStatisticsData),
 		}
 	}
-	for _, v := range gr.PlayerInfos {
-		if _, ok := ClubStatistics.ClubSD[gr.ClubId].UserSD[v.UserId]; !ok {
-			ClubStatistics.ClubSD[gr.ClubId].UserSD[v.UserId] = &UserStatisticsData{
+	for _, v := range gr.CurGameInfo.GamePlayers {
+		if _, ok := ClubStatistics.ClubSD[gr.CreateInfo.ClubId].UserSD[v.UserId]; !ok {
+			ClubStatistics.ClubSD[gr.CreateInfo.ClubId].UserSD[v.UserId] = &UserStatisticsData{
 				UserId:             v.UserId,
 				Name:               v.Name,
 				StatisticsIntegral: 0,
 				StatisticsPlay:     0,
 			}
 		}
-		ClubStatistics.ClubSD[gr.ClubId].UserSD[v.UserId].StatisticsIntegral += int64(v.Score)
-		ClubStatistics.ClubSD[gr.ClubId].UserSD[v.UserId].StatisticsPlay++
+		ClubStatistics.ClubSD[gr.CreateInfo.ClubId].UserSD[v.UserId].StatisticsIntegral += int64(v.Score)
+		ClubStatistics.ClubSD[gr.CreateInfo.ClubId].UserSD[v.UserId].StatisticsPlay++
 	}
 }
 

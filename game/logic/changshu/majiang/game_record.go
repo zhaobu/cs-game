@@ -41,27 +41,31 @@ func (self *GameRecord) Init(args *GameRecordArgs, players []*PlayerInfo) {
 		self.RankInfo[i] = &RankCell{ChairId: i}
 	}
 	self.UserScore = make([]map[int32]int32, 0, args.Args.RInfo.LoopCnt)
-	self.record = &mgo.WirteRecord{GameId: args.GameId, ClubId: args.ClubId, DeskId: args.DeskID, TotalInning: args.Args.RInfo.LoopCnt}
+
+	self.record = &mgo.WirteRecord{CreateInfo: &mgo.WriteGameConfig{GameId: args.GameId, ClubId: args.ClubId, DeskId: args.DeskID, TotalInning: args.Args.RInfo.LoopCnt}}
+	self.record.CurGameInfo = &mgo.WriteGameCell{}
 	//房间号+时间戳生成RoomRecordId
-	self.record.RoomRecordId = strconv.FormatUint(args.DeskID, 10) + strconv.FormatInt(time.Now().Unix(), 10)
-	self.record.PayType = args.Args.PaymentType
-	self.record.RoomRule, _ = proto.Marshal(args.Args)
-	self.record.PlayerInfos = make([]*mgo.GamePlayerInfo, 0, len(players))
+	self.record.CurGameInfo.RoomRecordId = strconv.FormatUint(args.DeskID, 10) + strconv.FormatInt(time.Now().Unix(), 10)
+	self.record.CreateInfo.PayType = args.Args.PaymentType
+	tmp := &mgo.GameAction{}
+	tmp.ActName, tmp.ActValue, _ = protobuf.Marshal(args)
+	self.record.CreateInfo.RoomRule = tmp
+	self.record.CurGameInfo.GamePlayers = make([]*mgo.RoomPlayerInfo, 0, len(players))
 	for k, v := range players {
-		info := &mgo.GamePlayerInfo{UserId: v.BaseInfo.Uid, Name: v.BaseInfo.Nickname, InitScore: 0, Score: v.BalanceInfo.Point, ChairId: int32(k)}
-		self.record.PlayerInfos = append(self.record.PlayerInfos, info)
+		info := &mgo.RoomPlayerInfo{UserId: v.BaseInfo.Uid, Name: v.BaseInfo.Nickname, Score: 0, TotalScore: 0, ChairId: int32(k)}
+		self.record.CurGameInfo.GamePlayers = append(self.record.CurGameInfo.GamePlayers, info)
 	}
 }
 
 //每局重置
 func (self *GameRecord) Reset(curinning uint32) {
-	for _, v := range self.record.PlayerInfos {
+	for _, v := range self.record.CurGameInfo.GamePlayers {
 		v.Score = 0
 	}
-	self.record.Index = curinning
-	self.record.GameStartTime = 0
-	self.record.GameEndTime = 0
-	self.record.RePlayData = nil
+	self.record.CurGameInfo.Index = curinning
+	self.record.CurGameInfo.GameStartTime = 0
+	self.record.CurGameInfo.GameEndTime = 0
+	self.record.CurGameInfo.RePlayData = nil
 }
 
 //记录游戏战绩
@@ -105,9 +109,9 @@ func (self *GameRecord) GetGameRecord() *pbgame_logic.S2CGameRecord {
 func (self *GameRecord) RecordGameAction(msg proto.Message) {
 	switch msg.(type) {
 	case *pbgame_logic.S2CStartGame:
-		self.record.GameStartTime = time.Now().Unix()
+		self.record.CurGameInfo.GameStartTime = time.Now().Unix()
 	case *pbgame_logic.BS2CGameEnd:
-		self.record.GameEndTime = time.Now().Unix()
+		self.record.CurGameInfo.GameEndTime = time.Now().Unix()
 	}
 	act := &mgo.GameAction{}
 	var err error
@@ -115,13 +119,14 @@ func (self *GameRecord) RecordGameAction(msg proto.Message) {
 	if err != nil {
 		log.Error("protobuf.Marshal err", zap.Error(err))
 	}
-	self.record.RePlayData = append(self.record.RePlayData, act)
+	self.record.CurGameInfo.RePlayData = append(self.record.CurGameInfo.RePlayData, act)
 }
 
 //游戏结束
 func (self *GameRecord) RecordGameEnd(players []*PlayerInfo) {
 	for k, v := range players {
-		self.record.PlayerInfos[k].Score = v.BalanceInfo.Point
+		self.record.CurGameInfo.GamePlayers[k].Score = v.BalanceInfo.Point
+		self.record.CurGameInfo.GamePlayers[k].TotalScore = v.BalanceResult.Point
 	}
 	mgo.AddGameRecord(self.record)
 }
