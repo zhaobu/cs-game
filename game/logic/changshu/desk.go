@@ -160,7 +160,7 @@ func (d *Desk) doSitDown(uid uint64, chair int32, rsp *pbgame.SitDownRsp) {
 		d.gameSink.changGameState(pbgame_logic.GameStatus_GSWait)
 	}
 	d.playChair[chair] = dUserInfo
-	d.gameSink.AddPlayer(chair, uid, dUserInfo.info.GetName())
+	d.gameSink.AddPlayer(chair, uid, dUserInfo.info)
 	//先发送加入成功消息
 	rsp.Code = pbgame.SitDownRspCode_SitDownSucc
 	d.SendData(uid, rsp)

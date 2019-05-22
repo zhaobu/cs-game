@@ -31,6 +31,7 @@ message RoomPlayerInfo {
   string Name = 2;       //姓名
   int32 TotalScore = 3;  //输赢积分 房间内的统计数据
   int32 ChairId = 4;     //在房间内的座位号
+  string Profile = 5;    //头像
 }
 
 //房间记录

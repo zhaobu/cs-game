@@ -3,6 +3,7 @@ package main
 import (
 	"cy/game/configs"
 	mj "cy/game/logic/changshu/majiang"
+	pbcommon "cy/game/pb/common"
 	pbgame "cy/game/pb/game"
 	pbgame_logic "cy/game/pb/game/mj/changshu"
 	"cy/game/util"
@@ -143,13 +144,13 @@ func (self *GameSink) StartGame() {
 }
 
 //玩家加入游戏
-func (self *GameSink) AddPlayer(chairId int32, uid uint64, nickName string) bool {
+func (self *GameSink) AddPlayer(chairId int32, uid uint64, uinfo *pbcommon.UserInfo) bool {
 	if self.game_config.PlayerCount <= chairId {
 		log.Errorf("%s 加入房间失败,人数已满,游戏开始人数为%d", self.logHeadUser(chairId), self.game_config.PlayerCount)
 		return false
 	}
 	self.players[chairId] = mj.MakePlayers()
-	self.players[chairId].BaseInfo = mj.PlayerBaseInfo{ChairId: chairId, Uid: uid, Nickname: nickName}
+	self.players[chairId].BaseInfo = mj.PlayerBaseInfo{ChairId: chairId, Uid: uid, Nickname: uinfo.Name, Profile: uinfo.Profile}
 	return true
 }
 

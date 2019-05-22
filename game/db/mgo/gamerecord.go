@@ -66,6 +66,7 @@ type RoomPlayerInfo struct {
 	Score      int32  `bson:"score,omitempty"`      //本局得分
 	TotalScore int32  `bson:"totalscore,omitempty"` //当前累计总得分
 	ChairId    int32  `bson:"chairid,omitempty"`    //座位号
+	Profile    string `bson:"profile,omitempty"`    //头像
 }
 
 //游戏单局记录
@@ -153,6 +154,7 @@ func AddGameRecord(gr *WirteRecord) (err error) {
 			Name:       v.Name,
 			ChairId:    v.ChairId,
 			TotalScore: v.TotalScore,
+			Profile:    v.Profile,
 		})
 	}
 	//更新每局记录id和总分详情

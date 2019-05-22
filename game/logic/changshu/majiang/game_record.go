@@ -52,7 +52,7 @@ func (self *GameRecord) Init(args *GameRecordArgs, players []*PlayerInfo) {
 	self.record.CreateInfo.RoomRule = tmp
 	self.record.CurGameInfo.GamePlayers = make([]*mgo.RoomPlayerInfo, 0, len(players))
 	for k, v := range players {
-		info := &mgo.RoomPlayerInfo{UserId: v.BaseInfo.Uid, Name: v.BaseInfo.Nickname, Score: 0, TotalScore: 0, ChairId: int32(k)}
+		info := &mgo.RoomPlayerInfo{UserId: v.BaseInfo.Uid, Name: v.BaseInfo.Nickname, Score: 0, TotalScore: 0, ChairId: int32(k), Profile: v.BaseInfo.Profile}
 		self.record.CurGameInfo.GamePlayers = append(self.record.CurGameInfo.GamePlayers, info)
 	}
 }
