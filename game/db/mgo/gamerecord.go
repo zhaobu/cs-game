@@ -228,16 +228,24 @@ func AddClubIntegralStatistics(clubs *ClubStatisticsData) (err error) {
 }
 
 //查询用户游戏记录
-func QueryUserRoomRecord(uid uint64, start int64, end int64) (rsp []*RoomRecord, err error) {
+func QueryUserRoomRecord(uid uint64, start, end int64, _curPage, _limit int32) (rsp []*RoomRecord, err error) {
+	var curPage, limit = int(_curPage), int(_limit)
+	if limit == 0 {
+		curPage, limit = 1, 30
+	}
 	rsp = make([]*RoomRecord, 0)
-	err = mgoSess.DB("").C(RoomRecordTable).Find(bson.M{"gameplayers.userid": uid, "gamestarttime": bson.M{"$gte": start, "$lt": end}}).All(&rsp)
+	err = mgoSess.DB("").C(RoomRecordTable).Find(bson.M{"gameplayers.userid": uid, "gamestarttime": bson.M{"$gte": start, "$lt": end}}).Skip(curPage * limit).Limit(limit).All(&rsp)
 	return
 }
 
 //查询俱乐部的战绩数据
-func QueryClubRoomRecord(clubid int64, start int64, end int64) (rsp []*RoomRecord, err error) {
+func QueryClubRoomRecord(clubid, start, end int64, _curPage, _limit int32) (rsp []*RoomRecord, err error) {
+	var curPage, limit = int(_curPage), int(_limit)
+	if limit == 0 {
+		curPage, limit = 1, 30
+	}
 	rsp = make([]*RoomRecord, 0)
-	err = mgoSess.DB("").C(RoomRecordTable).Find(bson.M{"clubid": clubid, "gamestarttime": bson.M{"$gte": start, "$lt": end}}).All(&rsp)
+	err = mgoSess.DB("").C(RoomRecordTable).Find(bson.M{"clubid": clubid, "gamestarttime": bson.M{"$gte": start, "$lt": end}}).Skip(curPage * limit).Limit(limit).All(&rsp)
 	if err != nil {
 		return
 	}
@@ -245,9 +253,13 @@ func QueryClubRoomRecord(clubid int64, start int64, end int64) (rsp []*RoomRecor
 }
 
 //查询俱乐部的战绩数据
-func QueryClubRoomRecordByRoom(clubid int64, deskid uint64) (rsp []*RoomRecord, err error) {
+func QueryClubRoomRecordByRoom(clubid int64, deskid uint64, _curPage, _limit int32) (rsp []*RoomRecord, err error) {
+	var curPage, limit = int(_curPage), int(_limit)
+	if limit == 0 {
+		curPage, limit = 1, 30
+	}
 	rsp = []*RoomRecord{}
-	err = mgoSess.DB("").C(RoomRecordTable).Find(bson.M{"clubid": clubid, "deskid": deskid}).All(&rsp)
+	err = mgoSess.DB("").C(RoomRecordTable).Find(bson.M{"clubid": clubid, "deskid": deskid}).Skip(curPage * limit).Limit(limit).All(&rsp)
 	if err != nil {
 		return
 	}

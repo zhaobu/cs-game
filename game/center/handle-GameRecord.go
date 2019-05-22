@@ -60,19 +60,19 @@ func (p *center) QueryRoomRecordReq(ctx context.Context, args *codec.Message, re
 	}
 	querydata := []*mgo.RoomRecord{}
 	if req.QueryType == 1 { //按userId查询
-		querydata, err = mgo.QueryUserRoomRecord(req.QueryUserId, req.QueryStartTime, req.QueryEndTime)
+		querydata, err = mgo.QueryUserRoomRecord(req.QueryUserId, req.QueryStartTime, req.QueryEndTime, req.CurPage, req.Limit)
 		if err != nil {
 			tlog.Warn("查询用户数据失败 err = " + err.Error())
 			rsp.Error = 1
 		}
 	} else if req.QueryType == 2 { //按俱乐部id查询
-		querydata, err = mgo.QueryClubRoomRecord(req.QueryClubId, req.QueryStartTime, req.QueryEndTime)
+		querydata, err = mgo.QueryClubRoomRecord(req.QueryClubId, req.QueryStartTime, req.QueryEndTime, req.CurPage, req.Limit)
 		if err != nil {
 			tlog.Warn("查询用户数据失败 err = " + err.Error())
 			rsp.Error = 1
 		}
 	} else if req.QueryType == 3 { //按俱乐部+房间号查询
-		querydata, err = mgo.QueryClubRoomRecordByRoom(req.QueryClubId, req.QueryRoomId)
+		querydata, err = mgo.QueryClubRoomRecordByRoom(req.QueryClubId, req.QueryRoomId, req.CurPage, req.Limit)
 		if err != nil {
 			tlog.Warn("查询俱乐部房间数据失败 err = " + err.Error())
 			rsp.Error = 1
