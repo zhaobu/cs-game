@@ -37,9 +37,7 @@ type Message struct {
 
 // NewPacket NewPacket
 func NewPacket() *Packet {
-	p := Packet{}
-	p.Msgs = make([]*Message, 0)
-	return &p
+	return &Packet{Msgs: []*Message{}}
 }
 
 // ReadFrom ReadFrom
@@ -125,6 +123,8 @@ func (p *Packet) Decode(data []byte) error {
 	return p.ReadFrom(br)
 }
 
+// | 4byte | 4byte | 2byte | 4byte | 变长 |   4byte   | 变长
+//   total  reserve  count  nameLen  name  payloadLen payload
 // Encode Encode
 func (p *Packet) Encode() (data []byte, err error) {
 	if len(p.Msgs) == 0 {
@@ -139,21 +139,25 @@ func (p *Packet) Encode() (data []byte, err error) {
 
 	var vLen uint64
 	for _, msg := range p.Msgs {
+		//nameLen
 		vLen += 4
 		if len(msg.Name) > math.MaxUint32 {
 			err = fmt.Errorf("%s too long", msg.Name)
 			return
 		}
+		//name
 		vLen += uint64(len(msg.Name))
-
+		//payloadLen
 		vLen += 4
 		if len(msg.Payload) > math.MaxUint32 {
 			err = fmt.Errorf("%s payload too long", msg.Name)
 			return
 		}
+		//payload
 		vLen += uint64(len(msg.Payload))
 	}
 
+	//reserve+count+vlen
 	var total = 4 + 2 + vLen
 	if total > math.MaxUint32 {
 		err = fmt.Errorf("total %d to long", total)
@@ -165,13 +169,14 @@ func (p *Packet) Encode() (data []byte, err error) {
 	data = make([]byte, 4+p.total)
 	var offset uint32
 
-	binary.BigEndian.PutUint32(data[offset:], p.total)
+	//按大端方式构建数据 total  reserve  count  nameLen  name  payloadLen payload
+	binary.BigEndian.PutUint32(data[offset:], p.total) //total
 	offset += 4
 
-	binary.BigEndian.PutUint32(data[offset:], p.reserve)
+	binary.BigEndian.PutUint32(data[offset:], p.reserve) //reserve
 	offset += 4
 
-	binary.BigEndian.PutUint16(data[offset:], uint16(len(p.Msgs)))
+	binary.BigEndian.PutUint16(data[offset:], uint16(len(p.Msgs))) //count
 	offset += 2
 
 	for _, msg := range p.Msgs {

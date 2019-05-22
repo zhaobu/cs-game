@@ -34,9 +34,9 @@ type session struct {
 	curSeq      uint64 //
 	stopFlag    int32
 	stopSig     chan struct{}
-	chInput     chan *codec.Message
+	chInput     chan *codec.Message //读消息缓冲区
 
-	bat *batcher.Batcher // TODO
+	bat *batcher.Batcher //批量发送消息
 }
 
 func newSession(tc net.Conn, srvConfig *serverConfig) *session {
@@ -47,6 +47,7 @@ func newSession(tc net.Conn, srvConfig *serverConfig) *session {
 	s.stopSig = make(chan struct{}, 0)
 	s.chInput = make(chan *codec.Message, 1024)
 
+	//设置打包方式为超时100ms,或者数据大小超过10 时执行一次s.batchOperator函数,
 	s.bat = batcher.New(s.batchOperator, time.Millisecond*100, batcher.SetMaxBatchSize(10))
 	s.bat.Listen()
 
@@ -330,6 +331,7 @@ func (s *session) sendMsg(msg *codec.Message) {
 	s.bat.Batch(msg)
 }
 
+//打包缓冲区满后执行的操作
 func (s *session) batchOperator(reqs []interface{}) {
 	if len(reqs) == 0 {
 		return

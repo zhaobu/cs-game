@@ -1,5 +1,5 @@
 cd win
 start /b club.exe
-REM start /b center.exe
-start /b gate.exe
+start /b center.exe
+REM start /b gate.exe
 pause
