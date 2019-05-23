@@ -3,7 +3,9 @@ package majiang
 import (
 	"cy/game/codec/protobuf"
 	"cy/game/db/mgo"
+	pbcommon "cy/game/pb/common"
 	pbgame_logic "cy/game/pb/game/mj/changshu"
+
 	"cy/game/util"
 	"sort"
 	"strconv"
@@ -29,31 +31,33 @@ type GameRecord struct {
 	record      *mgo.WirteRecord
 }
 
-type GameRecordArgs struct {
-	*pbgame_logic.DeskArg
-	GameId string
-	ClubId int64
-}
-
-func (self *GameRecord) Init(args *GameRecordArgs, players []*PlayerInfo) {
-	self.RankInfo = make([]*RankCell, args.Args.PlayerCount)
-	for i := int32(0); i < args.Args.PlayerCount; i++ {
+func (self *GameRecord) Init(info *pbgame_logic.GameDeskInfo, players []*PlayerInfo, clubId int64) {
+	createArg := info.Arg.Args
+	self.RankInfo = make([]*RankCell, createArg.PlayerCount)
+	for i := int32(0); i < createArg.PlayerCount; i++ {
 		self.RankInfo[i] = &RankCell{ChairId: i}
 	}
-	self.UserScore = make([]map[int32]int32, 0, args.Args.RInfo.LoopCnt)
+	self.UserScore = make([]map[int32]int32, 0, createArg.RInfo.LoopCnt)
 
-	self.record = &mgo.WirteRecord{CreateInfo: &mgo.WriteGameConfig{GameId: args.GameId, ClubId: args.ClubId, DeskId: args.DeskID, TotalInning: args.Args.RInfo.LoopCnt}}
+	self.record = &mgo.WirteRecord{CreateInfo: &mgo.WriteGameConfig{GameId: info.GameName, ClubId: clubId, DeskId: info.Arg.DeskID, TotalInning: createArg.RInfo.LoopCnt}}
 	self.record.CurGameInfo = &mgo.WriteGameCell{}
 	//房间号+时间戳生成RoomRecordId
-	self.record.CurGameInfo.RoomRecordId = strconv.FormatUint(args.DeskID, 10) + strconv.FormatInt(time.Now().Unix(), 10)
-	self.record.CreateInfo.PayType = args.Args.PaymentType
+	self.record.CurGameInfo.RoomRecordId = strconv.FormatUint(info.Arg.DeskID, 10) + strconv.FormatInt(time.Now().Unix(), 10)
+	self.record.CreateInfo.PayType = createArg.PaymentType
 	tmp := &mgo.GameAction{}
-	tmp.ActName, tmp.ActValue, _ = protobuf.Marshal(args.DeskArg)
-	self.record.CreateInfo.RoomRule = tmp
+	//修改存储的桌子信息
+	info.GameStatus = pbgame_logic.GameStatus_GSPlaying
+	//去掉不需要存储的玩家信息
+	for _, v := range info.GameUser {
+		tmp1 := &pbcommon.UserInfo{UserID: v.Info.UserID, Name: v.Info.Name, Sex: v.Info.Sex, Profile: v.Info.Profile}
+		v.Info = tmp1
+	}
+	tmp.ActName, tmp.ActValue, _ = protobuf.Marshal(info)
+	self.record.CreateInfo.DeskInfo = tmp
 	self.record.CurGameInfo.GamePlayers = make([]*mgo.RoomPlayerInfo, 0, len(players))
-	for k, v := range players {
-		info := &mgo.RoomPlayerInfo{UserId: v.BaseInfo.Uid, Name: v.BaseInfo.Nickname, Score: 0, TotalScore: 0, ChairId: int32(k), Profile: v.BaseInfo.Profile}
-		self.record.CurGameInfo.GamePlayers = append(self.record.CurGameInfo.GamePlayers, info)
+	for _, v := range players {
+		uinfo := &mgo.RoomPlayerInfo{UserId: v.BaseInfo.Uid, Name: v.BaseInfo.Nickname, Score: 0, PreScore: 0}
+		self.record.CurGameInfo.GamePlayers = append(self.record.CurGameInfo.GamePlayers, uinfo)
 	}
 }
 
@@ -126,7 +130,7 @@ func (self *GameRecord) RecordGameAction(msg proto.Message) {
 func (self *GameRecord) RecordGameEnd(players []*PlayerInfo) {
 	for k, v := range players {
 		self.record.CurGameInfo.GamePlayers[k].Score = v.BalanceInfo.Point
-		self.record.CurGameInfo.GamePlayers[k].TotalScore = v.BalanceResult.Point
+		self.record.CurGameInfo.GamePlayers[k].PreScore = v.BalanceResult.Point
 	}
 	mgo.AddGameRecord(self.record)
 }

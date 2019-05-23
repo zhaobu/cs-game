@@ -94,7 +94,6 @@ type PlayerBaseInfo struct {
 	ChairId  int32
 	Uid      uint64
 	Nickname string
-	Profile  string //玩家头像地址,游戏回放用到
 }
 
 //总结算

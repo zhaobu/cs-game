@@ -281,8 +281,14 @@ func (d *Desk) sendDeskInfo(uid uint64) {
 	if len(d.deskPlayers) <= 0 {
 		return
 	}
-	msg := &pbgame_logic.GameDeskInfo{GameName: gameName, Arg: d.deskConfig, GameStatus: d.gameStatus, CurInning: d.curInning}
-	msg.MasterUid = d.masterUid
+	msg := d.getBaseDeskInfo()
+	msg.CurInning = d.curInning
+	d.gameSink.gameReconnect(msg, uid)
+	d.SendData(uid, msg)
+}
+
+func (d *Desk) getBaseDeskInfo() *pbgame_logic.GameDeskInfo {
+	msg := &pbgame_logic.GameDeskInfo{GameName: gameName, Arg: d.deskConfig, GameStatus: d.gameStatus, MasterUid: d.masterUid}
 	msg.GameUser = make([]*pbgame_logic.DeskUserInfo, 0, d.deskConfig.Args.PlayerCount)
 	// 按照座位号从0开始遍历d.playChair
 	for chair, user := range d.playChair {
@@ -292,8 +298,7 @@ func (d *Desk) sendDeskInfo(uid uint64) {
 		userInfo.UserStatus = user.userStatus
 		msg.GameUser = append(msg.GameUser, userInfo)
 	}
-	d.gameSink.gameReconnect(msg, uid)
-	d.SendData(uid, msg)
+	return msg
 }
 
 //解散桌子

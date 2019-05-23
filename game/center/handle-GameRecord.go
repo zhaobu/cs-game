@@ -90,16 +90,14 @@ func (p *center) QueryRoomRecordReq(ctx context.Context, args *codec.Message, re
 			ClubId:        v.ClubId,
 			TotalInning:   v.TotalInning,
 			PayType:       v.PayType,
-			RoomRule:      &pbgamerecord.GameAction{ActName: v.RoomRule.ActName, ActValue: v.RoomRule.ActValue},
+			DeskInfo:      &pbgamerecord.GameAction{ActName: v.DeskInfo.ActName, ActValue: v.DeskInfo.ActValue},
 			GamePlayers:   make([]*pbgamerecord.RoomPlayerInfo, 0, len(v.GamePlayers)),
 			GameRecordIds: v.GameRecords,
 		}
 		for _, v1 := range v.GamePlayers {
 			_data.GamePlayers = append(_data.GamePlayers, &pbgamerecord.RoomPlayerInfo{
 				UserId:     v1.UserId,
-				Name:       v1.Name,
-				TotalScore: v1.TotalScore,
-				ChairId:    v1.ChairId,
+				TotalScore: v1.PreScore,
 			})
 		}
 		rsp.Datas = append(rsp.Datas, _data)
@@ -149,9 +147,9 @@ func (p *center) QueryGameRecordReq(ctx context.Context, args *codec.Message, re
 		}
 		for _, v1 := range v.GamePlayers {
 			_data.GamePlayers = append(_data.GamePlayers, &pbgamerecord.GamePlayerInfo{
-				UserId:  v1.UserId,
-				ChairId: v1.ChairId,
-				Score:   v1.Score,
+				UserId:   v1.UserId,
+				Score:    v1.Score,
+				PreScore: v1.PreScore,
 			})
 		}
 		rsp.Records = append(rsp.Records, _data)

@@ -102,8 +102,9 @@ func (self *GameSink) Ctor(config *pbgame_logic.CreateArg) error {
 func (self *GameSink) reset() {
 	if self.desk.curInning == 1 {
 		//所有玩家坐下后才初始化战绩记录
-		initArg := &mj.GameRecordArgs{GameId: self.desk.gameNode.GameName, ClubId: self.desk.clubId, DeskArg: self.desk.deskConfig}
-		self.record.Init(initArg, self.players)
+		// log.Debugf("传入前:%v", self.desk.getBaseDeskInfo())
+		self.record.Init(self.desk.getBaseDeskInfo(), self.players, self.desk.clubId)
+		// log.Debugf("传入后:%v", self.desk.getBaseDeskInfo())
 	}
 	self.record.Reset(self.desk.curInning)
 	//AllInfo
@@ -150,7 +151,7 @@ func (self *GameSink) AddPlayer(chairId int32, uid uint64, uinfo *pbcommon.UserI
 		return false
 	}
 	self.players[chairId] = mj.MakePlayers()
-	self.players[chairId].BaseInfo = mj.PlayerBaseInfo{ChairId: chairId, Uid: uid, Nickname: uinfo.Name, Profile: uinfo.Profile}
+	self.players[chairId].BaseInfo = mj.PlayerBaseInfo{ChairId: chairId, Uid: uid, Nickname: uinfo.Name}
 	return true
 }
 

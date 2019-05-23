@@ -4,12 +4,6 @@ import "cy/game/pb/common/head.proto";
 
 package pbgamerecord;
 
-message GamePlayerInfo {
-  uint64 UserId = 1;  //用户Id
-  int32 Score = 2;    //输赢积分
-  int32 ChairId = 3;  //在房间内的座位号
-}
-
 message GameAction {
   string ActName = 1;  //命令名称
   bytes ActValue = 2;  //命令序列化值
@@ -30,10 +24,7 @@ message QueryRoomRecordReq {
 }
 message RoomPlayerInfo {
   uint64 UserId = 1;     //用户Id
-  string Name = 2;       //姓名
   int32 TotalScore = 3;  //输赢积分 房间内的统计数据
-  int32 ChairId = 4;     //在房间内的座位号
-  string Profile = 5;    //头像
 }
 
 //房间记录
@@ -45,7 +36,7 @@ message RoomRecord {
   uint32 TotalInning = 5;   //总局数
   uint32 PayType = 6;       //支付方式 1 个人支付 2 AA支付
   int64 ClubId = 7;         //俱乐部Id 当 AreaType 1 时需要填写
-  GameAction RoomRule = 8;  //房间规则
+  GameAction DeskInfo = 8;  //房间信息
   repeated RoomPlayerInfo GamePlayers = 9;  //游戏参与玩家信息
   repeated string GameRecordIds = 10;       //房间内游戏数据 数组
 }
@@ -55,12 +46,19 @@ message QueryRoomRecordRsp {
   pbcommon.RspHead Head = 1;
   int32 Error = 2;  // 0 查询成功 1参数异常(不存在此人或者此俱乐部) 2权限不足
   repeated RoomRecord Datas = 3;  //房间记录数据
+  int32 PageCount = 4;            //总页数
 }
 
 //查询游戏记录请求(点击详情按钮)
 message QueryGameRecordReq {
   pbcommon.ReqHead Head = 1;
   string RoomRecordId = 2;  //要查询的房间记录id
+}
+
+message GamePlayerInfo {
+  uint64 UserId = 1;   //用户Id
+  int32 Score = 2;     //输赢积分
+  int32 PreScore = 3;  //前几局累积总分
 }
 
 //游戏单局记录

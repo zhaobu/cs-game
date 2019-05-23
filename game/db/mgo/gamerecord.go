@@ -28,7 +28,7 @@ type WriteGameConfig struct {
 	DeskId      uint64      //房间号
 	TotalInning uint32      //总局数
 	PayType     uint32      //支付方式1 个人支付 2 AA支付
-	RoomRule    *GameAction //房间规则
+	DeskInfo    *GameAction //房间规则
 }
 
 //本局数据
@@ -56,17 +56,15 @@ type RoomRecord struct {
 	GameId        string            //游戏Id
 	ClubId        int64             //俱乐部Id
 	PayType       uint32            //支付方式1 个人支付 2 AA支付
-	RoomRule      *GameAction       //房间规则
+	DeskInfo      *GameAction       //房间规则
 	GamePlayers   []*RoomPlayerInfo //玩家当前总积分详情
 	GameRecords   []string          //房间每局游戏记录id
 }
 type RoomPlayerInfo struct {
-	UserId     uint64 `bson:"userid,omitempty"`     //用户Id
-	Name       string `bson:"name,omitempty"`       //姓名
-	Score      int32  `bson:"score,omitempty"`      //本局得分
-	TotalScore int32  `bson:"totalscore,omitempty"` //当前累计总得分
-	ChairId    int32  `bson:"chairid,omitempty"`    //座位号
-	Profile    string `bson:"profile,omitempty"`    //头像
+	UserId   uint64 `bson:"userid,omitempty"`   //用户Id
+	Name     string `bson:"name,omitempty"`     //姓名
+	Score    int32  `bson:"score,omitempty"`    //本局得分
+	PreScore int32  `bson:"prescore,omitempty"` //当前累计总得分
 }
 
 //游戏单局记录
@@ -133,7 +131,7 @@ func AddGameRecord(gr *WirteRecord) (err error) {
 			GameId:        gr.CreateInfo.GameId,
 			ClubId:        gr.CreateInfo.ClubId,
 			PayType:       gr.CreateInfo.PayType,
-			RoomRule:      gr.CreateInfo.RoomRule,
+			DeskInfo:      gr.CreateInfo.DeskInfo,
 			GamePlayers:   make([]*RoomPlayerInfo, 0, len(gr.CurGameInfo.GamePlayers)),
 		}
 		// 插入一条房间记录
@@ -144,17 +142,14 @@ func AddGameRecord(gr *WirteRecord) (err error) {
 	//构建玩家信息
 	for _, v := range gr.CurGameInfo.GamePlayers {
 		rgd.GamePlayers = append(rgd.GamePlayers, &RoomPlayerInfo{ //单局记录
-			UserId:  v.UserId,
-			Score:   v.Score,
-			ChairId: v.ChairId,
+			UserId:   v.UserId,
+			Score:    v.Score,
+			PreScore: v.PreScore,
 		})
 
 		rrd.GamePlayers = append(rrd.GamePlayers, &RoomPlayerInfo{ //玩家总分
-			UserId:     v.UserId,
-			Name:       v.Name,
-			ChairId:    v.ChairId,
-			TotalScore: v.TotalScore,
-			Profile:    v.Profile,
+			UserId:   v.UserId,
+			PreScore: v.PreScore,
 		})
 	}
 	//更新每局记录id和总分详情
@@ -194,7 +189,6 @@ func AddClubCurrDayStatistics(gr *WirteRecord) (err error) {
 		} else {
 			csd.UserSD[v.UserId] = &UserStatisticsData{
 				UserId:             v.UserId,
-				Name:               v.Name,
 				StatisticsPlay:     1,
 				StatisticsIntegral: int64(v.Score),
 			}
@@ -231,7 +225,7 @@ func AddClubIntegralStatistics(clubs *ClubStatisticsData) (err error) {
 func QueryUserRoomRecord(uid uint64, start, end int64, _curPage, _limit int32) (rsp []*RoomRecord, err error) {
 	var curPage, limit = int(_curPage), int(_limit)
 	if limit == 0 {
-		curPage, limit = 1, 30
+		limit = 30
 	}
 	rsp = make([]*RoomRecord, 0)
 	err = mgoSess.DB("").C(RoomRecordTable).Find(bson.M{"gameplayers.userid": uid, "gamestarttime": bson.M{"$gte": start, "$lt": end}}).Skip(curPage * limit).Limit(limit).All(&rsp)
@@ -242,7 +236,7 @@ func QueryUserRoomRecord(uid uint64, start, end int64, _curPage, _limit int32) (
 func QueryClubRoomRecord(clubid, start, end int64, _curPage, _limit int32) (rsp []*RoomRecord, err error) {
 	var curPage, limit = int(_curPage), int(_limit)
 	if limit == 0 {
-		curPage, limit = 1, 30
+		limit = 30
 	}
 	rsp = make([]*RoomRecord, 0)
 	err = mgoSess.DB("").C(RoomRecordTable).Find(bson.M{"clubid": clubid, "gamestarttime": bson.M{"$gte": start, "$lt": end}}).Skip(curPage * limit).Limit(limit).All(&rsp)
@@ -256,7 +250,7 @@ func QueryClubRoomRecord(clubid, start, end int64, _curPage, _limit int32) (rsp 
 func QueryClubRoomRecordByRoom(clubid int64, deskid uint64, _curPage, _limit int32) (rsp []*RoomRecord, err error) {
 	var curPage, limit = int(_curPage), int(_limit)
 	if limit == 0 {
-		curPage, limit = 1, 30
+		limit = 30
 	}
 	rsp = []*RoomRecord{}
 	err = mgoSess.DB("").C(RoomRecordTable).Find(bson.M{"clubid": clubid, "deskid": deskid}).Skip(curPage * limit).Limit(limit).All(&rsp)
