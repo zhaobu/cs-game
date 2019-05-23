@@ -577,8 +577,8 @@ func (self *GameSink) outCard(chairId, card int32) error {
 	}
 	//出牌前检测是否还有其可执行的操作没有完成
 	if !self.canOperInfo[chairId].Empty() {
-		log.Errorf("%s 出牌失败,还有其他操作，先取消", self.logHeadUser(chairId))
-		return nil
+		log.Infof("%s 出牌时还有其他操作，取消所有能做的操作", self.logHeadUser(chairId))
+		self.resetOper()
 	}
 	cardInfo := &self.players[chairId].CardInfo
 	//判断是否有这张牌
@@ -694,6 +694,7 @@ func (self *GameSink) shuffle_cards() {
 //返回1表示能直接进行该操作,返回2表示还需要等待,返回3表示需要唤醒等待中的操作
 func (self *GameSink) checkPlayerOperationNeedWait(chairId int32, curOrder PriorityOrder) int {
 	var otherOrder, waitOrder PriorityOrder = NoneOrder, NoneOrder
+	log.Debugf("self.operOrder=%v", self.operOrder)
 	//检查其他人能做的最高优先级操作
 	for i := HuOrder; i >= ChiOrder; i-- {
 		if curOper, ok := self.operOrder[i]; ok {

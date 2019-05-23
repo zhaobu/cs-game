@@ -143,12 +143,14 @@ func AddGameRecord(gr *WirteRecord) (err error) {
 	for _, v := range gr.CurGameInfo.GamePlayers {
 		rgd.GamePlayers = append(rgd.GamePlayers, &RoomPlayerInfo{ //单局记录
 			UserId:   v.UserId,
+			Name:     v.Name,
 			Score:    v.Score,
 			PreScore: v.PreScore,
 		})
 
 		rrd.GamePlayers = append(rrd.GamePlayers, &RoomPlayerInfo{ //玩家总分
 			UserId:   v.UserId,
+			Name:     v.Name,
 			PreScore: v.PreScore,
 		})
 	}

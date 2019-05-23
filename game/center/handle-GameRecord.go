@@ -6,6 +6,7 @@ import (
 	"cy/game/db/mgo"
 	pbcommon "cy/game/pb/common"
 	pbgamerecord "cy/game/pb/gamerecord"
+	"cy/game/util"
 	sort "cy/game/util/tools/Sort"
 	"fmt"
 	"sync"
@@ -51,7 +52,7 @@ func (p *center) QueryRoomRecordReq(ctx context.Context, args *codec.Message, re
 		tlog.Error(err.Error())
 		return err
 	}
-	log.Debugf("QueryRoomRecordReq请求参数:req:%v", req)
+	log.Debugf("QueryRoomRecordReq请求参数:req:%s", util.PB2JSON(req, true))
 	rsp := &pbgamerecord.QueryRoomRecordRsp{
 		Error: 0,
 	}
@@ -97,6 +98,7 @@ func (p *center) QueryRoomRecordReq(ctx context.Context, args *codec.Message, re
 		for _, v1 := range v.GamePlayers {
 			_data.GamePlayers = append(_data.GamePlayers, &pbgamerecord.RoomPlayerInfo{
 				UserId:     v1.UserId,
+				Name:       v1.Name,
 				TotalScore: v1.PreScore,
 			})
 		}
@@ -106,7 +108,7 @@ func (p *center) QueryRoomRecordReq(ctx context.Context, args *codec.Message, re
 	if err != nil {
 		tlog.Error("消息封装失败", zap.Error(err))
 	}
-	log.Debugf("QueryRoomRecordReq请求结果:rsp:%v", rsp)
+	log.Debugf("QueryRoomRecordReq请求结果:rsp:%s", util.PB2JSON(rsp, true))
 	return err
 }
 
@@ -129,7 +131,7 @@ func (p *center) QueryGameRecordReq(ctx context.Context, args *codec.Message, re
 	if req.Head != nil {
 		rsp.Head = &pbcommon.RspHead{Seq: req.Head.Seq}
 	}
-	log.Debugf("QueryGameRecordReq请求参数req:%v", req)
+	log.Debugf("QueryGameRecordReq请求参数req:%s", util.PB2JSON(req, true))
 	querydata := []*mgo.GameRecord{}
 	if querydata, err = mgo.QueryGameRecord(req.RoomRecordId); err != nil {
 		tlog.Error("查询用户数据失败 err = " + err.Error())
@@ -148,6 +150,7 @@ func (p *center) QueryGameRecordReq(ctx context.Context, args *codec.Message, re
 		for _, v1 := range v.GamePlayers {
 			_data.GamePlayers = append(_data.GamePlayers, &pbgamerecord.GamePlayerInfo{
 				UserId:   v1.UserId,
+				Name:     v1.Name,
 				Score:    v1.Score,
 				PreScore: v1.PreScore,
 			})
@@ -158,7 +161,7 @@ func (p *center) QueryGameRecordReq(ctx context.Context, args *codec.Message, re
 	if err = codec.Pb2Msg(rsp, reply); err != nil {
 		tlog.Error("消息封装失败", zap.Error(err))
 	}
-	log.Debugf("QueryGameRecordReq请求结果:rsp:%v", rsp)
+	log.Debugf("QueryGameRecordReq请求结果:rsp:%s", util.PB2JSON(rsp, true))
 	return err
 }
 
@@ -179,7 +182,7 @@ func (p *center) QueryGameRePlaydReq(ctx context.Context, args *codec.Message, r
 	if req.Head != nil {
 		rsp.Head = &pbcommon.RspHead{Seq: req.Head.Seq}
 	}
-	log.Debugf("QueryGameRePlayRecord请求参数:req:%v", req)
+	log.Debugf("QueryGameRePlayRecord请求参数:req:%s", util.PB2JSON(req, true))
 	querydata := &mgo.GameRecord{}
 	if querydata, err = mgo.QueryGameRePlayRecord(req.GameRecordId); err != nil {
 		tlog.Warn("查询复盘数据失败 err = " + err.Error())
@@ -194,7 +197,7 @@ func (p *center) QueryGameRePlaydReq(ctx context.Context, args *codec.Message, r
 	if err != nil {
 		tlog.Error("消息封装失败", zap.Error(err))
 	}
-	log.Debugf("QueryGameRePlayRecord请求结果:rsp:%v", rsp)
+	log.Debugf("QueryGameRePlayRecord请求结果:rsp:%s", util.PB2JSON(rsp, true))
 	return err
 }
 

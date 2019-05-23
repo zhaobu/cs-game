@@ -24,6 +24,7 @@ message QueryRoomRecordReq {
 }
 message RoomPlayerInfo {
   uint64 UserId = 1;     //用户Id
+  string Name = 2;       //用户名
   int32 TotalScore = 3;  //输赢积分 房间内的统计数据
 }
 
@@ -57,8 +58,9 @@ message QueryGameRecordReq {
 
 message GamePlayerInfo {
   uint64 UserId = 1;   //用户Id
-  int32 Score = 2;     //输赢积分
-  int32 PreScore = 3;  //前几局累积总分
+  string Name = 2;     //用户名
+  int32 Score = 3;     //输赢积分
+  int32 PreScore = 4;  //前几局累积总分
 }
 
 //游戏单局记录
