@@ -53,11 +53,11 @@ func (p *club) AckClubEmailReq(ctx context.Context, args *codec.Message, reply *
 
 	switch e.Typ {
 	case emailTypJoinClub:
-		rsp.Code = ackJoin(e, req.Agree)
+		rsp.Code = ackJoin(e, req)
 	case emailTypInviteJoinClub:
-		rsp.Code = ackInviteJoin(e, req.Agree)
+		rsp.Code = ackInviteJoin(e, req)
 	case emailTypTransferMaster:
-		rsp.Code = ackTransferMaster(e, req.Agree)
+		rsp.Code = ackTransferMaster(e, req)
 	default:
 		rsp.Code = 4
 		return
@@ -67,11 +67,11 @@ func (p *club) AckClubEmailReq(ctx context.Context, args *codec.Message, reply *
 	return
 }
 
-func ackJoin(e *mgo.ClubEmail, agree bool) int32 {
+func ackJoin(e *mgo.ClubEmail, req *pbclub.AckClubEmailReq) int32 {
 	joinUID := e.UserID1
 	joinClubID := e.ClubID
 
-	if agree {
+	if req.Agree {
 		cc := getClub(joinClubID)
 		if cc == nil {
 			return 5
@@ -98,7 +98,7 @@ func ackJoin(e *mgo.ClubEmail, agree bool) int32 {
 		ClubID:   joinClubID,
 		UserID1:  joinUID,
 	}
-	if agree {
+	if req.Agree {
 		ce.Content = fmt.Sprintf(`您成功加入俱乐部[%d]`, joinClubID)
 	} else {
 		ce.Content = fmt.Sprintf(`您被拒绝加入俱乐部[%d]`, joinClubID)
@@ -106,15 +106,23 @@ func ackJoin(e *mgo.ClubEmail, agree bool) int32 {
 	mgo.AddClubEmail(ce, joinUID) // 发送给申请人
 	sendClubEmail(ce, joinUID)
 
+
+	if req.Agree {
+		ce.Content = fmt.Sprintf(`您同意[%d]加入俱乐部[%d]`,joinUID,joinClubID)
+	} else {
+		ce.Content = fmt.Sprintf(`您拒绝[%d]加入俱乐部[%d]`,joinUID,joinClubID)
+	}
+	mgo.AddClubEmail(ce, req.Head.UserID) // 发送给操作用户
+	sendClubEmail(ce, req.Head.UserID)
 	return 1
 }
 
-func ackInviteJoin(e *mgo.ClubEmail, agree bool) int32 {
+func ackInviteJoin(e *mgo.ClubEmail, req *pbclub.AckClubEmailReq) int32 {
 	inviter := e.UserID1
 	invitee := e.UserID2
 	joinClubID := e.ClubID
 
-	if agree {
+	if req.Agree {
 		cc := getClub(joinClubID)
 		if cc == nil {
 			return 5
@@ -140,7 +148,7 @@ func ackInviteJoin(e *mgo.ClubEmail, agree bool) int32 {
 		ClubID:   joinClubID,
 		UserID1:  inviter,
 	}
-	if agree {
+	if req.Agree {
 		ce.Content = fmt.Sprintf(`玩家[%d]同意加入俱乐部[%d]`, invitee, joinClubID)
 	} else {
 		ce.Content = fmt.Sprintf(`玩家[%d]拒绝加入俱乐部[%d]`, invitee, joinClubID)
@@ -151,12 +159,12 @@ func ackInviteJoin(e *mgo.ClubEmail, agree bool) int32 {
 	return 1
 }
 
-func ackTransferMaster(e *mgo.ClubEmail, agree bool) int32 {
+func ackTransferMaster(e *mgo.ClubEmail, req *pbclub.AckClubEmailReq) int32 {
 	oldMaster := e.UserID1
 	newMaster := e.UserID2
 	clubID := e.ClubID
 
-	if agree {
+	if req.Agree {
 		cc := getClub(clubID)
 		if cc == nil {
 			return 5
@@ -193,7 +201,7 @@ func ackTransferMaster(e *mgo.ClubEmail, agree bool) int32 {
 		ClubID:   clubID,
 		UserID1:  oldMaster,
 	}
-	if agree {
+	if req.Agree {
 		ce.Content = fmt.Sprintf(`玩家[%d]同意成为俱乐部[%d]群主`, newMaster, clubID)
 	} else {
 		ce.Content = fmt.Sprintf(`玩家[%d]拒绝成为俱乐部[%d]群主`, newMaster, clubID)

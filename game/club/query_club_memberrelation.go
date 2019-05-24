@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"cy/game/codec"
+	"cy/game/db/mgo"
 	pbclub "cy/game/pb/club"
 	pbcommon "cy/game/pb/common"
 	"fmt"
@@ -36,6 +37,8 @@ func (p *club) QueryClubMemberRelationReq(ctx context.Context, args *codec.Messa
 	}()
 
 	cc := getClub(req.ClubID)
+	cc.RLock()
+	defer cc.RUnlock()
 	if cc == nil {	//俱乐部不存在
 		rsp.Code = 2
 		return
@@ -49,7 +52,6 @@ func (p *club) QueryClubMemberRelationReq(ctx context.Context, args *codec.Messa
 		rsp.Code = 3
 		return
 	}
-	cc.RLock()
 	if mber,ok:=cc.Members[req.UserID];!ok{
 		rsp.Code = 4
 		return
@@ -67,7 +69,6 @@ func (p *club) QueryClubMemberRelationReq(ctx context.Context, args *codec.Messa
 			cu.RUnlock()
 		}
 	}
-	cc.RUnlock()
 	rsp.Code = 1
 	return
 }
@@ -99,6 +100,9 @@ func (p *club)AddClubMemberRelationReq(ctx context.Context, args *codec.Message,
 	}()
 
 	cc := getClub(req.ClubID)
+	cc.Lock()
+	defer cc.Unlock()
+	defer mgo.SaveClub(cc.Club)			//保存俱乐部数据
 	if cc == nil {	//俱乐部不存在
 		rsp.Code = 2
 		return
@@ -168,6 +172,9 @@ func (p *club)RemoveClubMemberRelationReq(ctx context.Context, args *codec.Messa
 	}()
 
 	cc := getClub(req.ClubID)
+	cc.Lock()
+	defer cc.Unlock()
+	defer mgo.SaveClub(cc.Club)			//保存俱乐部数据
 	if cc == nil {	//俱乐部不存在
 		rsp.Code = 2
 		return
