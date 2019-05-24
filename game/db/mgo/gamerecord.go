@@ -230,7 +230,8 @@ func QueryUserRoomRecord(uid uint64, start, end int64, _curPage, _limit int32) (
 		limit = 30
 	}
 	rsp = make([]*RoomRecord, 0)
-	err = mgoSess.DB("").C(RoomRecordTable).Find(bson.M{"gameplayers.userid": uid, "gamestarttime": bson.M{"$gte": start, "$lt": end}}).Skip(curPage * limit).Limit(limit).All(&rsp)
+	query := bson.M{"gameplayers.userid": uid, "gamestarttime": bson.M{"$gte": start, "$lt": end}}
+	err = mgoSess.DB("").C(RoomRecordTable).Find(query).Sort("-gamestarttime").Skip(curPage * limit).Limit(limit).All(&rsp)
 	return
 }
 
@@ -241,7 +242,8 @@ func QueryClubRoomRecord(clubid, start, end int64, _curPage, _limit int32) (rsp 
 		limit = 30
 	}
 	rsp = make([]*RoomRecord, 0)
-	err = mgoSess.DB("").C(RoomRecordTable).Find(bson.M{"clubid": clubid, "gamestarttime": bson.M{"$gte": start, "$lt": end}}).Skip(curPage * limit).Limit(limit).All(&rsp)
+	query := bson.M{"clubid": clubid, "gamestarttime": bson.M{"$gte": start, "$lt": end}}
+	err = mgoSess.DB("").C(RoomRecordTable).Find(query).Sort("-gamestarttime").Skip(curPage * limit).Limit(limit).All(&rsp)
 	if err != nil {
 		return
 	}
@@ -255,7 +257,8 @@ func QueryClubRoomRecordByRoom(clubid int64, deskid uint64, _curPage, _limit int
 		limit = 30
 	}
 	rsp = []*RoomRecord{}
-	err = mgoSess.DB("").C(RoomRecordTable).Find(bson.M{"clubid": clubid, "deskid": deskid}).Skip(curPage * limit).Limit(limit).All(&rsp)
+	query := bson.M{"clubid": clubid, "deskid": deskid}
+	err = mgoSess.DB("").C(RoomRecordTable).Find(query).Sort("-gamestarttime").Skip(curPage * limit).Limit(limit).All(&rsp)
 	if err != nil {
 		return
 	}
