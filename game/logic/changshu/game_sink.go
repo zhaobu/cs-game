@@ -988,7 +988,7 @@ func (self *GameSink) gangCard(chairId, card int32) error {
 
 //胡
 func (self *GameSink) huCard(chairId int32) error {
-	log.Debugf("%s,胡牌操作,card=%d", self.logHeadUser(chairId))
+	log.Debugf("%s,胡牌操作", self.logHeadUser(chairId))
 	//检查是否在游戏中
 	if !self.isPlaying {
 		log.Errorf("%s 胡牌失败,不在游戏中", self.logHeadUser(chairId))
