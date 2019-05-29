@@ -195,6 +195,7 @@ message S2CStartGame {
 message Json_FirstBuHua {
   repeated int32 hua_cards = 1;  //所有的花牌(包括手牌原有的花和补到的花)
   repeated int32 mo_cards = 2;  //摸到的所有牌
+  int32 mo_count = 3;           //总共摸牌的次数
 }
 
 //玩家摸牌

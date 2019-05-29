@@ -341,71 +341,6 @@ func switchToCyint32(cards []int32) []*pbgame_logic.Cyint32 {
 	return res
 }
 
-//玩家第一次补花,返回所有的花牌
-// func (self *GameSink) firstBuHuaCards(chairId int32) []int32 {
-// 	cardInfo := &self.players[chairId].CardInfo
-// 	tlog.Debug("庄家补花前手牌数据为", zap.Any("cardInfo", cardInfo))
-// 	leftCard := self.leftCard
-// 	huaIndex := make(map[int32]int32) //下次要补的花牌
-
-// 	huaCards := []int32{} //所有的花牌
-// 	//补掉一张花牌
-// 	operOnce := func(card int32) int32 {
-// 		//减一张花牌
-// 		self.operAction.updateCardInfo(cardInfo, nil, []int32{card})
-// 		//从牌库摸一张牌
-// 		moCard := leftCard[len(leftCard)-1]
-// 		self.leftCard = self.leftCard[:len(leftCard)-1]
-// 		tlog.Debug("补花", zap.Int32("huaCard", card), zap.Int32("moCard", moCard))
-// 		//摸的牌加到手牌
-// 		self.operAction.updateCardInfo(cardInfo, []int32{moCard}, nil)
-// 		//记录到消息
-// 		huaCards = append(huaCards, card)
-// 		if mj.IsHuaCard(moCard) {
-// 			mj.Add_stack(huaIndex, moCard)
-// 		}
-// 		return moCard
-// 	}
-
-// 	//先遍历一次所有花牌
-// 	for huaCard := int32(51); huaCard <= 59; huaCard++ {
-// 		//遇到一张花牌,补一张
-// 		if huaCount, ok := cardInfo.StackCards[huaCard]; ok {
-// 			for j := int32(0); j < huaCount; j++ {
-// 				operOnce(huaCard)
-// 			}
-// 		}
-// 	}
-
-// 	//再从第一次结果补花
-// 	if len(huaIndex) > 0 {
-// 		bFin := true //补花结束
-// 		num := 0
-// 		for {
-// 			//遍历所有
-// 			for huaCard, huaCount := range huaIndex {
-// 				for j := int32(0); j < huaCount; j++ {
-// 					if mj.IsHuaCard(operOnce(huaCard)) {
-// 						bFin = false
-// 					}
-// 					//补一张减一张
-// 					mj.Sub_stack(huaIndex, huaCard)
-// 				}
-// 			}
-// 			if bFin {
-// 				break
-// 			}
-// 			num++
-// 			if num >= 12 {
-// 				log.Errorf("补花死循环")
-// 				return nil
-// 			}
-// 		}
-// 	}
-// 	tlog.Debug("庄家补花后手牌数据为", zap.Any("cardInfo", cardInfo))
-// 	return huaCards
-// }
-
 //玩家第一次补花,返回所有的花牌,所有摸到的牌
 func (self *GameSink) firstBuHuaCards(chairId int32) (huaCards, moCards []int32) {
 	if self.hasFirstBuHua[chairId] {
@@ -475,27 +410,29 @@ func (self *GameSink) drawCard(chairId, last int32) error {
 
 	msg := &pbgame_logic.BS2CDrawCard{ChairId: chairId}
 	var huaCards, moCards []int32
-
+	var moCount int //总共摸牌的次数
 	tlog.Debug("玩家摸牌前手牌数据为", zap.Int32("chairId", chairId), zap.Any("cardInfo", self.players[chairId].CardInfo))
 	if !self.hasFirstBuHua[chairId] { //没有进行过第一次补花,先补掉手上的牌
 		if mj.GetHuaCount(self.players[chairId].CardInfo.StackCards) > 0 {
 			log.Debugf("%s 第一次摸牌,需要补花,补花前剩余[%d]张", self.logHeadUser(chairId), len(self.leftCard))
 			huaCards, moCards = self.firstBuHuaCards(chairId)
+			moCount += len(huaCards)
 		}
 		self.hasFirstBuHua[chairId] = true
 	}
 	huaCards2, moCards2 := self.drawOneCard(chairId)
+	moCount += len(huaCards2) + len(moCards2)
 	huaCards, moCards = append(huaCards, huaCards2...), append(moCards, moCards2...)
 
 	msg.LeftNum = int32(len(self.leftCard))
 	card := moCards[len(moCards)-1] //最后摸到的牌
 	//发送自己
-	msg.JsonDrawInfo = util.PB2JSON(&pbgame_logic.Json_FirstBuHua{HuaCards: huaCards, MoCards: moCards}, false)
+	msg.JsonDrawInfo = util.PB2JSON(&pbgame_logic.Json_FirstBuHua{HuaCards: huaCards, MoCards: moCards, MoCount: int32(moCount)}, false)
 	self.sendData(chairId, msg)
 	//游戏回放记录
 	self.record.RecordGameAction(msg)
 	//发送别人
-	msg.JsonDrawInfo = util.PB2JSON(&pbgame_logic.Json_FirstBuHua{HuaCards: huaCards, MoCards: make([]int32, len(moCards))}, false)
+	msg.JsonDrawInfo = util.PB2JSON(&pbgame_logic.Json_FirstBuHua{HuaCards: huaCards, MoCards: make([]int32, len(moCards)), MoCount: int32(moCount)}, false)
 	self.sendDataOther(chairId, msg)
 
 	cardInfo := &self.players[chairId].CardInfo
@@ -539,12 +476,12 @@ func (self *GameSink) checkAfterChiPeng(chairId int32) {
 			self.operAction.HandleBuHua(self.players[chairId], huaCards)
 			msg := &pbgame_logic.BS2CFirstBuHua{ChairId: chairId, LeftNum: int32(len(self.leftCard))}
 			//发给自己
-			msg.JsonFirstBuhua = util.PB2JSON(&pbgame_logic.Json_FirstBuHua{HuaCards: huaCards, MoCards: moCards}, false)
+			msg.JsonFirstBuhua = util.PB2JSON(&pbgame_logic.Json_FirstBuHua{HuaCards: huaCards, MoCards: moCards, MoCount: int32(len(huaCards))}, false)
 			self.sendData(chairId, msg)
 			//游戏回放记录
 			self.record.RecordGameAction(msg)
 			//发给别人
-			msg.JsonFirstBuhua = util.PB2JSON(&pbgame_logic.Json_FirstBuHua{HuaCards: huaCards, MoCards: make([]int32, len(moCards))}, false)
+			msg.JsonFirstBuhua = util.PB2JSON(&pbgame_logic.Json_FirstBuHua{HuaCards: huaCards, MoCards: make([]int32, len(moCards)), MoCount: int32(len(huaCards))}, false)
 			self.sendDataOther(chairId, msg)
 		}
 	}
