@@ -750,7 +750,7 @@ func (self *GameSink) chiCard(chairId, card int32, chiType uint32) error {
 		return nil
 	}
 	//更新玩家card_info表
-	self.operAction.HandleChiCard(&self.players[chairId].CardInfo, &self.players[self.lastOutChair].CardInfo, card, chiType)
+	self.operAction.HandleChiCard(&self.players[chairId].CardInfo, &self.players[self.lastOutChair].CardInfo, card, self.lastOutChair, chiType)
 	//回放记录
 
 	//变量维护

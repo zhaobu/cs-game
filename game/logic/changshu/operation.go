@@ -326,7 +326,7 @@ func (self *OperAtion) HandleOutCard(cardInfo *mj.PlayerCardInfo, card int32) {
 }
 
 //处理吃牌(cardInfo为吃牌玩家,loseCardInfo为出牌玩家)
-func (self *OperAtion) HandleChiCard(cardInfo *mj.PlayerCardInfo, loseCardInfo *mj.PlayerCardInfo, card int32, chiType uint32) {
+func (self *OperAtion) HandleChiCard(cardInfo *mj.PlayerCardInfo, loseCardInfo *mj.PlayerCardInfo, card, loseChair int32, chiType uint32) {
 	eatGroup := [3]int32{}
 	var operType pbgame_logic.OperType
 	//根据吃牌类型生成组合
@@ -342,7 +342,7 @@ func (self *OperAtion) HandleChiCard(cardInfo *mj.PlayerCardInfo, loseCardInfo *
 	}
 	self.updateCardInfo(cardInfo, nil, eatGroup[1:])
 	cardInfo.ChiCards = append(cardInfo.ChiCards, eatGroup)
-	cardInfo.RiverCards = append(cardInfo.RiverCards, &pbgame_logic.OperRecord{Type: operType, Card: card, LoseChair: -1})
+	cardInfo.RiverCards = append(cardInfo.RiverCards, &pbgame_logic.OperRecord{Type: operType, Card: card, LoseChair: loseChair})
 
 	//处理出牌玩家,把牌从出过的牌中拿走
 	loseCardInfo.OutCards, _ = mj.RemoveCard(loseCardInfo.OutCards, card, false)
