@@ -397,7 +397,7 @@ func (self *GameSink) resetOper() {
 	self.operOrder = map[PriorityOrder][]*OperPriority{}
 }
 
-//摸牌 last(-1杠后摸牌 1第一次摸牌 0正常摸牌)
+//摸牌 last(0从牌尾摸,1从牌前摸)
 func (self *GameSink) drawCard(chairId, last int32) error {
 	log.Debugf("%s,摸牌操作,last=%d", self.logHeadUser(chairId), last)
 	//检查游戏是否结束
@@ -408,7 +408,7 @@ func (self *GameSink) drawCard(chairId, last int32) error {
 
 	self.resetOper()
 
-	msg := &pbgame_logic.BS2CDrawCard{ChairId: chairId}
+	msg := &pbgame_logic.BS2CDrawCard{ChairId: chairId, DrawPos: last}
 	var huaCards, moCards []int32
 	var moCount int //总共摸牌的次数
 	tlog.Debug("玩家摸牌前手牌数据为", zap.Int32("chairId", chairId), zap.Any("cardInfo", self.players[chairId].CardInfo))
@@ -919,7 +919,7 @@ func (self *GameSink) gangCard(chairId, card int32) error {
 	self.haswaitOper[chairId] = false
 	self.resetOper()
 
-	self.drawCard(chairId, -1)
+	self.drawCard(chairId, 1)
 	return nil
 }
 
