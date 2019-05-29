@@ -202,7 +202,7 @@ message Json_FirstBuHua {
 message BS2CDrawCard {
   int32 chair_id = 1;         //摸牌玩家
   int32 left_num = 2;         //剩余张数
-  int32 draw_pos = 3;         // 0从牌尾摸,1从牌前摸
+  int32 draw_pos = 3;         // 0从牌前摸,1从摸牌尾
   string json_draw_info = 4;  //摸牌信息(按Json_FirstBuHua格式解析)
 }
 
