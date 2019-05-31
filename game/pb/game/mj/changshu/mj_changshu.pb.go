@@ -565,7 +565,7 @@ type CreateArgTpl struct {
 	Dipiao []*CyU32String `protobuf:"bytes,4,rep,name=Dipiao,proto3" json:"Dipiao,omitempty"`
 	// 局数
 	RInfo []*RoundInfo `protobuf:"bytes,5,rep,name=RInfo,proto3" json:"RInfo,omitempty"`
-	// 支付方式 1 个人支付 2 AA支付
+	// 支付方式 1 房主支付 2 AA支付
 	PaymentType []*CyU32String `protobuf:"bytes,6,rep,name=PaymentType,proto3" json:"PaymentType,omitempty"`
 	// 语音 1 普通场 2 语音场
 	Voice []*CyU32String `protobuf:"bytes,7,rep,name=Voice,proto3" json:"Voice,omitempty"`

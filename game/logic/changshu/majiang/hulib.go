@@ -3,6 +3,7 @@ package majiang
 //封装胡牌算法
 import (
 	mjhulib "cy/game/common/mjhulib"
+	pbgame_logic "cy/game/pb/game/mj/changshu"
 )
 
 var (
@@ -82,6 +83,11 @@ func (self *HuLib) ziYiSe(allColor map[int32]bool) bool {
 
 //门清
 func (self *HuLib) menQing(cardInfo *PlayerCardInfo) bool {
+	for _, v := range cardInfo.GangCards {
+		if v != pbgame_logic.OperType_Oper_AN_GANG { //只有暗杠才算门清
+			return false
+		}
+	}
 	return len(cardInfo.ChiCards)+len(cardInfo.PengCards) == 0
 }
 

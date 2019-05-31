@@ -27,13 +27,12 @@ func checkArg(req *pbgame.MakeDeskReq) (*pbgame_logic.CreateArg, error) {
 
 func calcFee(arg *pbgame_logic.CreateArg) int64 {
 	change := int64(0)
-	// 支付方式 1 个人支付 2 平局支付
+	// 支付方式 1 房主支付 2 AA支付
 	if arg.PaymentType == 1 {
 		change = int64(arg.RInfo.Fee)
 	} else if arg.PaymentType == 2 {
 		change = int64(arg.RInfo.Fee / uint32(arg.PlayerCount))
 	}
-	change = 0
 	return change
 }
 
@@ -149,13 +148,33 @@ func (self *roomHandle) HandleSitDownReq(uid uint64, req *pbgame.SitDownReq, rsp
 		rsp.ErrMsg = fmt.Sprintf("user%d not in desk", uid)
 		return
 	}
+	//如果是俱乐部房间,检查权限
+	if d.clubId != 0 {
+		rspCode := mgo.CheckSitDownClubRoom(uid, d.clubId, nil)
+		if rspCode != 0 {
+			switch rspCode {
+			case 1:
+				rsp.Code = pbgame.SitDownRspCode_SitDownClubNotExist
+				rsp.ErrMsg = fmt.Sprintf("roomHandle Desk %d,俱乐部不存在 ", d.deskId)
+			case 2:
+				rsp.Code = pbgame.SitDownRspCode_SitDownNotInClub
+				rsp.ErrMsg = fmt.Sprintf("roomHandle Desk %d,玩家不是俱乐部成员 ", d.deskId)
+			case 3:
+				rsp.Code = pbgame.SitDownRspCode_SitDownCanNotSitClubDesk
+				rsp.ErrMsg = fmt.Sprintf("roomHandle Desk %d,玩家无权加入房间 ", d.deskId)
+			case 4:
+				rsp.Code = pbgame.SitDownRspCode_SitDownClubHaveReleation
+				rsp.ErrMsg = fmt.Sprintf("roomHandle Desk %d,加入俱乐部时有亲属关系 ", d.deskId)
+			}
+			return
+		}
+	}
 	//检查玩家是否存在桌子信息
 	if _, ok := d.deskPlayers[uid]; !ok {
 		rsp.Code = pbgame.SitDownRspCode_SitDownNotInDesk
 		rsp.ErrMsg = fmt.Sprintf("user%d in desk,but has no deskinfo", uid)
 		return
 	}
-	//TODO距离限制
 	d.doSitDown(uid, req.ChairId, rsp)
 	return
 }
@@ -218,14 +237,14 @@ func (self *roomHandle) HandleQueryDeskInfoReq(uid uint64, req *pbgame.QueryDesk
 	return
 }
 
-func (self *roomHandle) RunLongTime(deskID uint64, typ int) bool {
-	d := getDeskByID(deskID)
-	if d == nil {
-		return false
-	}
+// func (self *roomHandle) RunLongTime(deskID uint64, typ int) bool {
+// 	d := getDeskByID(deskID)
+// 	if d == nil {
+// 		return false
+// 	}
 
-	deleteID2desk(deskID)
-	// deleteUser2desk()
+// 	deleteID2desk(deskID)
+// 	// deleteUser2desk()
 
-	return true
-}
+// 	return true
+// }

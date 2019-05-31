@@ -62,6 +62,11 @@ func makeDesk(deskArg *pbgame_logic.DeskArg, masterUid, deskID uint64, clubID in
 	d.playChair = make(map[int32]*deskUserInfo)
 	d.deskPlayers = make(map[uint64]*deskUserInfo)
 	d.timerManger = make(map[mj.EmtimerID]*timingwheel.Timer)
+	d.set_timer(mj.TID_LongTime, 30*time.Minute, func() {
+		if d.curInning == 0 {
+			d.dealDestroyDesk(pbgame.DestroyDeskType_DestroyTypeTimeOut)
+		}
+	})
 	return d
 }
 
@@ -129,6 +134,17 @@ func (d *Desk) doJoin(uid uint64, rsp *pbgame.JoinDeskRsp) {
 //坐下后由观察者变为游戏玩家
 func (d *Desk) doSitDown(uid uint64, chair int32, rsp *pbgame.SitDownRsp) {
 	tlog.Info("玩家doSitDown坐下准备", zap.Uint64("uid", uid), zap.Uint64("deksId", d.deskId))
+	// 距离判断 新加入的和每个已加入的玩家比较 <?的才能加入
+	if d.deskConfig.Args.LimitIP == 3 {
+		for _, v := range d.playChair {
+			info := v.info
+			if util.DistanceGeo(info.Latitude, info.Longitude, v.info.Latitude, v.info.Longitude) < 500.00 {
+				rsp.Code = pbgame.SitDownRspCode_SitDownDistanceSoClose
+				tlog.Info("玩家doSitDown坐下准备时距离限制,不允许坐下", zap.Uint64("uid", uid), zap.Uint64("deksId", d.deskId))
+				return
+			}
+		}
+	}
 	//检查是否已经准备好
 	dUserInfo := d.deskPlayers[uid]
 	//检查是否重复坐下
@@ -147,11 +163,12 @@ func (d *Desk) doSitDown(uid uint64, chair int32, rsp *pbgame.SitDownRsp) {
 	//检查钱是否够
 	fee := calcFee(d.deskConfig.Args)
 	if fee != 0 {
-		_, err := mgo.UpdateWealthPre(uid, pbgame.FeeType_FTMasonry, fee)
-		if err != nil {
-			tlog.Error("err mgo.UpdateWealthPre()", zap.Error(err))
-			rsp.Code = pbgame.SitDownRspCode_SitDownNotEnoughMoney
-			return
+		if d.deskConfig.Args.PaymentType == 1 && uid == d.masterUid || d.deskConfig.Args.PaymentType == 2 {
+			if _, err := mgo.UpdateWealthPre(uid, pbgame.FeeType_FTMasonry, fee); err != nil {
+				tlog.Error("err mgo.UpdateWealthPre()", zap.Error(err))
+				rsp.Code = pbgame.SitDownRspCode_SitDownNotEnoughMoney
+				return
+			}
 		}
 	}
 	dUserInfo.chairId = chair
@@ -172,6 +189,9 @@ func (d *Desk) doSitDown(uid uint64, chair int32, rsp *pbgame.SitDownRsp) {
 		d.changUserState(0, pbgame.UserDeskStatus_UDSPlaying)
 		d.gameSink.changGameState(pbgame_logic.GameStatus_GSDice)
 		d.gameSink.StartGame()
+		d.set_timer(mj.TID_LongTime, 2*time.Hour, func() {
+			d.dealDestroyDesk(pbgame.DestroyDeskType_DestroyTypeTimeOut)
+		})
 	}
 	d.updateDeskInfo(2) //通知俱乐部更新桌子信息
 }
@@ -190,11 +210,6 @@ func (d *Desk) changUserState(uid uint64, uState pbgame.UserDeskStatus) {
 //起立后由玩家变为观察者
 func (d *Desk) doStandUp(chairId int32) pbgame.ExitDeskRspCode {
 	tlog.Info("玩家doStandUp起立", zap.Int32("chairId", chairId), zap.Uint64("uid", d.GetUidByChairid(chairId)), zap.Uint64("deksId", d.deskId))
-	// chairId := d.GetChairidByUid(uid)
-	// if chairId == -1 {
-	// 	tlog.Info("doStandUp时 非游戏玩家")
-	// 	return
-	// }
 	if d.curInning > 0 {
 		tlog.Info("doStandUp时 游戏已经开始")
 		return pbgame.ExitDeskRspCode_ExitDeskPlaying
@@ -296,6 +311,7 @@ func (d *Desk) getBaseDeskInfo() *pbgame_logic.GameDeskInfo {
 		userInfo.Info = user.info
 		userInfo.ChairId = chair
 		userInfo.UserStatus = user.userStatus
+		userInfo.Point = d
 		msg.GameUser = append(msg.GameUser, userInfo)
 	}
 	return msg
@@ -539,8 +555,10 @@ func (d *Desk) GetUidByChairid(chairId int32) uint64 {
 
 func (d *Desk) set_timer(tID mj.EmtimerID, dura time.Duration, f func()) {
 	exefun := func() {
-		f()
-		d.timerMangerDelete(tID) //闭包,删除已经执行过的定时器
+		if d != nil {
+			f()
+			d.timerMangerDelete(tID) //闭包,删除已经执行过的定时器
+		}
 	}
 	d.rmu.Lock()
 	d.timerManger[tID] = d.gameNode.Timer.AfterFunc(dura, exefun)

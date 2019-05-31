@@ -13,9 +13,10 @@ type (
 
 //定时器ID
 const (
-	TID_None    EmtimerID = iota
-	TID_Common            //通用定时器id,用于不需要取消的定时
-	TID_Destory           //解散桌子
+	TID_None     EmtimerID = iota
+	TID_Common             //通用定时器id,用于不需要取消的定时
+	TID_Destory            //解散桌子
+	TID_LongTime           //房间半小时未开始或者2小时未打完结束房间
 	// TID_DealCard                        //发牌
 	// TID_GameStartBuHua                  //开始补花
 )

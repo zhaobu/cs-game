@@ -65,7 +65,7 @@ func (self *RoomServie) Init(gameName, gameID string, _tlog *zap.Logger, redisAd
 	self.Timer = timingwheel.NewTimingWheel(time.Second, 60) //一个节点一个定时器
 	self.Timer.Start()
 	self.delInvalidDesk()
-	self.checkDeskLongTime()
+	// self.checkDeskLongTime()
 	go util.Subscribe(redisAddr, redisDb, "inner_broadcast", self.onMessage)
 }
 
@@ -216,40 +216,40 @@ func (self *RoomServie) delInvalidDesk() {
 	}
 }
 
-func (self *RoomServie) checkDeskLongTime() {
-	go func() {
-		time.Sleep(time.Minute * 5)
-		now := time.Now().UTC()
+// func (self *RoomServie) checkDeskLongTime() {
+// 	go func() {
+// 		time.Sleep(time.Minute * 5)
+// 		now := time.Now().UTC()
 
-		for _, key := range cache.SCAN("deskinfo:*", 50) {
-			var deskID uint64
-			fmt.Sscanf(key, "deskinfo:%d", &deskID)
-			deskInfo, err := cache.QueryDeskInfo(deskID)
-			if err != nil {
-				continue
-			}
+// 		for _, key := range cache.SCAN("deskinfo:*", 50) {
+// 			var deskID uint64
+// 			fmt.Sscanf(key, "deskinfo:%d", &deskID)
+// 			deskInfo, err := cache.QueryDeskInfo(deskID)
+// 			if err != nil {
+// 				continue
+// 			}
 
-			if deskInfo.GameName != self.GameName || deskInfo.GameID != self.GameID {
-				continue
-			}
+// 			if deskInfo.GameName != self.GameName || deskInfo.GameID != self.GameID {
+// 				continue
+// 			}
 
-			doneOk := false
-			du := now.Sub(time.Unix(deskInfo.CreateTime, 0)).Minutes()
+// 			doneOk := false
+// 			du := now.Sub(time.Unix(deskInfo.CreateTime, 0)).Minutes()
 
-			if du > (time.Minute * 60).Minutes() {
-				doneOk = self.roomHandle.RunLongTime(deskID, 2)
-			} else if du > (time.Minute*30).Minutes() && deskInfo.Status == "" {
-				doneOk = self.roomHandle.RunLongTime(deskID, 1)
-			}
+// 			if du > (time.Minute * 60).Minutes() {
+// 				doneOk = self.roomHandle.RunLongTime(deskID, 2)
+// 			} else if du > (time.Minute*30).Minutes() && deskInfo.Status == "" {
+// 				doneOk = self.roomHandle.RunLongTime(deskID, 1)
+// 			}
 
-			if doneOk {
-				cache.DeleteClubDeskRelation(deskID)
-				cache.DelDeskInfo(deskID)
-				cache.FreeDeskID(deskID)
-			}
-		}
-	}()
-}
+// 			if doneOk {
+// 				cache.DeleteClubDeskRelation(deskID)
+// 				cache.DelDeskInfo(deskID)
+// 				cache.FreeDeskID(deskID)
+// 			}
+// 		}
+// 	}()
+// }
 
 func (self *RoomServie) onMessage(channel string, data []byte) error {
 	m := &codec.Message{}
