@@ -63,13 +63,15 @@ enum MakeDeskRspCode {
   MakeDeskNotUse = 0;
   MakeDeskSucc = 1;
   MakeDeskArgsErr = 2;
-  MakeDeskNotEnoughMoney = 3;       // 财富不够
-  MakeDeskNotEnoughDesk = 4;        // 桌子不够
-  MakeDeskInternalServerError = 5;  //服务器内部错误
-  MakeDeskUserStatusErr = 6;        // 创建并进入游戏失败
-  MakeDeskCanNotFindClubID = 7;     // 无效的俱乐部ID
-  MakeDeskLimit = 8;                // 个数限制
-  MakeDeskAlreadyInDesk = 9;        //已经在桌子中
+  MakeDeskNotEnoughMoney = 3;         // 财富不够
+  MakeDeskNotEnoughDesk = 4;          // 桌子不够
+  MakeDeskInternalServerError = 5;    //服务器内部错误
+  MakeDeskUserStatusErr = 6;          // 创建并进入游戏失败
+  MakeDeskCanNotFindClubID = 7;       // 无效的俱乐部ID
+  MakeDeskLimit = 8;                  // 个数限制
+  MakeDeskAlreadyInDesk = 9;          //已经在桌子中
+  MakeDeskUserNotInClub = 10;         //玩家不在俱乐部中
+  MakeDeskCanNotCreateClubDesk = 11;  //玩家没权限创建俱乐部房间
 }
 message MakeDeskRsp {
   pbcommon.RspHead Head = 1;
@@ -111,12 +113,16 @@ message SitDownReq {
 //坐下准备code
 enum SitDownRspCode {
   SitDownNone = 0;
-  SitDownSucc = 1;             //坐下成功
-  SitDownNotInDesk = 2;        //不在桌子中
-  SitDownNotEmpty = 3;         //座位有人
-  SitDownDistanceSoClose = 4;  //距离限制不允许坐下
-  SitDownGameStatusErr = 5;    //桌子状态错误(比如重复准备)
-  SitDownNotEnoughMoney = 6;   //金钱不够
+  SitDownSucc = 1;                //坐下成功
+  SitDownNotInDesk = 2;           //不在桌子中
+  SitDownNotEmpty = 3;            //座位有人
+  SitDownDistanceSoClose = 4;     //距离限制不允许坐下
+  SitDownGameStatusErr = 5;       //桌子状态错误(比如重复准备)
+  SitDownNotEnoughMoney = 6;      //金钱不够
+  SitDownClubNotExist = 7;        //坐下俱乐部房间时俱乐部不存在
+  SitDownNotInClub = 8;           //玩家不是本俱乐部成员
+  SitDownCanNotSitClubDesk = 9;   //玩家无权坐下俱乐部房间
+  SitDownClubHaveReleation = 10;  //坐下俱乐部房间时,有亲属关系
 }
 // 坐下准备 s -> c
 message SitDownRsp {
@@ -150,6 +156,7 @@ enum DestroyDeskType {
   DestroyTypeClub = 1;     //在俱乐部发起解散
   DestroyTypeDebug = 2;    //强制解散,调试用
   DestroyTypeGameEnd = 3;  //游戏大局结束解散房间
+  DestroyTypeTimeOut = 4;  //房间超时自动解散
 }
 // 申请解散 c -> s (包括游戏开始前房主解散和游戏中投票解散)
 message DestroyDeskReq {

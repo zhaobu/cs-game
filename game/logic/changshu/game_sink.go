@@ -131,6 +131,7 @@ func (self *GameSink) reset() {
 
 //开始游戏
 func (self *GameSink) StartGame() {
+	log.Infof("%s 第%d局游戏开始", self.logHeadUser(-1), self.desk.curInning)
 	self.isPlaying = true
 	self.reset()
 	if self.desk.curInning == 1 {
@@ -168,9 +169,7 @@ func (self *GameSink) Exitlayer(chairId int32) bool {
 //改变游戏状态
 func (self *GameSink) changGameState(gState pbgame_logic.GameStatus) {
 	self.desk.gameStatus = gState
-	// if gState > pbgame_logic.GameStatus_GSWait {
 	self.sendData(-1, &pbgame_logic.BS2CUpdateGameStatus{GameStatus: gState})
-	// }
 }
 
 //玩家投色子
@@ -441,8 +440,6 @@ func (self *GameSink) drawCard(chairId, last int32) error {
 	}
 
 	self.curOutChair = chairId
-	cardInfo.GuoPeng = false
-	cardInfo.CanNotOut = map[int32]int32{}
 
 	//当抓到花或杠牌后，补上一张牌,能花,杠上开花
 	huModeTags := []mj.EmHuModeTag{}
@@ -528,6 +525,8 @@ func (self *GameSink) outCard(chairId, card int32) error {
 		log.Errorf("%s 出牌失败,是吃碰后不能打的牌", self.logHeadUser(chairId))
 		return nil
 	}
+	cardInfo.GuoPeng = false
+	cardInfo.CanNotOut = map[int32]int32{}
 	//更新玩家card_info表
 	self.operAction.HandleOutCard(cardInfo, card)
 	msg := &pbgame_logic.BS2COutCard{ChairId: chairId, Card: card}
@@ -631,7 +630,11 @@ func (self *GameSink) shuffle_cards() {
 //返回1表示能直接进行该操作,返回2表示还需要等待,返回3表示需要唤醒等待中的操作
 func (self *GameSink) checkPlayerOperationNeedWait(chairId int32, curOrder PriorityOrder) int {
 	var otherOrder, waitOrder PriorityOrder = NoneOrder, NoneOrder
-	log.Debugf("self.operOrder=%v", self.operOrder)
+	for k, v := range self.operOrder {
+		for k1, v1 := range v {
+			log.Debugf("self.operOrder[%d][%d]=%v", k, k1, v1)
+		}
+	}
 	//检查其他人能做的最高优先级操作
 	for i := HuOrder; i >= ChiOrder; i-- {
 		if curOper, ok := self.operOrder[i]; ok {
@@ -1036,7 +1039,7 @@ func (self *GameSink) cancelOper(chairId int32) error {
 //游戏结束
 func (self *GameSink) gameEnd(endType pbgame_logic.GameEndType) {
 	self.changGameState(pbgame_logic.GameStatus_GSGameEnd)
-	log.Debugf("%s 第%d局游戏结束,结束原因%v", self.logHeadUser(-1), self.desk.curInning, endType)
+	log.Infof("%s 第%d局游戏结束,结束原因%d", self.logHeadUser(-1), self.desk.curInning, endType)
 	if !self.isPlaying { //可能是解散导致游戏结束
 		self.desk.gameEnd()
 		return
@@ -1124,7 +1127,12 @@ func (self *GameSink) gameReconnect(recInfo *pbgame_logic.GameDeskInfo, uid uint
 			}
 			v.JsonCardInfo = util.PB2JSON(tmp, false)
 		}
-	default:
+	case pbgame_logic.GameStatus_GSGameEnd: //游戏结束等待下局中
+		for _, v := range recInfo.GameUser {
+			k := v.ChairId
+			userInfo := self.players[k]
+			v.Point = userInfo.BalanceResult.Point
+		}
 	}
 }
 

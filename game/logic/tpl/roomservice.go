@@ -41,7 +41,6 @@ type IRoomHandle interface {
 	HandleMakeDeskReq(uid uint64, deskID uint64, req *pbgame.MakeDeskReq, rsp *pbgame.MakeDeskRsp) bool
 	HandleQueryGameConfigReq(uid uint64, req *pbgame.QueryGameConfigReq, rsp *pbgame.QueryGameConfigRsp)
 	HandleQueryDeskInfoReq(uid uint64, req *pbgame.QueryDeskInfoReq, rsp *pbgame.QueryDeskInfoRsp)
-	RunLongTime(deskID uint64, typ int) bool
 	OnOffLine(uid uint64, online bool)
 }
 
@@ -65,7 +64,7 @@ func (self *RoomServie) Init(gameName, gameID string, _tlog *zap.Logger, redisAd
 	self.Timer = timingwheel.NewTimingWheel(time.Second, 60) //一个节点一个定时器
 	self.Timer.Start()
 	self.delInvalidDesk()
-	self.checkDeskLongTime()
+	// self.checkDeskLongTime()
 	go util.Subscribe(redisAddr, redisDb, "inner_broadcast", self.onMessage)
 }
 
@@ -214,41 +213,6 @@ func (self *RoomServie) delInvalidDesk() {
 		cache.DelDeskInfo(deskID)
 		cache.FreeDeskID(deskID)
 	}
-}
-
-func (self *RoomServie) checkDeskLongTime() {
-	go func() {
-		time.Sleep(time.Minute * 5)
-		now := time.Now().UTC()
-
-		for _, key := range cache.SCAN("deskinfo:*", 50) {
-			var deskID uint64
-			fmt.Sscanf(key, "deskinfo:%d", &deskID)
-			deskInfo, err := cache.QueryDeskInfo(deskID)
-			if err != nil {
-				continue
-			}
-
-			if deskInfo.GameName != self.GameName || deskInfo.GameID != self.GameID {
-				continue
-			}
-
-			doneOk := false
-			du := now.Sub(time.Unix(deskInfo.CreateTime, 0)).Minutes()
-
-			if du > (time.Minute * 60).Minutes() {
-				doneOk = self.roomHandle.RunLongTime(deskID, 2)
-			} else if du > (time.Minute*30).Minutes() && deskInfo.Status == "" {
-				doneOk = self.roomHandle.RunLongTime(deskID, 1)
-			}
-
-			if doneOk {
-				cache.DeleteClubDeskRelation(deskID)
-				cache.DelDeskInfo(deskID)
-				cache.FreeDeskID(deskID)
-			}
-		}
-	}()
 }
 
 func (self *RoomServie) onMessage(channel string, data []byte) error {
