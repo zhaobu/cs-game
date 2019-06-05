@@ -1,0 +1,6 @@
+FROM golang:alpine as builder
+WORKDIR $GOPATH/src
+COPY start.sh .
+RUN chmod +x start.sh
+ENTRYPOINT [ "./start.sh" ]
+CMD ["bash"]
