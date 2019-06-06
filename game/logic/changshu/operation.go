@@ -164,6 +164,10 @@ func (self *OperAtion) moCanGang(stackCards map[int32]int32, pengCards map[int32
 	for card, num := range stackCards {
 		if num == 4 { //原来的暗杠
 			ret[card] = card
+		} else if num == 1 {
+			if _, ok := pengCards[card]; ok { //补杠
+				ret[card] = card
+			}
 		}
 	}
 	if num, ok := stackCards[_card]; ok && num == 3 { //摸到的牌组成暗杠
@@ -207,13 +211,17 @@ func (self *OperAtion) BankerAnalysis(playerInfo *mj.PlayerInfo, chairId int32, 
 }
 
 //吃碰后分析能做的操作
-func (self *OperAtion) AfterChiPengAnalysis(cardInfo *mj.PlayerCardInfo, chairId int32) *CanOperInfo {
+func (self *OperAtion) AfterChiPengAnalysis(cardInfo *mj.PlayerCardInfo, chairId, pengCard int32) *CanOperInfo {
 	ret := NewCanOper()
 	ret.CanGang.ChairId = chairId
 	//检查能否暗杠
 	for card, num := range cardInfo.StackCards {
 		if num == 4 { //原来的暗杠
 			ret.CanGang.GangList[card] = card
+		} else if num == 1 && pengCard != card {
+			if _, ok := cardInfo.PengCards[card]; ok { //除了当前碰的那张牌外,其他的牌能补杠
+				ret.CanGang.GangList[card] = card
+			}
 		}
 	}
 	return ret

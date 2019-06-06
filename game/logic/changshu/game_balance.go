@@ -159,30 +159,29 @@ func (self *GameBalance) CalGangTou(leftCards []int32, bankerId int32) { // 杠�
 		if mj.GetCardColor(leftCards[len(leftCards)-1]) < 4 {
 			self.duLongHua = mj.GetCardValue(int32(leftCards[len(leftCards)-1]))
 		}
-	} else {
-		num := 4
-		if self.game_config.Barhead == 2 {
-			num = 8
-		}
+	}
+	num := 4
+	if self.game_config.Barhead == 2 {
+		num = 8
+	}
 
-		getCanHit := func(chairId int32) map[int32]bool { //获取能中的牌
-			for i, j := bankerId, int32(0); j < self.game_config.PlayerCount; i, j = mj.GetNextChair(i, self.game_config.PlayerCount), j+1 {
-				if chairId == i {
-					return hitCards[j]
-				}
+	getCanHit := func(chairId int32) map[int32]bool { //获取能中的牌
+		for i, j := bankerId, int32(0); j < self.game_config.PlayerCount; i, j = mj.GetNextChair(i, self.game_config.PlayerCount), j+1 {
+			if chairId == i {
+				return hitCards[j]
 			}
-			return nil
 		}
-		count := 0          //计数
-		chairId := bankerId //从庄家开始算起数杠头
-		for _, v := range leftCards {
-			self.allCards[chairId] = append(self.allCards[chairId], v)
-			if self.game_config.Barhead != 3 && count < num && getCanHit(chairId)[v] {
-				self.hitIndex[chairId] = append(self.hitIndex[chairId], int32(len(self.allCards[chairId])-1))
-				count++
-			}
-			chairId = mj.GetNextChair(chairId, self.game_config.PlayerCount)
+		return nil
+	}
+	count := 0          //计数
+	chairId := bankerId //从庄家开始算起数杠头
+	for _, v := range leftCards {
+		self.allCards[chairId] = append(self.allCards[chairId], v)
+		if self.game_config.Barhead != 3 && count < num && getCanHit(chairId)[v] {
+			self.hitIndex[chairId] = append(self.hitIndex[chairId], int32(len(self.allCards[chairId])-1))
+			count++
 		}
+		chairId = mj.GetNextChair(chairId, self.game_config.PlayerCount)
 	}
 	log.Debugf("扳杠头结果:self.duLongHua=%d,\nself.allCards=%+v,\nself.hitIndex=%+v", self.duLongHua, self.allCards, self.hitIndex)
 }
@@ -255,6 +254,7 @@ func (self *GameBalance) GetPlayerBalanceInfo(players []*mj.PlayerInfo) (jsonInf
 			5: info.JiangMaPoint,
 			6: info.FengPoint,
 			7: info.DiPiaoPoint,
+			8: info.GangPoint,
 		}
 		return res
 	}

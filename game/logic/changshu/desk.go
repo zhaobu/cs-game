@@ -624,4 +624,5 @@ func (d *Desk) gameEnd() {
 	} else {
 		d.curInning++
 	}
+	d.updateDeskInfo(2) //通知俱乐部更新桌子信息
 }

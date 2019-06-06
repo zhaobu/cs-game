@@ -303,6 +303,7 @@ enum ScoreType {
   ScoreJiangMa = 5;  //奖码
   ScoreFeng = 6;     //风花
   ScoreDiPiao = 7;   //底飘
+  ScoreGangHua = 8;  //杠花
 }
 
 message Json_PlayerBalance {

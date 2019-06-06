@@ -466,7 +466,7 @@ func (self *GameSink) drawCard(chairId, last int32) error {
 }
 
 //检查吃碰后能做的操作
-func (self *GameSink) checkAfterChiPeng(chairId int32) {
+func (self *GameSink) checkAfterChiPeng(chairId, pengCard int32) {
 	if !self.hasFirstBuHua[chairId] { //第一次补花
 		huaCards, moCards := self.firstBuHuaCards(chairId)
 		if len(huaCards) > 0 {
@@ -484,8 +484,8 @@ func (self *GameSink) checkAfterChiPeng(chairId int32) {
 	}
 
 	cardInfo := &self.players[chairId].CardInfo
-	//分析能否暗杠,补杠
-	ret := self.operAction.AfterChiPengAnalysis(cardInfo, chairId)
+	//分析能否暗杠,补杠,不能补杠刚刚碰的那张牌
+	ret := self.operAction.AfterChiPengAnalysis(cardInfo, chairId, pengCard)
 	log.Infof("%s 吃碰后操作分析ret=%+v", self.logHeadUser(chairId), ret)
 	//统计能做的操作
 	if !ret.Empty() {
@@ -766,7 +766,7 @@ func (self *GameSink) chiCard(chairId, card int32, chiType uint32) error {
 	self.sendData(-1, msg)
 	//游戏回放记录
 	self.record.RecordGameAction(msg)
-	self.checkAfterChiPeng(chairId)
+	self.checkAfterChiPeng(chairId, 0)
 	return nil
 }
 
@@ -822,7 +822,7 @@ func (self *GameSink) pengCard(chairId, card int32) error {
 	self.haswaitOper[chairId] = false
 	self.resetOper()
 
-	self.checkAfterChiPeng(chairId)
+	self.checkAfterChiPeng(chairId, card)
 	return nil
 }
 
@@ -1207,7 +1207,9 @@ func (self *GameSink) doWantCards(chairId int32, cards []int32) (errMsg string) 
 		//调整牌库的顺序
 		tmpLeftCards := mj.DelCards(cardsStack, cards, self.leftCard)
 		self.leftCard = append(tmpLeftCards, mj.ReversaCards(cards)...)
+		tlog.Debug("已经发过牌要牌")
 	} else { //没发过牌
+		tlog.Debug("没发过牌要牌")
 		cardDef.DebugCardsFromClient(gameName, cards)
 	}
 
