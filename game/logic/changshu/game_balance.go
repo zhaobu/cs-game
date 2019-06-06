@@ -201,7 +201,7 @@ func (self *GameBalance) CalGameBalance(players []*mj.PlayerInfo, bankerId int32
 		balanceInfo.HuPoint = 1
 		winSocre := 1 + balanceInfo.GetPingHuHua() //胡牌1分+补花+杠花+风花
 		//奖码花
-		if self.game_config.Barhead == 3 {
+		if self.game_config.Barhead == 3 { //独龙杠
 			balanceInfo.JiangMaPoint = self.duLongHua
 		} else {
 			balanceInfo.JiangMaPoint = int32(len(self.hitIndex[winChair]))
@@ -212,7 +212,7 @@ func (self *GameBalance) CalGameBalance(players []*mj.PlayerInfo, bankerId int32
 		winSocre += balanceInfo.SpecialPoint
 		//豹子翻倍
 		balanceInfo.Baozi = self.baozi
-		winChair *= self.baozi
+		winSocre *= self.baozi
 		//底飘
 		winSocre += int32(self.game_config.Dipiao) * 2
 

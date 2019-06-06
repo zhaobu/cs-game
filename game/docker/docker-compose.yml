@@ -53,7 +53,7 @@ services:
       NodeType: gate
       NodeName: gate
     ports:
-      - 0.0.0.0:9876:9876
+      - 9876:9876
     logging:
       driver: "json-file"
       options:
@@ -152,9 +152,6 @@ services:
       - consul
     networks:
       - gamenet
-
-    # ports:
-    #   - 9603:9603
     environment:
       # 设置节点类型
       NodeType: game
