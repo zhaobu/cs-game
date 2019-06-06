@@ -8,11 +8,11 @@ networks:
       name: game_net
 
 # 游戏数据卷
-# volumes:
-#   gamedata:
-#     # 申明卷已经在外部创建
-#     external:
-#       name: game_data
+volumes:
+  gamedata:
+    # 申明卷已经在外部创建
+    external:
+      name: game_data
 
 # 服务
 services:
@@ -46,6 +46,8 @@ services:
       - mongodb
       - redis
       - consul
+      - club
+      - center
     networks:
       - gamenet
     environment:
@@ -171,8 +173,12 @@ services:
         # 给网络取别名,可以用redis和cache找到
         aliases:
           - cache
-    # volumes:
-    # - gamedata:/gamedata
+    command: /usr/local/etc/redis/redis.conf
+    volumes:
+      # 持久存储redis的数据
+      - gamedata:/data
+      # 挂载本地配置文件
+      - D:/gowork/src/cy/game/docker/redis.conf:/usr/local/etc/redis/redis.conf
 
   mongodb:
     image: mongo:latest
@@ -183,8 +189,12 @@ services:
         # 给网络取别名,可以用mongodb和db找到
         aliases:
           - db
-    # volumes:
-    # - gamedata:/gamedata
+    command: ["mongod", "-f", "/etc/mongo/mongod.conf"]
+    volumes:
+      # 持久存储mongodb的数据
+      - gamedata:/data/db:rw
+      # 挂载本地配置文件
+      - D:/gowork/src/cy/game/docker/mongod.conf:/etc/mongo/mongod.conf:rw
 
   consul:
     image: consul:latest
