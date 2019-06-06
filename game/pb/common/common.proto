@@ -93,4 +93,5 @@ message UserInfo {
   int32 PlayCount = 19;        // 局数
   int32 BindMobileCount = 20;  // 绑定手机次数，第一次绑定有赠送
   string Place = 21;           // 通过IP或者经纬度得到的位置名称
+  bool IsRedName = 22;         // 是否是红名用户
 }

@@ -5,7 +5,6 @@ import (
 	pbgame "cy/game/pb/game"
 	"cy/game/util"
 	"fmt"
-
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 )
@@ -250,4 +249,56 @@ func UpdateAgentID(uid uint64, agentID string) (info *pbcommon.UserInfo, err err
 
 func UpdateSessionID(uid uint64, sessionID string) (info *pbcommon.UserInfo, err error) {
 	return updateUserOneField(uid, "sessionid", sessionID)
+}
+
+//添加用户财富 对net端口开放
+func UpdateWealthByNet(uid uint64, feeType uint32, change int64)(user *pbcommon.UserInfo,err error){
+	field := ""
+	if feeType == 1 {
+		field = "gold"
+	} else if feeType == 2 {
+		field = "masonry"
+	} else {
+		return nil, fmt.Errorf("修改的货币类型错误 %d", feeType)
+	}
+	user,err =QueryUserInfo(uid)
+	if err != nil{
+		return nil,fmt.Errorf("查询用户信息失败 err=%s",err.Error())
+	}
+	oldnum := int64(0)
+	newnum := int64(0)
+	if feeType == 1 {
+		oldnum = int64(user.Gold)
+	}else{
+		oldnum = int64(user.Masonry)
+	}
+	newnum = oldnum + change
+	if newnum < 0 {
+		return nil,fmt.Errorf("余额不足")
+	}
+	result := bson.M{}
+	_, err = mgoSess.DB("").C("userinfo").Find(bson.M{"userid": uid}).Apply(mgo.Change{
+		Upsert:    false,
+		ReturnNew: true,
+		Update:    bson.M{"$inc": bson.M{field: change}},
+	}, result)
+	user = &pbcommon.UserInfo{}
+	err = util.Bson2struct(result, user)
+	return user,nil
+}
+
+//设置用户红名接口
+func SetUserRedName(uid uint64,isredname bool)(user *pbcommon.UserInfo,err error){
+	result := bson.M{}
+	_, err = mgoSess.DB("").C("userinfo").Find(bson.M{"userid": uid}).Apply(mgo.Change{
+		Upsert:    true,
+		ReturnNew: true,
+		Update:    bson.M{"$set": bson.M{"isredname": isredname}},
+	}, result)
+	if err != nil {
+		return nil, err
+	}
+	user = &pbcommon.UserInfo{}
+	err = util.Bson2struct(result, user)
+	return user,nil
 }
