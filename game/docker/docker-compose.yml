@@ -33,7 +33,7 @@ services:
     command: ["gate", "false"]
     volumes:
       # GOPATH目录
-      - D:/gowork/src/cy/game:/go/src/cy/game:rw
+      - ../:/go/src/cy/game:rw
     labels:
       - name="liwei"
     # working_dir: /go/src
@@ -71,7 +71,7 @@ services:
     command: ["center", "false"]
     volumes:
       # GOPATH目录
-      - D:/gowork/src/cy/game:/go/src/cy/game:rw
+      - ../:/go/src/cy/game:rw
     labels:
       - name="liwei"
     # working_dir: /go/src
@@ -105,7 +105,7 @@ services:
     command: ["club", "false"]
     volumes:
       # GOPATH目录
-      - D:/gowork/src/cy/game:/go/src/cy/game:rw
+      - ../:/go/src/cy/game:rw
     labels:
       - name="liwei"
     # working_dir: /go/src
@@ -139,7 +139,7 @@ services:
     command: ["changshu", "false"]
     volumes:
       # GOPATH目录
-      - D:/gowork/src/cy/game:/go/src/cy/game:rw
+      - ../:/go/src/cy/game:rw
     labels:
       - name="liwei"
     # working_dir: /go/src
@@ -178,7 +178,7 @@ services:
       # 持久存储redis的数据
       - gamedata:/data
       # 挂载本地配置文件
-      - D:/gowork/src/cy/game/docker/redis.conf:/usr/local/etc/redis/redis.conf
+      - ..//docker/redis.conf:/usr/local/etc/redis/redis.conf
 
   mongodb:
     image: mongo:latest
@@ -194,7 +194,7 @@ services:
       # 持久存储mongodb的数据
       - gamedata:/data/db:rw
       # 挂载本地配置文件
-      - D:/gowork/src/cy/game/docker/mongod.conf:/etc/mongo/mongod.conf:rw
+      - ..//docker/mongod.conf:/etc/mongo/mongod.conf:rw
 
   consul:
     image: consul:latest
