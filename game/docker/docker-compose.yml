@@ -178,7 +178,7 @@ services:
       # 持久存储redis的数据
       - gamedata:/data
       # 挂载本地配置文件
-      - ..//docker/redis.conf:/usr/local/etc/redis/redis.conf
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
 
   mongodb:
     image: mongo:latest
@@ -194,7 +194,7 @@ services:
       # 持久存储mongodb的数据
       - gamedata:/data/db:rw
       # 挂载本地配置文件
-      - ..//docker/mongod.conf:/etc/mongo/mongod.conf:rw
+      - ./mongod.conf:/etc/mongo/mongod.conf:rw
 
   consul:
     image: consul:latest
