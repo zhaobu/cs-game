@@ -441,10 +441,10 @@ func (self *GameSink) drawCard(chairId, last int32) error {
 
 	self.curOutChair = chairId
 
-	//当抓到花或杠牌后，补上一张牌,能花,杠上开花
-	huModeTags := []mj.EmHuModeTag{}
+	//当抓到花或杠牌后，补上一张牌,能胡,杠上开花
+	huModeTags := map[mj.EmHuModeTag]bool{}
 	if last == -1 || len(huaCards2) > 0 {
-		huModeTags = append(huModeTags, mj.HuModeTag_GangShangHua)
+		huModeTags[mj.HuModeTag_GangShangHua] = true
 	}
 	//分析能否暗杠,补杠,自摸胡
 	ret := self.operAction.DrawcardAnalysis(self.players[chairId], chairId, card, int32(len(self.leftCard)), huModeTags)

@@ -224,21 +224,6 @@ message BS2CFirstBuHua {
   string json_first_buhua = 3;  //第一次补花信息(按Json_FirstBuHua格式解析)
 }
 
-//当前出牌玩家(玩家摸牌,吃牌,碰牌后广播,表示当前出牌的玩家)
-// message BS2CCurOutChair {
-//   int32 chair_id = 1;  //当前出牌玩家
-// }
-
-// message BuHuaOnce {
-//   int32 hua_card = 1;  //花牌值
-//   int32 bu_card = 2;  //补到的牌(补花玩家收到真实牌值,其他玩家收到0)
-// }
-// //补花
-// message BS2CBuHua {
-//   int32 chair_id = 1;                    //补花玩家
-//   repeated BuHuaOnce bu_hua_result = 2;  //补花结果
-// }
-
 //玩家出牌
 message BS2COutCard {
   int32 chair_id = 1;  //出牌玩家

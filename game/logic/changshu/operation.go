@@ -228,7 +228,7 @@ func (self *OperAtion) AfterChiPengAnalysis(cardInfo *mj.PlayerCardInfo, chairId
 }
 
 //摸牌后分析能做的操作
-func (self *OperAtion) DrawcardAnalysis(playerInfo *mj.PlayerInfo, chairId, card int32, leftCardNum int32, huModeTags []mj.EmHuModeTag) *CanOperInfo {
+func (self *OperAtion) DrawcardAnalysis(playerInfo *mj.PlayerInfo, chairId, card int32, leftCardNum int32, huModeTags map[mj.EmHuModeTag]bool) *CanOperInfo {
 	ret := NewCanOper()
 	cardInfo := &playerInfo.CardInfo
 	stackCards, pengCards := cardInfo.StackCards, cardInfo.PengCards
@@ -239,7 +239,7 @@ func (self *OperAtion) DrawcardAnalysis(playerInfo *mj.PlayerInfo, chairId, card
 	}
 
 	if leftCardNum == 1 {
-		huModeTags = append(huModeTags, mj.HuModeTag_HaiDiLaoYue)
+		huModeTags[mj.HuModeTag_HaiDiLaoYue] = true
 	}
 	//判断是否能胡
 	self.updateCardInfo(cardInfo, []int32{card}, nil)
@@ -437,7 +437,7 @@ func (self *OperAtion) QiangGangAnalysis(playerInfo *mj.PlayerInfo, card, chairI
 	cardInfo := &playerInfo.CardInfo
 	//判断是否能胡
 	self.updateCardInfo(cardInfo, []int32{card}, nil)
-	if ok, huOper := huLib.CheckHuType(cardInfo, &playerInfo.BalanceInfo, mj.HuMode_PAOHU, []mj.EmHuModeTag{mj.HuModeTag_QiangGangHu}); ok {
+	if ok, huOper := huLib.CheckHuType(cardInfo, &playerInfo.BalanceInfo, mj.HuMode_PAOHU, map[mj.EmHuModeTag]bool{mj.HuModeTag_QiangGangHu: true}); ok {
 		ret.CanHu = CanHuOper{HuMode: mj.HuMode_PAOHU, HuList: huOper, Card: card, LoseChair: loseChair}
 	}
 	self.updateCardInfo(cardInfo, nil, []int32{card}) //还原手牌

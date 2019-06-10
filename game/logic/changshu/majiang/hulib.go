@@ -27,7 +27,7 @@ func init() {
 type HuTypeList []EmHuType
 
 //普通胡
-func (self *HuLib) normalHu(cardInfo *PlayerCardInfo) bool {
+func (self *HuLib) normalHu(cardInfo *PlayerCardInfo, gui_num int) bool {
 	checkcard := make([]int, 34)
 	for card, num := range cardInfo.StackCards {
 		if key, ok := var2key[card]; ok {
@@ -37,7 +37,7 @@ func (self *HuLib) normalHu(cardInfo *PlayerCardInfo) bool {
 		}
 	}
 
-	if MHuLib.GetHuInfo(checkcard, 0) {
+	if MHuLib.GetHuInfo(checkcard, gui_num) {
 		return true
 	}
 	return false
@@ -124,17 +124,8 @@ func hasHuaCard(cardInfo *PlayerCardInfo) bool {
 	return false
 }
 
-func HasHuModeTag(huModeTags []EmHuModeTag, tag EmHuModeTag) bool {
-	for _, v := range huModeTags {
-		if v == tag {
-			return true
-		}
-	}
-	return false
-}
-
 // 胡牌牌型
-func (self *HuLib) CheckHuType(cardInfo *PlayerCardInfo, balanceInfo *PlayserBalanceInfo, huMode EmHuMode, huModeTags []EmHuModeTag) (bool, HuTypeList) {
+func (self *HuLib) CheckHuType(cardInfo *PlayerCardInfo, balanceInfo *PlayserBalanceInfo, huMode EmHuMode, huModeTags map[EmHuModeTag]bool) (bool, HuTypeList) {
 	huTypeList := HuTypeList{}
 
 	//判断是否有花牌
@@ -144,19 +135,15 @@ func (self *HuLib) CheckHuType(cardInfo *PlayerCardInfo, balanceInfo *PlayserBal
 	}
 	baseHu := false
 	//先检查能基本胡
-	if self.normalHu(cardInfo) {
+	if self.normalHu(cardInfo, 0) {
 		baseHu = true
 	}
-	//普通话检查花数
+	//普通胡检查花数
 	if self.checkBaseHuHua(cardInfo, balanceInfo, huMode) && baseHu {
 		huTypeList = append(huTypeList, HuType_Normal)
 	}
 	//再判断能否特殊胡
 	if baseHu {
-		if self.menQing(cardInfo) { //门清
-			huTypeList = append(huTypeList, HuType_MenQing)
-		}
-
 		allColor := getColorCount(cardInfo)
 		if self.qingYiSe(allColor) { //清一色
 			huTypeList = append(huTypeList, HuType_QingYiSe)
@@ -165,20 +152,22 @@ func (self *HuLib) CheckHuType(cardInfo *PlayerCardInfo, balanceInfo *PlayserBal
 		} else if self.ziYiSe(allColor) { //字一色
 			huTypeList = append(huTypeList, HuType_ZiYiSe)
 		}
-
+		if self.menQing(cardInfo) { //门清
+			huTypeList = append(huTypeList, HuType_MenQing)
+		}
 		if self.duiDuiHu(cardInfo) { //对对胡
 			huTypeList = append(huTypeList, HuType_DuiDuiHu)
 		}
-		if HasHuModeTag(huModeTags, HuModeTag_GangShangHua) { //杠上花
+		if huModeTags[HuModeTag_GangShangHua] { //杠上花
 			huTypeList = append(huTypeList, HuType_GangShangKaiHua)
 		}
-		if HasHuModeTag(huModeTags, HuModeTag_QiangGangHu) { //抢杠胡
+		if huModeTags[HuModeTag_QiangGangHu] { //抢杠胡
 			huTypeList = append(huTypeList, HuType_QiangGangHu)
 		}
 		if self.daDiaoChe(cardInfo) { //大吊车
 			huTypeList = append(huTypeList, HuType_DaDiaoChe)
 		}
-		if HasHuModeTag(huModeTags, HuModeTag_HaiDiLaoYue) { //海底捞月
+		if huModeTags[HuModeTag_HaiDiLaoYue] { //海底捞月
 			huTypeList = append(huTypeList, HuType_HaiDiLaoYue)
 		}
 	}
@@ -207,4 +196,48 @@ func (self *HuLib) checkBaseHuHua(cardInfo *PlayerCardInfo, balanceInfo *Playser
 		return huaShu >= 3
 	}
 	return false
+}
+
+//检查打出某张牌后能否听
+func (self *HuLib) OneCardCanListen(cardInfo *PlayerCardInfo, balanceInfo *PlayserBalanceInfo, huModeTags map[EmHuModeTag]bool) bool {
+	huTypeList := HuTypeList{}
+
+	//判断是否有花牌
+	if hasHuaCard(cardInfo) {
+		log.Errorf("检测胡牌时还有花牌")
+		return false
+	}
+	baseHu := false
+	//先检查能基本胡
+	if self.normalHu(cardInfo, 1) {
+		baseHu = true
+	}
+	//普通胡检查花数
+	if self.checkBaseHuHua(cardInfo, balanceInfo, HuMode_ZIMO) && baseHu {
+		huTypeList = append(huTypeList, HuType_Normal)
+	}
+	//不能普通胡时再检查能否特殊胡,只要能胡一种就可听牌
+	if baseHu && len(huTypeList) <= 0 {
+		allColor := getColorCount(cardInfo)
+		if self.qingYiSe(allColor) { //清一色
+			huTypeList = append(huTypeList, HuType_QingYiSe)
+		} else if self.hunYiSe(allColor) { //混一色
+			huTypeList = append(huTypeList, HuType_HunYiSe)
+		} else if self.ziYiSe(allColor) { //字一色
+			huTypeList = append(huTypeList, HuType_ZiYiSe)
+		} else if self.menQing(cardInfo) { //门清
+			huTypeList = append(huTypeList, HuType_MenQing)
+		} else if self.duiDuiHu(cardInfo) { //对对胡
+			huTypeList = append(huTypeList, HuType_DuiDuiHu)
+		} else if huModeTags[HuModeTag_GangShangHua] { //杠上花
+			huTypeList = append(huTypeList, HuType_GangShangKaiHua)
+		} else if huModeTags[HuModeTag_QiangGangHu] { //抢杠胡
+			huTypeList = append(huTypeList, HuType_QiangGangHu)
+		} else if self.daDiaoChe(cardInfo) { //大吊车
+			huTypeList = append(huTypeList, HuType_DaDiaoChe)
+		} else if huModeTags[HuModeTag_HaiDiLaoYue] { //海底捞月
+			huTypeList = append(huTypeList, HuType_HaiDiLaoYue)
+		}
+	}
+	return len(huTypeList) > 0
 }
