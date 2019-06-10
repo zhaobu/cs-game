@@ -116,7 +116,7 @@ func UpdateWealthPreSure(uid uint64, feeType pbgame.FeeType, change int64) (*pbc
 }
 
 // UpsertUserInfo 插入更新玩家信息
-func UpsertUserInfo(u *pbcommon.UserInfo) (*pbcommon.UserInfo, error) {
+func UpsertUserInfo(u *pbcommon.UserInfo) (*pbcommon.UserInfo,bool, error) {
 	coll := mgoSess.DB("").C("userinfo")
 
 	var find = make(bson.M)
@@ -126,7 +126,7 @@ func UpsertUserInfo(u *pbcommon.UserInfo) (*pbcommon.UserInfo, error) {
 			var err2 error
 			u.UserID, err2 = incUserID()
 			if err2 != nil {
-				return nil, err2
+				return nil,false, err2
 			}
 
 			// 新玩家初始财富，必须要赋值，不能用客户端传过来的
@@ -135,15 +135,15 @@ func UpsertUserInfo(u *pbcommon.UserInfo) (*pbcommon.UserInfo, error) {
 			u.GoldPre = 0
 			u.MasonryPre = 0
 			bs, _ := util.Struct2bson(u)
-			return u, coll.Insert(bs)
+			return u,true, coll.Insert(bs)
 		}
-		return nil, err
+		return nil,false, err
 	}
 
 	old := &pbcommon.UserInfo{}
 	err = util.Bson2struct(find, old)
 	if err != nil {
-		return nil, err
+		return nil,false, err
 	}
 
 	// 更新的信息
@@ -154,7 +154,7 @@ func UpsertUserInfo(u *pbcommon.UserInfo) (*pbcommon.UserInfo, error) {
 	old.Profile = u.Profile
 
 	bs, _ := util.Struct2bson(old)
-	return old, coll.Update(bson.M{"wxid": old.WxID}, bs)
+	return old,false, coll.Update(bson.M{"wxid": old.WxID}, bs)
 }
 
 func incUserID() (uint64, error) {

@@ -209,3 +209,33 @@ services:
           - discovery
     # volumes:
     # - gamedata:/gamedata
+
+  # initdb:
+  #   image: golang:alpine
+  #   working_dir: /go/src/cy/game/bin/linux
+  #   command: chmod +x $NodeName &&./$NodeName
+  #   volumes:
+  #     # GOPATH目录
+  #     - ../:/go/src/cy/game:rw
+  #   labels:
+  #     - name="liwei"
+  #   # working_dir: /go/src
+  #   # 打开标准输入，可以接受外部输入
+  #   stdin_open: true
+  #   # 模拟一个伪终端
+  #   tty: true
+  #   # 指定启动顺序
+  #   depends_on:
+  #     - mongodb
+  #     - redis
+  #     - consul
+  #   networks:
+  #     - gamenet
+  #   environment:
+  #     # 设置节点类型
+  #     NodeName: initdb
+  #   logging:
+  #     driver: "json-file"
+  #     options:
+  #       max-size: "1000k"
+  #       max-file: "20"

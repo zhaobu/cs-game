@@ -1,5 +1,7 @@
 set GOOS=windows
 
+go build -tags consul -o bin/win/http.exe cy/game/http
+
 go build -tags consul -o bin/win/gate.exe cy/game/gate
 
 go build -tags consul -o bin/win/center.exe cy/game/center

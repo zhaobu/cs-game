@@ -31,7 +31,7 @@ func main() {
 	initDb()
 	initRedis()
 
-	genDeskID(123456, 123456+100)
+	// genDeskID(123456, 123456+100)
 	genClubID()
 
 }

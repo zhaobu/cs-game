@@ -64,15 +64,18 @@ func backendLoginReq(loginReq *pblogin.LoginReq) (loginRsp *pblogin.LoginRsp) {
 		u.Sex = loginReq.Sex
 		u.Profile = loginReq.Profile
 
-		var err error
-		loginRsp.User, err = mgo.UpsertUserInfo(u)
+		var err   error
+		var isregister bool
+		loginRsp.User,isregister, err = mgo.UpsertUserInfo(u)
 		if err != nil {
 			log.Error(errors.Wrapf(err, "upsertUserInfo %+v", *loginReq))
 			loginRsp.Code = pblogin.LoginRspCode_Other
 			loginRsp.StrCode = err.Error()
 			return
 		}
-
+		if isregister {	//新注册用户
+			PushUserRegister(loginRsp.User)
+		}
 		loginRsp.Code = pblogin.LoginRspCode_Succ
 	case pblogin.LoginType_Phone:
 		mobile := loginReq.ID

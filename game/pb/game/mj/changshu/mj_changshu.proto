@@ -116,6 +116,17 @@ message C2SGetGameRecord {
 }
 
 ///////////////////////////s-c///////////////////////////
+message Json_Listen {
+  message cards {
+    repeated int32 cards = 1;  //一个人的手牌
+  }
+  map<int32, cards> info = 1;  //听牌信息key表示打出的牌,cards表示可以听的牌
+}
+
+// 听牌结果
+message S2CListenCards {
+  string listen_result = 1;  //听牌信息(按照Json_Listen解析)
+}
 //玩家准备下一局
 message BS2CGetReady {
   uint64 userId = 1;  //准备玩家
