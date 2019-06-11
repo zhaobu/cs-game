@@ -384,11 +384,26 @@ func (d *Desk) doVoteDestroyDesk(uid uint64, req *pbgame.VoteDestroyDeskReq) {
 
 //处理桌子销毁
 func (d *Desk) dealDestroyDesk(reqType pbgame.DestroyDeskType) {
-	//在游戏中解散
-	if reqType != pbgame.DestroyDeskType_DestroyTypeDebug && d.gameStatus > pbgame_logic.GameStatus_GSWait {
-		d.gameSink.gameEnd(pbgame_logic.GameEndType_EndDissmiss)
-	} else {
-		d.realDestroyDesk(reqType)
+	switch reqType {
+	case pbgame.DestroyDeskType_DestroyTypeClub, pbgame.DestroyDeskType_DestroyTypeGame, pbgame.DestroyDeskType_DestroyTypeTimeOut:
+		//在游戏中解散
+		if d.curInning > 0 {
+			d.gameSink.gameEnd(pbgame_logic.GameEndType_EndDissmiss)
+		}
+	}
+	d.realDestroyDesk(reqType)
+}
+
+//游戏结束
+func (d *Desk) gameEnd(endType pbgame_logic.GameEndType) {
+	if endType != pbgame_logic.GameEndType_EndDissmiss {
+		d.changUserState(0, pbgame.UserDeskStatus_UDSGameEnd)
+		if d.curInning == d.deskConfig.Args.RInfo.LoopCnt {
+			d.realDestroyDesk(pbgame.DestroyDeskType_DestroyTypeGameEnd)
+		} else {
+			d.curInning++
+		}
+		d.updateDeskInfo(2) //通知俱乐部更新桌子信息
 	}
 }
 
@@ -614,15 +629,4 @@ func (d *Desk) doChatMessage(uid uint64, req *pbgame.ChatMessageReq) {
 			d.SendData(userInfo.info.UserID, msg)
 		}
 	}
-}
-
-//游戏结束
-func (d *Desk) gameEnd() {
-	d.changUserState(0, pbgame.UserDeskStatus_UDSGameEnd)
-	if d.curInning == d.deskConfig.Args.RInfo.LoopCnt {
-		d.realDestroyDesk(pbgame.DestroyDeskType_DestroyTypeGameEnd)
-	} else {
-		d.curInning++
-	}
-	d.updateDeskInfo(2) //通知俱乐部更新桌子信息
 }

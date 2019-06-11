@@ -200,11 +200,14 @@ func Sub_stack(m map[int32]int32, cards ...int32) {
 	}
 }
 
-//统计牌数量
-func CalStackCards(rawcards []int32) map[int32]int32 {
+//统计牌数量(withOutHua为true时表示不统计花牌)
+func CalStackCards(rawcards []int32, withOutHua bool) map[int32]int32 {
 	var newcard = make(map[int32]int32)
 	for _, v := range rawcards {
-		Add_stack(newcard, v)
+		if withOutHua && IsHuaCard(v) {
+		} else {
+			Add_stack(newcard, v)
+		}
 	}
 	return newcard
 }
@@ -235,7 +238,7 @@ func IsVaildCard(card int32) bool {
 //从allCards中去掉cards,返回剩下的牌
 func DelCards(cardsStack map[int32]int32, cards, allCards []int32) (leftCards []int32) {
 	if cardsStack == nil {
-		cardsStack = CalStackCards(cards)
+		cardsStack = CalStackCards(cards, false)
 	}
 	for _, v := range allCards { //找到没有指定的牌,保存
 		if num, ok := cardsStack[v]; ok {

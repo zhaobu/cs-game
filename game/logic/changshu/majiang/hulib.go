@@ -16,11 +16,11 @@ type HuLib struct {
 
 func init() {
 	MHuLib = mjhulib.GetSingleton().HuLib
-	var2key = map[int32]int{
+	var2key = map[int32]int{ //不包含花牌
 		11: 0, 12: 1, 13: 2, 14: 3, 15: 4, 16: 5, 17: 6, 18: 7, 19: 8,
 		21: 9, 22: 10, 23: 11, 24: 12, 25: 13, 26: 14, 27: 15, 28: 16, 29: 17,
 		31: 18, 32: 19, 33: 20, 34: 21, 35: 22, 36: 23, 37: 24, 38: 25, 39: 26,
-		41: 27, 42: 28, 43: 29, 44: 30, 45: 31, 46: 32, 47: 33,
+		41: 27, 42: 28, 43: 29, 44: 30, 45: 31, 46: 32,
 	}
 }
 
@@ -210,6 +210,44 @@ func (self *HuLib) OneCardCanListen(cardInfo *PlayerCardInfo, balanceInfo *Plays
 	baseHu := false
 	//先检查能基本胡
 	if self.normalHu(cardInfo, 1) {
+		baseHu = true
+	}
+	//普通胡检查花数
+	if self.checkBaseHuHua(cardInfo, balanceInfo, HuMode_ZIMO) && baseHu {
+		huTypeList = append(huTypeList, HuType_Normal)
+	}
+	//不能普通胡时再检查能否特殊胡,只要能胡一种就可听牌
+	if baseHu && len(huTypeList) <= 0 {
+		allColor := getColorCount(cardInfo)
+		if self.qingYiSe(allColor) { //清一色
+			huTypeList = append(huTypeList, HuType_QingYiSe)
+		} else if self.hunYiSe(allColor) { //混一色
+			huTypeList = append(huTypeList, HuType_HunYiSe)
+		} else if self.ziYiSe(allColor) { //字一色
+			huTypeList = append(huTypeList, HuType_ZiYiSe)
+		} else if self.menQing(cardInfo) { //门清
+			huTypeList = append(huTypeList, HuType_MenQing)
+		} else if self.duiDuiHu(cardInfo) { //对对胡
+			huTypeList = append(huTypeList, HuType_DuiDuiHu)
+		} else if huModeTags[HuModeTag_GangShangHua] { //杠上花
+			huTypeList = append(huTypeList, HuType_GangShangKaiHua)
+		} else if huModeTags[HuModeTag_QiangGangHu] { //抢杠胡
+			huTypeList = append(huTypeList, HuType_QiangGangHu)
+		} else if self.daDiaoChe(cardInfo) { //大吊车
+			huTypeList = append(huTypeList, HuType_DaDiaoChe)
+		} else if huModeTags[HuModeTag_HaiDiLaoYue] { //海底捞月
+			huTypeList = append(huTypeList, HuType_HaiDiLaoYue)
+		}
+	}
+	return len(huTypeList) > 0
+}
+
+//判断出能听后检查某张牌是否能胡
+func (self *HuLib) OneCardCanHu(cardInfo *PlayerCardInfo, balanceInfo *PlayserBalanceInfo, huModeTags map[EmHuModeTag]bool) bool {
+	huTypeList := HuTypeList{}
+	baseHu := false
+	//先检查能基本胡
+	if self.normalHu(cardInfo, 0) {
 		baseHu = true
 	}
 	//普通胡检查花数

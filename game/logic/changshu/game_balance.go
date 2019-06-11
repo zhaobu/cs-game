@@ -190,7 +190,9 @@ func (self *GameBalance) CalGangTou(leftCards []int32, bankerId int32) { // Êù†Â
 func (self *GameBalance) CalGameBalance(players []*mj.PlayerInfo, bankerId int32) {
 	getHuTypeScore := func(huInfo *HuScoreInfo) (score int32) {
 		for _, v := range huInfo.HuTypeList {
-			score += huTypeScore[v]
+			if v != mj.HuType_Normal {
+				score += huTypeScore[v]
+			}
 		}
 		return
 	}
@@ -301,6 +303,6 @@ func (self *GameBalance) CalNextBankerId(bankerId int32) int32 {
 			}
 		}
 		rand.Seed(int64(time.Now().UnixNano()))
-		return rand.Int31n(int32(len(huId)))
+		return huId[rand.Intn(len(huId))]
 	}
 }

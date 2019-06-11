@@ -117,10 +117,14 @@ message C2SGetGameRecord {
 
 ///////////////////////////s-c///////////////////////////
 message Json_Listen {
-  message cards {
-    repeated int32 cards = 1;  //一个人的手牌
+  message onecard {
+    int32 card = 1;  //能听的牌
+    int32 num = 2;   //剩余的数量
   }
-  map<int32, cards> info = 1;  //听牌信息key表示打出的牌,cards表示可以听的牌
+  message cards {
+    repeated onecard cards = 1;  //所有能听的牌
+  }
+  map<int32, cards> info = 1;  //听牌信息key表示打出的牌,value表示可以听的牌
 }
 
 // 听牌结果
@@ -413,6 +417,7 @@ message GameDeskInfo {
   repeated cyint32 draw_dice_value = 16;   //摸牌色子
   int32 left_oper_time = 17;               //剩余操作时间
   int32 total_num = 18;                    //总牌数
+  string listen_result = 19;  //听牌信息(按照Json_Listen解析)
 }
 
 // message PlayerBalanceResult {
