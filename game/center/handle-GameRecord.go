@@ -328,7 +328,7 @@ func StartTimer_ResetClubStatistics() {
 	t := next.Sub(now)
 	timer := time.NewTimer(t)
 	go func() {
-		<-timer.C
+		<- timer.C
 		ResetClubGameStatistics()
 	}()
 }
@@ -340,8 +340,12 @@ func ResetClubGameStatistics() {
 	//}
 	//_ClubStatistics := ClubStatistics
 	//ClubStatistics = nil
+	err := mgo.CleraUserCurrDayStatistics()
+	if err != nil{
+		log.Errorf("CleraUserCurrDayStatistics err = " + err.Error())
+	}
 	cds, err := mgo.QueryAndClearAllClubCurrDayStatistics()
-	if err != nil {
+	if err == nil {
 		for _, v1 := range cds {
 			CSData := &mgo.ClubStatisticsData{
 				ClubId:         v1.ClubId,

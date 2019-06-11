@@ -5,6 +5,7 @@ import (
 	"cy/game/codec"
 	"cy/game/codec/protobuf"
 	"cy/game/db/mgo"
+	"cy/game/net"
 	pbcommon "cy/game/pb/common"
 	pblogin "cy/game/pb/login"
 	"encoding/json"
@@ -74,7 +75,10 @@ func backendLoginReq(loginReq *pblogin.LoginReq) (loginRsp *pblogin.LoginRsp) {
 			return
 		}
 		if isregister {	//新注册用户
-			PushUserRegister(loginRsp.User)
+			err := net.PushUserRegister(loginRsp.User)
+			if err != nil{
+				log.Errorf(err.Error())
+			}
 		}
 		loginRsp.Code = pblogin.LoginRspCode_Succ
 	case pblogin.LoginType_Phone:

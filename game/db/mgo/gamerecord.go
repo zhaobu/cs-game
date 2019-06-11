@@ -1,8 +1,8 @@
 package mgo
 
 import (
+	"cy/game/net"
 	"strconv"
-
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 )
@@ -10,6 +10,7 @@ import (
 const (
 	RoomRecordTable             = "roomrecord"             //游戏房间记录
 	GameRecordTable             = "gamerecord"             //游戏单局记录
+	UserCurrDayStatisticsTable  = "usercurrdaystatistics"  //用户当日统计数据
 	ClubCurrDayStatisticsTable  = "clubcurrdaystatistics"  //俱乐部当日统计数据
 	ClubStatisticsPlayTable     = "clubstatisticsplay"     //俱乐部游戏对局次数统计数据
 	ClubStatisticsIntegralTable = "clubstatisticsintegral" //俱乐部游戏积分统计数据
@@ -78,6 +79,10 @@ type GameRecord struct {
 }
 
 //俱乐部当日统计数据-----------------------------------------------------------------------------------------------------
+type UserCurrDayStatisticsData struct {
+	UserId             uint64  `bson:"_id"`//用户Id
+	StatisticsPlay     int64  //当天本俱乐部次数统计
+}
 type ClubCurrDayStatisticsData struct {
 	ClubId int64 //俱乐部Id
 	UserSD map[uint64]*UserStatisticsData
@@ -169,8 +174,37 @@ func AddGameRecord(gr *WirteRecord) (err error) {
 		if err == nil && gr.CreateInfo.ClubId != 0 {
 			AddClubCurrDayStatistics(gr) //写入统计数据
 		}
+		AddUserCurrDayStatistics(gr)
 		return
 	}
+	return
+}
+
+//添加俱乐部当日统计数据
+func AddUserCurrDayStatistics(gr *WirteRecord) (err error) {
+	for _, v := range gr.CurGameInfo.GamePlayers {
+		ud := &UserCurrDayStatisticsData{}
+		_err := mgoSess.DB("").C(UserCurrDayStatisticsTable).Find(bson.M{"_id": v.UserId}).One(ud)
+		if _err != nil {
+			ud = &UserCurrDayStatisticsData{
+				UserId: v.UserId,
+				StatisticsPlay:0,
+			}
+		}
+		ud.StatisticsPlay ++
+		if int(ud.StatisticsPlay) == net.Bureau{//达到抽奖次数
+			net.GetletteNum(ud.UserId,int(ud.StatisticsPlay))
+		}
+		_, err = mgoSess.DB("").C(UserCurrDayStatisticsTable).Upsert(bson.M{"_id": v.UserId}, ud)
+		if err != nil {
+			return err
+		}
+	}
+	return err
+}
+
+func CleraUserCurrDayStatistics()(err error){
+	err = mgoSess.DB("").C(UserCurrDayStatisticsTable).Remove(nil)
 	return
 }
 

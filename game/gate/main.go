@@ -6,6 +6,7 @@ import (
 	zaplog "cy/game/common/logger"
 	"cy/game/configs"
 	"cy/game/db/mgo"
+	"cy/game/net"
 	"flag"
 	"fmt"
 	"os"
@@ -95,7 +96,6 @@ func main() {
 	initLog()
 
 	var err error
-
 	err = cache.Init(*redisAddr, *redisDb)
 	if err != nil {
 		log.Error(err.Error())
@@ -107,9 +107,9 @@ func main() {
 		log.Error(err.Error())
 		return
 	}
+    net.Init(*netAddr)			//初始化net
 
 	subscribeBackend(*redisAddr, *redisDb)
-
 	{
 		servicePath := "center"
 		d := client.NewConsulDiscovery(*basePath, servicePath, []string{*consulAddr}, nil)
