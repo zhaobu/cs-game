@@ -31,9 +31,9 @@ var (
 	redisAddr  = flag.String("redisAddr", "192.168.0.90:6379", "redis address")
 	redisDb    = flag.Int("redisDb", 1, "redis db select")
 	mgoURI     = flag.String("mgo", "mongodb://192.168.0.90:27017/game", "mongo connection URI")
-	netAddr    = flag.String("netaddr", `http://192.168.0.207:8096`, ",Net Addr")					//后台服务器地址
-	log  *zap.SugaredLogger //printf风格
-	tlog *zap.Logger        //structured 风格
+	netAddr    = flag.String("netaddr", "http://192.168.0.207:8096", ",Net Addr") //后台服务器地址
+	log        *zap.SugaredLogger                                                 //printf风格
+	tlog       *zap.Logger                                                        //structured 风格
 )
 
 func init() {
@@ -43,6 +43,7 @@ func init() {
 	*redisAddr = configs.Conf.RedisAddr
 	*redisDb = configs.Conf.RedisDb
 	*mgoURI = configs.Conf.MgoURI
+	*netAddr = configs.Conf.NetAddr
 	*addr = configs.Conf.GameNode[gameName].Addr
 }
 
@@ -138,11 +139,10 @@ func main() {
 		return
 	}
 
-	net.Init(*netAddr)			//初始化net
-	err = net.GetCondition()			//获取抽奖配置表
+	net.Init(*netAddr)       //初始化net
+	err = net.GetCondition() //获取抽奖配置表
 	if err != nil {
 		tlog.Error("net.GetCondition err", zap.Error(err))
-		return
 	}
 
 	s := server.NewServer()

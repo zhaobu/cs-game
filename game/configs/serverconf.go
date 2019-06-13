@@ -18,6 +18,7 @@ type GlobalConf struct {
 	RedisAddr  string `json:"RedisAddr"`
 	RedisDb    int    `json:"RedisDb"`
 	MgoURI     string `json:"MgoURI"`
+	NetAddr    string `json:"NetAddr"`
 }
 
 //节点配置
@@ -40,6 +41,7 @@ type allConfig struct {
 	ClubConf    *nodeConf `json:"ClubConf"`
 	CenterConf  *nodeConf `json:"CenterConf"`
 	GateConf    *nodeConf `json:"GateConf"`
+	HttpConf    *nodeConf `json:"HttpConf"`
 	*GlobalConf `json:"GlobalConf"`
 	*GameConfs  `json:"GameConfs"`
 }
@@ -50,6 +52,7 @@ func init() {
 		ClubConf:   new(nodeConf),
 		CenterConf: new(nodeConf),
 		GateConf:   new(nodeConf),
+		HttpConf:   new(nodeConf),
 		GlobalConf: new(GlobalConf),
 		GameConfs:  new(GameConfs),
 	}

@@ -3,12 +3,13 @@ package main
 import (
 	"context"
 	"cy/game/codec"
-	"cy/game/pb/club"
-	"cy/game/pb/common"
+	pbclub "cy/game/pb/club"
+	pbcommon "cy/game/pb/common"
 	"fmt"
 	"runtime/debug"
-	"github.com/sirupsen/logrus"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 func (p *club) QueryClubByIDReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
@@ -58,6 +59,7 @@ func (p *club) QueryClubByIDReq(ctx context.Context, args *codec.Message, reply 
 		Profile:      cc.Profile,
 		Base: &pbclub.BaseInfo{
 			Name:            cc.Name,
+			IsMasterPay:     cc.IsMasterPay,
 			IsAutoCreate:    cc.IsAutoCreate,
 			IsCustomGameArg: cc.IsCustomGameArg,
 		},
@@ -94,22 +96,22 @@ func (p *club) QueryClubByIDReq(ctx context.Context, args *codec.Message, reply 
 		rsp.Identity = m.Identity
 	}
 
-	if time.Now().Sub(cc.lastquerytime).Seconds() > 3 {//进行缓存同步
+	if time.Now().Sub(cc.lastquerytime).Seconds() > 3 { //进行缓存同步
 		synchroClubdeskinfo(cc.ID)
 		cc.lastquerytime = time.Now()
 	}
 
 	//在查询时 做一下俱乐部桌子校验 防止游戏服务器重启 自动开放俱乐部的桌子不存在的情况
-	if cc.IsAutoCreate && cc.f == nil {		//自动创建桌子 但是当前不存在桌子
+	if cc.IsAutoCreate && cc.f == nil { //自动创建桌子 但是当前不存在桌子
 		haveEmptyTable := false
-		for _,v :=range cc.desks {
-			if v.Status == "1" {	//有空桌子
+		for _, v := range cc.desks {
+			if v.Status == "1" { //有空桌子
 				haveEmptyTable = true
-				break;
+				break
 			}
 		}
-		if !haveEmptyTable {	//不存在空桌子
-			checkAutoCreate(cc.ID)	//自动创建房间
+		if !haveEmptyTable { //不存在空桌子
+			checkAutoCreate(cc.ID) //自动创建房间
 		}
 	}
 	for _, d := range cc.desks {

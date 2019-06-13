@@ -20,5 +20,5 @@ else
     echo 'rebuild false'
 fi
 cd $GOPATH/src/cy/game/bin/linux
-./$NodeName
+./$1
 

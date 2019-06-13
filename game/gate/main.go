@@ -30,7 +30,7 @@ var (
 	redisDb    = flag.Int("redisDb", 1, "redis db select")
 	mgoURI     = flag.String("mgo", "mongodb://192.168.0.90:27017/game", "mongo connection URI")
 	aliAppCode = flag.String("aliCode", `c091b052e9dd467fa1f49789be7add07`, "ali APPCODE")
-	netAddr    = flag.String("netaddr", `http://192.168.0.207:8096`, ",Net Addr")					//后台服务器地址
+	netAddr    = flag.String("netaddr", `http://192.168.0.207:8096`, ",Net Addr") //后台服务器地址
 	mgr        = newManager()
 
 	cliCenter client.XClient
@@ -81,6 +81,7 @@ func init() {
 	*redisAddr = configs.Conf.RedisAddr
 	*redisDb = configs.Conf.RedisDb
 	*mgoURI = configs.Conf.MgoURI
+	*netAddr = configs.Conf.NetAddr
 	*addr = configs.Conf.GateConf.Addr
 }
 
@@ -107,7 +108,7 @@ func main() {
 		log.Error(err.Error())
 		return
 	}
-    net.Init(*netAddr)			//初始化net
+	net.Init(*netAddr) //初始化net
 
 	subscribeBackend(*redisAddr, *redisDb)
 	{

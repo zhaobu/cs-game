@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"cy/game/codec"
-	"cy/game/pb/club"
-	"cy/game/pb/common"
+	pbclub "cy/game/pb/club"
+	pbcommon "cy/game/pb/common"
 	"fmt"
 
 	"github.com/sirupsen/logrus"
@@ -37,9 +37,9 @@ func (p *club) UpdateClubNoticeReq(ctx context.Context, args *codec.Message, rep
 			logrus.Error(err.Error())
 		}
 
-		if rsp.Code == 1 {
-			sendClubChangeInfo(req.ClubID, clubChangeTypUpdate, args.UserID)
-		}
+		//if rsp.Code == 1 {
+		//	sendClubChangeInfo(req.ClubID, clubChangeTypUpdate, args.UserID)
+		//}
 	}()
 
 	cc := getClub(req.ClubID)

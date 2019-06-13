@@ -1,5 +1,7 @@
 set GOOS=linux
 
+go build -tags consul -o bin/linux/http cy/game/http
+
 go build -tags consul -o bin/linux/gate cy/game/gate
 
 go build -tags consul -o bin/linux/center cy/game/center
