@@ -15,7 +15,9 @@
 *.log
 *.svn
 *.idea
-linux/
-win/
+game/bin/linux/*
+!game/bin/linux/configs/
+game/bin/win/*
+!game/bin/win/configs/
 90update/
 desk.json
