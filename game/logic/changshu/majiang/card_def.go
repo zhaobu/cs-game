@@ -102,7 +102,7 @@ func (self *CardDef) GetBaseCard(playerCount int32) []int32 {
 }
 
 //读取配牌
-func (self *CardDef) DebugCards(gameName string, baseCard []int32, playercount int32) []int32 {
+func (self *CardDef) GetDebugCards(gameName string, baseCard []int32, playercount int32) []int32 {
 	//从配牌文件读取
 	util.LoadJSON(configs.Conf.GameNode[gameName].GameTest, &testCards)
 	if !testCards.DebugCards {

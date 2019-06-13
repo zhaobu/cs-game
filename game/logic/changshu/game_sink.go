@@ -448,7 +448,7 @@ func (self *GameSink) drawCard(chairId, last int32) error {
 	self.curOutChair = chairId
 	//当抓到花或杠牌后，补上一张牌,能胡,杠上开花
 	huModeTags := map[mj.EmHuModeTag]bool{}
-	if last == -1 || len(huaCards2) > 0 {
+	if last == 1 || len(huaCards2) > 0 {
 		huModeTags[mj.HuModeTag_GangShangHua] = true
 	}
 	//分析能否暗杠,补杠,自摸胡
@@ -462,9 +462,6 @@ func (self *GameSink) drawCard(chairId, last int32) error {
 	}
 	//统计能做的操作
 	if !ret.Empty() {
-		if last == -1 && !ret.CanHu.Empty() {
-			//杠上开花
-		}
 		msg := &pbgame_logic.S2CHaveOperation{ChairId: chairId}
 		self.countCanOper(ret, chairId, msg)
 		//发送玩家可进行的操作
@@ -628,7 +625,7 @@ func (self *GameSink) countCanOper(ret *CanOperInfo, chairId int32, msg *pbgame_
 //洗牌
 func (self *GameSink) shuffle_cards() {
 	if !*release && configs.Conf.GameNode[gameName].GameTest != "" {
-		self.leftCard = cardDef.DebugCards(gameName, self.baseCard, self.game_config.PlayerCount)
+		self.leftCard = cardDef.GetDebugCards(gameName, self.baseCard, self.game_config.PlayerCount)
 		return
 	}
 	log.Debugf("*release=%v,configs.Conf.GameNode[gameName].GameTest=%v", *release, configs.Conf.GameNode[gameName].GameTest)
@@ -640,7 +637,7 @@ func (self *GameSink) checkPlayerOperationNeedWait(chairId int32, curOrder Prior
 	var otherOrder, waitOrder PriorityOrder = NoneOrder, NoneOrder
 	for k, v := range self.operOrder {
 		for k1, v1 := range v {
-			log.Debugf("self.operOrder[%d][%d]=%v", k, k1, v1)
+			log.Debugf("self.operOrder[%d][%d]=%+v", k, k1, v1)
 		}
 	}
 	//检查其他人能做的最高优先级操作
@@ -651,6 +648,9 @@ func (self *GameSink) checkPlayerOperationNeedWait(chairId int32, curOrder Prior
 					otherOrder = i
 					break
 				}
+			}
+			if otherOrder != NoneOrder {
+				break
 			}
 		}
 	}
@@ -1098,6 +1098,7 @@ func (self *GameSink) afterGameEnd(endType pbgame_logic.GameEndType) {
 //断线重连
 func (self *GameSink) gameReconnect(recInfo *pbgame_logic.GameDeskInfo, uid uint64) {
 	chairId := self.desk.GetChairidByUid(uid)
+	log.Infof("%s 第%d局玩家%d断线重连,chairId=%d", self.logHeadUser(-1), self.desk.curInning, uid, chairId)
 	//chairId为-1时为观察者游戏中途进入房间
 	switch recInfo.GameStatus {
 	case pbgame_logic.GameStatus_GSDice: //投色子
@@ -1209,7 +1210,7 @@ func (self *GameSink) addCanNotOut(chairId, card int32, chiType uint32) {
 
 func (self *GameSink) doWantCards(chairId int32, cards []int32) (errMsg string) {
 	var leftCardsStack map[int32]int32
-	if self.desk.gameStatus == pbgame_logic.GameStatus_GSPlaying { //游戏中要牌
+	if self.isPlaying { //游戏中要牌
 		leftCardsStack = mj.CalStackCards(self.leftCard, false)
 	} else { //游戏开始前配牌
 		leftCardsStack = mj.CalStackCards(self.baseCard, false)
@@ -1227,7 +1228,7 @@ func (self *GameSink) doWantCards(chairId int32, cards []int32) (errMsg string) 
 			return
 		}
 	}
-	if len(self.leftCard) > 0 { //已经发过牌
+	if self.isPlaying { //已经发过牌
 		//调整牌库的顺序
 		tmpLeftCards := mj.DelCards(cardsStack, cards, self.leftCard)
 		self.leftCard = append(tmpLeftCards, mj.ReversaCards(cards)...)
