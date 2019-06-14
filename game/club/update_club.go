@@ -59,11 +59,21 @@ func (p *club) UpdateClubReq(ctx context.Context, args *codec.Message, reply *co
 	}
 
 	cc.Lock()
-	if cc.MasterUserID != args.UserID {
-		cc.Unlock()
+	//if cc.MasterUserID != args.UserID {
+	//	cc.Unlock()
+	//	rsp.Code = 4
+	//	return
+	//}
+	// 权限检查
+	permisOK := false
+	if m, find := cc.Members[args.UserID]; find && (m.Identity == identityMaster || m.Identity == identityAdmin) {
+		permisOK = true
+	}
+	if !permisOK {	//操作用户权限够
 		rsp.Code = 4
 		return
 	}
+
 
 	cc.Name = req.Base.Name
 	cc.IsAutoCreate = req.Base.IsAutoCreate
