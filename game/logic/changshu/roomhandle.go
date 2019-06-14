@@ -221,6 +221,7 @@ func (self *roomHandle) HandleMakeDeskReq(uid uint64, deskID uint64, req *pbgame
 
 	//返回桌子参数
 	rsp.Info.ArgName, rsp.Info.ArgValue, _ = protobuf.Marshal(newD.deskConfig)
+	rsp.Info.TotalLoop = int64(newD.deskConfig.Args.RInfo.LoopCnt)
 	return true
 }
 

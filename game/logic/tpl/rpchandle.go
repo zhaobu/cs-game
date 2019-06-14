@@ -424,17 +424,11 @@ func (self *RpcHandle) MakeDeskReq(ctx context.Context, args *codec.Message, rep
 			deskInfo.CreateUserProfile = ui.Profile
 		}
 		deskInfo.CreateTime = time.Now().UTC().Unix()
-		// deskInfo.CreateFee =
-		// deskInfo.ArgName = rsp.Info.ArgName
-		// deskInfo.ArgValue = rsp.Info.ArgValue
 		deskInfo.Status = "1"
 		deskInfo.GameName = self.service.GameName
 		deskInfo.GameID = self.service.GameID
 		deskInfo.ClubID = req.ClubID
 		deskInfo.Kind = pbcommon.DeskType_DTFriend
-		// deskInfo.SdInfos
-		deskInfo.TotalLoop = 0
-		deskInfo.CurrLoop = 0
 
 		err = cache.AddDeskInfo(deskInfo) // 2> 保存桌子信息
 		if err != nil {
