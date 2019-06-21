@@ -5,8 +5,9 @@ import (
 	"cy/game/codec"
 	"cy/game/codec/protobuf"
 	"cy/game/db/mgo"
-	"cy/game/pb/common"
-	"cy/game/pb/hall"
+	"cy/game/net"
+	pbcommon "cy/game/pb/common"
+	pbhall "cy/game/pb/hall"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -34,6 +35,8 @@ func (s *session) handleHall(msg *codec.Message) error {
 		s.handleHallUpdateBindMobileReq(msg.UserID, v)
 	case *pbhall.UpdateIdCardReq:
 		s.handleHallUpdateIdCardReq(msg.UserID, v)
+	case *pbhall.QueryUserBuildInfoReq:
+		s.handleHallQueryUserBuildInfoReq(msg.UserID, v)
 	default:
 		return fmt.Errorf("bad type:%+v", v)
 	}
@@ -168,27 +171,28 @@ func (s *session) handleHallUpdateBindMobileReq(userID uint64, req *pbhall.Updat
 
 	userInfo, err := mgo.QueryUserByMobile(req.Mobile)
 	if !isLoginSucced {
-		// 登陆时，必须是已经被绑定过的
 		if err != nil {
 			rsp.Code = 3
 			return
 		}
 		userID = userInfo.UserID
 	} else {
-		// 重置时，必须没有被其他人绑定
 		if err == nil && userInfo.UserID != userID {
 			rsp.Code = 4
 			return
 		}
 	}
-
 	_, err = mgo.UpdateBindMobile(userID, req.Mobile, req.Password)
 	if err != nil {
 		rsp.Code = 5
 		return
 	}
-
 	rsp.Code = 1
+	//推送net
+	err = net.PushUserBindPhone(userID, req.Mobile)
+	if err != nil {
+		log.Errorf(err.Error())
+	}
 }
 
 func queryGameList() (gamelist []string, err error) {
@@ -216,4 +220,25 @@ func queryGameList() (gamelist []string, err error) {
 		}
 	}
 	return
+}
+
+//查询用户绑定信息
+func (s *session) handleHallQueryUserBuildInfoReq(uid uint64, req *pbhall.QueryUserBuildInfoReq) {
+	rsp := &pbhall.QueryUserBuildInfoRsp{
+		IsBuildPhone:    false,
+		PhoneNumber:     "",
+		IsBuildXianLiao: false,
+		XianLiaoAccount: "",
+	}
+	if req.Head != nil {
+		rsp.Head = &pbcommon.RspHead{Seq: req.Head.Seq}
+	}
+	defer func() {
+		s.sendPb(rsp)
+	}()
+	Info, _ := mgo.QueryUserInfo(s.uid)
+	if Info.Mobile != "" {
+		rsp.IsBuildPhone = true
+		rsp.PhoneNumber = Info.Mobile
+	}
 }

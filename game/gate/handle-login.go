@@ -65,30 +65,29 @@ func backendLoginReq(loginReq *pblogin.LoginReq) (loginRsp *pblogin.LoginRsp) {
 		u.Sex = loginReq.Sex
 		u.Profile = loginReq.Profile
 
-		var err   error
+		var err error
 		var isregister bool
-		loginRsp.User,isregister, err = mgo.UpsertUserInfo(u)
+		loginRsp.User, isregister, err = mgo.UpsertUserInfo(u)
 		if err != nil {
 			log.Error(errors.Wrapf(err, "upsertUserInfo %+v", *loginReq))
 			loginRsp.Code = pblogin.LoginRspCode_Other
 			loginRsp.StrCode = err.Error()
 			return
 		}
-		if isregister {	//新注册用户
+		if isregister { //新注册用户
 			err := net.PushUserRegister(loginRsp.User)
-			if err != nil{
+			if err != nil {
 				log.Errorf(err.Error())
 			}
 		}
 		loginRsp.Code = pblogin.LoginRspCode_Succ
 	case pblogin.LoginType_Phone:
 		mobile := loginReq.ID
-
+		//tlog.Info("请求手机登陆", zap.Any("mobile", mobile),zap.Any("Password", loginReq.Password))
 		if mobile == "" || loginReq.Password == "" {
 			loginRsp.Code = pblogin.LoginRspCode_IdOrPwdFailed
 			return
 		}
-
 		userInfo, err := mgo.QueryUserByMobile(mobile)
 		if err != nil {
 			loginRsp.Code = pblogin.LoginRspCode_MobileNoBind
@@ -96,7 +95,16 @@ func backendLoginReq(loginReq *pblogin.LoginReq) (loginRsp *pblogin.LoginRsp) {
 			return
 		}
 
-		if userInfo.Password != loginReq.Password {
+		if userInfo.Password != loginReq.Password { //两次校验 先做密码校验 失败之后在做验证码校验
+			captcha, err := cache.GetCaptcha(mobile)
+			//tlog.Info("获取手机验证码", zap.Any("mobile", mobile),zap.Any("Password", loginReq.Password),zap.Any("captcha", captcha))
+			if err == nil && captcha == loginReq.Password {
+				userInfo, _ = mgo.UpdateBindMobile(userInfo.UserID, mobile, loginReq.Password) //更新绑定密码数据
+				loginRsp.User = userInfo
+				loginRsp.Code = pblogin.LoginRspCode_Succ
+				return
+			}
+			cache.DeleteCaptcha(mobile)
 			loginRsp.Code = pblogin.LoginRspCode_IdOrPwdFailed
 			return
 		}
@@ -182,13 +190,11 @@ func (s *session) handleLoginMobileCaptchaReq(userID uint64, req *pblogin.Mobile
 		rsp.Code = 6
 		return
 	}
-
 	err = sendMobileCaptcha(req.Mobile, captcha)
 	if err != nil {
 		rsp.Code = 7
 		return
 	}
-
 	rsp.Code = 1
 	rsp.TestCaptcha = captcha // TODO
 }

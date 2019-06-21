@@ -5,52 +5,65 @@ import "cy/game/pb/common/common.proto";
 
 package pbhall;
 
-// 查询支持游戏 c -> s 
+// 查询支持游戏 c -> s
 message QueryGameListReq {
-    pbcommon.ReqHead Head = 1;   
+  pbcommon.ReqHead Head = 1;
 }
 
 message QueryGameListRsp {
-    pbcommon.RspHead Head = 1;
-    repeated string GameNames = 2;
+  pbcommon.RspHead Head = 1;
+  repeated string GameNames = 2;
 }
 
 // 查询会话信息 c -> s
 message QuerySessionInfoReq {
-	pbcommon.ReqHead Head = 1;
+  pbcommon.ReqHead Head = 1;
 }
 
 message QuerySessionInfoRsp {
-    pbcommon.RspHead Head = 1;
-	pbcommon.SessionInfo Info = 2;
+  pbcommon.RspHead Head = 1;
+  pbcommon.SessionInfo Info = 2;
 }
 
 // 查询用户信息 c -> s
 message QueryUserInfoReq {
-    pbcommon.ReqHead Head = 1;
+  pbcommon.ReqHead Head = 1;
 }
 
 message QueryUserInfoRsp {
-    pbcommon.RspHead Head = 1;
-    pbcommon.UserInfo Info = 2;
+  pbcommon.RspHead Head = 1;
+  pbcommon.UserInfo Info = 2;
+}
+
+//查询用户绑定信息
+message QueryUserBuildInfoReq {
+  pbcommon.ReqHead Head = 1;
+}
+
+//查询用户绑定信息
+message QueryUserBuildInfoRsp {
+  pbcommon.RspHead Head = 1;
+  bool IsBuildPhone = 2;       //是否绑定了手机号
+  string PhoneNumber = 3;      //绑定的手机号
+  bool IsBuildXianLiao = 4;    //是否绑定了闲聊账号
+  string XianLiaoAccount = 5;  //绑定的闲聊Account
 }
 
 // 查询玩家建的桌子  c -> s
 message QueryUserOwnDeskReq {
-    pbcommon.ReqHead Head = 1;
+  pbcommon.ReqHead Head = 1;
 }
 
 message QueryUserOwnDeskRsp {
-    pbcommon.RspHead Head = 1;
-    repeated pbcommon.DeskInfo Infos = 2;
+  pbcommon.RspHead Head = 1;
+  repeated pbcommon.DeskInfo Infos = 2;
 }
 
 // s -> c
 message UserWealthChange {
-    uint64 UserID = 1;
-    uint64 Gold = 2;
-    int64 GoldChange = 3;
-    uint64 Masonry = 4;
-    int64 MasonryChange = 5;
+  uint64 UserID = 1;
+  uint64 Gold = 2;
+  int64 GoldChange = 3;
+  uint64 Masonry = 4;
+  int64 MasonryChange = 5;
 }
-

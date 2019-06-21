@@ -612,6 +612,12 @@ func (d *Desk) OnOffLine(uid uint64, online bool) {
 				//重新从mgo获取session信息
 				dUserInfo.info, _ = mgo.QueryUserInfo(uid)
 				d.sendDeskInfo(uid)
+				//如果有解散信息,就广播当前解散信息
+				if d.voteInfo != nil {
+					leftTime := dissTimeOut - time.Now().Sub(d.voteInfo.voteTime)
+					//广播选择
+					d.SendData(uid, &pbgame.VoteDestroyDeskNotif{DeskID: d.deskId, VoteUser: d.voteInfo.voteUser, LeftTime: int32(leftTime.Seconds()), VoteResult: d.getVoteResult()})
+				}
 			}
 		} else {
 			if !online { //观察者下线
