@@ -2,9 +2,9 @@ package mgo
 
 import (
 	"cy/game/net"
-	"strconv"
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
+	"strconv"
 )
 
 const (
@@ -80,8 +80,8 @@ type GameRecord struct {
 
 //俱乐部当日统计数据-----------------------------------------------------------------------------------------------------
 type UserCurrDayStatisticsData struct {
-	UserId             uint64  `bson:"_id"`//用户Id
-	StatisticsPlay     int64  //当天本俱乐部次数统计
+	UserId         uint64 `bson:"_id"` //用户Id
+	StatisticsPlay int64  //当天本俱乐部次数统计
 }
 type ClubCurrDayStatisticsData struct {
 	ClubId int64 //俱乐部Id
@@ -170,12 +170,11 @@ func AddGameRecord(gr *WirteRecord) (err error) {
 
 	//记录当局详情
 	err = mgoSess.DB("").C(GameRecordTable).Insert(rgd)
-	if err != nil {
-		if err == nil && gr.CreateInfo.ClubId != 0 {
+	if err == nil {
+		if gr.CreateInfo.ClubId != 0 {
 			AddClubCurrDayStatistics(gr) //写入统计数据
 		}
 		AddUserCurrDayStatistics(gr)
-		return
 	}
 	return
 }
@@ -187,23 +186,24 @@ func AddUserCurrDayStatistics(gr *WirteRecord) (err error) {
 		_err := mgoSess.DB("").C(UserCurrDayStatisticsTable).Find(bson.M{"_id": v.UserId}).One(ud)
 		if _err != nil {
 			ud = &UserCurrDayStatisticsData{
-				UserId: v.UserId,
-				StatisticsPlay:0,
+				UserId:         v.UserId,
+				StatisticsPlay: 0,
 			}
 		}
-		ud.StatisticsPlay ++
-		if int(ud.StatisticsPlay) == net.Bureau{//达到抽奖次数
-			net.GetletteNum(ud.UserId,int(ud.StatisticsPlay))
+		ud.StatisticsPlay++
+		if int(ud.StatisticsPlay) == net.Bureau { //达到抽奖次数
+			net.GetletteNum(ud.UserId, int(ud.StatisticsPlay))
 		}
 		_, err = mgoSess.DB("").C(UserCurrDayStatisticsTable).Upsert(bson.M{"_id": v.UserId}, ud)
 		if err != nil {
 			return err
 		}
+		SetUserGamePlay(v.UserId, v.Score > 0)
 	}
 	return err
 }
 
-func CleraUserCurrDayStatistics()(err error){
+func CleraUserCurrDayStatistics() (err error) {
 	err = mgoSess.DB("").C(UserCurrDayStatisticsTable).Remove(nil)
 	return
 }
@@ -309,7 +309,6 @@ func QueryRoomRecordByRoom(deskid uint64) (rsp *RoomRecord, err error) {
 	}
 	return
 }
-
 
 //查询游戏具体详情数据
 func QueryGameRecord(roomRecordId string) (rsp []*GameRecord, err error) {

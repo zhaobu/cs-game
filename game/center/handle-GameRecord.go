@@ -97,11 +97,17 @@ func (p *center) QueryRoomRecordReq(ctx context.Context, args *codec.Message, re
 			GameRecordIds: v.GameRecords,
 		}
 		for _, v1 := range v.GamePlayers {
-			_data.GamePlayers = append(_data.GamePlayers, &pbgamerecord.RoomPlayerInfo{
+			udata,err := mgo.QueryUserInfo(v1.UserId)
+			playerinfo := &pbgamerecord.RoomPlayerInfo{
 				UserId:     v1.UserId,
 				Name:       v1.Name,
 				TotalScore: v1.PreScore,
-			})
+			}
+			if err == nil{
+				playerinfo.HeadUrl = udata.Profile
+			}
+			_data.GamePlayers = append(_data.GamePlayers,playerinfo )
+
 		}
 		rsp.Datas = append(rsp.Datas, _data)
 	}

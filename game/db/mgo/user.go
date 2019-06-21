@@ -5,7 +5,6 @@ import (
 	pbgame "cy/game/pb/game"
 	"cy/game/util"
 	"fmt"
-
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 )
@@ -72,17 +71,19 @@ func UpdateWealthPre(uid uint64, feeType pbgame.FeeType, change int64) (*pbcommo
 	}
 	fieldPre := field + "pre"
 
-	rsp := &pbcommon.UserInfo{}
+	result := bson.M{}
 	_, err := mgoSess.DB("").C("userinfo").Find(bson.M{"userid": uid, field: bson.M{"$gte": change}}).Apply(mgo.Change{
 		Upsert:    false,
 		ReturnNew: true,
 		Update:    bson.M{"$inc": bson.M{field: change * -1, fieldPre: change}},
-	}, rsp)
+	}, result)
 
 	if err != nil {
 		return nil, err
 	}
 
+	rsp := &pbcommon.UserInfo{}
+	err = util.Bson2struct(result, rsp)
 	return rsp, err
 }
 
@@ -98,17 +99,19 @@ func UpdateWealthPreSure(uid uint64, feeType pbgame.FeeType, change int64) (*pbc
 	}
 	fieldPre := field + "pre"
 
-	rsp := &pbcommon.UserInfo{}
+	result := bson.M{}
 	_, err := mgoSess.DB("").C("userinfo").Find(bson.M{"userid": uid, fieldPre: bson.M{"$gte": change}}).Apply(mgo.Change{
 		Upsert:    false,
 		ReturnNew: true,
 		Update:    bson.M{"$inc": bson.M{field: change, fieldPre: change * -1}},
-	}, rsp)
+	}, result)
 
 	if err != nil {
 		return nil, err
 	}
 
+	rsp := &pbcommon.UserInfo{}
+	err = util.Bson2struct(result, rsp)
 	return rsp, err
 }
 
@@ -116,8 +119,8 @@ func UpdateWealthPreSure(uid uint64, feeType pbgame.FeeType, change int64) (*pbc
 func UpsertUserInfo(u *pbcommon.UserInfo) (*pbcommon.UserInfo, bool, error) {
 	coll := mgoSess.DB("").C("userinfo")
 
-	old := &pbcommon.UserInfo{}
-	err := coll.Find(bson.M{"wxid": u.WxID}).One(old)
+	var find = make(bson.M)
+	err := coll.Find(bson.M{"wxid": u.WxID}).One(find)
 	if err != nil {
 		if err == mgo.ErrNotFound {
 			var err2 error
@@ -137,6 +140,8 @@ func UpsertUserInfo(u *pbcommon.UserInfo) (*pbcommon.UserInfo, bool, error) {
 		return nil, false, err
 	}
 
+	old := &pbcommon.UserInfo{}
+	err = util.Bson2struct(find, old)
 	if err != nil {
 		return nil, false, err
 	}
@@ -169,34 +174,40 @@ func incUserID() (uint64, error) {
 
 func QueryUserInfo(uid uint64) (info *pbcommon.UserInfo, err error) {
 	info = &pbcommon.UserInfo{}
-	err = mgoSess.DB("").C("userinfo").Find(bson.M{"userid": uid}).One(info)
+	result := bson.M{}
+	err = mgoSess.DB("").C("userinfo").Find(bson.M{"userid": uid}).One(result)
 	if err != nil {
 		return nil, err
 	}
+	err = util.Bson2struct(result, info)
 	return
 }
 
 func QueryUserByMobile(mobile string) (info *pbcommon.UserInfo, err error) {
 	info = &pbcommon.UserInfo{}
-	err = mgoSess.DB("").C("userinfo").Find(bson.M{"mobile": mobile}).One(info)
+	result := bson.M{}
+	err = mgoSess.DB("").C("userinfo").Find(bson.M{"mobile": mobile}).One(result)
 	if err != nil {
 		return nil, err
 	}
+	err = util.Bson2struct(result, info)
 	return
 }
 
 func updateUserOneField(uid uint64, fieldName string, newValue string) (info *pbcommon.UserInfo, err error) {
-	info = &pbcommon.UserInfo{}
+	result := bson.M{}
 	_, err = mgoSess.DB("").C("userinfo").Find(bson.M{"userid": uid}).Apply(mgo.Change{
 		Upsert:    false,
 		ReturnNew: true,
 		Update:    bson.M{"$set": bson.M{fieldName: newValue}},
-	}, info)
+	}, result)
 
 	if err != nil {
 		return nil, err
 	}
 
+	info = &pbcommon.UserInfo{}
+	err = util.Bson2struct(result, info)
 	return
 }
 
@@ -206,19 +217,21 @@ func updateUserManyField(uid uint64, kv map[string]string) (info *pbcommon.UserI
 		bm[k] = v
 	}
 
-	info = &pbcommon.UserInfo{}
+	result := bson.M{}
 	_, err = mgoSess.DB("").C("userinfo").Find(bson.M{"userid": uid}).Apply(mgo.Change{
 		Upsert:    false,
 		ReturnNew: true,
 		Update:    bson.M{"$set": bm},
-	}, info)
+	}, result)
 
 	if err != nil {
 		return nil, err
 	}
 
-	fmt.Printf("%+v\n", info)
+	fmt.Printf("%+v\n", result)
 
+	info = &pbcommon.UserInfo{}
+	err = util.Bson2struct(result, info)
 	return
 }
 
@@ -263,25 +276,50 @@ func UpdateWealthByNet(uid uint64, feeType uint32, change int64) (user *pbcommon
 	if newnum < 0 {
 		return nil, fmt.Errorf("余额不足")
 	}
-	user = &pbcommon.UserInfo{}
+	result := bson.M{}
 	_, err = mgoSess.DB("").C("userinfo").Find(bson.M{"userid": uid}).Apply(mgo.Change{
 		Upsert:    false,
 		ReturnNew: true,
 		Update:    bson.M{"$inc": bson.M{field: change}},
-	}, user)
+	}, result)
+	user = &pbcommon.UserInfo{}
+	err = util.Bson2struct(result, user)
 	return user, nil
 }
 
 //设置用户红名接口
 func SetUserRedName(uid uint64, isredname bool) (user *pbcommon.UserInfo, err error) {
-	user = &pbcommon.UserInfo{}
+	result := bson.M{}
 	_, err = mgoSess.DB("").C("userinfo").Find(bson.M{"userid": uid}).Apply(mgo.Change{
 		Upsert:    true,
 		ReturnNew: true,
 		Update:    bson.M{"$set": bson.M{"isredname": isredname}},
-	}, user)
+	}, result)
 	if err != nil {
 		return nil, err
 	}
+	user = &pbcommon.UserInfo{}
+	err = util.Bson2struct(result, user)
 	return user, nil
+}
+
+//设置用户邮寄记录信息
+func SetUserGamePlay(uid uint64, iswin bool) (err error) {
+	result := bson.M{}
+	var change mgo.Change
+	if iswin {
+		change = mgo.Change{
+			Upsert:    true,
+			ReturnNew: true,
+			Update:    bson.M{"$inc": bson.M{"totalcase": 1, "wincasecase": 1}},
+		}
+	} else {
+		change = mgo.Change{
+			Upsert:    true,
+			ReturnNew: true,
+			Update:    bson.M{"$inc": bson.M{"totalcase": 1}},
+		}
+	}
+	_, err = mgoSess.DB("").C("userinfo").Find(bson.M{"userid": uid}).Apply(change, result)
+	return err
 }
