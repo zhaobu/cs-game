@@ -61,6 +61,7 @@ func (p *center) QueryRoomRecordReq(ctx context.Context, args *codec.Message, re
 	}
 	querydata := []*mgo.RoomRecord{}
 	if req.QueryType == 1 { //按userId查询
+		rsp.QueryUserId = req.QueryUserId	//客户端需求 经查询的uid 返回给用户
 		querydata, err = mgo.QueryUserRoomRecord(req.QueryUserId, req.QueryStartTime, req.QueryEndTime, req.CurPage, req.Limit)
 		if err != nil {
 			tlog.Warn("查询用户数据失败 err = " + err.Error())

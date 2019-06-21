@@ -299,6 +299,18 @@ func QueryClubRoomRecordByRoom(clubid int64, deskid uint64, _curPage, _limit int
 	return
 }
 
+//查询俱乐部的战绩数据
+func QueryRoomRecordByRoom(deskid uint64) (rsp *RoomRecord, err error) {
+	rsp = &RoomRecord{}
+	query := bson.M{"deskid": deskid}
+	err = mgoSess.DB("").C(RoomRecordTable).Find(query).Sort("-gamestarttime").One(rsp)
+	if err != nil {
+		return
+	}
+	return
+}
+
+
 //查询游戏具体详情数据
 func QueryGameRecord(roomRecordId string) (rsp []*GameRecord, err error) {
 	rsp = []*GameRecord{}

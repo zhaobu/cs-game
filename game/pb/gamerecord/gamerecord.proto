@@ -25,7 +25,8 @@ message QueryRoomRecordReq {
 message RoomPlayerInfo {
   uint64 UserId = 1;     //用户Id
   string Name = 2;       //用户名
-  int32 TotalScore = 3;  //输赢积分 房间内的统计数据
+  string HeadUrl = 3;    //用户头像地址
+  int32 TotalScore = 4;  //输赢积分 房间内的统计数据
 }
 
 //房间记录
@@ -46,8 +47,9 @@ message RoomRecord {
 message QueryRoomRecordRsp {
   pbcommon.RspHead Head = 1;
   int32 Error = 2;  // 0 查询成功 1参数异常(不存在此人或者此俱乐部) 2权限不足
-  repeated RoomRecord Datas = 3;  //房间记录数据
-  int32 PageCount = 4;            //总页数
+  uint64 QueryUserId = 3;         //用户Id
+  repeated RoomRecord Datas = 4;  //房间记录数据
+  int32 PageCount = 5;            //总页数
 }
 
 //查询游戏记录请求(点击详情按钮)
