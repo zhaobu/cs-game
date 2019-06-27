@@ -12,6 +12,7 @@ enum LoginType {
     QQ     = 2;
 	Phone  = 3;
     Email  = 4;
+    XianLiao = 5;       //闲聊登陆方式
 }
 
 // 登陆回应code
@@ -27,8 +28,8 @@ enum LoginRspCode {
 message LoginReq {
     pbcommon.ReqHead Head = 1;
     LoginType LoginType = 2;     
-    string ID = 3; // WX:为微信ID Phone:手机号码
-    string Password = 4; // WX:为空 Phone:登陆密码
+    string ID = 3; // WX:为微信ID Phone:手机号码 XianLiao:openid
+    string Password = 4; // WX:为空 Phone:登陆密码 XianLiao:为空
     string Version = 5;
     string DeviceType = 6;
     string Sex = 7;

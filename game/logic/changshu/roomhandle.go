@@ -46,21 +46,6 @@ func (self *roomHandle) HandleGameCommandReq(uid uint64, req *pbgame.GameCommand
 	self.RoomServie.ToGateNormal(rsp, uid)
 }
 
-//HandleChatMessageReq玩家发送聊天
-func (self *roomHandle) HandleChatMessageReq(uid uint64, req *pbgame.ChatMessageReq) {
-	//检查桌子是否存在
-	d := getDeskByUID(uid)
-	if d == nil {
-		tlog.Info("HandleChatMessageReq find no desk", zap.Uint64("uid", uid))
-		return
-	}
-	if req.Info == "" {
-		tlog.Info("HandleChatMessageReq empty message", zap.Uint64("uid", uid))
-		return
-	}
-	d.doChatMessage(uid, req)
-}
-
 //HandleVoteDestroyDeskReq玩家选择解散请求
 func (self *roomHandle) HandleVoteDestroyDeskReq(uid uint64, req *pbgame.VoteDestroyDeskReq) {
 	//检查桌子是否存在

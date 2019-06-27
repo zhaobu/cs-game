@@ -236,29 +236,32 @@ message GameNotif {
   bytes NotifValue = 2;
 }
 
-//发送聊天信息 c -> s
-message ChatMessageReq {
-  pbcommon.ReqHead Head = 1;
-  string Info = 2;
-}
-
-//广播聊天信息 s-> c
-message ChatMessageNotif {
-  uint64 UserID = 1;
-  string Info = 2;
+enum CmdType {
+  CmdNone = 0;
+  CmdEmoji = 1;      //发送表情
+  CmdDebugCard = 2;  //配牌,要牌
+  CmdProps = 3;      //发送道具
+  CmdPhrase = 4;     //发送短语
 }
 
 //发送游戏指令 c -> s
 message GameCommandReq {
   pbcommon.ReqHead Head = 1;
-  int32 CmdType = 2;   //指令类型
-  string CmdInfo = 3;  //指令内容(按json格式前后端协定好格式)
+  CmdType CmdType = 2;  //指令类型
+  string CmdInfo = 3;   //指令内容(按json格式前后端协定好格式)
 }
 
 //发送游戏指令 s -> c
 message GameCommandRsp {
   pbcommon.RspHead Head = 1;
-  int32 CmdType = 2;  //执行的命令码
-  int32 Code = 3;     // 0表示执行成功,1表示失败
-  string ErrMsg = 4;  //指令错误原因
+  CmdType CmdType = 2;  //执行的命令码
+  int32 Code = 3;       // 0表示执行成功,1表示失败
+  string ErrMsg = 4;    //指令错误原因
+}
+
+//游戏指令通知,发送给1个或者多个人
+message GameCommandNotif {
+  uint64 UserID = 1;
+  CmdType CmdType = 2;  //执行的命令码
+  string CmdInfo = 3;   //指令内容
 }

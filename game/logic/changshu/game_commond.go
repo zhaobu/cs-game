@@ -4,8 +4,6 @@ import (
 	pbgame "cy/game/pb/game"
 	"encoding/json"
 	"fmt"
-
-	"go.uber.org/zap"
 )
 
 type gameCommond struct {
@@ -13,32 +11,28 @@ type gameCommond struct {
 
 func (self *gameCommond) HandleCommond(uid uint64, req *pbgame.GameCommandReq, rsp *pbgame.GameCommandRsp) {
 	switch req.CmdType {
-	case 1: //强制解散房间
-		self.CmdDestroy(uid, req, rsp)
+	case pbgame.CmdType_CmdEmoji, pbgame.CmdType_CmdProps, pbgame.CmdType_CmdPhrase: //发送表情,道具,短语
+		self.SendFixedInfo(uid, req, rsp)
 	case 2: //要牌
 		self.CmdWantCard(uid, req, rsp)
 	}
 }
 
-//强制解散房间
-func (self *gameCommond) CmdDestroy(uid uint64, req *pbgame.GameCommandReq, rsp *pbgame.GameCommandRsp) {
-	type cmd struct {
-		DeskId uint64 `json:"deskId"`
-	}
-	tmp := &cmd{}
-	if err := json.Unmarshal([]byte(req.CmdInfo), tmp); err != nil {
-		fmt.Println("json.Unmarshal err = ", err)
+//发送表情,道具,短语
+func (self *gameCommond) SendFixedInfo(uid uint64, req *pbgame.GameCommandReq, rsp *pbgame.GameCommandRsp) {
+	//检查玩家是否在桌子
+	d := getDeskByUID(uid)
+	defer func() {
+		if rsp.ErrMsg != "" {
+			tlog.Error(rsp.ErrMsg)
+		}
+	}()
+	if d == nil || d.GetChairidByUid(uid) == -1 {
+		rsp.ErrMsg = fmt.Sprintf("SendEmojiProps err,玩家%d不在桌子中,无法发送表情道具,短语信息", uid)
 		return
 	}
-	//检查桌子是否存在
-	d := getDeskByID(tmp.DeskId)
-	if d == nil {
-		tlog.Error("CmdDestroy err,不存在该桌子号", zap.Uint64("deskId", tmp.DeskId))
-		return
-	}
-	realReq := &pbgame.DestroyDeskReq{DeskID: tmp.DeskId, Type: pbgame.DestroyDeskType_DestroyTypeDebug}
-	realRsp := &pbgame.DestroyDeskRsp{}
-	d.doDestroyDesk(uid, realReq, realRsp)
+	//广播消息
+	d.SendData(0, &pbgame.GameCommandNotif{UserID: uid, CmdType: req.CmdType, CmdInfo: req.CmdInfo})
 	return
 }
 

@@ -626,13 +626,3 @@ func (d *Desk) OnOffLine(uid uint64, online bool) {
 		}
 	}
 }
-
-//发送聊天消息
-func (d *Desk) doChatMessage(uid uint64, req *pbgame.ChatMessageReq) {
-	msg := &pbgame.ChatMessageNotif{UserID: uid, Info: req.Info}
-	for _, userInfo := range d.playChair {
-		if userInfo.info.UserID != uid {
-			d.SendData(userInfo.info.UserID, msg)
-		}
-	}
-}
