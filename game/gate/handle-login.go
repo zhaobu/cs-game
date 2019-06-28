@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
+	"strings"
 
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
@@ -45,7 +46,7 @@ func loginBySessionID(loginReq *pblogin.LoginReq) (loginRsp *pblogin.LoginRsp) {
 	return
 }
 
-func backendLoginReq(loginReq *pblogin.LoginReq) (loginRsp *pblogin.LoginRsp) {
+func backendLoginReq(s *session,loginReq *pblogin.LoginReq) (loginRsp *pblogin.LoginRsp) {
 	loginRsp = &pblogin.LoginRsp{}
 	if loginReq.Head != nil {
 		loginRsp.Head = &pbcommon.RspHead{Seq: loginReq.Head.Seq}
@@ -59,12 +60,9 @@ func backendLoginReq(loginReq *pblogin.LoginReq) (loginRsp *pblogin.LoginRsp) {
 		u := &pbcommon.UserInfo{}
 		u.WxID = loginReq.ID // 登陆标示
 		// 更新的信息
-		u.Longitude = loginReq.Longitude
-		u.Latitude = loginReq.Latitude
 		u.Name = loginReq.Name
 		u.Sex = loginReq.Sex
 		u.Profile = loginReq.Profile
-
 		var err error
 		var isregister bool
 		loginRsp.User, isregister, err = mgo.UpsertUserInfo(u)
@@ -108,7 +106,20 @@ func backendLoginReq(loginReq *pblogin.LoginReq) (loginRsp *pblogin.LoginRsp) {
 			loginRsp.Code = pblogin.LoginRspCode_IdOrPwdFailed
 			return
 		}
-
+		loginRsp.User = userInfo
+		loginRsp.Code = pblogin.LoginRspCode_Succ
+	case pblogin.LoginType_XianLiao:
+		xlid := loginReq.ID
+		if xlid == ""  {
+			loginRsp.Code = pblogin.LoginRspCode_IdOrPwdFailed
+			return
+		}
+		userInfo, err := mgo.QueryUserByXianLiao(xlid)
+		if err != nil {
+			loginRsp.Code = pblogin.LoginRspCode_XLNoBind
+			loginRsp.StrCode = err.Error()
+			return
+		}
 		loginRsp.User = userInfo
 		loginRsp.Code = pblogin.LoginRspCode_Succ
 	default:
@@ -117,10 +128,18 @@ func backendLoginReq(loginReq *pblogin.LoginReq) (loginRsp *pblogin.LoginRsp) {
 
 	if loginRsp.Code == pblogin.LoginRspCode_Succ {
 		if rid, err := uuid.NewV4(); err == nil {
+			loginRsp.User.IP = strings.Split(s.tc.RemoteAddr().String(),":")[0] 		//获取用户IP
+			err = mgo.UpdateUserIP(loginRsp.User.UserID,loginRsp.User.IP)	//写入数据库
+			if err != nil{
+				tlog.Info("更新用户IP 错误", zap.Any("uId", loginRsp.User.UserID),zap.Any("IP", loginRsp.User.IP))
+			}
+			err = mgo.UpdateUserLocation(loginRsp.User.UserID,loginReq.Longitude,loginReq.Latitude,loginReq.Place)	//写入数据库
+			if err != nil{
+				tlog.Info("更新用户定位 错误", zap.Any("uId", loginRsp.User.UserID))
+			}
 			loginRsp.User, _ = mgo.UpdateSessionID(loginRsp.User.UserID, rid.String())
 		}
 	}
-
 	return
 }
 

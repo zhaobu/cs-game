@@ -6,10 +6,11 @@ import (
 	"cy/game/codec/protobuf"
 	"cy/game/db/mgo"
 	"cy/game/net"
-	pbcommon "cy/game/pb/common"
-	pbhall "cy/game/pb/hall"
+	"cy/game/pb/common"
+	"cy/game/pb/hall"
 	"encoding/json"
 	"fmt"
+	"go.uber.org/zap"
 	"strings"
 	"time"
 
@@ -17,11 +18,12 @@ import (
 )
 
 func (s *session) handleHall(msg *codec.Message) error {
+
 	pb, err := protobuf.Unmarshal(msg.Name, msg.Payload)
 	if err != nil {
 		return err
 	}
-
+	tlog.Info("收到大厅消息", zap.Any("err", err))
 	switch v := pb.(type) {
 	case *pbhall.QueryGameListReq:
 		s.handleHallQueryGameListReq(v)
@@ -33,10 +35,12 @@ func (s *session) handleHall(msg *codec.Message) error {
 		s.handleHallQueryUserOwnDeskReq(v)
 	case *pbhall.UpdateBindMobileReq:
 		s.handleHallUpdateBindMobileReq(msg.UserID, v)
+	case *pbhall.BindXianLiaoAccountReq:
+		s.handleHallBindXianLiaoAccountReq(msg.UserID, v)
 	case *pbhall.UpdateIdCardReq:
 		s.handleHallUpdateIdCardReq(msg.UserID, v)
 	case *pbhall.QueryUserBuildInfoReq:
-		s.handleHallQueryUserBuildInfoReq(msg.UserID, v)
+		s.handleHallQueryUserBuildInfoReq(msg.UserID,v)
 	default:
 		return fmt.Errorf("bad type:%+v", v)
 	}
@@ -189,10 +193,46 @@ func (s *session) handleHallUpdateBindMobileReq(userID uint64, req *pbhall.Updat
 	}
 	rsp.Code = 1
 	//推送net
-	err = net.PushUserBindPhone(userID, req.Mobile)
-	if err != nil {
-		log.Errorf(err.Error())
+	tlog.Info("推送用户绑定手机信息", zap.Any("Uid", userID), zap.Any("Mobile", req.Mobile))
+	err = net.PushUserBindPhone(userID,req.Mobile)
+	if err != nil{
+		tlog.Error("推送用户绑定手机信息 错误", zap.Any("Uid", userID), zap.Any("Mobile", req.Mobile),zap.Any("err",err.Error()))
 	}
+}
+
+//绑定闲聊账号
+func (s *session) handleHallBindXianLiaoAccountReq(userID uint64,req *pbhall.BindXianLiaoAccountReq){
+	tlog.Info("收到用户绑定闲聊信息", zap.Any("userID", userID), zap.Any("req", req))
+	rsp := &pbhall.BindXianLiaoAccountRsp{}
+	if req.Head != nil {
+		rsp.Head = &pbcommon.RspHead{Seq: req.Head.Seq}
+	}
+	defer func() {
+		s.sendPb(rsp)
+	}()
+
+	if req.XianLiaoId == "" {
+		rsp.Code = 2
+		return
+	}
+	isLoginSucced := (userID != 0)
+
+	if !isLoginSucced {
+		rsp.Code = 3
+		return
+	} else {
+		userInfo, err := mgo.QueryUserByXianLiao(req.XianLiaoId)
+		if err == nil && userInfo.UserID != userID {
+			rsp.Code = 4
+			return
+		}
+	}
+	_, err := mgo.BindXianLiaoID(userID, req.XianLiaoId)
+	if err != nil {
+		rsp.Code = 5
+		return
+	}
+	rsp.Code = 1
 }
 
 func queryGameList() (gamelist []string, err error) {
@@ -223,12 +263,12 @@ func queryGameList() (gamelist []string, err error) {
 }
 
 //查询用户绑定信息
-func (s *session) handleHallQueryUserBuildInfoReq(uid uint64, req *pbhall.QueryUserBuildInfoReq) {
+func (s *session) handleHallQueryUserBuildInfoReq(uid uint64, req *pbhall.QueryUserBuildInfoReq){
 	rsp := &pbhall.QueryUserBuildInfoRsp{
-		IsBuildPhone:    false,
-		PhoneNumber:     "",
-		IsBuildXianLiao: false,
-		XianLiaoAccount: "",
+		IsBuildPhone:false,
+		PhoneNumber:"",
+		IsBuildXianLiao:false,
+		XianLiaoAccount:"",
 	}
 	if req.Head != nil {
 		rsp.Head = &pbcommon.RspHead{Seq: req.Head.Seq}
@@ -237,8 +277,12 @@ func (s *session) handleHallQueryUserBuildInfoReq(uid uint64, req *pbhall.QueryU
 		s.sendPb(rsp)
 	}()
 	Info, _ := mgo.QueryUserInfo(s.uid)
-	if Info.Mobile != "" {
+	if Info.Mobile != ""{
 		rsp.IsBuildPhone = true
 		rsp.PhoneNumber = Info.Mobile
+	}
+	if Info.XLID != ""{
+		rsp.IsBuildXianLiao = true
+		rsp.XianLiaoAccount = Info.XLID
 	}
 }

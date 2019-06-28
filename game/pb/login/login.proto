@@ -22,6 +22,7 @@ enum LoginRspCode {
     Succ = 2;
     Other = 3;
     MobileNoBind = 4; // 手机登陆时，此手机没有被绑定
+    XLNoBind  = 5;     // 闲聊登陆时，此 闲聊没有被绑定
 }
 
 // 登陆请求 c -> s
@@ -38,9 +39,10 @@ message LoginReq {
     string Profile = 10; // 头像地址
     double Longitude = 13; // 经度
     double Latitude = 14; // 维度
-    string IsSimulator = 15;
-    string NetworkType = 16;
-    string Energy = 17; // 电量 
+    string Place = 15;    //定位地址名名称
+    string IsSimulator = 16;
+    string NetworkType = 17;
+    string Energy = 18; //电量
 }
 
 // s -> c

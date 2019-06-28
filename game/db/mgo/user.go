@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
+	"time"
 )
 
 var (
@@ -134,6 +135,7 @@ func UpsertUserInfo(u *pbcommon.UserInfo) (*pbcommon.UserInfo, bool, error) {
 			u.Masonry = 8
 			u.GoldPre = 0
 			u.MasonryPre = 0
+			u.RegisterTime = time.Now().Unix()	//注册时间
 			bs, _ := util.Struct2bson(u)
 			return u, true, coll.Insert(bs)
 		}
@@ -193,6 +195,19 @@ func QueryUserByMobile(mobile string) (info *pbcommon.UserInfo, err error) {
 	err = util.Bson2struct(result, info)
 	return
 }
+func QueryUserByXianLiao(xlId string) (info *pbcommon.UserInfo, err error) {
+	info = &pbcommon.UserInfo{}
+	result := bson.M{}
+	err = mgoSess.DB("").C("userinfo").Find(bson.M{"xlid": xlId}).One(result)
+	if err != nil {
+		return nil, err
+	}
+	err = util.Bson2struct(result, info)
+	return
+}
+
+
+
 
 func updateUserOneField(uid uint64, fieldName string, newValue string) (info *pbcommon.UserInfo, err error) {
 	result := bson.M{}
@@ -219,7 +234,7 @@ func updateUserManyField(uid uint64, kv map[string]string) (info *pbcommon.UserI
 
 	result := bson.M{}
 	_, err = mgoSess.DB("").C("userinfo").Find(bson.M{"userid": uid}).Apply(mgo.Change{
-		Upsert:    false,
+		Upsert:    true,
 		ReturnNew: true,
 		Update:    bson.M{"$set": bm},
 	}, result)
@@ -243,8 +258,27 @@ func UpdateBindMobile(uid uint64, mobile, password string) (info *pbcommon.UserI
 	return updateUserManyField(uid, map[string]string{"mobile": mobile, "password": password})
 }
 
+func BindXianLiaoID(uid uint64, xlid string) (info *pbcommon.UserInfo, err error) {
+	return updateUserManyField(uid, map[string]string{"xlid": xlid})
+}
+
 func UpdateAgentID(uid uint64, agentID string) (info *pbcommon.UserInfo, err error) {
 	return updateUserOneField(uid, "agent", agentID)
+}
+
+func UpdateUserLocation(uid uint64,Longitude, Latitude float64,Place string)(err error){
+	result := bson.M{}
+	_, err = mgoSess.DB("").C("userinfo").Find(bson.M{"userid": uid}).Apply(mgo.Change{
+		Upsert:    true,
+		ReturnNew: true,
+		Update:    bson.M{"$set": bson.M{"longitude": Longitude,"latitude":Latitude,"place":Place}},
+	}, result)
+	return err
+}
+
+func UpdateUserIP(uid uint64,Ip string)error{
+	_,err := updateUserOneField(uid, "ip", Ip)
+	return err
 }
 
 func UpdateSessionID(uid uint64, sessionID string) (info *pbcommon.UserInfo, err error) {

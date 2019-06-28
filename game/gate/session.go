@@ -176,7 +176,7 @@ func (s *session) handleInput() (err error) {
 				if loginReq.Head != nil && loginReq.Head.UserID != 0 && loginReq.Head.SessionID != "" {
 					loginRsp = loginBySessionID(loginReq)
 				} else {
-					loginRsp = backendLoginReq(loginReq)
+					loginRsp = backendLoginReq(s,loginReq)
 				}
 
 				if loginRsp.Code == pblogin.LoginRspCode_Succ {
@@ -289,6 +289,7 @@ func (s *session) dispatch(msg *codec.Message) {
 		}
 	} else { // 本地处理
 		if serviceName == "pbhall" {
+			tlog.Info("收到大厅消息", zap.String("name", msg.Name))
 			s.handleHall(msg)
 		} else if serviceName == "pblogin" {
 			s.handleLogin(msg)
