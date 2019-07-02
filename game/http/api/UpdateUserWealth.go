@@ -38,7 +38,7 @@ func UpdateUserWealthReq(c *gin.Context) {
 		return
 	}
 	//通知客户端
-	if req.CurrencyType == 1 {
+	if req.CurrencyType == 2 {
 		err = ToGateNormal(&pbhall.UserWealthChange{
 			UserID:        userInfo.UserID,
 			Gold:          userInfo.Gold,

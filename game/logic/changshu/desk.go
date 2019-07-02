@@ -160,15 +160,12 @@ func (d *Desk) doSitDown(uid uint64, chair int32, rsp *pbgame.SitDownRsp) {
 		rsp.Code = pbgame.SitDownRspCode_SitDownNotEmpty
 		return
 	}
-	//检查钱是否够
-	fee := calcFee(d.deskConfig.Args)
-	if fee != 0 {
-		if d.deskConfig.Args.PaymentType == 1 && uid == d.masterUid || d.deskConfig.Args.PaymentType == 2 {
-			if _, err := mgo.UpdateWealthPre(uid, pbgame.FeeType_FTMasonry, fee); err != nil {
-				tlog.Error("err mgo.UpdateWealthPre()", zap.Error(err))
-				rsp.Code = pbgame.SitDownRspCode_SitDownNotEnoughMoney
-				return
-			}
+	//检查钱是否够(房主建房时已经预扣)
+	if uid != d.masterUid && d.deskConfig.Args.PaymentType == 2 {
+		if err := d.updateWealth(uid, 0); err != nil {
+			tlog.Error("err mgo.UpdateWealthPre()", zap.Error(err))
+			rsp.Code = pbgame.SitDownRspCode_SitDownNotEnoughMoney
+			return
 		}
 	}
 	dUserInfo.chairId = chair
@@ -249,7 +246,10 @@ func (d *Desk) doExit(uid uint64, rsp *pbgame.ExitDeskRsp) {
 			tlog.Info("doExit时 d.doStandUp 失败", zap.Any("rsp.Code", rsp.Code))
 			return
 		}
-		d.rollbackMoney(uid)
+		//退还扣的钱(房主预扣的钱要等游戏结束再判断是否需要退还)
+		if uid != d.masterUid {
+			d.updateWealth(uid, 1)
+		}
 	}
 	delete(d.deskPlayers, uid)
 	deleteUser2desk(uid)
@@ -396,26 +396,31 @@ func (d *Desk) dealDestroyDesk(reqType pbgame.DestroyDeskType) {
 
 //游戏结束
 func (d *Desk) gameEnd(endType pbgame_logic.GameEndType) {
-	if endType != pbgame_logic.GameEndType_EndDissmiss {
+	if endType != pbgame_logic.GameEndType_EndDissmiss { //胡牌或者流局
 		d.changUserState(0, pbgame.UserDeskStatus_UDSGameEnd)
 		if d.curInning == d.deskConfig.Args.RInfo.LoopCnt {
 			d.realDestroyDesk(pbgame.DestroyDeskType_DestroyTypeGameEnd)
 		} else {
 			d.curInning++
+			d.updateDeskInfo(2) //通知俱乐部更新桌子信息
 		}
-		d.updateDeskInfo(2) //通知俱乐部更新桌子信息
 	}
 }
 
 //真正销毁桌子
 func (d *Desk) realDestroyDesk(reqType pbgame.DestroyDeskType) {
+	//如果房主没有在房间玩游戏,就退还房主预扣的钱
+	if d.curInning == 0 || d.curInning > 0 && d.GetChairidByUid(d.masterUid) == -1 {
+		d.updateWealth(d.masterUid, 1)
+	}
 	//处理房间所有人的状态
 	msg := &pbgame.DestroyDeskResultNotif{DeskID: d.deskId, Result: 1, Type: reqType}
+
 	for uid, _ := range d.deskPlayers {
+		d.SendData(uid, msg)
 		delete(d.deskPlayers, uid)
 		deleteUser2desk(uid)
 		//通知所有人房间已销毁
-		d.SendData(uid, msg)
 		cache.ExitGame(uid, d.gameNode.GameName, d.gameNode.GameID, d.deskId)
 	}
 	d.updateDeskInfo(3) //通知俱乐部更新桌子信息
@@ -425,25 +430,23 @@ func (d *Desk) realDestroyDesk(reqType pbgame.DestroyDeskType) {
 	cache.FreeDeskID(d.deskId)
 }
 
-// 预扣还回去
-func (d *Desk) rollbackMoney(uid uint64) {
-	change := int64(0)
+// 更新财富(tag:0:表示预扣,1:返还)
+func (d *Desk) updateWealth(uid uint64, tag int) (err error) {
 	goldChange := int64(0)
 	masonryChange := int64(0)
-	createArg := d.deskConfig.Args
-	if createArg.PaymentType == 1 { //房主支付
-		change = int64(createArg.RInfo.Fee)
-	} else if createArg.PaymentType == 2 { //个人支付
-		change = int64(createArg.RInfo.Fee / uint32(createArg.PlayerCount))
-	}
+	change := calcFee(d.deskConfig.Args)
 
 	if d.deskConfig.FeeType == pbgame.FeeType_FTGold {
 		goldChange = change
 	} else if d.deskConfig.FeeType == pbgame.FeeType_FTMasonry {
 		masonryChange = change
 	}
-
-	info, err := mgo.UpdateWealthPreSure(uid, d.deskConfig.FeeType, change)
+	var info *pbcommon.UserInfo
+	if tag == 1 {
+		info, err = mgo.UpdateWealthPreSure(uid, d.deskConfig.FeeType, change)
+	} else {
+		info, err = mgo.UpdateWealth(uid, d.deskConfig.FeeType, change)
+	}
 	if err != nil {
 		return
 	}
@@ -456,6 +459,7 @@ func (d *Desk) rollbackMoney(uid uint64) {
 		Masonry:       info.Masonry,
 		MasonryChange: masonryChange,
 	})
+	return
 }
 
 //游戏逻辑分发

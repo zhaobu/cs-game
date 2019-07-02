@@ -5,9 +5,10 @@ import (
 	pbgame "cy/game/pb/game"
 	"cy/game/util"
 	"fmt"
+	"time"
+
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
-	"time"
 )
 
 var (
@@ -20,7 +21,7 @@ func Init(url string) (err error) {
 }
 
 // UpdateWealth 更新财富 feeType 1:gold, 2:masonry  change有符号
-func UpdateWealth(uid uint64, feeType uint32, change int64) (*pbcommon.UserInfo, error) {
+func UpdateWealth(uid uint64, feeType pbgame.FeeType, change int64) (*pbcommon.UserInfo, error) {
 	field := ""
 	if feeType == 1 {
 		field = "gold"
@@ -135,7 +136,7 @@ func UpsertUserInfo(u *pbcommon.UserInfo) (*pbcommon.UserInfo, bool, error) {
 			u.Masonry = 8
 			u.GoldPre = 0
 			u.MasonryPre = 0
-			u.RegisterTime = time.Now().Unix()	//注册时间
+			u.RegisterTime = time.Now().Unix() //注册时间
 			bs, _ := util.Struct2bson(u)
 			return u, true, coll.Insert(bs)
 		}
@@ -206,9 +207,6 @@ func QueryUserByXianLiao(xlId string) (info *pbcommon.UserInfo, err error) {
 	return
 }
 
-
-
-
 func updateUserOneField(uid uint64, fieldName string, newValue string) (info *pbcommon.UserInfo, err error) {
 	result := bson.M{}
 	_, err = mgoSess.DB("").C("userinfo").Find(bson.M{"userid": uid}).Apply(mgo.Change{
@@ -266,18 +264,18 @@ func UpdateAgentID(uid uint64, agentID string) (info *pbcommon.UserInfo, err err
 	return updateUserOneField(uid, "agent", agentID)
 }
 
-func UpdateUserLocation(uid uint64,Longitude, Latitude float64,Place string)(err error){
+func UpdateUserLocation(uid uint64, Longitude, Latitude float64, Place string) (err error) {
 	result := bson.M{}
 	_, err = mgoSess.DB("").C("userinfo").Find(bson.M{"userid": uid}).Apply(mgo.Change{
 		Upsert:    true,
 		ReturnNew: true,
-		Update:    bson.M{"$set": bson.M{"longitude": Longitude,"latitude":Latitude,"place":Place}},
+		Update:    bson.M{"$set": bson.M{"longitude": Longitude, "latitude": Latitude, "place": Place}},
 	}, result)
 	return err
 }
 
-func UpdateUserIP(uid uint64,Ip string)error{
-	_,err := updateUserOneField(uid, "ip", Ip)
+func UpdateUserIP(uid uint64, Ip string) error {
+	_, err := updateUserOneField(uid, "ip", Ip)
 	return err
 }
 
@@ -288,9 +286,9 @@ func UpdateSessionID(uid uint64, sessionID string) (info *pbcommon.UserInfo, err
 //添加用户财富 对net端口开放
 func UpdateWealthByNet(uid uint64, feeType uint32, change int64) (user *pbcommon.UserInfo, err error) {
 	field := ""
-	if feeType == 1 {
+	if feeType == 2 {
 		field = "gold"
-	} else if feeType == 2 {
+	} else if feeType == 1 {
 		field = "masonry"
 	} else {
 		return nil, fmt.Errorf("修改的货币类型错误 %d", feeType)

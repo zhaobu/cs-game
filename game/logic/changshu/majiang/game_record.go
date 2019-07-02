@@ -31,7 +31,7 @@ type GameRecord struct {
 	record      *mgo.WirteRecord
 }
 
-func (self *GameRecord) Init(info *pbgame_logic.GameDeskInfo, players []*PlayerInfo, clubId int64) {
+func (self *GameRecord) Init(info *pbgame_logic.GameDeskInfo, players []*PlayerInfo, clubId int64, masterUid uint64) {
 	createArg := info.Arg.Args
 	self.RankInfo = make([]*RankCell, createArg.PlayerCount)
 	for i := int32(0); i < createArg.PlayerCount; i++ {
@@ -39,7 +39,7 @@ func (self *GameRecord) Init(info *pbgame_logic.GameDeskInfo, players []*PlayerI
 	}
 	self.UserScore = make([]map[int32]int32, 0, createArg.RInfo.LoopCnt)
 
-	self.record = &mgo.WirteRecord{CreateInfo: &mgo.WriteGameConfig{GameId: info.GameName, ClubId: clubId, DeskId: info.Arg.DeskID, TotalInning: createArg.RInfo.LoopCnt}}
+	self.record = &mgo.WirteRecord{CreateInfo: &mgo.WriteGameConfig{GameId: info.GameName, ClubId: clubId, DeskId: info.Arg.DeskID, TotalInning: createArg.RInfo.LoopCnt, MasterUid: masterUid, Fee: createArg.RInfo.Fee}}
 	self.record.CurGameInfo = &mgo.WriteGameCell{}
 	//房间号+时间戳生成RoomRecordId
 	self.record.CurGameInfo.RoomRecordId = strconv.FormatUint(info.Arg.DeskID, 10) + strconv.FormatInt(time.Now().Unix(), 10)

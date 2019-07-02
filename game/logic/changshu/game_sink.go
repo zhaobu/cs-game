@@ -104,7 +104,7 @@ func (self *GameSink) reset() {
 	if self.desk.curInning == 1 {
 		//所有玩家坐下后才初始化战绩记录
 		// log.Debugf("传入前:%v", self.desk.getBaseDeskInfo())
-		self.record.Init(self.desk.getBaseDeskInfo(), self.players, self.desk.clubId)
+		self.record.Init(self.desk.getBaseDeskInfo(), self.players, self.desk.clubId, self.desk.masterUid)
 		// log.Debugf("传入后:%v", self.desk.getBaseDeskInfo())
 	}
 	self.record.Reset(self.desk.curInning)

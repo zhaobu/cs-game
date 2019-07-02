@@ -245,6 +245,9 @@ func (self *GameBalance) GetPlayerBalanceInfo(players []*mj.PlayerInfo) (jsonInf
 		for _, v := range self.huChairs[chairId].HuTypeList {
 			res = append(res, pbgame_logic.HuType(v))
 		}
+		if len(res) == 1 {
+			res = []pbgame_logic.HuType{}
+		}
 		return
 	}
 	getClientScoreType := func(info *mj.PlayserBalanceInfo) map[int32]int32 {

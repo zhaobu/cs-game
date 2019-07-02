@@ -2,9 +2,10 @@ package mgo
 
 import (
 	"cy/game/net"
+	"strconv"
+
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
-	"strconv"
 )
 
 const (
@@ -30,6 +31,8 @@ type WriteGameConfig struct {
 	TotalInning uint32      //总局数
 	PayType     uint32      //支付方式1 个人支付 2 AA支付
 	DeskInfo    *GameAction //房间规则
+	MasterUid   uint64      //房主uid
+	Fee         uint32      //扣费
 }
 
 //本局数据
@@ -56,8 +59,10 @@ type RoomRecord struct {
 	DeskId        uint64            //房间号
 	GameId        string            //游戏Id
 	ClubId        int64             //俱乐部Id
+	MasterUid     uint64            //房主uid
 	PayType       uint32            //支付方式1 个人支付 2 AA支付
 	DeskInfo      *GameAction       //房间规则
+	Fee           uint32            //扣费
 	GamePlayers   []*RoomPlayerInfo //玩家当前总积分详情
 	GameRecords   []string          //房间每局游戏记录id
 }
@@ -135,6 +140,8 @@ func AddGameRecord(gr *WirteRecord) (err error) {
 			DeskId:        gr.CreateInfo.DeskId,
 			GameId:        gr.CreateInfo.GameId,
 			ClubId:        gr.CreateInfo.ClubId,
+			MasterUid:     gr.CreateInfo.MasterUid,
+			Fee:           gr.CreateInfo.Fee,
 			PayType:       gr.CreateInfo.PayType,
 			DeskInfo:      gr.CreateInfo.DeskInfo,
 			GamePlayers:   make([]*RoomPlayerInfo, 0, len(gr.CurGameInfo.GamePlayers)),

@@ -12,15 +12,16 @@ message GameAction {
 //查询房间游戏记录数据请求(点击战绩按钮或者俱乐部内查找)
 message QueryRoomRecordReq {
   pbcommon.ReqHead Head = 1;
-  //查询类型 1按userId查询2按俱乐部id查询3按俱乐部+房间号查询
-  int32 QueryType = 2;
-  uint64 QueryUserId = 3;    //要查询的uid
-  int64 QueryClubId = 4;     //俱乐部Id
-  uint64 QueryRoomId = 5;    //房间号
-  int64 QueryStartTime = 6;  //开始时间
-  int64 QueryEndTime = 7;    //结束时间
-  int32 CurPage = 8;         //当前页面
-  int32 Limit = 9;           //每页的数量
+  //查询类型 1按userId 查询2按俱乐部id 查询3按俱乐部+房间号查询
+  int32 UserIdentity = 2;    //查询者身份 只有俱乐部查询才需要
+  int32 QueryType = 3;
+  uint64 QueryUserId = 4;    //要查询的uid
+  int64 QueryClubId = 5;     //俱乐部Id
+  uint64 QueryRoomId = 6;    //房间号
+  int64 QueryStartTime = 7;  //开始时间
+  int64 QueryEndTime = 8;    //结束时间
+  int32 CurPage = 9;         //当前页面
+  int32 Limit = 10;          //每页的数量
 }
 message RoomPlayerInfo {
   uint64 UserId = 1;     //用户Id
@@ -48,8 +49,10 @@ message QueryRoomRecordRsp {
   pbcommon.RspHead Head = 1;
   int32 Error = 2;  // 0 查询成功 1参数异常(不存在此人或者此俱乐部) 2权限不足
   uint64 QueryUserId = 3;         //用户Id
-  repeated RoomRecord Datas = 4;  //房间记录数据
-  int32 PageCount = 5;            //总页数
+  uint32 TotalRooms = 4;           //总房间数
+  uint32 TotalFree = 5;             //总花费砖石数
+  repeated RoomRecord Datas = 6;  //房间记录数据
+  int32 PageCount = 7;            //总页数
 }
 
 //查询游戏记录请求(点击详情按钮)

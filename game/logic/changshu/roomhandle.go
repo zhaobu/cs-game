@@ -25,15 +25,14 @@ func checkArg(req *pbgame.MakeDeskReq) (*pbgame_logic.CreateArg, error) {
 	return arg, nil
 }
 
-func calcFee(arg *pbgame_logic.CreateArg) int64 {
-	change := int64(0)
+func calcFee(arg *pbgame_logic.CreateArg) (change int64) {
 	// 支付方式 1 房主支付 2 AA支付
 	if arg.PaymentType == 1 {
-		change = int64(arg.RInfo.Fee)
+		change = int64(int32(arg.RInfo.Fee) * arg.PlayerCount)
 	} else if arg.PaymentType == 2 {
-		change = int64(arg.RInfo.Fee / uint32(arg.PlayerCount))
+		change = int64(arg.RInfo.Fee)
 	}
-	return change
+	return
 }
 
 //HandleGameCommandReq游戏指令
