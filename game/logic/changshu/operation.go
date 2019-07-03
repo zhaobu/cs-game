@@ -465,6 +465,8 @@ func (self *OperAtion) GetListenInfo(chairId int32, players []*mj.PlayerInfo, hu
 			}
 		}
 	}
+	bakHandCards := make([]int32, len(cardInfo.HandCards)) //保留原手牌顺序
+	copy(bakHandCards, cardInfo.HandCards)
 	for removeCard, _ := range cardInfo.StackCards {
 		if _, ok := cardInfo.CanNotOut[removeCard]; !ok {
 			self.updateCardInfo(cardInfo, nil, []int32{removeCard})
@@ -485,6 +487,7 @@ func (self *OperAtion) GetListenInfo(chairId int32, players []*mj.PlayerInfo, hu
 			self.updateCardInfo(cardInfo, []int32{removeCard}, nil) //还原手牌
 		}
 	}
+	cardInfo.HandCards = bakHandCards
 	if canListen {
 		res = &pbgame_logic.S2CListenCards{ListenResult: util.PB2JSON(jsonStr, false)}
 	}

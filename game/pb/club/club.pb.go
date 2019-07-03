@@ -1844,7 +1844,7 @@ func (m *AckClubEmailReq) GetAgree() bool {
 
 type AckClubEmailRsp struct {
 	Head *common.RspHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
-	// 1成功 2找不到EmailMsgID 3flag!=0 4typ not in(1,2,3) 5找不到俱乐部
+	// 1成功 2找不到EmailMsgID 3flag!=0 邮件已操作 4typ not in(1,2,3)没有此操作方式 5找不到俱乐部
 	Code                 int32    `protobuf:"varint,2,opt,name=Code,proto3" json:"Code,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`

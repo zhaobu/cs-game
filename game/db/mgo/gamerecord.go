@@ -60,7 +60,7 @@ type RoomRecord struct {
 	GameId        string            //游戏Id
 	ClubId        int64             //俱乐部Id
 	MasterUid     uint64            //房主uid
-	PayType       uint32            //支付方式1 个人支付 2 AA支付
+	PayType       uint32            //支付方式 1个人支付 2 AA支付 3群主支付
 	DeskInfo      *GameAction       //房间规则
 	Fee           uint32            //扣费
 	GamePlayers   []*RoomPlayerInfo //玩家当前总积分详情
@@ -276,6 +276,21 @@ func QueryUserRoomRecord(uid uint64, start, end int64, _curPage, _limit int32) (
 	return
 }
 
+//查询俱乐部的战绩数据 查询目标会员战绩
+func QueryClubRoomRecordByUser(uid uint64,clubid, start, end int64, _curPage, _limit int32) (rsp []*RoomRecord, err error) {
+	var curPage, limit = int(_curPage), int(_limit)
+	if limit == 0 {
+		limit = 30
+	}
+	rsp = make([]*RoomRecord, 0)
+	query := bson.M{"gameplayers.userid": uid, "clubid": clubid, "gamestarttime": bson.M{"$gte": start, "$lt": end}}
+	err = mgoSess.DB("").C(RoomRecordTable).Find(query).Sort("-gamestarttime").Skip(curPage * limit).Limit(limit).All(&rsp)
+	if err != nil {
+		return
+	}
+	return
+}
+
 //查询俱乐部的战绩数据
 func QueryClubRoomRecord(clubid, start, end int64, _curPage, _limit int32) (rsp []*RoomRecord, err error) {
 	var curPage, limit = int(_curPage), int(_limit)
@@ -290,6 +305,8 @@ func QueryClubRoomRecord(clubid, start, end int64, _curPage, _limit int32) (rsp 
 	}
 	return
 }
+
+
 
 //查询俱乐部的战绩数据
 func QueryClubRoomRecordByRoom(clubid int64, deskid uint64, _curPage, _limit int32) (rsp []*RoomRecord, err error) {

@@ -415,7 +415,7 @@ func (self *GameSink) drawCard(chairId, last int32) error {
 	msg := &pbgame_logic.BS2CDrawCard{ChairId: chairId, DrawPos: last}
 	var huaCards, moCards []int32
 	var moCount int //总共摸牌的次数
-	tlog.Debug("玩家摸牌前手牌数据为", zap.Int32("chairId", chairId), zap.Any("cardInfo", self.players[chairId].CardInfo))
+	log.Debugf("%s,玩家%d摸牌前手牌数据为%v", self.logHeadUser(chairId), chairId, self.players[chairId].CardInfo)
 	if !self.hasFirstBuHua[chairId] { //没有进行过第一次补花,先补掉手上的牌
 		if mj.GetHuaCount(self.players[chairId].CardInfo.StackCards) > 0 {
 			log.Debugf("%s 第一次摸牌,需要补花,补花前剩余[%d]张", self.logHeadUser(chairId), len(self.leftCard))

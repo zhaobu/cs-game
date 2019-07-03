@@ -9,6 +9,7 @@ import (
 	"cy/game/util"
 	sort "cy/game/util/tools/Sort"
 	"fmt"
+	"github.com/robfig/cron"
 	"sync"
 	"time"
 
@@ -16,24 +17,24 @@ import (
 )
 
 var (
-	ClubStatistics *ClubGameStatistics
+	//ClubStatistics *ClubGameStatistics
 	clublock       sync.RWMutex
 )
 
-type ClubGameStatistics struct {
-	ClubSD map[int64]*ClubStatisticsData
-}
-
-type ClubStatisticsData struct {
-	UserSD map[uint64]*UserStatisticsData
-}
-
-type UserStatisticsData struct {
-	UserId             uint64 //用户Id
-	Name               string //姓名
-	StatisticsIntegral int64  //当天输赢积分统计
-	StatisticsPlay     int64  //当天本俱乐部次数统计
-}
+//type ClubGameStatistics struct {
+//	ClubSD map[int64]*ClubStatisticsData
+//}
+//
+//type ClubStatisticsData struct {
+//	UserSD map[uint64]*UserStatisticsData
+//}
+//
+//type UserStatisticsData struct {
+//	UserId             uint64 //用户Id
+//	Name               string //姓名
+//	StatisticsIntegral int64  //当天输赢积分统计
+//	StatisticsPlay     int64  //当天本俱乐部次数统计
+//}
 
 func GameRecord_Init() {
 	StartTimer_ResetClubStatistics()
@@ -68,10 +69,18 @@ func (p *center) QueryRoomRecordReq(ctx context.Context, args *codec.Message, re
 			rsp.Error = 1
 		}
 	} else if req.QueryType == 2 { //按俱乐部id查询
-		querydata, err = mgo.QueryClubRoomRecord(req.QueryClubId, req.QueryStartTime, req.QueryEndTime, req.CurPage, req.Limit)
-		if err != nil {
-			tlog.Warn("查询用户数据失败 err = " + err.Error())
-			rsp.Error = 1
+		if req.UserIdentity == 1 || req.UserIdentity == 2 {	//普通会员
+			querydata, err = mgo.QueryClubRoomRecord(req.QueryClubId, req.QueryStartTime, req.QueryEndTime, req.CurPage, req.Limit)
+			if err != nil {
+				tlog.Warn("查询用户数据失败 err = " + err.Error())
+				rsp.Error = 1
+			}
+		}else{
+			querydata, err = mgo.QueryClubRoomRecordByUser(req.Head.UserID,req.QueryClubId, req.QueryStartTime, req.QueryEndTime, req.CurPage, req.Limit)
+			if err != nil {
+				tlog.Warn("查询用户数据失败 err = " + err.Error())
+				rsp.Error = 1
+			}
 		}
 	} else if req.QueryType == 3 { //按俱乐部+房间号查询
 		querydata, err = mgo.QueryClubRoomRecordByRoom(req.QueryClubId, req.QueryRoomId, req.CurPage, req.Limit)
@@ -109,13 +118,24 @@ func (p *center) QueryRoomRecordReq(ctx context.Context, args *codec.Message, re
 			_data.GamePlayers = append(_data.GamePlayers,playerinfo )
 
 		}
+		if req.UserIdentity == 1 || req.UserIdentity == 2 {
+			rsp.TotalFree += v.Fee * uint32(len(v.GamePlayers))
+		}else{
+			if v.PayType != 2 {
+				if v.MasterUid == req.Head.UserID{
+					rsp.TotalFree += v.Fee * uint32(len(v.GamePlayers))
+				}
+			}else{
+				rsp.TotalFree += v.Fee
+			}
+		}
 		rsp.Datas = append(rsp.Datas, _data)
 	}
+	rsp.TotalRooms = uint32(len(rsp.Datas))
 	err = codec.Pb2Msg(rsp, reply)
 	if err != nil {
 		tlog.Error("消息封装失败", zap.Error(err))
 	}
-	log.Debugf("QueryRoomRecordReq请求结果:rsp:%s", util.PB2JSON(rsp, true))
 	return err
 }
 
@@ -296,138 +316,126 @@ func (p *center) QueryClubStatisticsReq(ctx context.Context, args *codec.Message
 }
 
 //--------------------------------------------------统计数据------------------------------------------------------------
+
 //写入俱乐部统计数据到缓存
-func WriteClubGameStatistics(gr *mgo.WirteRecord) {
-	defer clublock.Unlock()
-	clublock.Lock()
-	if gr.CreateInfo.ClubId == 0 {
-		return
-	}
-	if ClubStatistics == nil {
-		ClubStatistics = &ClubGameStatistics{
-			ClubSD: make(map[int64]*ClubStatisticsData),
-		}
-	}
-	if _, ok := ClubStatistics.ClubSD[gr.CreateInfo.ClubId]; !ok {
-		ClubStatistics.ClubSD[gr.CreateInfo.ClubId] = &ClubStatisticsData{
-			UserSD: make(map[uint64]*UserStatisticsData),
-		}
-	}
-	for _, v := range gr.CurGameInfo.GamePlayers {
-		if _, ok := ClubStatistics.ClubSD[gr.CreateInfo.ClubId].UserSD[v.UserId]; !ok {
-			ClubStatistics.ClubSD[gr.CreateInfo.ClubId].UserSD[v.UserId] = &UserStatisticsData{
-				UserId:             v.UserId,
-				Name:               v.Name,
-				StatisticsIntegral: 0,
-				StatisticsPlay:     0,
-			}
-		}
-		ClubStatistics.ClubSD[gr.CreateInfo.ClubId].UserSD[v.UserId].StatisticsIntegral += int64(v.Score)
-		ClubStatistics.ClubSD[gr.CreateInfo.ClubId].UserSD[v.UserId].StatisticsPlay++
-	}
-}
+//func WriteClubGameStatistics(gr *mgo.WirteRecord) {
+//	defer clublock.Unlock()
+//	clublock.Lock()
+//	if gr.CreateInfo.ClubId == 0 {
+//		return
+//	}
+//	if ClubStatistics == nil {
+//		ClubStatistics = &ClubGameStatistics{
+//			ClubSD: make(map[int64]*ClubStatisticsData),
+//		}
+//	}
+//	if _, ok := ClubStatistics.ClubSD[gr.CreateInfo.ClubId]; !ok {
+//		ClubStatistics.ClubSD[gr.CreateInfo.ClubId] = &ClubStatisticsData{
+//			UserSD: make(map[uint64]*UserStatisticsData),
+//		}
+//	}
+//	for _, v := range gr.CurGameInfo.GamePlayers {
+//		if _, ok := ClubStatistics.ClubSD[gr.CreateInfo.ClubId].UserSD[v.UserId]; !ok {
+//			ClubStatistics.ClubSD[gr.CreateInfo.ClubId].UserSD[v.UserId] = &UserStatisticsData{
+//				UserId:             v.UserId,
+//				Name:               v.Name,
+//				StatisticsIntegral: 0,
+//				StatisticsPlay:     0,
+//			}
+//		}
+//		ClubStatistics.ClubSD[gr.CreateInfo.ClubId].UserSD[v.UserId].StatisticsIntegral += int64(v.Score)
+//		ClubStatistics.ClubSD[gr.CreateInfo.ClubId].UserSD[v.UserId].StatisticsPlay++
+//	}
+//}
 
 //启动定时任务 暂定每天凌晨执行统计数据清零
 func StartTimer_ResetClubStatistics() {
-	now := time.Now()
-	next := now.Add(time.Hour * 24)
-	next = time.Date(next.Year(), next.Month(), next.Day(), 0, 0, 0, 0, next.Location())
-	t := next.Sub(now)
-	timer := time.NewTimer(t)
-	go func() {
-		<- timer.C
+	c := cron.New()
+	spec := "0 0 2 * * ?"
+	c.AddFunc(spec, func() {
 		ResetClubGameStatistics()
-	}()
+	})
+	c.Start()
 }
 
 //每天定时重置统计数据并写入到数据库中
 func ResetClubGameStatistics() {
-	//if ClubStatistics == nil {
-	//	return
-	//}
-	//_ClubStatistics := ClubStatistics
-	//ClubStatistics = nil
-	err := mgo.CleraUserCurrDayStatistics()
-	if err != nil{
-		log.Errorf("CleraUserCurrDayStatistics err = " + err.Error())
-	}
+ 	mgo.CleraUserCurrDayStatistics()
 	cds, err := mgo.QueryAndClearAllClubCurrDayStatistics()
-	if err == nil {
-		for _, v1 := range cds {
-			CSData := &mgo.ClubStatisticsData{
-				ClubId:         v1.ClubId,
-				StatisticsTime: time.Now().Unix(),
-				Statistics:     []*mgo.StatisticsData{},
-			}
-
-			usd := []interface{}{}
-			for _, v2 := range v1.UserSD {
-				usd = append(usd, v2)
-			}
-
-			//先做对局次数排名
-			sort.Sort(usd, func(a interface{}, b interface{}) int8 {
-				_a := a.(*UserStatisticsData)
-				_b := b.(*UserStatisticsData)
-				if _a.StatisticsPlay < _b.StatisticsPlay {
-					return 1
-				} else if _a.StatisticsPlay == _b.StatisticsPlay {
-					return 0
-				} else {
-					return -1
-				}
-			})
-			index := 0
-			for _, u := range usd {
-				if index > 10 {
-					break
-				}
-				userdata := u.(*UserStatisticsData)
-				CSData.Statistics = append(CSData.Statistics, &mgo.StatisticsData{
-					UserId:     userdata.UserId,
-					Statistics: userdata.StatisticsPlay,
-				})
-				index++
-			}
-			err := mgo.AddClubPlayStatistics(CSData)
-			if err != nil {
-				log.Errorf("写入对局统计数据失败 err = " + err.Error())
-				break
-			}
-
-			//再排名积分
-			sort.Sort(usd, func(a interface{}, b interface{}) int8 {
-				_a := a.(*UserStatisticsData)
-				_b := b.(*UserStatisticsData)
-				if _a.StatisticsIntegral < _b.StatisticsIntegral {
-					return 1
-				} else if _a.StatisticsIntegral == _b.StatisticsIntegral {
-					return 0
-				} else {
-					return -1
-				}
-			})
-			index = 0
-			for _, u := range usd {
-				if index > 10 {
-					break
-				}
-				userdata := u.(*UserStatisticsData)
-				CSData.Statistics = append(CSData.Statistics, &mgo.StatisticsData{
-					UserId:     userdata.UserId,
-					Name:       userdata.Name,
-					Statistics: userdata.StatisticsIntegral,
-				})
-				index++
-			}
-			err = mgo.AddClubIntegralStatistics(CSData)
-			if err != nil {
-				log.Errorf("写入战绩数据库失败")
-				break
-			}
-		}
-	} else {
-		log.Errorf("查询当日俱乐部游戏统计数据错误", err)
+	if err != nil{
+		tlog.Error("查询俱乐部当日游戏缓存数据错误 err = " + err.Error())
+		return
 	}
-	StartTimer_ResetClubStatistics() //重新计算下一次时间
+	for _, v1 := range cds {
+		CSData := &mgo.ClubStatisticsData{
+			ClubId:         v1.ClubId,
+			StatisticsTime: time.Now().Unix(),
+			Statistics:     []*mgo.StatisticsData{},
+		}
+
+		usd := []interface{}{}
+		for _, v2 := range v1.UserSD {
+			usd = append(usd, v2)
+		}
+
+		//先做对局次数排名
+		sort.Sort(usd, func(a interface{}, b interface{}) int8 {
+			_a := a.(*mgo.UserStatisticsData)
+			_b := b.(*mgo.UserStatisticsData)
+			if _a.StatisticsPlay < _b.StatisticsPlay {
+				return 1
+			} else if _a.StatisticsPlay == _b.StatisticsPlay {
+				return 0
+			} else {
+				return -1
+			}
+		})
+		index := 0
+		for _, u := range usd {
+			if index > 10 {
+				break
+			}
+			userdata := u.(*mgo.UserStatisticsData)
+			CSData.Statistics = append(CSData.Statistics, &mgo.StatisticsData{
+				UserId:     userdata.UserId,
+				Statistics: userdata.StatisticsPlay,
+			})
+			index++
+		}
+		err := mgo.AddClubPlayStatistics(CSData)
+		if err != nil {
+			tlog.Error("写入对局统计数据失败 err = " + err.Error())
+			break
+		}
+		//再排名积分
+		sort.Sort(usd, func(a interface{}, b interface{}) int8 {
+			_a := a.(*mgo.UserStatisticsData)
+			_b := b.(*mgo.UserStatisticsData)
+			if _a.StatisticsIntegral < _b.StatisticsIntegral {
+				return 1
+			} else if _a.StatisticsIntegral == _b.StatisticsIntegral {
+				return 0
+			} else {
+				return -1
+			}
+		})
+		index = 0
+		for _, u := range usd {
+			if index > 10 {
+				break
+			}
+			userdata := u.(*mgo.UserStatisticsData)
+			CSData.Statistics = append(CSData.Statistics, &mgo.StatisticsData{
+				UserId:     userdata.UserId,
+				Name:       userdata.Name,
+				Statistics: userdata.StatisticsIntegral,
+			})
+			index++
+		}
+		err = mgo.AddClubIntegralStatistics(CSData)
+		if err != nil {
+			tlog.Error("写入战绩数据库失败")
+			break
+		}
+	}
 }

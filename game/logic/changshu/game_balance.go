@@ -242,11 +242,11 @@ func (self *GameBalance) CalGameBalance(players []*mj.PlayerInfo, bankerId int32
 //小局结算信息
 func (self *GameBalance) GetPlayerBalanceInfo(players []*mj.PlayerInfo) (jsonInfo []*pbgame_logic.Json_PlayerBalance_Info) {
 	getClientHuType := func(chairId int32) (res []pbgame_logic.HuType) {
+		bNormalHu := len(self.huChairs[chairId].HuTypeList) == 1 //有特殊胡时,不算普通胡
 		for _, v := range self.huChairs[chairId].HuTypeList {
-			res = append(res, pbgame_logic.HuType(v))
-		}
-		if len(res) == 1 {
-			res = []pbgame_logic.HuType{}
+			if v != mj.HuType_Normal || (v == mj.HuType_Normal && bNormalHu) {
+				res = append(res, pbgame_logic.HuType(v))
+			}
 		}
 		return
 	}
