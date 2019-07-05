@@ -282,7 +282,6 @@ func (p *center) QueryClubStatisticsReq(ctx context.Context, args *codec.Message
 			csd = append(csd, v2)
 		}
 
-		//先做对局次数排名
 		sort.Sort(csd, func(a interface{}, b interface{}) int8 {
 			_a := a.(*mgo.StatisticsData)
 			_b := b.(*mgo.StatisticsData)
@@ -300,11 +299,16 @@ func (p *center) QueryClubStatisticsReq(ctx context.Context, args *codec.Message
 				break
 			}
 			sdata := u.(*mgo.StatisticsData)
-			rsp.StatisticsDatas = append(rsp.StatisticsDatas, &pbgamerecord.StatisticsData{
+			data := &pbgamerecord.StatisticsData{
 				UserId:     sdata.UserId,
 				Name:       sdata.Name,
 				Statistics: sdata.Statistics,
-			})
+			}
+			udata,err := mgo.QueryUserInfo(sdata.UserId)
+			if err == nil{
+				data.HeadUrl = udata.Profile
+			}
+			rsp.StatisticsDatas = append(rsp.StatisticsDatas,data)
 			index++
 		}
 	}
@@ -398,6 +402,7 @@ func ResetClubGameStatistics() {
 			userdata := u.(*mgo.UserStatisticsData)
 			CSData.Statistics = append(CSData.Statistics, &mgo.StatisticsData{
 				UserId:     userdata.UserId,
+				Name:       userdata.Name,
 				Statistics: userdata.StatisticsPlay,
 			})
 			index++

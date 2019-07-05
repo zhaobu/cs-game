@@ -23,6 +23,7 @@ message QueryRoomRecordReq {
   int32 CurPage = 9;         //当前页面
   int32 Limit = 10;          //每页的数量
 }
+
 message RoomPlayerInfo {
   uint64 UserId = 1;     //用户Id
   string Name = 2;       //用户名
@@ -108,7 +109,8 @@ message QueryClubStatisticsReq {
 message StatisticsData {
   uint64 UserId = 1;  //用户Id
   string Name = 2;    //姓名
-  int64 Statistics = 3;  //统计数据  积分统计 为积分 对局次数统计 为对局数
+  string HeadUrl = 3;   //用户头像
+  int64 Statistics = 4;  //统计数据  积分统计 为积分 对局次数统计 为对局数
 }
 //查询俱乐部统计回应
 message QueryClubStatisticsRsp {

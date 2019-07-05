@@ -55,6 +55,7 @@ message DeskInfo {
   repeated SiteDownPlayerInfo SdInfos = 15;  // 桌子中坐下的玩家
   int64 TotalLoop = 16;                      // 总局数
   int64 CurrLoop = 17;                       // 当前局数
+  uint64 CreateVlaueHash = 18;               //建房参数hash值
 }
 
 // 会话信息

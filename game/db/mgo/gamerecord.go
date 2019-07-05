@@ -232,6 +232,7 @@ func AddClubCurrDayStatistics(gr *WirteRecord) (err error) {
 		} else {
 			csd.UserSD[v.UserId] = &UserStatisticsData{
 				UserId:             v.UserId,
+				Name:               v.Name,
 				StatisticsPlay:     1,
 				StatisticsIntegral: int64(v.Score),
 			}
@@ -277,7 +278,7 @@ func QueryUserRoomRecord(uid uint64, start, end int64, _curPage, _limit int32) (
 }
 
 //查询俱乐部的战绩数据 查询目标会员战绩
-func QueryClubRoomRecordByUser(uid uint64,clubid, start, end int64, _curPage, _limit int32) (rsp []*RoomRecord, err error) {
+func QueryClubRoomRecordByUser(uid uint64, clubid, start, end int64, _curPage, _limit int32) (rsp []*RoomRecord, err error) {
 	var curPage, limit = int(_curPage), int(_limit)
 	if limit == 0 {
 		limit = 30
@@ -305,8 +306,6 @@ func QueryClubRoomRecord(clubid, start, end int64, _curPage, _limit int32) (rsp 
 	}
 	return
 }
-
-
 
 //查询俱乐部的战绩数据
 func QueryClubRoomRecordByRoom(clubid int64, deskid uint64, _curPage, _limit int32) (rsp []*RoomRecord, err error) {

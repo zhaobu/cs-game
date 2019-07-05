@@ -9,6 +9,7 @@ import (
 	pbgame "cy/game/pb/game"
 	"cy/game/util"
 	"fmt"
+	"hash/crc32"
 	"runtime/debug"
 	"time"
 
@@ -388,6 +389,7 @@ func (self *RpcHandle) MakeDeskReq(ctx context.Context, args *codec.Message, rep
 
 	if self.service.roomHandle.HandleMakeDeskReq(args.UserID, newDeskID, req, rsp) {
 		deskInfo := rsp.Info
+		deskInfo.CreateVlaueHash = uint64(crc32.ChecksumIEEE(req.GameArgMsgValue))
 		deskInfo.ID = newDeskID
 		deskInfo.CreateUserID = args.UserID
 		if ui, err := mgo.QueryUserInfo(args.UserID); err == nil {

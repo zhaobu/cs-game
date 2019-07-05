@@ -14,7 +14,7 @@ var addDeskInfoScript = redis.NewScript(1, `
 	then
 		return 2
 	else
-		redis.call('HMSET', KEYS[1], 'Uuid', ARGV[1], 'ID', ARGV[2], 'CreateUserID', ARGV[3], 'CreateUserName', ARGV[4], 'CreateUserProfile', ARGV[5], 'CreateTime', ARGV[6], 'CreateFee', ARGV[7], 'ArgName',  ARGV[8], 'ArgValue',  ARGV[9], 'Status', ARGV[10], 'GameName', ARGV[11], 'GameID', ARGV[12], 'ClubID', ARGV[13], 'Kind', ARGV[14], 'SdInfos', ARGV[15], 'TotalLoop', ARGV[16], 'CurrLoop', ARGV[17])
+		redis.call('HMSET', KEYS[1], 'Uuid', ARGV[1], 'ID', ARGV[2], 'CreateUserID', ARGV[3], 'CreateUserName', ARGV[4], 'CreateUserProfile', ARGV[5], 'CreateTime', ARGV[6], 'CreateFee', ARGV[7], 'ArgName',  ARGV[8], 'ArgValue',  ARGV[9], 'Status', ARGV[10], 'GameName', ARGV[11], 'GameID', ARGV[12], 'ClubID', ARGV[13], 'Kind', ARGV[14], 'SdInfos', ARGV[15], 'TotalLoop', ARGV[16], 'CurrLoop', ARGV[17],'CreateVlaueHash', ARGV[18])
 		return 1
 	end
 	`)
@@ -44,6 +44,7 @@ func AddDeskInfo(info *pbcommon.DeskInfo) (err error) {
 		sdInfo,
 		strconv.FormatInt(info.TotalLoop, 10),
 		strconv.FormatInt(info.CurrLoop, 10),
+		strconv.FormatUint(info.CreateVlaueHash, 10),
 	))
 
 	if err != nil {
@@ -66,7 +67,7 @@ var updateDeskInfoScript = redis.NewScript(1, `
 	if (redis.call('HGET', KEYS[1], 'Uuid')==ARGV[1])
 	then
 		redis.call('HINCRBY', KEYS[1], 'Uuid', 1)
-		redis.call('HMSET', KEYS[1], 'ID', ARGV[2], 'CreateUserID', ARGV[3], 'CreateUserName', ARGV[4], 'CreateUserProfile', ARGV[5], 'CreateTime', ARGV[6], 'CreateFee', ARGV[7], 'ArgName',  ARGV[8], 'ArgValue',  ARGV[9], 'Status', ARGV[10], 'GameName', ARGV[11], 'GameID', ARGV[12], 'ClubID', ARGV[13], 'Kind', ARGV[14], 'SdInfos', ARGV[15], 'TotalLoop', ARGV[16], 'CurrLoop', ARGV[17])
+		redis.call('HMSET', KEYS[1], 'ID', ARGV[2], 'CreateUserID', ARGV[3], 'CreateUserName', ARGV[4], 'CreateUserProfile', ARGV[5], 'CreateTime', ARGV[6], 'CreateFee', ARGV[7], 'ArgName',  ARGV[8], 'ArgValue',  ARGV[9], 'Status', ARGV[10], 'GameName', ARGV[11], 'GameID', ARGV[12], 'ClubID', ARGV[13], 'Kind', ARGV[14], 'SdInfos', ARGV[15], 'TotalLoop', ARGV[16], 'CurrLoop', ARGV[17],'CreateVlaueHash', ARGV[18])
 		return 1
 	else
 		return 2
@@ -101,6 +102,7 @@ func UpdateDeskInfo(info *pbcommon.DeskInfo) error {
 
 		strconv.FormatInt(info.TotalLoop, 10),
 		strconv.FormatInt(info.CurrLoop, 10),
+		strconv.FormatUint(info.CreateVlaueHash, 10),
 	)
 	return err
 }
@@ -139,6 +141,6 @@ func QueryDeskInfo(deskID uint64) (*pbcommon.DeskInfo, error) {
 	json.Unmarshal([]byte(reply["SdInfos"]), &info.SdInfos)
 	info.TotalLoop, _ = strconv.ParseInt(reply["TotalLoop"], 10, 64)
 	info.CurrLoop, _ = strconv.ParseInt(reply["CurrLoop"], 10, 64)
-
+	info.CreateVlaueHash, _ = strconv.ParseUint(reply["CreateVlaueHash"], 10, 64)
 	return info, nil
 }

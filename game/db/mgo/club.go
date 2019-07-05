@@ -27,6 +27,7 @@ type Club struct {
 	IsAutoCreate           bool
 	IsCustomGameArg        bool
 	IsMasterPay            bool
+	IsProofe			   bool	//是否打烊
 	Notice                 string
 	CurrDayDestoryDeskNum  int   //当天解散房间次数
 	LastDestoryDeskNumTime int64 //最后解散桌子时间
