@@ -141,7 +141,7 @@ func getGameCli(gameName string) (cli client.XClient, err error) {
 	}()
 
 	if gameName == "" {
-		return nil, fmt.Errorf("empty game name")
+		return nil, fmt.Errorf("房间不存在")
 	}
 
 	gameName = "game/" + gameName

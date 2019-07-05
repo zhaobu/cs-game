@@ -176,7 +176,7 @@ func (s *session) handleInput() (err error) {
 				if loginReq.Head != nil && loginReq.Head.UserID != 0 && loginReq.Head.SessionID != "" {
 					loginRsp = loginBySessionID(loginReq)
 				} else {
-					loginRsp = backendLoginReq(s,loginReq)
+					loginRsp = backendLoginReq(s, loginReq)
 				}
 
 				if loginRsp.Code == pblogin.LoginRspCode_Succ {

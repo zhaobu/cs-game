@@ -445,7 +445,7 @@ func (d *Desk) updateWealth(uid uint64, tag int) (err error) {
 	if tag == 1 {
 		info, err = mgo.UpdateWealthPreSure(uid, d.deskConfig.FeeType, change)
 	} else {
-		info, err = mgo.UpdateWealth(uid, d.deskConfig.FeeType, change)
+		info, err = mgo.UpdateWealthPre(uid, d.deskConfig.FeeType, change)
 	}
 	if err != nil {
 		return

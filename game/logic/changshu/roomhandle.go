@@ -179,27 +179,15 @@ func (self *roomHandle) HandleMakeDeskReq(uid uint64, deskID uint64, req *pbgame
 
 	tlog.Info("HandleMakeDeskReq", zap.Any("CreateArg", arg))
 
-	fee := calcFee(arg)
-
-	if fee != 0 {
-		_, err = mgo.UpdateWealthPre(uid, pbgame.FeeType_FTMasonry, fee)
-		if err != nil {
-			tlog.Error("err mgo.UpdateWealthPre()", zap.Error(err))
-			rsp.Code = pbgame.MakeDeskRspCode_MakeDeskNotEnoughMoney
-			return false
-		}
-
-		//建房失败,返还扣除的房费
-		defer func() {
-			if err != nil {
-				mgo.UpdateWealthPreSure(uid, pbgame.FeeType_FTMasonry, fee)
-			}
-		}()
-	}
-
 	//构建桌子参数
 	deskArg := &pbgame_logic.DeskArg{Args: arg, Enable: true, Type: pbcommon.DeskType_DTFriend, FeeType: pbgame.FeeType_FTMasonry, DeskID: deskID}
 	newD := makeDesk(deskArg, uid, deskID, req.ClubID, self.RoomServie)
+	if err = newD.updateWealth(uid, 0); err != nil {
+		tlog.Error("err 预扣钻失败", zap.Error(err))
+		rsp.Code = pbgame.MakeDeskRspCode_MakeDeskNotEnoughMoney
+		return false
+	}
+
 	//把桌子加入管理
 	updateID2desk(newD)
 
