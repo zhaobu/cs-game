@@ -12,7 +12,7 @@ message cyU32String {
 
 message RoundInfo {
   uint32 LoopCnt = 1;  // 局数 8 16
-  uint32 Fee = 2;      // 个人费用(AA支付和个人支付都是表示单人费用)
+  uint32 Fee = 2;  // 个人费用(AA支付和个人支付都是表示单人费用)
 }
 
 // 创建房间参数

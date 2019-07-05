@@ -493,3 +493,42 @@ func (self *OperAtion) GetListenInfo(chairId int32, players []*mj.PlayerInfo, hu
 	}
 	return
 }
+
+//听牌分析(不用打牌判断听)
+func (self *OperAtion) GetListenInfo2(chairId int32, players []*mj.PlayerInfo, huModeTags map[mj.EmHuModeTag]bool, leftCard []int32) (res *pbgame_logic.S2CListenCards, canListen bool) {
+	jsonStr := &pbgame_logic.Json_Listen{Info: map[int32]*pbgame_logic.Json_ListenCards{}}
+	cardInfo := &players[chairId].CardInfo
+	//统计剩余数量
+	leftStack := mj.CalStackCards(leftCard, true)
+	//加上其他玩家手中的数量
+	for k, v := range players {
+		if int32(k) != chairId {
+			for card, num := range v.CardInfo.StackCards {
+				if !mj.IsHuaCard(card) {
+					leftStack[card] += num
+				}
+			}
+		}
+	}
+	//先判断能胡
+	if huLib.OneCardCanListen(cardInfo, &players[chairId].BalanceInfo, huModeTags) {
+		bakHandCards := make([]int32, len(cardInfo.HandCards)) //保留原手牌顺序
+		copy(bakHandCards, cardInfo.HandCards)
+		canListen = true
+		jsonStr.Info[0] = &pbgame_logic.Json_ListenCards{}
+		//找出所有能听的牌
+		for addCard, num := range leftStack {
+			self.updateCardInfo(cardInfo, []int32{addCard}, nil)
+			if huLib.OneCardCanHu(cardInfo, &players[chairId].BalanceInfo, huModeTags) {
+				oneListen := &pbgame_logic.Json_ListenOnecard{Card: addCard, Num: num} //能听的一张牌
+				jsonStr.Info[0].Cards = append(jsonStr.Info[0].Cards, oneListen)
+			}
+			self.updateCardInfo(cardInfo, nil, []int32{addCard})
+		}
+		cardInfo.HandCards = bakHandCards
+	}
+	if canListen {
+		res = &pbgame_logic.S2CListenCards{ListenResult: util.PB2JSON(jsonStr, false)}
+	}
+	return
+}

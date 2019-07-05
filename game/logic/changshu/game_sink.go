@@ -1131,6 +1131,10 @@ func (self *GameSink) gameReconnect(recInfo *pbgame_logic.GameDeskInfo, uid uint
 				if listenMsg, ok := self.operAction.GetListenInfo(chairId, self.players, nil, self.leftCard); ok {
 					recInfo.ListenResult = listenMsg.ListenResult
 				}
+			} else {
+				if listenMsg, ok := self.operAction.GetListenInfo2(chairId, self.players, nil, self.leftCard); ok {
+					recInfo.ListenResult = listenMsg.ListenResult
+				}
 			}
 			canNotOut := make([]int32, 0, len(self.players[chairId].CardInfo.CanNotOut))
 			for _, v := range self.players[chairId].CardInfo.CanNotOut {

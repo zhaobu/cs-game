@@ -338,6 +338,9 @@ func (d *Desk) doDestroyDesk(uid uint64, req *pbgame.DestroyDeskReq, rsp *pbgame
 			msg := &pbgame.VoteDestroyDeskNotif{DeskID: d.deskId, VoteUser: uid, LeftTime: int32(dissTimeOut.Seconds()), VoteResult: d.getVoteResult()}
 			d.SendData(0, msg)
 			d.set_timer(mj.TID_Destory, 15*time.Second, func() {
+				if d.voteInfo == nil {
+					return
+				}
 				tmpReq := &pbgame.VoteDestroyDeskReq{Option: pbgame.VoteOption_VoteOptionAgree}
 				for _, v := range d.playChair {
 					//超时默认为同意解散
