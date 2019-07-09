@@ -123,6 +123,7 @@ enum SitDownRspCode {
   SitDownNotInClub = 8;           //玩家不是本俱乐部成员
   SitDownCanNotSitClubDesk = 9;   //玩家无权坐下俱乐部房间
   SitDownClubHaveReleation = 10;  //坐下俱乐部房间时,有亲属关系
+  SitDownIPLimit = 11;            //坐下房间时ip相同
 }
 // 坐下准备 s -> c
 message SitDownRsp {

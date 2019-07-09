@@ -288,6 +288,7 @@ func (self *GameSink) deal_card() {
 
 	//洗牌
 	self.shuffle_cards()
+	tlog.Debug("发牌前的牌库为", zap.Any("self.leftCard", self.leftCard))
 	var player_cards [][]int32
 	player_cards, self.leftCard = cardDef.DealCard(self.leftCard, self.game_config.PlayerCount, self.bankerId)
 
@@ -358,7 +359,7 @@ func (self *GameSink) firstBuHuaCards(chairId int32) (huaCards, moCards []int32)
 	copy(tmpHandCards, cardInfo.HandCards)
 	for _, card := range tmpHandCards {
 		if mj.IsHuaCard(card) {
-			tmpHuaCards, moCard := self.drawOneCard(chairId)
+			tmpHuaCards, moCard := self.drawOneCard()
 			tlog.Debug("补花", zap.Int32("huacard", card), zap.Any("moCard", moCard), zap.Any("tmpHuaCards", tmpHuaCards))
 			self.operAction.updateCardInfo(cardInfo, nil, []int32{card}) //减掉原有的花
 			self.operAction.updateCardInfo(cardInfo, moCard, nil)        //加上摸到的牌
@@ -372,9 +373,13 @@ func (self *GameSink) firstBuHuaCards(chairId int32) (huaCards, moCards []int32)
 }
 
 //从牌堆摸一张牌,摸到不是花牌为止
-func (self *GameSink) drawOneCard(chairId int32) (huaCards, moCard []int32) {
+func (self *GameSink) drawOneCard() (huaCards, moCard []int32) {
 	var num int32
+	huaCards, moCard = []int32{}, []int32{}
 	for {
+		if len(self.leftCard) == 0 {
+			break
+		}
 		card := self.leftCard[len(self.leftCard)-1]
 		self.leftCard = self.leftCard[:len(self.leftCard)-1]
 		if !mj.IsHuaCard(card) {
@@ -415,7 +420,7 @@ func (self *GameSink) drawCard(chairId, last int32) error {
 	msg := &pbgame_logic.BS2CDrawCard{ChairId: chairId, DrawPos: last}
 	var huaCards, moCards []int32
 	var moCount int //总共摸牌的次数
-	log.Debugf("%s,玩家%d摸牌前手牌数据为%v", self.logHeadUser(chairId), chairId, self.players[chairId].CardInfo)
+	log.Debugf("%s,玩家%d摸牌前手牌数据为%+v,牌库剩余牌:%v", self.logHeadUser(chairId), chairId, self.players[chairId].CardInfo, self.leftCard)
 	if !self.hasFirstBuHua[chairId] { //没有进行过第一次补花,先补掉手上的牌
 		if mj.GetHuaCount(self.players[chairId].CardInfo.StackCards) > 0 {
 			log.Debugf("%s 第一次摸牌,需要补花,补花前剩余[%d]张", self.logHeadUser(chairId), len(self.leftCard))
@@ -424,12 +429,15 @@ func (self *GameSink) drawCard(chairId, last int32) error {
 		}
 		self.hasFirstBuHua[chairId] = true
 	}
-	huaCards2, moCards2 := self.drawOneCard(chairId)
+	huaCards2, moCards2 := self.drawOneCard()
 	moCount += len(huaCards2) + len(moCards2)
 	huaCards, moCards = append(huaCards, huaCards2...), append(moCards, moCards2...)
 
 	msg.LeftNum = int32(len(self.leftCard))
-	card := moCards[len(moCards)-1] //最后摸到的牌
+	var card int32
+	if len(moCards) > 0 {
+		card = moCards[len(moCards)-1] //最后摸到的牌
+	}
 	//发送自己
 	msg.JsonDrawInfo = util.PB2JSON(&pbgame_logic.Json_FirstBuHua{HuaCards: huaCards, MoCards: moCards, MoCount: int32(moCount)}, false)
 	self.sendData(chairId, msg)
@@ -445,6 +453,11 @@ func (self *GameSink) drawCard(chairId, last int32) error {
 		self.operAction.HandleBuHua(self.players[chairId], huaCards)
 	}
 
+	//如果摸牌时摸到的全部是花牌,游戏结束
+	if len(moCards) == 0 {
+		self.gameEnd(pbgame_logic.GameEndType_EndDeuce)
+		return nil
+	}
 	self.curOutChair = chairId
 	//当抓到花或杠牌后，补上一张牌,能胡,杠上开花
 	huModeTags := map[mj.EmHuModeTag]bool{}
@@ -1056,7 +1069,7 @@ func (self *GameSink) cancelOper(chairId int32) error {
 //游戏结束
 func (self *GameSink) gameEnd(endType pbgame_logic.GameEndType) {
 	self.changGameState(pbgame_logic.GameStatus_GSGameEnd)
-	log.Infof("%s 第%d局游戏结束,结束原因%d", self.logHeadUser(-1), self.desk.curInning, endType)
+	log.Infof("%s 第%d局游戏结束,结束原因%d,结束时剩余牌为%v", self.logHeadUser(-1), self.desk.curInning, endType, self.leftCard)
 	if !self.isPlaying { //可能是解散导致游戏结束
 		self.desk.gameEnd(endType)
 		return
@@ -1064,14 +1077,12 @@ func (self *GameSink) gameEnd(endType pbgame_logic.GameEndType) {
 	self.isPlaying = false
 	//发送小结算信息
 	msg := &pbgame_logic.BS2CGameEnd{CurInning: self.desk.curInning, Banker: self.bankerId, EndType: endType}
-	// if self.hasHu {
 	self.gameBalance.CalGameBalance(self.players, self.bankerId)
 	strPlayerBalance := &pbgame_logic.Json_PlayerBalance{PlayerBalanceInfo: self.gameBalance.GetPlayerBalanceInfo(self.players)}
 	msg.JsonPlayerBalance = util.PB2JSON(strPlayerBalance, false)
-	if self.game_config.Barhead == 3 {
+	if self.game_config.Barhead == 3 && self.hasHu {
 		msg.DulongCard = self.leftCard[len(self.leftCard)-1]
 	}
-	// }
 	self.sendData(-1, msg)
 	//游戏回放记录
 	self.record.RecordGameAction(msg)

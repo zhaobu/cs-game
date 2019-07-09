@@ -73,13 +73,10 @@ func (p *club) UpdateClubReq(ctx context.Context, args *codec.Message, reply *co
 		rsp.Code = 4
 		return
 	}
-
-
 	cc.Name = req.Base.Name
 	cc.IsAutoCreate = req.Base.IsAutoCreate
 	cc.IsCustomGameArg = req.Base.IsCustomGameArg
 	cc.IsMasterPay = req.Base.IsMasterPay
-
 	cc.GameArgs = make([]*mgo.DeskSetting, 0)
 	for _, v := range req.GameArgs {
 		cc.GameArgs = append(cc.GameArgs, &mgo.DeskSetting{
@@ -89,26 +86,14 @@ func (p *club) UpdateClubReq(ctx context.Context, args *codec.Message, reply *co
 			Enable:          v.Enable,
 		})
 	}
-
 	cc.noCommit = true
-
 	cc.Unlock()
-
 	rsp.Code = 1
-
-
 	//更新房间设置时检查是否需要重新创建房间
-	if cc.IsAutoCreate && cc.f == nil {		//自动创建桌子 但是当前不存在桌子
-		haveEmptyTable := false
-		for _,v :=range cc.desks {
-			if v.Status == "1" {	//有空桌子
-				haveEmptyTable = true
-				break;
-			}
-		}
-		if !haveEmptyTable {	//不存在空桌子
-			logrus.Infof("查询俱乐部时校验到没有空桌子 %x",cc.desks)
-			checkAutoCreate(cc.ID)	//自动创建房间
+	if req.Base.IsAutoCreate && cc.f == nil {		//自动创建桌子 但是当前不存在桌子
+		setting,cid,masterUserID := checkAutoCreate(cc.ID)
+		if len(setting) > 0 {
+			createDesk(setting, cid, masterUserID)
 		}
 	}
 	//if req.Base.IsAutoCreate {

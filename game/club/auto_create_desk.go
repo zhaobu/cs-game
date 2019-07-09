@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"cy/game/cache"
 	"cy/game/codec"
 	"cy/game/codec/protobuf"
@@ -8,9 +9,7 @@ import (
 	"cy/game/pb/common"
 	"cy/game/pb/game"
 	"cy/game/pb/inner"
-
-	"bytes"
-	"context"
+	"hash/crc32"
 
 	"github.com/sirupsen/logrus"
 )
@@ -57,18 +56,21 @@ func flashDesk(n *pbinner.DeskChangeNotif) {
 			needCheck = true
 		}
 		if needCheck {
-			checkAutoCreate(n.ClubID)
+			setting,cid,masterUserID := checkAutoCreate(n.ClubID)
+			if len(setting) > 0 {
+				createDesk(setting,cid,masterUserID)
+			}
 		}
 	}
 
 	go sendClubChangeInfo(n.ClubID, clubChanageTypeDeskUpdata, 0)
 }
 
-func checkAutoCreate(cid int64) {
-	logrus.Infof("checkAutoCreate %d", cid)
+func checkAutoCreate(_cid int64)(setting []*mgo.DeskSetting, cid int64, masterUserID uint64) {
+	logrus.Infof("checkAutoCreate %d", _cid)
 	var needCreateGameArgs []*mgo.DeskSetting
 
-	cc := getClub(cid)
+	cc := getClub(_cid)
 	if cc == nil {
 		return
 	}
@@ -83,30 +85,35 @@ func checkAutoCreate(cid int64) {
 	}
 
 	for _, a := range gameArgs {
-		var have bool
+		have := false
+		//fmt.Printf("开始查找 a.GameName=%s  a.GameArgMsgValue = %v a.CreateVlaueHash=%d\n", a.GameName,a.GameArgMsgValue,crc32.ChecksumIEEE(a.GameArgMsgValue))
 		for _, b := range cc.desks {
-			if a.GameName == b.GameName && bytes.Equal(a.GameArgMsgValue, b.ArgValue) {
+			//fmt.Printf("检测俱乐部房间 a.GameName=%s b.GameName=%s\n", a.GameName, b.GameName)
+			//fmt.Printf("检测俱乐部房间 a.Status=%s \n",b.Status)
+			//fmt.Printf("检测俱乐部房间\n a.CreateVlaueHash =%d  b.CreateVlaueHash =%d  \n",crc32.ChecksumIEEE(a.GameArgMsgValue),b.CreateVlaueHash)
+			//fmt.Printf("a GameArgMsgValue = %d a CreateVlaueHash = %d \n",crc32.ChecksumIEEE(a.GameArgMsgValue),a.GameArgMsgValue)
+			if a.GameName == b.GameName && b.Status == "1" &&  b.CreateVlaueHash == uint64(crc32.ChecksumIEEE(a.GameArgMsgValue)) { //判断是否有空的对应玩法的桌子
+				//fmt.Printf("找到一个相同的空房间 %d\n",b.CreateVlaueHash)
 				have = true
 				break
 			}
 		}
 
 		if !have {
+			//fmt.Printf("需要创建一个房间 %d \n",crc32.ChecksumIEEE(a.GameArgMsgValue))
 			needCreateGameArgs = append(needCreateGameArgs, a)
 			if pb, err := protobuf.Unmarshal(a.GameArgMsgName, a.GameArgMsgValue); err == nil {
 				logrus.Infof("will create desk arg: %+v\n", pb)
 			}
 		}
+		//fmt.Printf("结束查找-----------------------------------------------------------------------------------\n")
 	}
 
-	masterUserID := cc.MasterUserID
-
-	cc.RUnlock()
-
-	if len(needCreateGameArgs) > 0 {
-		createDesk(needCreateGameArgs, cid, masterUserID)
-	}
-
+	defer cc.RUnlock()
+	//if len(needCreateGameArgs) > 0 {
+	//	createDesk(needCreateGameArgs, _cid, masterUserID)
+	//}
+	return needCreateGameArgs,_cid,cc.MasterUserID
 }
 
 func createDesk(setting []*mgo.DeskSetting, cid int64, masterUserID uint64) {
@@ -128,7 +135,6 @@ func createDesk(setting []*mgo.DeskSetting, cid int64, masterUserID uint64) {
 		}, reqRCall)
 		reqRCall.UserID = masterUserID
 		rspRCall := &codec.Message{}
-
 		cli.Go(context.Background(), "MakeDeskReq", reqRCall, rspRCall, nil)
 	}
 }

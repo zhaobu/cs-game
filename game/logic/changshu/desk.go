@@ -21,8 +21,8 @@ import (
 	"go.uber.org/zap"
 )
 
-const dissInterval time.Duration = time.Second * 2 //解散间隔2s
-const dissTimeOut time.Duration = time.Second * 15 //投票解散时间15s
+const dissInterval time.Duration = time.Second * 2  //解散间隔2s
+const dissTimeOut time.Duration = time.Second * 120 //投票解散时间120s
 
 type deskUserInfo struct {
 	chairId    int32                 //座位号
@@ -134,11 +134,26 @@ func (d *Desk) doJoin(uid uint64, rsp *pbgame.JoinDeskRsp) {
 //坐下后由观察者变为游戏玩家
 func (d *Desk) doSitDown(uid uint64, chair int32, rsp *pbgame.SitDownRsp) {
 	tlog.Info("玩家doSitDown坐下准备", zap.Uint64("uid", uid), zap.Uint64("deksId", d.deskId))
-	// 距离判断 新加入的和每个已加入的玩家比较 <?的才能加入
+	userInfo, err := mgo.QueryUserInfo(uid)
+	if err != nil {
+		tlog.Info("玩家doSitDown坐下准备时,mgo.QueryUserInfo err", zap.Uint64("uid", uid), zap.Uint64("deksId", d.deskId))
+		rsp.Code = pbgame.SitDownRspCode_SitDownNotInDesk
+		return
+	}
+	// ip限制,同一个局域网,不允许加入房间
+	if d.deskConfig.Args.LimitIP == 3 || d.deskConfig.Args.LimitIP == 2 {
+		for _, v := range d.playChair {
+			if userInfo.IP == v.info.IP {
+				rsp.Code = pbgame.SitDownRspCode_SitDownIPLimit
+				tlog.Info("玩家doSitDown坐下准备时IP限制,不允许坐下", zap.Uint64("uid", uid), zap.Uint64("deksId", d.deskId))
+				return
+			}
+		}
+	}
+	// ip+距离判断 新加入的和每个已加入的玩家比较 <?的才能加入
 	if d.deskConfig.Args.LimitIP == 3 {
 		for _, v := range d.playChair {
-			info := v.info
-			if util.DistanceGeo(info.Latitude, info.Longitude, v.info.Latitude, v.info.Longitude) < 500.00 {
+			if util.DistanceGeo(userInfo.Latitude, userInfo.Longitude, v.info.Latitude, v.info.Longitude) < 500.00 {
 				rsp.Code = pbgame.SitDownRspCode_SitDownDistanceSoClose
 				tlog.Info("玩家doSitDown坐下准备时距离限制,不允许坐下", zap.Uint64("uid", uid), zap.Uint64("deksId", d.deskId))
 				return
@@ -325,7 +340,7 @@ func (d *Desk) doDestroyDesk(uid uint64, req *pbgame.DestroyDeskReq, rsp *pbgame
 			rsp.ErrMsg = fmt.Sprintf("已经有玩家申请解散:%d", req.DeskID)
 			return
 		}
-		if d.gameStatus > pbgame_logic.GameStatus_GSWait { //游戏中申请解散
+		if d.curInning > 0 { //游戏中申请解散
 			dUserInfo, _ := d.deskPlayers[uid]
 			//检查是否过于频繁
 			if dUserInfo.lastDiss.Unix() != 0 && time.Since(dUserInfo.lastDiss) < dissInterval {
@@ -337,7 +352,7 @@ func (d *Desk) doDestroyDesk(uid uint64, req *pbgame.DestroyDeskReq, rsp *pbgame
 			d.voteInfo = &voteInfo{voteUser: uid, voteTime: time.Now(), voteOption: map[uint64]pbgame.VoteOption{uid: pbgame.VoteOption_VoteOptionAgree}}
 			msg := &pbgame.VoteDestroyDeskNotif{DeskID: d.deskId, VoteUser: uid, LeftTime: int32(dissTimeOut.Seconds()), VoteResult: d.getVoteResult()}
 			d.SendData(0, msg)
-			d.set_timer(mj.TID_Destory, 15*time.Second, func() {
+			d.set_timer(mj.TID_Destory, dissTimeOut, func() {
 				if d.voteInfo == nil {
 					return
 				}
@@ -380,8 +395,10 @@ func (d *Desk) doVoteDestroyDesk(uid uint64, req *pbgame.VoteDestroyDeskReq) {
 	if req.Option == pbgame.VoteOption_VoteOptionReject { //拒绝解散
 		d.SendData(0, &pbgame.DestroyDeskResultNotif{DeskID: d.deskId, Result: 2, Type: pbgame.DestroyDeskType_DestroyTypeGame})
 		d.voteInfo = nil
+		d.cancel_timer(mj.TID_Destory)
 	} else if len(d.voteOption) == int(d.deskConfig.Args.PlayerCount) { //所有人都同意解散
 		d.dealDestroyDesk(pbgame.DestroyDeskType_DestroyTypeGame)
+		d.cancel_timer(mj.TID_Destory)
 	}
 }
 
@@ -587,7 +604,7 @@ func (d *Desk) set_timer(tID mj.EmtimerID, dura time.Duration, f func()) {
 }
 
 func (d *Desk) cancel_timer(tID mj.EmtimerID) {
-	d.rmu.RLock()
+	d.rmu.Lock()
 	t, ok := d.timerManger[tID]
 	d.rmu.Unlock()
 	if !ok {

@@ -51,12 +51,13 @@ func (p *club) RefreshClubDesks(ctx context.Context, args *codec.Message, reply 
 	}
 
 	cc.RLock()
-	defer cc.RUnlock()
+
 	rsp.Info = &pbclub.ClubInfo{
 		ID:           cc.ID,
 		MasterUserID: cc.MasterUserID,
 		MasterName:   "", // TODO
 		Profile:      cc.Profile,
+		IsProofe:cc.IsProofe,
 		Base: &pbclub.BaseInfo{
 			Name:            cc.Name,
 			IsAutoCreate:    cc.IsAutoCreate,
@@ -99,24 +100,18 @@ func (p *club) RefreshClubDesks(ctx context.Context, args *codec.Message, reply 
 		synchroClubdeskinfo(cc.ID)
 		cc.lastquerytime = time.Now()
 	}
-
-	//在查询时 做一下俱乐部桌子校验 防止游戏服务器重启 自动开放俱乐部的桌子不存在的情况
-	if cc.IsAutoCreate && cc.f == nil {		//自动创建桌子 但是当前不存在桌子
-		haveEmptyTable := false
-		for _,v :=range cc.desks {
-			if v.Status == "1" {	//有空桌子
-				haveEmptyTable = true
-				break;
-			}
-		}
-		if !haveEmptyTable {	//不存在空桌子
-			logrus.Infof("查询俱乐部时校验到没有空桌子 %x",cc.desks)
-			checkAutoCreate(cc.ID)	//自动创建房间
-		}
-	}
 	for _, d := range cc.desks {
 		rsp.Info.Desks = append(rsp.Info.Desks, d)
 	}
 	rsp.Code = 1
+	cc.RUnlock()
+
+	//在查询时 做一下俱乐部桌子校验 防止游戏服务器重启 自动开放俱乐部的桌子不存在的情况
+	if cc.IsAutoCreate && cc.f == nil {		//自动创建桌子 但是当前不存在桌子
+		setting,cid,masterUserID := checkAutoCreate(cc.ID)
+		if len(setting) > 0 {
+			createDesk(setting, cid, masterUserID)
+		}
+	}
 	return
 }

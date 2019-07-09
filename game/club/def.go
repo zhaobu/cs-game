@@ -20,6 +20,7 @@ const (
 	identityAdmin  = 2 // 管理员
 	identityNormal = 3 // 普通成员
 	identityBlack  = 4 // 黑名单
+	identityInReview = 5 //审核中
 )
 
 const (

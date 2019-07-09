@@ -82,6 +82,7 @@ func (p *club) CreateClubReq(ctx context.Context, args *codec.Message, reply *co
 	cc.IsAutoCreate = req.Base.IsAutoCreate
 	cc.IsCustomGameArg = req.Base.IsCustomGameArg
 	cc.IsMasterPay = req.Base.IsMasterPay
+	cc.IsProofe = false
 	cc.CurrDayDestoryDeskNum = 0
 	cc.LastDestoryDeskNumTime = time.Now().Unix()
 	// 创建人默认加入且同意
@@ -91,6 +92,7 @@ func (p *club) CreateClubReq(ctx context.Context, args *codec.Message, reply *co
 		Agree:    true,
 		Relation:[]uint64{},
 	}
+	cc.GameArgs = make([]*mgo.DeskSetting, 0)
 	for _, v := range req.GameArgs {
 		cc.GameArgs = append(cc.GameArgs, &mgo.DeskSetting{
 			GameName:        v.GameName,
@@ -100,7 +102,12 @@ func (p *club) CreateClubReq(ctx context.Context, args *codec.Message, reply *co
 		})
 	}
 	if cc.IsAutoCreate {
-		cc.f = func() { checkAutoCreate(newID) }
+		cc.f = func() {
+			setting,cid,masterUserID := checkAutoCreate(newID)
+			if len(setting) > 0 {
+				createDesk(setting,cid,masterUserID)
+			}
+		}
 	}
 	cc.noCommit = true
 

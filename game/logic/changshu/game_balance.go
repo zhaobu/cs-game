@@ -215,7 +215,8 @@ func (self *GameBalance) CalGameBalance(players []*mj.PlayerInfo, bankerId int32
 		balanceInfo.Baozi = self.baozi
 		winSocre *= self.baozi
 		//底飘
-		winSocre += int32(self.game_config.Dipiao) * 2
+		balanceInfo.DiPiaoPoint = int32(self.game_config.Dipiao) * 2
+		winSocre += balanceInfo.DiPiaoPoint
 
 		//赢
 		if self.huMode == mj.HuMode_ZIMO {
