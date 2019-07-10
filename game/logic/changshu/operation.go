@@ -472,7 +472,6 @@ func (self *OperAtion) GetListenInfo(chairId int32, players []*mj.PlayerInfo, hu
 			self.updateCardInfo(cardInfo, nil, []int32{removeCard})
 			//先判断能胡
 			if huLib.OneCardCanListen(cardInfo, &players[chairId].BalanceInfo, huModeTags) {
-				canListen = true
 				jsonStr.Info[removeCard] = &pbgame_logic.Json_ListenCards{}
 				//找出所有能听的牌
 				for addCard, num := range leftStack {
@@ -482,6 +481,12 @@ func (self *OperAtion) GetListenInfo(chairId int32, players []*mj.PlayerInfo, hu
 						jsonStr.Info[removeCard].Cards = append(jsonStr.Info[removeCard].Cards, oneListen)
 					}
 					self.updateCardInfo(cardInfo, nil, []int32{addCard})
+				}
+				//如果能听的牌在牌库和其他玩家手牌中不存在则去掉该种听牌情况
+				if len(jsonStr.Info[removeCard].Cards) == 0 {
+					jsonStr.Info[removeCard] = nil
+				} else {
+					canListen = true
 				}
 			}
 			self.updateCardInfo(cardInfo, []int32{removeCard}, nil) //还原手牌
@@ -514,7 +519,6 @@ func (self *OperAtion) GetListenInfo2(chairId int32, players []*mj.PlayerInfo, h
 	if huLib.OneCardCanListen(cardInfo, &players[chairId].BalanceInfo, huModeTags) {
 		bakHandCards := make([]int32, len(cardInfo.HandCards)) //保留原手牌顺序
 		copy(bakHandCards, cardInfo.HandCards)
-		canListen = true
 		jsonStr.Info[0] = &pbgame_logic.Json_ListenCards{}
 		//找出所有能听的牌
 		for addCard, num := range leftStack {
@@ -524,6 +528,12 @@ func (self *OperAtion) GetListenInfo2(chairId int32, players []*mj.PlayerInfo, h
 				jsonStr.Info[0].Cards = append(jsonStr.Info[0].Cards, oneListen)
 			}
 			self.updateCardInfo(cardInfo, nil, []int32{addCard})
+		}
+		//如果能听的牌在牌库和其他玩家手牌中不存在则去掉该种听牌情况
+		if len(jsonStr.Info[0].Cards) == 0 {
+			jsonStr.Info[0] = nil
+		} else {
+			canListen = true
 		}
 		cardInfo.HandCards = bakHandCards
 	}

@@ -198,7 +198,7 @@ func (self *HuLib) checkBaseHuHua(cardInfo *PlayerCardInfo, balanceInfo *Playser
 	return false
 }
 
-//检查打出某张牌后能否听
+//检查听牌时打出某张牌后能否听
 func (self *HuLib) OneCardCanListen(cardInfo *PlayerCardInfo, balanceInfo *PlayserBalanceInfo, huModeTags map[EmHuModeTag]bool) bool {
 	huTypeList := HuTypeList{}
 
@@ -242,7 +242,7 @@ func (self *HuLib) OneCardCanListen(cardInfo *PlayerCardInfo, balanceInfo *Plays
 	return len(huTypeList) > 0
 }
 
-//判断出能听后检查某张牌是否能胡
+//检查听牌时打出某张牌后再加入一张牌是否能胡
 func (self *HuLib) OneCardCanHu(cardInfo *PlayerCardInfo, balanceInfo *PlayserBalanceInfo, huModeTags map[EmHuModeTag]bool) bool {
 	huTypeList := HuTypeList{}
 	baseHu := false
