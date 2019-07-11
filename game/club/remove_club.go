@@ -78,7 +78,7 @@ func (p *club) RemoveClubReq(ctx context.Context, args *codec.Message, reply *co
 		}
 	}
 	if len(destorydesks)> 0{
-		defer destoryDesk(destorydesks)
+		defer destoryDesk(0,destorydesks[0:]...)
 	}
 	return
 }

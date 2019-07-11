@@ -71,7 +71,7 @@ func (p *club) SetClubIsProofeReq(ctx context.Context, args *codec.Message, repl
 			}
 		}
 		if len(destorydesks)> 0{
-			defer destoryDesk(destorydesks)
+			defer destoryDesk(0,destorydesks[0:]...)
 		}
 	}else{
 		////在查询时 做一下俱乐部桌子校验 防止游戏服务器重启 自动开放俱乐部的桌子不存在的情况

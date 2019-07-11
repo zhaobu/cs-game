@@ -141,7 +141,7 @@ func createDesk(setting []*mgo.DeskSetting, cid int64, masterUserID uint64) {
 }
 
 //销毁桌子
-func destoryDesk(desks []*pbcommon.DeskInfo){
+func destoryDesk(uId uint64,desks... *pbcommon.DeskInfo){
 	for _, s := range desks {
 		cli, err := getGameCli(s.GameName)
 		if err != nil {
@@ -149,11 +149,11 @@ func destoryDesk(desks []*pbcommon.DeskInfo){
 		}
 		reqRCall := &codec.Message{}
 		codec.Pb2Msg(&pbgame.DestroyDeskReq{
-			Head:            &pbcommon.ReqHead{UserID: 0},
+			Head:            &pbcommon.ReqHead{UserID: uId},
 			DeskID:s.ID,
 			Type:pbgame.DestroyDeskType_DestroyTypeClub,
 		}, reqRCall)
-		reqRCall.UserID = 0
+		reqRCall.UserID = uId
 		rspRCall := &codec.Message{}
 		cli.Go(context.Background(), "DestroyDeskReq", reqRCall, rspRCall, nil)
 	}

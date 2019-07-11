@@ -358,17 +358,9 @@ message MakeDeskReq {
     int64 ClubID = 5;
 }
 
-
-// 加入桌子 c -> s
-message JoinDeskReq {
+//解散桌子 只有群主能解散
+message DestroyDeskReq {
     pbcommon.ReqHead Head = 1;
-    uint64 DeskID = 2;
-}
-
-// 加入桌子 s -> c
-message JoinDeskRsp {
-    pbcommon.RspHead Head = 1;
-    int32 Code = 2;             //看game.JoinDeskRsp 请求1
-    string ErrMsg = 3;
-    pbcommon.DeskInfo Info = 4;
+    int64 ClubID = 2;
+    uint64 DeskID = 3;
 }
