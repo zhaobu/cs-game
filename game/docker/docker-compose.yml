@@ -166,39 +166,39 @@ services:
         max-size: "1000k"
         max-file: "20"
 
-  changshu:
-    build:
-      #指定  Dockerfile  所在文件夹的路径
-      context: ./
-      # 指定  Dockerfile  文件名
-      dockerfile: Dockerfile.golang
-    command: ["changshu", "false"]
-    volumes:
-      # GOPATH目录
-      - ../:/go/src/cy/game:rw
-    labels:
-      - name="liwei"
-    # working_dir: /go/src
-    # 打开标准输入，可以接受外部输入
-    stdin_open: true
-    # 模拟一个伪终端
-    tty: true
-    # 指定启动顺序
-    depends_on:
-      - mongodb
-      - redis
-      - consul
-    networks:
-      - gamenet
-    environment:
-      # 设置节点类型
-      NodeType: game
-      NodeName: changshu
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "1000k"
-        max-file: "20"
+  # changshu:
+  #   build:
+  #     #指定  Dockerfile  所在文件夹的路径
+  #     context: ./
+  #     # 指定  Dockerfile  文件名
+  #     dockerfile: Dockerfile.golang
+  #   command: ["changshu", "false"]
+  #   volumes:
+  #     # GOPATH目录
+  #     - ../:/go/src/cy/game:rw
+  #   labels:
+  #     - name="liwei"
+  #   # working_dir: /go/src
+  #   # 打开标准输入，可以接受外部输入
+  #   stdin_open: true
+  #   # 模拟一个伪终端
+  #   tty: true
+  #   # 指定启动顺序
+  #   depends_on:
+  #     - mongodb
+  #     - redis
+  #     - consul
+  #   networks:
+  #     - gamenet
+  #   environment:
+  #     # 设置节点类型
+  #     NodeType: game
+  #     NodeName: changshu
+  #   logging:
+  #     driver: "json-file"
+  #     options:
+  #       max-size: "1000k"
+  #       max-file: "20"
 
   redis:
     image: redis:latest

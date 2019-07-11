@@ -87,13 +87,15 @@ func (p *club) UpdateClubReq(ctx context.Context, args *codec.Message, reply *co
 		})
 	}
 	cc.noCommit = true
+	IsProofe := cc.IsProofe
+	f := cc.f
 	cc.Unlock()
 	rsp.Code = 1
 	//更新房间设置时检查是否需要重新创建房间
-	if req.Base.IsAutoCreate && cc.f == nil {		//自动创建桌子 但是当前不存在桌子
+	if req.Base.IsAutoCreate && !IsProofe && f == nil {		//自动创建桌子 但是当前不存在桌子
 		setting,cid,masterUserID := checkAutoCreate(cc.ID)
 		if len(setting) > 0 {
-			createDesk(setting, cid, masterUserID)
+			defer createDesk(setting, cid, masterUserID)
 		}
 	}
 	//if req.Base.IsAutoCreate {

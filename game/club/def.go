@@ -7,11 +7,11 @@ package main
 type clubChangeTyp int
 
 const (
-	clubChangeTypJoin   clubChangeTyp = 1
-	clubChangeTypUpdate clubChangeTyp = 2
-	clubChangeTypExit   clubChangeTyp = 3
-	clubChangeTypRemove clubChangeTyp = 4
-	clubChanageTypeDeskUpdata clubChangeTyp  = 5
+	clubChangeTypJoin         clubChangeTyp = 1
+	clubChangeTypUpdate       clubChangeTyp = 2
+	clubChangeTypExit         clubChangeTyp = 3
+	clubChangeTypRemove       clubChangeTyp = 4
+	clubChangeTypUpdateNoTips clubChangeTyp = 5
 	// 被踢出？
 )
 

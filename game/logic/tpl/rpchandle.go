@@ -370,20 +370,6 @@ func (self *RpcHandle) MakeDeskReq(ctx context.Context, args *codec.Message, rep
 
 	//如果是俱乐部建房,检查权限
 	if req.ClubID != 0 {
-		rspCode := mgo.CheckCreateClubRoom(req.ClubID, args.UserID)
-		if rspCode == 1 {
-			self.service.tlog.Error("err mgo.CheckCreateClubRoom(),俱乐部不存在")
-			rsp.Code = pbgame.MakeDeskRspCode_MakeDeskCanNotFindClubID
-			return nil
-		} else if rspCode == 2 {
-			self.service.tlog.Error("err mgo.CheckCreateClubRoom(),玩家不是本俱乐部成员")
-			rsp.Code = pbgame.MakeDeskRspCode_MakeDeskUserNotInClub
-			return nil
-		} else if rspCode == 3 {
-			self.service.tlog.Error("err mgo.CheckCreateClubRoom(),玩家没有创建俱乐部房间权限")
-			rsp.Code = pbgame.MakeDeskRspCode_MakeDeskCanNotCreateClubDesk
-			return nil
-		}
 		cache.AddClubDeskRelation(req.ClubID, newDeskID)
 	}
 

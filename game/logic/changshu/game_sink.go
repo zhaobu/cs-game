@@ -895,7 +895,7 @@ func (self *GameSink) gangCard(chairId, card int32) error {
 	}
 
 	//变量维护
-	self.resetOper() //先清除操作,以免影响抢杠胡判断
+
 	self.haswaitOper[chairId] = false
 
 	self.curOutChair = -1 //玩家杠牌后 当前出牌玩家还不是自己 要摸牌后才能出牌
@@ -916,13 +916,15 @@ func (self *GameSink) gangCard(chairId, card int32) error {
 	//判断抢杠胡
 	if gangType == pbgame_logic.OperType_Oper_BU_GANG {
 		for k, v := range self.players {
-			if int32(k) != chairId {
+			if int32(k) != chairId && self.canOperInfo[int32(k)].CanHu.Empty() { //避免抢杠胡玩家取消后重复判断抢杠胡
 				ret := self.operAction.QiangGangAnalysis(v, card, int32(k), int32(chairId))
 				if !ret.Empty() {
 					//统计并记录玩家可以进行的操作
 					msg := &pbgame_logic.S2CHaveOperation{ChairId: int32(k)}
 					self.countCanOper(ret, int32(k), msg)
+					//标记有一次机会可以抢杠胡
 					willWait = true
+
 					//发送玩家可进行的操作
 					log.Infof("%s 可进行的操作%+v", self.logHeadUser(int32(k)), ret)
 					self.sendData(int32(k), msg)
@@ -933,8 +935,12 @@ func (self *GameSink) gangCard(chairId, card int32) error {
 
 	//如果能抢杠胡,需要等待玩家操作
 	if willWait {
+		log.Debugf("%s 操作杠时其他玩家可以抢杠胡,需要等待", self.logHeadUser(chairId))
+		self.insertWaitOper(chairId, GangOrder, &WaitOperRecord{Card: card})
+		self.haswaitOper[chairId] = true
 		return nil
 	}
+	self.resetOper()
 
 	msg := &pbgame_logic.BS2CGangCard{ChairId: chairId, Card: card, Type: pbgame_logic.GangType(gangType), LoseChair: loseChair}
 	self.sendData(-1, msg)
@@ -1013,7 +1019,6 @@ func (self *GameSink) huCard(chairId int32) error {
 	self.haswaitOper[chairId] = false
 
 	if len(self.operOrder[HuOrder]) == 0 {
-		self.gameBalance.CalGangTou(self.leftCard, self.bankerId)
 		self.gameEnd(pbgame_logic.GameEndType_EndHu)
 	}
 	return nil
@@ -1074,6 +1079,7 @@ func (self *GameSink) gameEnd(endType pbgame_logic.GameEndType) {
 		self.desk.gameEnd(endType)
 		return
 	}
+	self.gameBalance.CalGangTou(self.leftCard, self.bankerId)
 	self.isPlaying = false
 	//发送小结算信息
 	msg := &pbgame_logic.BS2CGameEnd{CurInning: self.desk.curInning, Banker: self.bankerId, EndType: endType}

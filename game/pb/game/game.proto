@@ -68,7 +68,7 @@ enum MakeDeskRspCode {
   MakeDeskInternalServerError = 5;    //服务器内部错误
   MakeDeskUserStatusErr = 6;          // 创建并进入游戏失败
   MakeDeskCanNotFindClubID = 7;       // 无效的俱乐部ID
-  MakeDeskLimit = 8;                  // 个数限制
+  MakeDeskLimit = 8;                  //个数限制
   MakeDeskAlreadyInDesk = 9;          //已经在桌子中
   MakeDeskUserNotInClub = 10;         //玩家不在俱乐部中
   MakeDeskCanNotCreateClubDesk = 11;  //玩家没权限创建俱乐部房间

@@ -104,13 +104,16 @@ func (p *club) RefreshClubDesks(ctx context.Context, args *codec.Message, reply 
 		rsp.Info.Desks = append(rsp.Info.Desks, d)
 	}
 	rsp.Code = 1
+	IsAutoCreate := cc.IsAutoCreate
+	IsProofe := cc.IsProofe
+	f := cc.f
 	cc.RUnlock()
 
 	//在查询时 做一下俱乐部桌子校验 防止游戏服务器重启 自动开放俱乐部的桌子不存在的情况
-	if cc.IsAutoCreate && cc.f == nil {		//自动创建桌子 但是当前不存在桌子
+	if IsAutoCreate && !IsProofe && f == nil {		//自动创建桌子 但是当前不存在桌子
 		setting,cid,masterUserID := checkAutoCreate(cc.ID)
 		if len(setting) > 0 {
-			createDesk(setting, cid, masterUserID)
+			defer createDesk(setting, cid, masterUserID)
 		}
 	}
 	return

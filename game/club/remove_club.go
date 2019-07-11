@@ -61,6 +61,7 @@ func (p *club) RemoveClubReq(ctx context.Context, args *codec.Message, reply *co
 	for _, m := range cc.Members {
 		notifyUids = append(notifyUids, m.UserID)
 	}
+	desk := cc.desks
 	cc.Unlock()
 
 	mgo.RemoveClub(req.ClubID) // db 直接删除
@@ -68,6 +69,17 @@ func (p *club) RemoveClubReq(ctx context.Context, args *codec.Message, reply *co
 		delUserJoinClub(uid, req.ClubID)
 	}
 	rsp.Code = 1
+
+	//解散空闲的桌子
+	destorydesks := []*pbcommon.DeskInfo{}
+	for _,v := range desk{
+		if v.Status == "1"{
+			destorydesks = append(destorydesks,v)
+		}
+	}
+	if len(destorydesks)> 0{
+		defer destoryDesk(destorydesks)
+	}
 	return
 }
 

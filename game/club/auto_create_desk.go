@@ -45,9 +45,10 @@ func flashDesk(n *pbinner.DeskChangeNotif) {
 
 	cc.RLock()
 	isAutoCreate := cc.IsAutoCreate
+	IsProofe := cc.IsProofe
 	cc.RUnlock()
 
-	if isAutoCreate {
+	if isAutoCreate && !IsProofe {
 		// 更新、删除的时候 可能要自动建房间
 		var needCheck bool
 		if n.ChangeTyp == 3 {
@@ -63,7 +64,7 @@ func flashDesk(n *pbinner.DeskChangeNotif) {
 		}
 	}
 
-	go sendClubChangeInfo(n.ClubID, clubChanageTypeDeskUpdata, 0)
+	go sendClubChangeInfo(n.ClubID, clubChangeTypUpdateNoTips, 0)
 }
 
 func checkAutoCreate(_cid int64)(setting []*mgo.DeskSetting, cid int64, masterUserID uint64) {
@@ -136,5 +137,24 @@ func createDesk(setting []*mgo.DeskSetting, cid int64, masterUserID uint64) {
 		reqRCall.UserID = masterUserID
 		rspRCall := &codec.Message{}
 		cli.Go(context.Background(), "MakeDeskReq", reqRCall, rspRCall, nil)
+	}
+}
+
+//销毁桌子
+func destoryDesk(desks []*pbcommon.DeskInfo){
+	for _, s := range desks {
+		cli, err := getGameCli(s.GameName)
+		if err != nil {
+			continue
+		}
+		reqRCall := &codec.Message{}
+		codec.Pb2Msg(&pbgame.DestroyDeskReq{
+			Head:            &pbcommon.ReqHead{UserID: 0},
+			DeskID:s.ID,
+			Type:pbgame.DestroyDeskType_DestroyTypeClub,
+		}, reqRCall)
+		reqRCall.UserID = 0
+		rspRCall := &codec.Message{}
+		cli.Go(context.Background(), "DestroyDeskReq", reqRCall, rspRCall, nil)
 	}
 }

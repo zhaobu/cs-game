@@ -38,7 +38,7 @@ func (p *club) SetClubIsProofeReq(ctx context.Context, args *codec.Message, repl
 		}
 
 		if rsp.Code == 1 {
-			sendClubChangeInfo(req.ClubID, clubChangeTypUpdate, args.UserID)
+			sendClubChangeInfo(req.ClubID, clubChangeTypUpdateNoTips, args.UserID)
 		}
 	}()
 
@@ -56,10 +56,32 @@ func (p *club) SetClubIsProofeReq(ctx context.Context, args *codec.Message, repl
 		rsp.Code = 3
 		return
 	}
-
 	cc.IsProofe = req.IsProofe
 	cc.noCommit = true
+	desk := cc.desks
+	IsAutoCreate := cc.IsAutoCreate
+	f := cc.f
 	cc.Unlock()
+
+	if req.IsProofe { //打烊
+		destorydesks := []*pbcommon.DeskInfo{}
+		for _,v := range desk{
+			if v.Status == "1"{
+				destorydesks = append(destorydesks,v)
+			}
+		}
+		if len(destorydesks)> 0{
+			defer destoryDesk(destorydesks)
+		}
+	}else{
+		////在查询时 做一下俱乐部桌子校验 防止游戏服务器重启 自动开放俱乐部的桌子不存在的情况
+		if IsAutoCreate && f == nil { //自动创建桌子 但是当前不存在桌子
+			setting,cid,masterUserID := checkAutoCreate(cc.ID)
+			if len(setting) > 0 {
+				defer createDesk(setting, cid, masterUserID)
+			}
+		}
+	}
 	rsp.Code = 1
 	return
 }

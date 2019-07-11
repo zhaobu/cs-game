@@ -484,7 +484,7 @@ func (self *OperAtion) GetListenInfo(chairId int32, players []*mj.PlayerInfo, hu
 				}
 				//如果能听的牌在牌库和其他玩家手牌中不存在则去掉该种听牌情况
 				if len(jsonStr.Info[removeCard].Cards) == 0 {
-					jsonStr.Info[removeCard] = nil
+					delete(jsonStr.Info, removeCard)
 				} else {
 					canListen = true
 				}
@@ -531,7 +531,7 @@ func (self *OperAtion) GetListenInfo2(chairId int32, players []*mj.PlayerInfo, h
 		}
 		//如果能听的牌在牌库和其他玩家手牌中不存在则去掉该种听牌情况
 		if len(jsonStr.Info[0].Cards) == 0 {
-			jsonStr.Info[0] = nil
+			delete(jsonStr.Info, 0)
 		} else {
 			canListen = true
 		}
