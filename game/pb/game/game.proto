@@ -72,6 +72,7 @@ enum MakeDeskRspCode {
   MakeDeskAlreadyInDesk = 9;          //已经在桌子中
   MakeDeskUserNotInClub = 10;         //玩家不在俱乐部中
   MakeDeskCanNotCreateClubDesk = 11;  //玩家没权限创建俱乐部房间
+  MakeDeskClubIsIsProofe = 12;         //俱乐部已经打烊不能创建房间
 }
 message MakeDeskRsp {
   pbcommon.RspHead Head = 1;
@@ -169,6 +170,7 @@ message DestroyDeskReq {
 //申请解散回应code
 enum DestroyDeskRspCode {
   DestroyDeskNone = 0;
+<<<<<<< .mine
   DestroyDeskSucc = 1;           //申请解散成功
   DestroyDeskPlaying = 2;        //正在游戏中,不能解散(非好友场次)
   DestroyDeskNotMaster = 3;      //游戏开始前只有房主才能解散房间
@@ -180,6 +182,31 @@ enum DestroyDeskRspCode {
   SitDownNotInClub = 9;          //玩家不是本俱乐部成员
   DestroyDeskNoPower = 10;       //无权解散桌子 (俱乐部添加)
   DestroyDeskNumUpCeii = 11;     //解散桌子已达上限 (俱乐部添加)
+||||||| .r11819
+  DestroyDeskSucc = 1;       //申请解散成功
+  DestroyDeskPlaying = 2;    //正在游戏中,不能解散(非好友场次)
+  DestroyDeskNotMaster = 3;  //游戏开始前只有房主才能解散房间
+  DestroyDeskFrequent = 4;   //解散请求过于频繁
+  DestroyDeskNotExist = 5;   //桌子不存在
+  DestroyDeskNotInDesk = 6;  //玩家不在桌子中
+  DestroyDeskRepeated = 7;   //已经有人申请解散
+  MakeDeskCanNotFindClubID = 8;    //无效的俱乐部Id
+  SitDownNotInClub = 9;           //玩家不是本俱乐部成员
+  DestroyDeskNoPower = 10;    //无权解散桌子 (俱乐部添加)
+  DestroyDeskNumUpCeii = 11;  //解散桌子已达上限 (俱乐部添加)
+=======
+  DestroyDeskSucc = 1;       //申请解散成功
+  DestroyDeskPlaying = 2;    //正在游戏中,不能解散(非好友场次)
+  DestroyDeskNotMaster = 3;  //游戏开始前只有房主才能解散房间
+  DestroyDeskFrequent = 4;   //解散请求过于频繁
+  DestroyDeskNotExist = 5;   //桌子不存在
+  DestroyDeskNotInDesk = 6;  //玩家不在桌子中
+  DestroyDeskRepeated = 7;   //已经有人申请解散
+  DestroyDeskNotFindClubID = 8;    //无效的俱乐部Id
+  DestroyDeskNotInClub = 9;           //玩家不是本俱乐部成员
+  DestroyDeskNoPower = 10;    //无权解散桌子 (俱乐部添加)
+  DestroyDeskNumUpCeii = 11;  //解散桌子已达上限 (俱乐部添加)
+>>>>>>> .r11821
 }
 //申请解散回应
 message DestroyDeskRsp {

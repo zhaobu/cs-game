@@ -43,6 +43,12 @@ func (p *club) MakeDeskReq(ctx context.Context, args *codec.Message, reply *code
 	}
 	cc.Lock()
 
+	if cc.IsProofe {
+		rsp.Code = 12
+		cc.Unlock()
+		return
+	}
+
 	m, find := cc.Members[args.UserID]
 	if !find || (m.Identity == identityBlack ) {
 		cc.Unlock()

@@ -87,10 +87,9 @@ func (p *club) DealMemberIdentityReq(ctx context.Context, args *codec.Message, r
 
 	if req.Del {
 		delUserJoinClub(req.UserID, req.ClubID)
-		//sendClubChangeInfo(cc.ID, clubChangeTypExit, req.UserID)
-		sendClubChangeInfoByuIds(cc.ID, clubChangeTypExit, req.UserID,[]uint64{req.Head.UserID,req.UserID})
+		sendClubChangeInfoByuIds(cc.ID, clubChangeTypExit, req.UserID,req.Head.UserID,req.UserID)
 	} else {
-		sendClubChangeInfoByuIds(cc.ID, clubChangeTypUpdateNoTips, req.UserID,[]uint64{req.UserID})
+		sendClubChangeInfoByuIds(cc.ID, clubChangeTypUpdateNoTips, req.UserID,req.UserID)
 	}
 	return
 }

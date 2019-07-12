@@ -191,7 +191,7 @@ func ackTransferMaster(e *mgo.ClubEmail, req *pbclub.AckClubEmailReq) int32 {
 		cc.noCommit = true
 		cc.Unlock()
 
-		sendClubChangeInfo(clubID, clubChangeTypUpdate, newMaster)
+		sendClubChangeInfoByuIds(clubID,clubChangeTypUpdate,newMaster,oldMaster,newMaster)
 	}
 
 	ce := &mgo.ClubEmail{
