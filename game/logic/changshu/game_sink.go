@@ -922,7 +922,6 @@ func (self *GameSink) gangCard(chairId, card int32) error {
 					//统计并记录玩家可以进行的操作
 					msg := &pbgame_logic.S2CHaveOperation{ChairId: int32(k)}
 					self.countCanOper(ret, int32(k), msg)
-					//标记有一次机会可以抢杠胡
 					willWait = true
 
 					//发送玩家可进行的操作
@@ -1019,6 +1018,16 @@ func (self *GameSink) huCard(chairId int32) error {
 	self.haswaitOper[chairId] = false
 
 	if len(self.operOrder[HuOrder]) == 0 {
+		//如果是抢杠胡,去掉被抢杠玩家手里的牌
+		if huInfo.HuMode == mj.HuMode_PAOHU {
+			for _, v := range huInfo.HuList {
+				if v == mj.HuType_QiangGangHu {
+					loseCardInfo := &self.players[huInfo.LoseChair].CardInfo
+					self.operAction.updateCardInfo(loseCardInfo, nil, []int32{huInfo.Card})
+					break
+				}
+			}
+		}
 		self.gameEnd(pbgame_logic.GameEndType_EndHu)
 	}
 	return nil

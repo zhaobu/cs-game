@@ -107,6 +107,15 @@ func (self *CardDef) GetDebugCards(gameName string, baseCard []int32, playercoun
 	util.LoadJSON(configs.Conf.GameNode[gameName].GameTest, &testCards)
 	if !testCards.DebugCards {
 		return RandCards(baseCard)
+	} else {
+		//检查配牌是否合法,三人麻将没有万字牌
+		if playercount == 3 {
+			for _, v := range testCards.HandCards {
+				if GetCardColor(v) == 1 {
+					return RandCards(baseCard)
+				}
+			}
+		}
 	}
 
 	//随机剩下的牌

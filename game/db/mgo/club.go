@@ -27,7 +27,7 @@ type Club struct {
 	IsAutoCreate           bool
 	IsCustomGameArg        bool
 	IsMasterPay            bool
-	IsProofe			   bool	//是否打烊
+	IsProofe               bool //是否打烊
 	Notice                 string
 	CurrDayDestoryDeskNum  int   //当天解散房间次数
 	LastDestoryDeskNumTime int64 //最后解散桌子时间
@@ -121,26 +121,6 @@ func QueryClubByID(id int64) (c *Club, err error) {
 	c = &Club{}
 	err = mgoSess.DB("").C("clubinfo").Find(bson.M{"id": id}).One(c)
 	return
-}
-
-//校验创建房间接口 code 0 校验成功 1俱乐部不存在 2用户不是本俱乐部的 3用户无权创建房间
-func CheckCreateClubRoom(cId int64, uId uint64) int32 {
-	c := &Club{}
-	err := mgoSess.DB("").C("clubinfo").Find(bson.M{"id": cId}).One(c)
-	if err != nil {
-		return 1
-	} else {
-		for _, u := range c.Members {
-			if u.UserID == uId {
-				if u.Identity != 4 { //不是黑名单用户
-					return 0
-				} else {
-					return 3
-				}
-			}
-		}
-		return 2
-	}
 }
 
 //校验加入房间接口 code 0 校验成功 1俱乐部不存在 2用户不是本俱乐部的 3用户无权加入房间 4房间中有亲属成员存在

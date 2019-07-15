@@ -2,7 +2,7 @@ package main
 
 import (
 	"cy/game/db/mgo"
-	"cy/game/pb/club"
+	pbclub "cy/game/pb/club"
 )
 
 func sendClubChangeInfo(clubID int64, typ clubChangeTyp, changeUserID uint64) {
@@ -40,7 +40,7 @@ func sendClubChangeInfo(clubID int64, typ clubChangeTyp, changeUserID uint64) {
 }
 
 //指定发送目标
-func sendClubChangeInfoByuIds(clubID int64, typ clubChangeTyp, changeUserID uint64,uIds []uint64) {
+func sendClubChangeInfoByuIds(clubID int64, typ clubChangeTyp, changeUserID uint64, uIds ...uint64) {
 	onlineSubMembers := make([]uint64, 0)
 
 	cc := getClub(clubID)
