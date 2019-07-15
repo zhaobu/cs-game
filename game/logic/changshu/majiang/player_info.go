@@ -38,7 +38,7 @@ type PlayerCardInfo struct {
 	ChiCards   [][3]int32                      //{card1,card2,card3,card4,card5,card6}3个连续的能组成吃,吃的牌放第一个
 	RiverCards []*pbgame_logic.OperRecord      //操作记录
 	HuaCards   []int32                         //花牌
-	GuoPeng    bool                            //是否过碰
+	GuoPeng    map[int32]int32                 //过碰的牌
 	CanNotOut  map[int32]int32                 //不能打的牌,包括吃后,碰后不能打的牌
 }
 
@@ -51,7 +51,7 @@ func (self *PlayerCardInfo) reset() {
 	self.ChiCards = [][3]int32{}
 	self.RiverCards = []*pbgame_logic.OperRecord{}
 	self.HuaCards = []int32{}
-	self.GuoPeng = false
+	self.GuoPeng = map[int32]int32{}
 	self.CanNotOut = map[int32]int32{}
 }
 

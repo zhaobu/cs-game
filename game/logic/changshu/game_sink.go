@@ -543,7 +543,7 @@ func (self *GameSink) outCard(chairId, card int32) error {
 		log.Errorf("%s 出牌失败,是吃碰后不能打的牌", self.logHeadUser(chairId))
 		return nil
 	}
-	cardInfo.GuoPeng = false
+	cardInfo.GuoPeng = map[int32]int32{}
 	cardInfo.CanNotOut = map[int32]int32{}
 	//更新玩家card_info表
 	self.operAction.HandleOutCard(cardInfo, card)
@@ -1039,7 +1039,7 @@ func (self *GameSink) cancelOper(chairId int32) error {
 	}
 
 	if !self.canOperInfo[chairId].CanPeng.Empty() {
-		self.players[chairId].CardInfo.GuoPeng = true
+		self.players[chairId].CardInfo.GuoPeng[self.canOperInfo[chairId].CanPeng.Card] = self.canOperInfo[chairId].CanPeng.Card
 	}
 	//检查玩家当前操作是否需要等待
 	res := self.checkPlayerOperationNeedWait(chairId, NoneOrder)
@@ -1271,11 +1271,7 @@ func (self *GameSink) getReady(uid uint64) {
 		log.Debugf("%s 准备下一局时重复准备", self.logHeadUser(self.desk.GetChairidByUid(uid)))
 		return
 	}
-	// if self.readyInfo[chairId] {
-	// }
 	self.desk.changUserState(uid, pbgame.UserDeskStatus_UDSSitDown)
-
-	// self.readyInfo[chairId] = true
 	self.sendData(-1, &pbgame_logic.BS2CGetReady{UserId: uid})
 	var readyNum int32 = 0
 	for _, v := range self.desk.playChair {
@@ -1284,7 +1280,7 @@ func (self *GameSink) getReady(uid uint64) {
 		}
 	}
 	if readyNum == 1 {
-		self.changGameState(pbgame_logic.GameStatus_GSWait)
+		self.changGameState(pbgame_logic.GameStatus_GSGameReady)
 	} else if readyNum == self.game_config.PlayerCount {
 		self.desk.changUserState(0, pbgame.UserDeskStatus_UDSPlaying)
 		self.StartGame()

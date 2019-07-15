@@ -214,9 +214,9 @@ func (d *Desk) changUserState(uid uint64, uState pbgame.UserDeskStatus) {
 		for _, userInfo := range d.playChair {
 			userInfo.userStatus = uState
 		}
-		return
+	} else {
+		d.deskPlayers[uid].userStatus = uState
 	}
-	d.deskPlayers[uid].userStatus = uState
 }
 
 //起立后由玩家变为观察者

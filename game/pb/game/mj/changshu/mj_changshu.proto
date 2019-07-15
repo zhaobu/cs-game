@@ -65,8 +65,9 @@ enum GameStatus {
   GSNone = 0;
   GSWait = 1;  //等待中(第一局为1个或多个点坐下,第二局后为一个或多个点下一局)
   GSDice = 2;  //打色子
-  GSPlaying = 3;  //游戏中
-  GSGameEnd = 4;  //游戏结束,没有人准备好下一局
+  GSPlaying = 3;    //游戏中
+  GSGameEnd = 4;    //游戏结束,没有人准备好下一局
+  GSGameReady = 5;  //游戏结束,部分玩家准备好下一局
 }
 
 message cyint32 {

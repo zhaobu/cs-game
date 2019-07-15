@@ -306,7 +306,7 @@ func (self *OperAtion) OutCardAnalysis(playerInfo *mj.PlayerInfo, outCard, chair
 		if ok, chi := self.checkChi(cardInfo.StackCards, outCard, chairId, outChair); ok {
 			ret.CanChi = CanChiOper{ChiType: chi, Card: outCard, ChairId: chairId}
 		}
-		if !cardInfo.GuoPeng && self.checkPeng(cardInfo.StackCards, outCard) {
+		if cardInfo.GuoPeng[outCard] != outCard && self.checkPeng(cardInfo.StackCards, outCard) {
 			ret.CanPeng = CanPengOper{Card: outCard, ChairId: chairId, LoseChair: outChair}
 		}
 		if self.checkPengGang(cardInfo.StackCards, outCard) {
