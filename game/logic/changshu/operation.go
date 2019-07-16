@@ -303,8 +303,10 @@ func (self *OperAtion) OutCardAnalysis(playerInfo *mj.PlayerInfo, outCard, chair
 	cardInfo := &playerInfo.CardInfo
 	ret := NewCanOper()
 	if leftCardNum > 0 {
-		if ok, chi := self.checkChi(cardInfo.StackCards, outCard, chairId, outChair); ok {
-			ret.CanChi = CanChiOper{ChiType: chi, Card: outCard, ChairId: chairId}
+		if self.game_config.PlayerCount != 3 { //三人麻将不能吃
+			if ok, chi := self.checkChi(cardInfo.StackCards, outCard, chairId, outChair); ok {
+				ret.CanChi = CanChiOper{ChiType: chi, Card: outCard, ChairId: chairId}
+			}
 		}
 		if cardInfo.GuoPeng[outCard] != outCard && self.checkPeng(cardInfo.StackCards, outCard) {
 			ret.CanPeng = CanPengOper{Card: outCard, ChairId: chairId, LoseChair: outChair}

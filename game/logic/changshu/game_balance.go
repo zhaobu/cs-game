@@ -155,9 +155,12 @@ func (self *GameBalance) DealStartDice(randRes [2]int32) {
 //计算杠头数
 func (self *GameBalance) CalGangTou(leftCards []int32, bankerId int32) { // 杠头  1 扳4个 2 扳8个 3 独龙杠
 	if self.game_config.Barhead == 3 {
-		self.duLongHua = 5
-		if mj.GetCardColor(leftCards[len(leftCards)-1]) < 4 {
-			self.duLongHua = mj.GetCardValue(int32(leftCards[len(leftCards)-1]))
+		if len(leftCards) > 0 {
+			self.duLongHua = 5
+			if mj.GetCardColor(leftCards[len(leftCards)-1]) < 4 {
+				self.duLongHua = mj.GetCardValue(int32(leftCards[len(leftCards)-1]))
+			}
+			leftCards = leftCards[:len(leftCards)-1] //如果是独龙杠,把独龙杠的牌从牌堆去掉
 		}
 	}
 	num := 4
@@ -231,6 +234,12 @@ func (self *GameBalance) CalGameBalance(players []*mj.PlayerInfo, bankerId int32
 				players[i].BalanceResult.Point -= winSocre
 			}
 		} else {
+			for _, huType := range v.HuTypeList { //抢杠胡包三家
+				if huType == mj.HuType_QiangGangHu {
+					winSocre *= self.game_config.PlayerCount - 1
+					break
+				}
+			}
 			balanceInfo.Point += winSocre                         //赢
 			players[self.loseChair].BalanceInfo.Point -= winSocre //输
 			//总分

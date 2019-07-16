@@ -333,46 +333,48 @@ func (d *Desk) getBaseDeskInfo() *pbgame_logic.GameDeskInfo {
 
 //解散桌子
 func (d *Desk) doDestroyDesk(uid uint64, req *pbgame.DestroyDeskReq, rsp *pbgame.DestroyDeskRsp) {
-	if req.Type == pbgame.DestroyDeskType_DestroyTypeGame { //游戏玩家发起解散
-		//检查是否重复申请
-		if d.voteInfo != nil {
-			rsp.Code = pbgame.DestroyDeskRspCode_DestroyDeskRepeated
-			rsp.ErrMsg = fmt.Sprintf("已经有玩家申请解散:%d", req.DeskID)
-			return
-		}
-		if d.curInning > 0 { //游戏中申请解散
-			dUserInfo, _ := d.deskPlayers[uid]
-			//检查是否过于频繁
-			if dUserInfo.lastDiss.Unix() != 0 && time.Since(dUserInfo.lastDiss) < dissInterval {
-				rsp.Code = pbgame.DestroyDeskRspCode_DestroyDeskFrequent
-				rsp.ErrMsg = fmt.Sprintf("解散请求过于频繁")
-				return
-			}
-			dUserInfo.lastDiss = time.Now()
-			d.voteInfo = &voteInfo{voteUser: uid, voteTime: time.Now(), voteOption: map[uint64]pbgame.VoteOption{uid: pbgame.VoteOption_VoteOptionAgree}}
-			msg := &pbgame.VoteDestroyDeskNotif{DeskID: d.deskId, VoteUser: uid, LeftTime: int32(dissTimeOut.Seconds()), VoteResult: d.getVoteResult()}
-			d.SendData(0, msg)
-			d.set_timer(mj.TID_Destory, dissTimeOut, func() {
-				if d.voteInfo == nil {
-					return
-				}
-				tmpReq := &pbgame.VoteDestroyDeskReq{Option: pbgame.VoteOption_VoteOptionAgree}
-				for _, v := range d.playChair {
-					//超时默认为同意解散
-					if _, ok := d.voteOption[v.info.UserID]; !ok {
-						d.doVoteDestroyDesk(v.info.UserID, tmpReq)
-					}
-				}
-			})
-			return
-		}
-
+	if req.Type == pbgame.DestroyDeskType_DestroyTypeGame { //游戏开始房主申请解散
 		if uid != d.masterUid {
 			rsp.Code = pbgame.DestroyDeskRspCode_DestroyDeskNotMaster
 			rsp.ErrMsg = fmt.Sprintf("游戏开始前只有房主才能解散桌子")
 			return
 		}
 		d.dealDestroyDesk(req.Type)
+	} else if req.Type == pbgame.DestroyDeskType_DestroyTypeVote { //游戏中投票解散
+		//检查是否重复申请
+		if d.voteInfo != nil {
+			rsp.Code = pbgame.DestroyDeskRspCode_DestroyDeskRepeated
+			rsp.ErrMsg = fmt.Sprintf("已经有玩家申请解散:%d", req.DeskID)
+			return
+		}
+		if d.curInning <= 0 { //游戏中申请解散
+			rsp.Code = pbgame.DestroyDeskRspCode_DestroyDeskVoteWithOutPlaying
+			rsp.ErrMsg = fmt.Sprintf("游戏不在进行中不能进行投票解散:%d", req.DeskID)
+			return
+		}
+		dUserInfo, _ := d.deskPlayers[uid]
+		//检查是否过于频繁
+		if dUserInfo.lastDiss.Unix() != 0 && time.Since(dUserInfo.lastDiss) < dissInterval {
+			rsp.Code = pbgame.DestroyDeskRspCode_DestroyDeskFrequent
+			rsp.ErrMsg = fmt.Sprintf("解散请求过于频繁")
+			return
+		}
+		dUserInfo.lastDiss = time.Now()
+		d.voteInfo = &voteInfo{voteUser: uid, voteTime: time.Now(), voteOption: map[uint64]pbgame.VoteOption{uid: pbgame.VoteOption_VoteOptionAgree}}
+		msg := &pbgame.VoteDestroyDeskNotif{DeskID: d.deskId, VoteUser: uid, LeftTime: int32(dissTimeOut.Seconds()), VoteResult: d.getVoteResult()}
+		d.SendData(0, msg)
+		d.set_timer(mj.TID_Destory, dissTimeOut, func() {
+			if d.voteInfo == nil {
+				return
+			}
+			tmpReq := &pbgame.VoteDestroyDeskReq{Option: pbgame.VoteOption_VoteOptionAgree}
+			for _, v := range d.playChair {
+				//超时默认为同意解散
+				if _, ok := d.voteOption[v.info.UserID]; !ok {
+					d.doVoteDestroyDesk(v.info.UserID, tmpReq)
+				}
+			}
+		})
 	} else if req.Type == pbgame.DestroyDeskType_DestroyTypeClub { //俱乐部群主申请解散房间
 		//TODO查询俱乐部接口
 		d.dealDestroyDesk(req.Type)
@@ -393,11 +395,11 @@ func (d *Desk) doVoteDestroyDesk(uid uint64, req *pbgame.VoteDestroyDeskReq) {
 	//广播选择
 	d.SendData(0, &pbgame.VoteDestroyDeskNotif{DeskID: d.deskId, VoteUser: d.voteInfo.voteUser, LeftTime: int32(leftTime.Seconds()), VoteResult: d.getVoteResult()})
 	if req.Option == pbgame.VoteOption_VoteOptionReject { //拒绝解散
-		d.SendData(0, &pbgame.DestroyDeskResultNotif{DeskID: d.deskId, Result: 2, Type: pbgame.DestroyDeskType_DestroyTypeGame})
+		d.SendData(0, &pbgame.DestroyDeskResultNotif{DeskID: d.deskId, Result: 2, Type: pbgame.DestroyDeskType_DestroyTypeVote})
 		d.voteInfo = nil
 		d.cancel_timer(mj.TID_Destory)
 	} else if len(d.voteOption) == int(d.deskConfig.Args.PlayerCount) { //所有人都同意解散
-		d.dealDestroyDesk(pbgame.DestroyDeskType_DestroyTypeGame)
+		d.dealDestroyDesk(pbgame.DestroyDeskType_DestroyTypeVote)
 		d.cancel_timer(mj.TID_Destory)
 	}
 }
@@ -405,7 +407,7 @@ func (d *Desk) doVoteDestroyDesk(uid uint64, req *pbgame.VoteDestroyDeskReq) {
 //处理桌子销毁
 func (d *Desk) dealDestroyDesk(reqType pbgame.DestroyDeskType) {
 	switch reqType {
-	case pbgame.DestroyDeskType_DestroyTypeClub, pbgame.DestroyDeskType_DestroyTypeGame, pbgame.DestroyDeskType_DestroyTypeTimeOut:
+	case pbgame.DestroyDeskType_DestroyTypeClub, pbgame.DestroyDeskType_DestroyTypeVote, pbgame.DestroyDeskType_DestroyTypeTimeOut:
 		//在游戏中解散
 		if d.curInning > 0 {
 			d.gameSink.gameEnd(pbgame_logic.GameEndType_EndDissmiss)

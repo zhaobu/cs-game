@@ -154,11 +154,12 @@ message ExitDeskRsp {
 
 //点击解散按钮方式
 enum DestroyDeskType {
-  DestroyTypeGame = 0;     //在桌子发起解散
-  DestroyTypeClub = 1;     //在俱乐部发起解散
-  DestroyTypeDebug = 2;    //强制解散,调试用
-  DestroyTypeGameEnd = 3;  //游戏大局结束解散房间
-  DestroyTypeTimeOut = 4;  //房间超时自动解散
+  DestroyTypeGame = 0;     //游戏未开始房主申请解散
+  DestroyTypeVote = 1;     //投票解散
+  DestroyTypeClub = 2;     //在俱乐部发起解散
+  DestroyTypeDebug = 3;    //强制解散,调试用
+  DestroyTypeGameEnd = 4;  //游戏大局结束解散房间
+  DestroyTypeTimeOut = 5;  //房间超时自动解散
 }
 // 申请解散 c -> s (包括游戏开始前房主解散和游戏中投票解散)
 message DestroyDeskReq {
@@ -181,6 +182,7 @@ enum DestroyDeskRspCode {
   DestroyDeskNotInClub = 9;      //玩家不是本俱乐部成员
   DestroyDeskNoPower = 10;       //无权解散桌子 (俱乐部添加)
   DestroyDeskNumUpCeii = 11;     //解散桌子已达上限 (俱乐部添加)
+  DestroyDeskVoteWithOutPlaying = 12;  //不在游戏中,不能投票解散
 }
 //申请解散回应
 message DestroyDeskRsp {

@@ -1092,9 +1092,9 @@ func (self *GameSink) gameEnd(endType pbgame_logic.GameEndType) {
 	//发送小结算信息
 	msg := &pbgame_logic.BS2CGameEnd{CurInning: self.desk.curInning, Banker: self.bankerId, EndType: endType}
 	if self.game_config.Barhead == 3 && self.hasHu {
-		msg.DulongCard = self.leftCard[len(self.leftCard)-1]
-		//如果是独龙杠,把独龙杠的牌从牌堆去掉
-		self.leftCard = self.leftCard[:len(self.leftCard)-1]
+		if len(self.leftCard) > 0 {
+			msg.DulongCard = self.leftCard[len(self.leftCard)-1]
+		}
 	}
 	self.gameBalance.CalGangTou(self.leftCard, self.bankerId)
 	self.gameBalance.CalGameBalance(self.players, self.bankerId)
