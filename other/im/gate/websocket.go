@@ -3,8 +3,8 @@ package main
 import (
 	"bufio"
 	"cy/other/im/codec"
-	_ "cy/other/im/friend/pb"
 	_ "cy/other/im/pb"
+	_ "cy/other/im/pb/friend"
 	"flag"
 	"fmt"
 	"net"

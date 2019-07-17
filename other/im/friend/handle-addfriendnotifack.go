@@ -7,7 +7,7 @@ import (
 	"cy/other/im/codec/protobuf"
 	"cy/other/im/friend/db/notif"
 	"cy/other/im/friend/db/result"
-	friendpb "cy/other/im/friend/pb"
+	friendpb "cy/other/im/pb/friend"
 	"fmt"
 	"runtime/debug"
 	"strconv"

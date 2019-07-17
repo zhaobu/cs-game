@@ -8,7 +8,7 @@ import (
 	"hash"
 	"io"
 
-	aescrc "cy/other/im/crypto/aes"
+	aescrc "cy/other/im/common/crypto/aes"
 )
 
 const (

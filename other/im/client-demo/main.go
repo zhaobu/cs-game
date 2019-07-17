@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"crypto/hmac"
 	"crypto/sha256"
-	"cy/other/im/crypto/dh"
+	"cy/other/im/common/crypto/dh"
 	"cy/other/im/codec"
 	"cy/other/im/codec/protobuf"
 	"cy/other/im/pb"

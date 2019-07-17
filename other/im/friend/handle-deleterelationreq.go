@@ -5,7 +5,7 @@ import (
 	"cy/other/im/cache"
 	"cy/other/im/codec"
 	"cy/other/im/codec/protobuf"
-	"cy/other/im/friend/pb"
+	friendpb "cy/other/im/pb/friend"
 	"fmt"
 	"runtime/debug"
 
