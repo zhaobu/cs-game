@@ -2,7 +2,7 @@ package db
 
 import (
 	"crypto/md5"
-	"cy/im/inner"
+	"cy/other/im/inner"
 	"flag"
 	"strconv"
 

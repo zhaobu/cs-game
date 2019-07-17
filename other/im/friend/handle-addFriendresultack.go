@@ -2,10 +2,10 @@ package main
 
 import (
 	"context"
-	"cy/im/codec"
-	"cy/im/codec/protobuf"
-	"cy/im/friend/db/result"
-	"cy/im/friend/pb"
+	"cy/other/im/codec"
+	"cy/other/im/codec/protobuf"
+	"cy/other/im/friend/db/result"
+	"cy/other/im/friend/pb"
 	"fmt"
 	"runtime/debug"
 	"strconv"

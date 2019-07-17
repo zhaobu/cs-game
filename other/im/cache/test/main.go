@@ -1,12 +1,12 @@
 package main
 
 import (
-	"cy/im/cache"
+	"cy/other/im/cache"
 	"fmt"
 )
 
 func main() {
-	if err := cache.Init("192.168.0.213:6379"); err != nil {
+	if err := cache.Init("192.168.0.10:6379"); err != nil {
 		fmt.Println(err)
 		return
 	}

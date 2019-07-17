@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
-	"cy/im/codec"
-	"cy/im/inner"
+	"cy/other/im/codec"
+	"cy/other/im/inner"
 	"hash/fnv"
 	"sort"
 	"strings"

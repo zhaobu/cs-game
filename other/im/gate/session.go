@@ -5,11 +5,11 @@ import (
 	"context"
 	"crypto/hmac"
 	"crypto/sha256"
-	"cy/crypto/dh"
-	"cy/im/cache"
-	"cy/im/codec"
-	_ "cy/im/friend/pb"
-	"cy/im/pb"
+	"cy/other/im/crypto/dh"
+	"cy/other/im/cache"
+	"cy/other/im/codec"
+	_ "cy/other/im/friend/pb"
+	impb "cy/other/im/pb"
 	"fmt"
 	"io"
 	"math/big"
@@ -20,8 +20,8 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/sirupsen/logrus"
 	"github.com/smallnest/rpcx/client"
+	"go.uber.org/zap"
 )
 
 type session struct {
@@ -64,11 +64,11 @@ func (s *session) run() {
 	var err error
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Printf("r:(%v) stack:(%s)\n", r, string(debug.Stack()))
+			log.Errorf("recover info:%s,stack:%s", r, string(debug.Stack()))
 		}
 
 		if err != nil {
-			fmt.Println("session close: ", err)
+			log.Errorf("session close:%v", err)
 		}
 	}()
 
@@ -130,7 +130,7 @@ func (s *session) genKey(agreeKey []byte) {
 
 func (s *session) handleRecv() (err error) {
 	defer func() {
-		logrus.WithFields(logrus.Fields{"uid": s.uid, "err": err}).Info("session close")
+		tlog.Info("session close", zap.Uint64("uid", s.uid), zap.Error(err))
 
 		if s.uid != 0 {
 			placeChange(s.uid, false, s.srvConfig.id)
@@ -141,9 +141,7 @@ func (s *session) handleRecv() (err error) {
 
 		if r := recover(); r != nil {
 			err = fmt.Errorf("%v", r)
-			logrus.WithFields(logrus.Fields{
-				"stack": string(debug.Stack()),
-			}).Error()
+			log.Errorf("recover info:stack:%s", string(debug.Stack()))
 		}
 	}()
 
@@ -247,16 +245,16 @@ func (s *session) call(args *codec.MsgPayload) {
 		reply := codec.NewMsgPayload()
 		callErr := cli.Call(context.Background(), serviceMethod, args, reply)
 		if callErr != nil {
-			logrus.Warn(callErr.Error())
+			log.Warn(callErr.Error())
 		} else {
 			if reply.PayloadName != "" {
 				replyBuf, err := reply.Encode()
 				if err == nil {
-					logrus.WithFields(logrus.Fields{"uid": s.uid, "name": reply.PayloadName}).Info("will send")
+					tlog.Info("will send", zap.Uint64("uid", s.uid), zap.String("name", reply.PayloadName))
 					err = s.send(replyBuf)
 				}
 				if err != nil {
-					logrus.Warn(err)
+					log.Warn(err)
 				}
 			}
 		}
@@ -271,7 +269,7 @@ func placeChange(uid uint64, online bool, gateID string) {
 		err = cache.UserOffline(uid)
 	}
 	if err != nil {
-		logrus.Error(err.Error())
+		log.Error(err.Error())
 	}
 }
 
@@ -302,7 +300,7 @@ func (s *session) doSend() {
 		case m, ok := <-s.outputCh:
 			if ok {
 				if err := m.WriteTo(s.c); err != nil {
-					logrus.Infof("send to %d failed %s", s.uid, err.Error())
+					log.Infof("send to %d failed %s", s.uid, err.Error())
 				}
 			}
 		}

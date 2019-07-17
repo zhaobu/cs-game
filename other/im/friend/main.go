@@ -1,8 +1,8 @@
 package main
 
 import (
-	"cy/im/cache"
-	"cy/util"
+	"cy/other/im/cache"
+	"cy/other/im/util"
 	"flag"
 	"fmt"
 	"log"
@@ -26,7 +26,7 @@ var (
 	instanceName    = flag.String("instanceName", `zztest-1009`, "instanceName")
 	accessKeyID     = flag.String("accessKeyID", `LTAIssLCxHELxHAq`, "accessKeyId")
 	accessKeySecret = flag.String("accessKeySecret", `645bzZ5iJxPru921GNrvkYNIm2Uhnf`, "accessKeySecret")
-	redisAddr       = flag.String("redisaddr", "192.168.0.213:6379", "redis address")
+	redisAddr       = flag.String("redisaddr", "192.168.0.10:6379", "redis address")
 
 	cliGate client.XClient
 

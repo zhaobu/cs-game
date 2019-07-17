@@ -1,9 +1,9 @@
 package main
 
 import (
-	"cy/im/cache"
-	"cy/im/logic/db"
-	"cy/util"
+	"cy/other/im/cache"
+	"cy/other/im/logic/db"
+	"cy/other/im/util"
 	"flag"
 	"fmt"
 	"os"
@@ -40,10 +40,10 @@ func init() {
 
 func main() {
 	var (
-		consulAddr = flag.String("consulAddr", "localhost:8500", "consul address")
+		consulAddr = flag.String("consulAddr", "127.0.0.1:8500", "consul address")
 		basePath   = flag.String("base", "/cy_im", "consul prefix path")
 		addr       = flag.String("addr", "", "listen address")
-		redisAddr  = flag.String("redisaddr", "192.168.0.213:6379", "redis address")
+		redisAddr  = flag.String("redisaddr", "192.168.0.10:6379", "redis address")
 	)
 	flag.Parse()
 

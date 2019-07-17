@@ -1,7 +1,7 @@
 package protobuf
 
 import (
-	"cy/im/pb/misc"
+	"cy/other/im/pb/misc"
 
 	"github.com/golang/protobuf/proto"
 )

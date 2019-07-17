@@ -2,9 +2,9 @@ package main
 
 import (
 	"bufio"
-	"cy/im/codec"
-	_ "cy/im/friend/pb"
-	_ "cy/im/pb"
+	"cy/other/im/codec"
+	_ "cy/other/im/friend/pb"
+	_ "cy/other/im/pb"
 	"flag"
 	"fmt"
 	"net"

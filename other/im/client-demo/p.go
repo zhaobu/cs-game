@@ -1,10 +1,10 @@
 package main
 
 import (
-	"cy/im/codec"
-	"cy/im/codec/protobuf"
-	"cy/im/friend/pb"
-	"cy/im/pb"
+	"cy/other/im/codec"
+	"cy/other/im/codec/protobuf"
+	"cy/other/im/friend/pb"
+	"cy/other/im/pb"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"

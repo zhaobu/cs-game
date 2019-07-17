@@ -2,7 +2,7 @@ package codec
 
 import (
 	"bytes"
-	"cy/util"
+	"cy/other/im/util"
 	"encoding/binary"
 	"io"
 

@@ -2,11 +2,11 @@ package main
 
 import (
 	"context"
-	"cy/im/cache"
-	"cy/im/codec"
-	"cy/im/codec/protobuf"
-	"cy/im/friend/db/notif"
-	"cy/im/friend/pb"
+	"cy/other/im/cache"
+	"cy/other/im/codec"
+	"cy/other/im/codec/protobuf"
+	"cy/other/im/friend/db/notif"
+	"cy/other/im/friend/pb"
 	"fmt"
 	"runtime/debug"
 	"time"

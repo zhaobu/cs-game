@@ -1,7 +1,7 @@
 package mq
 
 import (
-	"cy/im/mq/redis"
+	"cy/other/im/mq/redis"
 	"fmt"
 )
 

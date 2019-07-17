@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"cy/im/codec"
+	"cy/other/im/codec"
 )
 
 type selectByToID struct {

@@ -2,14 +2,14 @@ package main
 
 import (
 	"context"
-	"cy/im/cache"
-	"cy/im/codec"
+	"cy/other/im/cache"
+	"cy/other/im/codec"
 	"fmt"
-	"log"
 	"time"
 
+	"go.uber.org/zap"
+
 	metrics "github.com/rcrowley/go-metrics"
-	"github.com/sirupsen/logrus"
 	"github.com/smallnest/rpcx/server"
 	"github.com/smallnest/rpcx/serverplugin"
 )
@@ -21,7 +21,7 @@ func innerServer() {
 	s.RegisterName("Gate", new(gate), "")
 	err := s.Serve("tcp", *iaddr)
 	if err != nil {
-		logrus.WithFields(logrus.Fields{}).Warn(err)
+		tlog.Warn("err", zap.Error(err))
 	}
 }
 
@@ -44,12 +44,8 @@ type gate struct {
 }
 
 func (p *gate) BackEnd(ctx context.Context, args *codec.MsgPayload, reply *interface{}) (err error) {
-	logrus.WithFields(logrus.Fields{
-		"Flag":        args.Flag,
-		"ToUID":       args.ToUID,
-		"PayloadName": args.PayloadName,
-		"err":         err,
-	}).Info("backend")
+	tlog.Warn("err", zap.Error(err))
+	log.Infof("backend:Flag:%v,ToUID:%d,PayloadName:%s,err:%v", args.Flag, args.ToUID, args.PayloadName, err)
 
 	sess := mgr.GetSession(args.ToUID)
 	if sess == nil {
@@ -60,20 +56,15 @@ func (p *gate) BackEnd(ctx context.Context, args *codec.MsgPayload, reply *inter
 	if err != nil {
 		return err
 	}
-	logrus.WithFields(logrus.Fields{"uid": args.ToUID, "name": args.PayloadName}).Info("will send")
+	tlog.Info("will send", zap.Uint64("uid", args.ToUID), zap.String("name", args.PayloadName))
 	return sess.send(buf)
 }
 
 func (p *gate) BroadCast(ctx context.Context, args *codec.MsgPayload, reply *interface{}) (err error) {
-	logrus.WithFields(logrus.Fields{
-		"Flag":        args.Flag,
-		"ToUID":       args.ToUID,
-		"PayloadName": args.PayloadName,
-		"err":         err,
-	}).Info("broadcast")
+	log.Infof("broadcast:Flag:%v,ToUID:%d,PayloadName:%s,err:%v", args.Flag, args.ToUID, args.PayloadName, err)
 
 	if !args.Flag.IsBroadCast() {
-		logrus.Warn("not broad cast")
+		log.Warn("not broad cast")
 		return nil
 	}
 
@@ -84,9 +75,9 @@ func (p *gate) BroadCast(ctx context.Context, args *codec.MsgPayload, reply *int
 
 	mgr.Iter(func(uid uint64, sess *session) {
 		if err := sess.send(buf); err != nil {
-			logrus.Warn(err)
+			log.Warn(err)
 		} else {
-			logrus.WithFields(logrus.Fields{"uid": sess.uid, "name": args.PayloadName}).Info("will send")
+			tlog.Info("will send", zap.Uint64("uid", sess.uid), zap.String("name", args.PayloadName))
 		}
 	})
 
@@ -94,15 +85,10 @@ func (p *gate) BroadCast(ctx context.Context, args *codec.MsgPayload, reply *int
 }
 
 func (p *gate) MultiCast(ctx context.Context, args *codec.MsgPayload, reply *interface{}) (err error) {
-	logrus.WithFields(logrus.Fields{
-		"Flag":        args.Flag,
-		"ToUID":       args.ToUID,
-		"PayloadName": args.PayloadName,
-		"err":         err,
-	}).Info("multi cast")
+	log.Infof("multi cast:Flag:%v,ToUID:%d,PayloadName:%s,err:%v", args.Flag, args.ToUID, args.PayloadName, err)
 
 	if !args.Flag.IsMultiCast() {
-		logrus.Warn("not multi cast")
+		log.Warn("not multi cast")
 		return nil
 	}
 
@@ -120,9 +106,9 @@ func (p *gate) MultiCast(ctx context.Context, args *codec.MsgPayload, reply *int
 		}
 
 		if err := sess.send(buf); err != nil {
-			logrus.Warn(err)
+			log.Warn(err)
 		} else {
-			logrus.WithFields(logrus.Fields{"uid": sess.uid, "name": args.PayloadName}).Info("will send")
+			tlog.Info("will send", zap.Uint64("uid", sess.uid), zap.String("name", args.PayloadName))
 		}
 	}
 

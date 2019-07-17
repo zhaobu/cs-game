@@ -2,11 +2,11 @@ package main
 
 import (
 	"context"
-	"cy/im/codec"
-	"cy/im/codec/protobuf"
-	"cy/im/inner"
-	"cy/im/logic/db"
-	"cy/im/pb"
+	"cy/other/im/codec"
+	"cy/other/im/codec/protobuf"
+	"cy/other/im/inner"
+	"cy/other/im/logic/db"
+	"cy/other/im/pb"
 	"fmt"
 	"runtime/debug"
 	"strconv"

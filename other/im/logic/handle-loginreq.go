@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
-	"cy/im/codec"
-	"cy/im/codec/protobuf"
-	"cy/im/pb"
+	"cy/other/im/codec"
+	"cy/other/im/codec/protobuf"
+	"cy/other/im/pb"
 	"fmt"
 	"runtime/debug"
 

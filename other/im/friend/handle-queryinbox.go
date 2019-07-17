@@ -2,12 +2,12 @@ package main
 
 import (
 	"context"
-	"cy/im/codec"
-	"cy/im/codec/protobuf"
-	"cy/im/friend/db/notif"
-	"cy/im/friend/db/result"
-	"cy/im/friend/pb"
-	"cy/im/pb/misc"
+	"cy/other/im/codec"
+	"cy/other/im/codec/protobuf"
+	"cy/other/im/friend/db/notif"
+	"cy/other/im/friend/db/result"
+	"cy/other/im/friend/pb"
+	"cy/other/im/pb/misc"
 	"fmt"
 	"runtime/debug"
 	"strconv"

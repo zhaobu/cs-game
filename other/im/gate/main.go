@@ -1,41 +1,49 @@
 package main
 
 import (
-	"cy/im/cache"
-	"cy/util"
+	"cy/other/im/cache"
+	zaplog "cy/other/im/common/logger"
+	"cy/other/im/util"
 	"flag"
 	"fmt"
 	"os"
 	"runtime/debug"
 	"time"
 
-	"github.com/sirupsen/logrus"
 	"github.com/smallnest/rpcx/client"
+	"go.uber.org/zap"
 )
 
 var (
-	consulAddr = flag.String("consulAddr", "localhost:8500", "consul address")
+	consulAddr = flag.String("consulAddr", "127.0.0.1:8500", "consul address")
 	basePath   = flag.String("base", "/cy_im", "consul prefix path")
-	addr       = flag.String("addr", "localhost:9876", "tcp listen address")
-	wsAddr     = flag.String("wsaddr", "localhost:9877", "ws listen address")
+	addr       = flag.String("addr", "127.0.0.1:9876", "tcp listen address")
+	wsAddr     = flag.String("wsaddr", "127.0.0.1:9877", "ws listen address")
 	iaddr      = flag.String("iaddr", "", "inner listen address")
-	redisAddr  = flag.String("redisaddr", "192.168.0.213:6379", "redis address")
+	redisAddr  = flag.String("redisaddr", "192.168.0.10:6379", "redis address")
+	release    = flag.Bool("release", false, "run mode")
+	nodeName   = flag.String("nodeName", "gate", "nodeName")
 
 	mgr = newManager()
 
 	cliLogic  client.XClient
 	cliFriend client.XClient
+
+	log  *zap.SugaredLogger //printf风格
+	tlog *zap.Logger        //structured 风格
 )
 
 func initLog() {
-	logrus.SetFormatter(&logrus.JSONFormatter{})
-	logName := fmt.Sprintf("gate_%d_%d.log", os.Getpid(), time.Now().Unix())
-	file, err := os.OpenFile(logName, os.O_CREATE|os.O_WRONLY, 0666)
-	if err == nil {
-		logrus.SetOutput(file)
+	var logName, logLevel string
+	if *release {
+		logLevel = "info"
+		logName = fmt.Sprintf("./log/%s_%d_%s.log", *nodeName, os.Getpid(), time.Now().Format("2006_01_02"))
 	} else {
-		logrus.SetOutput(os.Stdout)
+		logName = fmt.Sprintf("./log/%s.log", *nodeName)
+		logLevel = "debug"
 	}
+	tlog = zaplog.InitLogger(logName, logLevel, !*release)
+	log = tlog.Sugar()
 }
 
 func main() {
@@ -50,13 +58,13 @@ func main() {
 		if r := recover(); r != nil {
 
 		}
-		logrus.WithFields(logrus.Fields{}).Warn(string(debug.Stack()))
+		log.Errorf("recover info:stack:%s", string(debug.Stack()))
 	}()
 
 	initLog()
 
 	if err := cache.Init(*redisAddr); err != nil {
-		logrus.Error(err.Error())
+		log.Error(err.Error())
 		return
 	}
 
@@ -79,7 +87,7 @@ func main() {
 		*iaddr = taddr.String()
 	}
 
-	logrus.Info("listen at:", *iaddr)
+	log.Info("listen at:", *iaddr)
 
 	go innerServer()
 

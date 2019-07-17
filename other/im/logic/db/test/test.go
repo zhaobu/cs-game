@@ -1,8 +1,8 @@
 package main
 
 import (
-	"cy/im/inner"
-	"cy/im/logic/db"
+	"cy/other/im/inner"
+	"cy/other/im/logic/db"
 	"fmt"
 	"os"
 	"time"

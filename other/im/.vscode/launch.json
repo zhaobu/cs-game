@@ -1,0 +1,68 @@
+{
+    // 使用 IntelliSense 了解相关属性。 
+    // 悬停以查看现有属性的描述。
+    // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch Package",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${fileDirname}", //配置Go项目启动文件路径，即main函数所在的.go文件的路径,${workspaceRoot}代表项目的根目录,也就是 /bin /pkg /src这三个文件夹所在的目录
+            "buildFlags": "-tags consul", //设置编译参数
+            "args": [],
+            "cwd": "${workspaceFolder}/bin/win", //设置工作目录
+            "internalConsoleOptions": "openOnSessionStart",
+            "output": "${workspaceFolder}/bin/win/vsdebug", //设置vscode调试时生成文件的路径
+            "showGlobalVariables": true,
+            // "externalConsole": true,
+            // "console": "integratedTerminal",
+            "env": {}, //可以用来配置调试启动时所用的环境变量参数,比如gopath临时设置为某个参数就可以在这里指定，如果有多个gopath，用英文冒号:来连接多个gopath
+            // "trace": "log"
+            "dlvLoadConfig": {
+                "followPointers": true,
+                "maxVariableRecurse": 2,
+                "maxStringLen": 1024,
+                "maxArrayValues": 1024,
+                "maxStructFields": -1
+            }
+
+        },
+        {
+            "name": "Launch executable",
+            "type": "go",
+            "request": "launch",
+            "mode": "exec",
+            "program": "absolute-path-to-the-executable"
+        },
+        {
+            "name": "Connect to server",
+            "type": "go",
+            "request": "launch",
+            "mode": "remote",
+            "remotePath": "${workspaceFolder}",
+            "port": 2345,
+            "host": "127.0.0.1",
+            "program": "${workspaceFolder}",
+            "env": {},
+            "args": []
+        },
+        {
+            "name": "Launch test package",
+            "type": "go",
+            "request": "launch",
+            "mode": "test",
+            "program": "${workspaceFolder}"
+        },
+        {
+            "name": "Launch file",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${file}",
+            "showLog": true,
+            "logOutput": "debugger"
+        },
+    ]
+}
