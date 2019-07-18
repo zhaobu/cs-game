@@ -7,6 +7,7 @@ import (
 	"cy/other/im/codec/protobuf"
 	impb "cy/other/im/pb"
 	"fmt"
+	. "cy/other/im/common/logger"
 	"runtime/debug"
 	"sort"
 	"strconv"
@@ -19,7 +20,7 @@ func (p *logic) MsgNotifyAck(ctx context.Context, args *codec.MsgPayload, reply 
 	defer func() {
 		r := recover()
 		if r != nil {
-			log.Errorf("recover info,fromid=%d,toid=%d,flag=%v,plname=%s,req=%v,err=%s,r=%s,stack=%s", args.FromUID, args.ToUID, args.Flag, args.PayloadName, req, err, r, string(debug.Stack()))
+			Log.Errorf("recover info,fromid=%d,toid=%d,flag=%v,plname=%s,req=%v,err=%s,r=%s,stack=%s", args.FromUID, args.ToUID, args.Flag, args.PayloadName, req, err, r, string(debug.Stack()))
 		}
 	}()
 
@@ -39,7 +40,7 @@ func (p *logic) MsgNotifyAck(ctx context.Context, args *codec.MsgPayload, reply 
 	cnt := make(map[uint64]int64)
 	cnt[req.OtherUID] = (int64(len(req.MsgIDs)) * -1)
 	if err2 := cache.ChangeUnreadCnt(args.FromUID, cnt); err2 != nil {
-		log.Warn(err2)
+		Log.Warn(err2)
 	}
 
 	// 排序后取最大的msgid
@@ -49,7 +50,7 @@ func (p *logic) MsgNotifyAck(ctx context.Context, args *codec.MsgPayload, reply 
 
 	// 不判断消息ID合法（是否有效、是否对应此otherid）
 	if lastid, err3 := strconv.ParseInt(req.MsgIDs[0], 10, 64); err3 != nil {
-		log.Warn(err3)
+		Log.Warn(err3)
 	} else {
 		cache.SetLastReadID(args.FromUID, req.OtherUID, lastid)
 	}

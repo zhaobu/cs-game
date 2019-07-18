@@ -7,6 +7,7 @@ import (
 	"cy/other/im/inner"
 
 	impb "cy/other/im/pb"
+	. "cy/other/im/common/logger"
 	"fmt"
 	"runtime/debug"
 	"strconv"
@@ -21,7 +22,7 @@ func (p *logic) SendMsgReq(ctx context.Context, args *codec.MsgPayload, reply *c
 	defer func() {
 		r := recover()
 		if r != nil {
-			log.Errorf("recover info,fromid=%d,toid=%d,flag=%v,plname=%s,req=%v,rsp=%v,err=%s,r=%s,stack=%s", args.FromUID, args.ToUID, args.Flag, args.PayloadName, req, rsp, err, r, string(debug.Stack()))
+			Log.Errorf("recover info,fromid=%d,toid=%d,flag=%v,plname=%s,req=%v,rsp=%v,err=%s,r=%s,stack=%s", args.FromUID, args.ToUID, args.Flag, args.PayloadName, req, rsp, err, r, string(debug.Stack()))
 		}
 	}()
 

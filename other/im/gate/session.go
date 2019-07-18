@@ -8,6 +8,7 @@ import (
 	"cy/other/im/cache"
 	"cy/other/im/codec"
 	"cy/other/im/common/crypto/dh"
+	. "cy/other/im/common/logger"
 	impb "cy/other/im/pb"
 	_ "cy/other/im/pb/friend"
 	"fmt"
@@ -64,11 +65,11 @@ func (s *session) run() {
 	var err error
 	defer func() {
 		if r := recover(); r != nil {
-			log.Errorf("recover info:%s,stack:%s", r, string(debug.Stack()))
+			Log.Errorf("recover info:%s,stack:%s", r, string(debug.Stack()))
 		}
 
 		if err != nil {
-			log.Errorf("session close:%v", err)
+			Log.Errorf("session close:%v", err)
 		}
 	}()
 
@@ -130,7 +131,7 @@ func (s *session) genKey(agreeKey []byte) {
 
 func (s *session) handleRecv() (err error) {
 	defer func() {
-		tlog.Info("session close", zap.Uint64("uid", s.uid), zap.Error(err))
+		Tlog.Info("session close", zap.Uint64("uid", s.uid), zap.Error(err))
 
 		if s.uid != 0 {
 			placeChange(s.uid, false, s.srvConfig.id)
@@ -141,7 +142,7 @@ func (s *session) handleRecv() (err error) {
 
 		if r := recover(); r != nil {
 			err = fmt.Errorf("%v", r)
-			log.Errorf("recover info:stack:%s", string(debug.Stack()))
+			Log.Errorf("recover info:stack:%s", string(debug.Stack()))
 		}
 	}()
 
@@ -245,16 +246,16 @@ func (s *session) call(args *codec.MsgPayload) {
 		reply := codec.NewMsgPayload()
 		callErr := cli.Call(context.Background(), serviceMethod, args, reply)
 		if callErr != nil {
-			log.Warn(callErr.Error())
+			Log.Warn(callErr.Error())
 		} else {
 			if reply.PayloadName != "" {
 				replyBuf, err := reply.Encode()
 				if err == nil {
-					tlog.Info("will send", zap.Uint64("uid", s.uid), zap.String("name", reply.PayloadName))
+					Tlog.Info("will send", zap.Uint64("uid", s.uid), zap.String("name", reply.PayloadName))
 					err = s.send(replyBuf)
 				}
 				if err != nil {
-					log.Warn(err)
+					Log.Warn(err)
 				}
 			}
 		}
@@ -269,7 +270,7 @@ func placeChange(uid uint64, online bool, gateID string) {
 		err = cache.UserOffline(uid)
 	}
 	if err != nil {
-		log.Error(err.Error())
+		Log.Error(err.Error())
 	}
 }
 
@@ -300,7 +301,7 @@ func (s *session) doSend() {
 		case m, ok := <-s.outputCh:
 			if ok {
 				if err := m.WriteTo(s.c); err != nil {
-					log.Infof("send to %d failed %s", s.uid, err.Error())
+					Log.Infof("send to %d failed %s", s.uid, err.Error())
 				}
 			}
 		}

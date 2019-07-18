@@ -5,6 +5,7 @@ import (
 	"cy/other/im/cache"
 	"cy/other/im/codec"
 	"cy/other/im/codec/protobuf"
+	. "cy/other/im/common/logger"
 	"cy/other/im/inner"
 	impb "cy/other/im/pb"
 	"cy/other/im/pb/misc"
@@ -77,10 +78,10 @@ func batchOperator(reqs []interface{}) {
 
 	if toUID != 0 {
 		cache.ChangeUnreadCnt(toUID, unreadCnt)
-		log.Infof("change unread cnt,uid=%d,unreadCnt=%v", toUID, unreadCnt)
+		Log.Infof("change unread cnt,uid=%d,unreadCnt=%v", toUID, unreadCnt)
 
 		if queryPlace(toUID) != "" {
-			log.Infof("online,touid=%d", toUID)
+			Log.Infof("online,touid=%d", toUID)
 			pntf := codec.NewMsgPayload()
 			pntf.ToUID = toUID
 			var err error
@@ -88,7 +89,7 @@ func batchOperator(reqs []interface{}) {
 			if err == nil {
 				cliGate.Go(context.Background(), "BackEnd", pntf, nil, nil)
 			} else {
-				log.Infof("offline,touid=%d", toUID)
+				Log.Infof("offline,touid=%d", toUID)
 			}
 		}
 	}

@@ -5,6 +5,7 @@ import (
 	"cy/other/im/codec"
 	"cy/other/im/codec/protobuf"
 	impb "cy/other/im/pb"
+	. "cy/other/im/common/logger"
 	"fmt"
 	"runtime/debug"
 )
@@ -14,7 +15,7 @@ func (p *logic) LoginReq(ctx context.Context, args *codec.MsgPayload, reply *cod
 	defer func() {
 		r := recover()
 		if r != nil {
-			log.Errorf("recover info,fromid=%d,toid=%d,flag=%v,plname=%s,err=%s,r=%s,stack=%s", args.FromUID, args.ToUID, args.Flag, args.PayloadName, err, r, string(debug.Stack()))
+			Log.Errorf("recover info,fromid=%d,toid=%d,flag=%v,plname=%s,err=%s,r=%s,stack=%s", args.FromUID, args.ToUID, args.Flag, args.PayloadName, err, r, string(debug.Stack()))
 		}
 	}()
 

@@ -2,7 +2,6 @@ package main
 
 import (
 	"cy/other/im/cache"
-
 	"cy/other/im/util"
 	"flag"
 	"fmt"
@@ -10,9 +9,7 @@ import (
 	"runtime/debug"
 	"time"
 
-	zaplog "cy/other/im/common/logger"
-
-	"go.uber.org/zap"
+	. "cy/other/im/common/logger"
 
 	_ "github.com/RussellLuo/timingwheel"
 	metrics "github.com/rcrowley/go-metrics"
@@ -29,22 +26,18 @@ var (
 	//tw = timingwheel.NewTimingWheel(time.Millisecond, 20)
 	release  = flag.Bool("release", false, "run mode")
 	nodeName = flag.String("nodeName", "logic", "nodeName")
-
-	log  *zap.SugaredLogger //printf风格
-	tlog *zap.Logger        //structured 风格
 )
 
 func initLog() {
 	var logName, logLevel string
 	if *release {
 		logLevel = "info"
-		logName = fmt.Sprintf("./log/%s_%d_%s.log", *nodeName, os.Getpid(), time.Now().Format("2006_01_02"))
+		logName = fmt.Sprintf("./Log/%s_%d_%s.Log", *nodeName, os.Getpid(), time.Now().Format("2006_01_02"))
 	} else {
-		logName = fmt.Sprintf("./log/%s.log", *nodeName)
+		logName = fmt.Sprintf("./Log/%s.Log", *nodeName)
 		logLevel = "debug"
 	}
-	tlog = zaplog.InitLogger(logName, logLevel, !*release)
-	log = tlog.Sugar()
+	InitLogger(logName, logLevel, !*release)
 }
 
 func main() {
@@ -60,14 +53,14 @@ func main() {
 
 	defer func() {
 		if r := recover(); r != nil {
-			log.Error(string(debug.Stack()))
+			Log.Error(string(debug.Stack()))
 		}
 	}()
 
 	InitTS()
 
 	if err := cache.Init(*redisAddr); err != nil {
-		log.Error(err.Error())
+		Log.Error(err.Error())
 		return
 	}
 
@@ -78,13 +71,13 @@ func main() {
 	if *addr == "" {
 		taddr, err := util.AllocListenAddr()
 		if err != nil {
-			log.Error(err.Error())
+			Log.Error(err.Error())
 			return
 		}
 		*addr = taddr.String()
 	}
 
-	log.Info("listen at:", *addr)
+	Log.Info("listen at:", *addr)
 
 	{
 		d := client.NewConsulDiscovery(*basePath, "Gate", []string{*consulAddr}, nil)
@@ -98,7 +91,7 @@ func main() {
 	s.RegisterName("Logic", new(logic), "")
 	err = s.Serve("tcp", *addr)
 	if err != nil {
-		log.Error(err.Error())
+		Log.Error(err.Error())
 	}
 }
 
@@ -112,7 +105,7 @@ func addRegistryPlugin(s *server.Server, addr, consulAddr, basePath string) {
 	}
 	err := r.Start()
 	if err != nil {
-		log.Error(err.Error())
+		Log.Error(err.Error())
 	}
 	s.Plugins.Add(r)
 }

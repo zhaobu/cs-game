@@ -7,6 +7,7 @@ import (
 	"cy/other/im/codec/protobuf"
 	impb "cy/other/im/pb"
 	"fmt"
+	. "cy/other/im/common/logger"
 	"runtime/debug"
 )
 
@@ -18,7 +19,7 @@ func (p *logic) QueryUnreadCntReq(ctx context.Context, args *codec.MsgPayload, r
 	defer func() {
 		r := recover()
 		if r != nil {
-			log.Errorf("recover info,fromid=%d,toid=%d,flag=%v,plname=%s,req=%v,rsp=%v,err=%s,r=%s,stack=%s", args.FromUID, args.ToUID, args.Flag, args.PayloadName, req, rsp, err, r, string(debug.Stack()))
+			Log.Errorf("recover info,fromid=%d,toid=%d,flag=%v,plname=%s,req=%v,rsp=%v,err=%s,r=%s,stack=%s", args.FromUID, args.ToUID, args.Flag, args.PayloadName, req, rsp, err, r, string(debug.Stack()))
 		}
 	}()
 

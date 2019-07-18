@@ -2,7 +2,7 @@ package main
 
 import (
 	"cy/other/im/cache"
-	zaplog "cy/other/im/common/logger"
+	. "cy/other/im/common/logger"
 	"cy/other/im/util"
 	"flag"
 	"fmt"
@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/smallnest/rpcx/client"
-	"go.uber.org/zap"
 )
 
 var (
@@ -28,22 +27,18 @@ var (
 
 	cliLogic  client.XClient
 	cliFriend client.XClient
-
-	log  *zap.SugaredLogger //printf风格
-	tlog *zap.Logger        //structured 风格
 )
 
 func initLog() {
 	var logName, logLevel string
 	if *release {
 		logLevel = "info"
-		logName = fmt.Sprintf("./log/%s_%d_%s.log", *nodeName, os.Getpid(), time.Now().Format("2006_01_02"))
+		logName = fmt.Sprintf("./Log/%s_%d_%s.Log", *nodeName, os.Getpid(), time.Now().Format("2006_01_02"))
 	} else {
-		logName = fmt.Sprintf("./log/%s.log", *nodeName)
+		logName = fmt.Sprintf("./Log/%s.Log", *nodeName)
 		logLevel = "debug"
 	}
-	tlog = zaplog.InitLogger(logName, logLevel, !*release)
-	log = tlog.Sugar()
+	InitLogger(logName, logLevel, !*release)
 }
 
 func main() {
@@ -56,14 +51,14 @@ func main() {
 
 	defer func() {
 		if r := recover(); r != nil {
-			log.Errorf("recover info:stack:%s", string(debug.Stack()))
+			Log.Errorf("recover info:stack:%s", string(debug.Stack()))
 		}
 	}()
 
 	initLog()
 
 	if err := cache.Init(*redisAddr); err != nil {
-		log.Error(err.Error())
+		Log.Error(err.Error())
 		return
 	}
 
@@ -86,7 +81,7 @@ func main() {
 		*iaddr = taddr.String()
 	}
 
-	log.Info("listen at:", *iaddr)
+	Log.Info("listen at:", *iaddr)
 
 	go innerServer()
 
@@ -103,5 +98,5 @@ func main() {
 
 	stcp := newTcpServer(cfg)
 
-	log.Info(stcp.start("tcp", *addr))
+	Log.Info(stcp.start("tcp", *addr))
 }

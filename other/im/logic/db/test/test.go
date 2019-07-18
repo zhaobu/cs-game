@@ -66,13 +66,13 @@ func testReadChatMsg2() {
 }
 
 func init() {
-	log.SetFormatter(&log.JSONFormatter{})
-	logName := fmt.Sprintf("logic_%d_%d.log", os.Getpid(), time.Now().Unix())
+	Log.SetFormatter(&Log.JSONFormatter{})
+	logName := fmt.Sprintf("logic_%d_%d.Log", os.Getpid(), time.Now().Unix())
 	file, err := os.OpenFile(logName, os.O_CREATE|os.O_WRONLY, 0666)
 	if err == nil {
-		log.SetOutput(file)
+		Log.SetOutput(file)
 	} else {
-		log.SetOutput(os.Stdout)
+		Log.SetOutput(os.Stdout)
 	}
 }
 

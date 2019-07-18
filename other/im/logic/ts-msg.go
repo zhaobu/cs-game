@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/md5"
+	. "cy/other/im/common/logger"
 	"cy/other/im/inner"
 	"flag"
 	"strconv"
@@ -49,7 +50,7 @@ func BatchWriteChatMsg(reqs []*ChatMsg) (err error) {
 		return
 	}
 
-	log.Infof("db.BatchWriteChatMsg,reqs=%v", reqs)
+	Log.Infof("db.BatchWriteChatMsg,reqs=%v", reqs)
 
 	batchWriteReq := &tablestore.BatchWriteRowRequest{}
 	for _, req := range reqs {
@@ -101,7 +102,7 @@ func BatchWriteChatMsg(reqs []*ChatMsg) (err error) {
 
 func RangeGetMsgRecord(storeKey string, startMsgid, endMsgid int64, limit int32) (result []*ChatMsg, err error) {
 	defer func() {
-		log.Info("db.RangeGetMsgRecord,storeKey=%s,startMsgid=%d,endMsgid=%d,limit=%d,result=%v,err=%s", storeKey, startMsgid, endMsgid, limit, result, err)
+		Log.Info("db.RangeGetMsgRecord,storeKey=%s,startMsgid=%d,endMsgid=%d,limit=%d,result=%v,err=%s", storeKey, startMsgid, endMsgid, limit, result, err)
 	}()
 
 	h := md5.New()
@@ -197,7 +198,7 @@ func RangeGetMsgRecord(storeKey string, startMsgid, endMsgid int64, limit int32)
 
 func RangeGetBySessionKey(storeKey, sessionKey string, startMsgid int64, limit int32) (result []*ChatMsg, err error) {
 	defer func() {
-		log.Info("db.RangeGetBySessionKey,storeKey=%s,sessionKey=%s,startMsgid=%d,limit=%d,result=%v,err=%s", storeKey, sessionKey, startMsgid, limit, result, err)
+		Log.Info("db.RangeGetBySessionKey,storeKey=%s,sessionKey=%s,startMsgid=%d,limit=%d,result=%v,err=%s", storeKey, sessionKey, startMsgid, limit, result, err)
 	}()
 
 	h := md5.New()

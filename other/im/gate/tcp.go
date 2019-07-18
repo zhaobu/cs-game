@@ -1,6 +1,7 @@
 package main
 
 import (
+	. "cy/other/im/common/logger"
 	"fmt"
 	"net"
 	"sync/atomic"
@@ -63,7 +64,7 @@ func (s *tcpServer) accept() error {
 		if err != nil {
 			return err
 		}
-		log.Debug("new connect: ", nc.RemoteAddr())
+		Log.Debug("new connect: ", nc.RemoteAddr())
 		go s.serveConn(nc)
 	}
 }
