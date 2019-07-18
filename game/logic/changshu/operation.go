@@ -368,8 +368,18 @@ func (self *OperAtion) HandlePengCard(playerInfo *mj.PlayerInfo, loseCardInfo *m
 	cardInfo.RiverCards = append(cardInfo.RiverCards, &pbgame_logic.OperRecord{Type: pbgame_logic.OperType_Oper_PENG, Card: card, LoseChair: loseChair})
 	//处理出牌玩家,把牌从出过的牌中拿走
 	loseCardInfo.OutCards, _ = mj.RemoveCard(loseCardInfo.OutCards, card, false)
-	if card >= 41 && card <= 46 { //东南西北中发白碰牌算1花，胡牌时留手3张算2花
+	if card >= 41 && card <= 46 { //东南西北中发白碰牌算1花
 		playerInfo.BalanceInfo.FengPoint += 1
+	}
+}
+
+//胡牌时留手3张算2花(cardInfo为碰牌玩家,loseCardInfo为出牌玩家)
+func (self *OperAtion) HandleRemainPengCard(playerInfo *mj.PlayerInfo) {
+	cardInfo := &playerInfo.CardInfo
+	for card, v := range cardInfo.StackCards {
+		if card >= 41 && card <= 46 && v == 3 { //东南西北中发白碰牌算2花
+			playerInfo.BalanceInfo.FengPoint += 2
+		}
 	}
 }
 

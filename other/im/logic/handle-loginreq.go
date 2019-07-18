@@ -4,30 +4,18 @@ import (
 	"context"
 	"cy/other/im/codec"
 	"cy/other/im/codec/protobuf"
-	"cy/other/im/pb"
+	impb "cy/other/im/pb"
 	"fmt"
 	"runtime/debug"
-
-	"github.com/sirupsen/logrus"
 )
 
 func (p *logic) LoginReq(ctx context.Context, args *codec.MsgPayload, reply *codec.MsgPayload) (err error) {
 
 	defer func() {
-		stack := ""
 		r := recover()
 		if r != nil {
-			stack = string(debug.Stack())
+			log.Errorf("recover info,fromid=%d,toid=%d,flag=%v,plname=%s,err=%s,r=%s,stack=%s", args.FromUID, args.ToUID, args.Flag, args.PayloadName, err, r, string(debug.Stack()))
 		}
-		logrus.WithFields(logrus.Fields{
-			"fromid": args.FromUID,
-			"toid":   args.ToUID,
-			"flag":   args.Flag,
-			"plname": args.PayloadName,
-			"err":    err,
-			"r":      r,
-			"stack":  stack,
-		}).Info()
 	}()
 
 	pb, err := protobuf.Unmarshal(args.PayloadName, args.Payload)

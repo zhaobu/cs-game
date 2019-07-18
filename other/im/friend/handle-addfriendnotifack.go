@@ -1,19 +1,16 @@
 package main
-
 import (
 	"context"
 	"cy/other/im/cache"
 	"cy/other/im/codec"
 	"cy/other/im/codec/protobuf"
-	"cy/other/im/friend/db/notif"
-	"cy/other/im/friend/db/result"
+	. "cy/other/im/common/logger"
+	"cy/other/im/friend/db"
 	friendpb "cy/other/im/pb/friend"
 	"fmt"
 	"runtime/debug"
 	"strconv"
 	"time"
-
-	"github.com/sirupsen/logrus"
 )
 
 func (p *friend) AddFriendNotifAck(ctx context.Context, args *codec.MsgPayload, reply *codec.MsgPayload) (err error) {
@@ -21,20 +18,10 @@ func (p *friend) AddFriendNotifAck(ctx context.Context, args *codec.MsgPayload, 
 	var ok bool
 
 	defer func() {
-		stack := ""
 		r := recover()
 		if r != nil {
-			stack = string(debug.Stack())
+			Log.Errorf("recover info,fromid=%d,toid=%d,flag=%v,req=%v,err=%v,stack=%s", args.FromUID, args.ToUID, args.Flag, req, err, string(debug.Stack()))
 		}
-		logrus.WithFields(logrus.Fields{
-			"fromid": args.FromUID,
-			"toid":   args.ToUID,
-			"flag":   args.Flag,
-			"req":    req,
-			"err":    err,
-			"r":      r,
-			"stack":  stack,
-		}).Info()
 	}()
 
 	pb, err := protobuf.Unmarshal(args.PayloadName, args.Payload)
@@ -72,10 +59,10 @@ func (p *friend) AddFriendNotifAck(ctx context.Context, args *codec.MsgPayload, 
 
 	// 被加人删除 AddFriendNotif
 	msgid, _ := strconv.ParseInt(req.MsgID, 10, 64)
-	notif.DeleteAddFriendNotif(tsdbCli, fmt.Sprintf("uid:%d", req.Target), msgid)
+	db.DeleteAddFriendNotif(tsdbCli, fmt.Sprintf("uid:%d", req.Target), msgid)
 
 	// 邀请人添加 AddFriendResult
-	addFriendResultDB := &result.AddFriendResult{
+	addFriendResultDB := &db.AddFriendResult{
 		StoreKey:   fmt.Sprintf("uid:%d", req.Source),
 		MsgID:      time.Now().UTC().UnixNano(), // 用新的ID
 		Target:     req.Target,
@@ -85,12 +72,12 @@ func (p *friend) AddFriendNotifAck(ctx context.Context, args *codec.MsgPayload, 
 		Code:       int64(req.Code),
 	}
 
-	result.BatchWriteAddFriendResult(tsdbCli, []*result.AddFriendResult{addFriendResultDB})
+	db.BatchWriteAddFriendResult(tsdbCli, []*db.AddFriendResult{addFriendResultDB})
 
 	// 通知邀请人
 	{
 		if queryPlace(req.Source) == "" {
-			logrus.WithFields(logrus.Fields{"source": req.Source}).Info("not online")
+			Log.Infof("not online:source=%d", req.Source)
 			return nil
 		}
 
@@ -114,3 +101,4 @@ func (p *friend) AddFriendNotifAck(ctx context.Context, args *codec.MsgPayload, 
 
 	return nil
 }
+

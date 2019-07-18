@@ -163,9 +163,11 @@ func (self *GameBalance) CalGangTou(leftCards []int32, bankerId int32) { // 杠�
 			leftCards = leftCards[:len(leftCards)-1] //如果是独龙杠,把独龙杠的牌从牌堆去掉
 		}
 	}
-	num := 4
+	num := 0
 	if self.game_config.Barhead == 2 {
 		num = 8
+	} else if self.game_config.Barhead == 1 {
+		num = 4
 	}
 
 	getCanHit := func(chairId int32) map[int32]bool { //获取能中的牌
@@ -180,7 +182,7 @@ func (self *GameBalance) CalGangTou(leftCards []int32, bankerId int32) { // 杠�
 	chairId := bankerId //从庄家开始算起数杠头
 	for _, v := range leftCards {
 		self.allCards[chairId] = append(self.allCards[chairId], v)
-		if self.game_config.Barhead != 3 && count < num && getCanHit(chairId)[v] {
+		if count < num && getCanHit(chairId)[v] {
 			self.hitIndex[chairId] = append(self.hitIndex[chairId], int32(len(self.allCards[chairId])-1))
 			count++
 		}

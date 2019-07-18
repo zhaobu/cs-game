@@ -15,10 +15,10 @@ import (
 )
 
 var (
-	consulAddr = flag.String("consulAddr", "127.0.0.1:8500", "consul address")
+	consulAddr = flag.String("consulAddr", "192.168.0.10:8500", "consul address")
 	basePath   = flag.String("base", "/cy_im", "consul prefix path")
-	addr       = flag.String("addr", "127.0.0.1:9876", "tcp listen address")
-	wsAddr     = flag.String("wsaddr", "127.0.0.1:9877", "ws listen address")
+	addr       = flag.String("addr", "192.168.0.10:9876", "tcp listen address")
+	wsAddr     = flag.String("wsaddr", "192.168.0.10:9877", "ws listen address")
 	iaddr      = flag.String("iaddr", "", "inner listen address")
 	redisAddr  = flag.String("redisaddr", "192.168.0.10:6379", "redis address")
 	release    = flag.Bool("release", false, "run mode")
@@ -56,9 +56,8 @@ func main() {
 
 	defer func() {
 		if r := recover(); r != nil {
-
+			log.Errorf("recover info:stack:%s", string(debug.Stack()))
 		}
-		log.Errorf("recover info:stack:%s", string(debug.Stack()))
 	}()
 
 	initLog()
@@ -104,5 +103,5 @@ func main() {
 
 	stcp := newTcpServer(cfg)
 
-	fmt.Println(stcp.start("tcp", *addr))
+	log.Info(stcp.start("tcp", *addr))
 }

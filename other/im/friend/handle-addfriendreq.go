@@ -5,22 +5,19 @@ import (
 	"cy/other/im/cache"
 	"cy/other/im/codec"
 	"cy/other/im/codec/protobuf"
-	"cy/other/im/friend/db/notif"
+	. "cy/other/im/common/logger"
+	"cy/other/im/friend/db"
 	friendpb "cy/other/im/pb/friend"
 	"fmt"
 	"runtime/debug"
 	"time"
-
-	"github.com/sirupsen/logrus"
 )
 
 func (p *friend) AddFriendReq(ctx context.Context, args *codec.MsgPayload, reply *codec.MsgPayload) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("%v", r)
-			logrus.WithFields(logrus.Fields{
-				"stack": string(debug.Stack()),
-			}).Error()
+			Log.Errorf("recover info, err=%s,stack info:%s", err, string(debug.Stack()))
 		}
 	}()
 
@@ -33,28 +30,16 @@ func (p *friend) AddFriendReq(ctx context.Context, args *codec.MsgPayload, reply
 		return fmt.Errorf("not friendpb.AddFriendReq")
 	}
 
-	logrus.WithFields(logrus.Fields{
-		"name":   args.PayloadName,
-		"fromid": args.FromUID,
-		"detail": req,
-	}).Info("handle")
+	Log.Infof("args info:name=%s,fromid=%d,detail=%v", args.PayloadName, args.FromUID, req)
 
 	if req.Source == req.Target || req.Source != args.FromUID {
-		logrus.WithFields(logrus.Fields{
-			"name":   args.PayloadName,
-			"fromid": args.FromUID,
-			"detail": req,
-		}).Info("bad args")
+		Log.Infof("bad args info:name=%s,fromid=%d,detail=%v", args.PayloadName, args.FromUID, req)
 		return
 	}
 
 	pending, err := cache.AddFriendPending(req.Source, req.Target)
 	if err != nil || pending {
-		logrus.WithFields(logrus.Fields{
-			"name":   args.PayloadName,
-			"detail": req,
-			"err":    err,
-		}).Info("AddFriendPending")
+		Log.Infof("AddFriendPending info:name=%s,detail=%v,err=%s", args.PayloadName, req, err)
 		return
 	}
 
@@ -62,14 +47,14 @@ func (p *friend) AddFriendReq(ctx context.Context, args *codec.MsgPayload, reply
 	if err == nil {
 		for _, fid := range fs {
 			if fid == req.Target {
-				logrus.WithFields(logrus.Fields{"source": req.Source, "target": req.Target}).Info("areadly friend")
+				Log.Infof("areadly friend:source=%d,target=%d", req.Source, req.Target)
 				return
 			}
 		}
 	}
 
 	{
-		addFriendNotif := &notif.AddFriendNotif{
+		addFriendNotif := &db.AddFriendNotif{
 			StoreKey:   fmt.Sprintf("uid:%d", req.Target),
 			MsgID:      time.Now().UTC().UnixNano(),
 			Target:     req.Target,
@@ -77,12 +62,12 @@ func (p *friend) AddFriendReq(ctx context.Context, args *codec.MsgPayload, reply
 			Msg:        req.Msg,
 			InviteTime: time.Now().UTC().UnixNano(),
 		}
-		notif.BatchWriteAddFriendNotif(tsdbCli, []*notif.AddFriendNotif{addFriendNotif})
+		db.BatchWriteAddFriendNotif(tsdbCli, []*db.AddFriendNotif{addFriendNotif})
 	}
 
 	{
 		if queryPlace(req.Target) == "" {
-			logrus.WithFields(logrus.Fields{"target": req.Target}).Info("not online")
+			Log.Infof("not online:target=%d", req.Target)
 			return
 		}
 

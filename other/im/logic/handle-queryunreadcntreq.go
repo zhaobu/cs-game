@@ -5,11 +5,9 @@ import (
 	"cy/other/im/cache"
 	"cy/other/im/codec"
 	"cy/other/im/codec/protobuf"
-	"cy/other/im/pb"
+	impb "cy/other/im/pb"
 	"fmt"
 	"runtime/debug"
-
-	"github.com/sirupsen/logrus"
 )
 
 func (p *logic) QueryUnreadCntReq(ctx context.Context, args *codec.MsgPayload, reply *codec.MsgPayload) (err error) {
@@ -18,22 +16,10 @@ func (p *logic) QueryUnreadCntReq(ctx context.Context, args *codec.MsgPayload, r
 	rsp := &impb.QueryUnreadCntRsp{}
 
 	defer func() {
-		stack := ""
 		r := recover()
 		if r != nil {
-			stack = string(debug.Stack())
+			log.Errorf("recover info,fromid=%d,toid=%d,flag=%v,plname=%s,req=%v,rsp=%v,err=%s,r=%s,stack=%s", args.FromUID, args.ToUID, args.Flag, args.PayloadName, req, rsp, err, r, string(debug.Stack()))
 		}
-		logrus.WithFields(logrus.Fields{
-			"fromid": args.FromUID,
-			"toid":   args.ToUID,
-			"flag":   args.Flag,
-			"plname": args.PayloadName,
-			"err":    err,
-			"r":      r,
-			"stack":  stack,
-			"req":    req,
-			"rsp":    rsp,
-		}).Info()
 	}()
 
 	pb, err := protobuf.Unmarshal(args.PayloadName, args.Payload)

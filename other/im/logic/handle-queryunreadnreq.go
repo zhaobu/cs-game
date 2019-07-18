@@ -6,13 +6,11 @@ import (
 	"cy/other/im/codec"
 	"cy/other/im/codec/protobuf"
 	"cy/other/im/inner"
-	"cy/other/im/logic/db"
-	"cy/other/im/pb"
+
+	impb "cy/other/im/pb"
 	"fmt"
 	"runtime/debug"
 	"strconv"
-
-	"github.com/sirupsen/logrus"
 )
 
 func (p *logic) QueryUnreadNReq(ctx context.Context, args *codec.MsgPayload, reply *codec.MsgPayload) (err error) {
@@ -21,22 +19,10 @@ func (p *logic) QueryUnreadNReq(ctx context.Context, args *codec.MsgPayload, rep
 	rsp := &impb.QueryUnreadNRsp{}
 
 	defer func() {
-		stack := ""
 		r := recover()
 		if r != nil {
-			stack = string(debug.Stack())
+			log.Errorf("recover info,fromid=%d,toid=%d,flag=%v,plname=%s,req=%v,rsp=%v,err=%s,r=%s,stack=%s", args.FromUID, args.ToUID, args.Flag, args.PayloadName, req, rsp, err, r, string(debug.Stack()))
 		}
-		logrus.WithFields(logrus.Fields{
-			"fromid": args.FromUID,
-			"toid":   args.ToUID,
-			"flag":   args.Flag,
-			"plname": args.PayloadName,
-			"err":    err,
-			"r":      r,
-			"stack":  stack,
-			"req":    req,
-			"rsp":    rsp,
-		}).Info()
 	}()
 
 	pb, err := protobuf.Unmarshal(args.PayloadName, args.Payload)
@@ -56,7 +42,7 @@ func (p *logic) QueryUnreadNReq(ctx context.Context, args *codec.MsgPayload, rep
 	sessID := inner.SessionID(args.FromUID, req.OtherUID, args.IsBroadCast(), args.IsMultiCast())
 	startMsgID, _ := cache.LastReadID(args.FromUID, req.OtherUID)
 
-	result, err := db.RangeGetBySessionKey(storeKey, sessID, startMsgID, int32(req.LastN))
+	result, err := RangeGetBySessionKey(storeKey, sessID, startMsgID, int32(req.LastN))
 
 	if err != nil || len(result) == 0 {
 		return

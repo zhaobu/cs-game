@@ -4,10 +4,10 @@ import (
 	"bufio"
 	"crypto/hmac"
 	"crypto/sha256"
-	"cy/other/im/common/crypto/dh"
 	"cy/other/im/codec"
 	"cy/other/im/codec/protobuf"
-	"cy/other/im/pb"
+	"cy/other/im/common/crypto/dh"
+	impb "cy/other/im/pb"
 	"log"
 	"net"
 	"net/http"
@@ -41,9 +41,9 @@ var (
 func main() {
 	flag.Parse()
 
-	//printAddFriendNotifAck()
-	//printLoginReq()
-	printEnterExitRoom()
+	printLoginReq()
+	printAddFriendNotifAck()
+	// printEnterExitRoom()
 	printSendMsgReq()
 
 	//printQueryInbox()

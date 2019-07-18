@@ -10,6 +10,11 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+var (
+	Log  *zap.SugaredLogger //printf风格
+	Tlog *zap.Logger        //structured 风格
+)
+
 func InitLogger(logpath string, loglevel string, debugmode bool) *zap.Logger {
 
 	var allCore []zapcore.Core
@@ -63,5 +68,7 @@ func InitLogger(logpath string, loglevel string, debugmode bool) *zap.Logger {
 	core := zapcore.NewTee(allCore...)
 
 	// From a zapcore.Core, it's easy to construct a Logger.
-	return zap.New(core).WithOptions(zap.AddCaller())
+	Tlog = zap.New(core).WithOptions(zap.AddCaller())
+	Log = Tlog.Sugar()
+	return Tlog
 }

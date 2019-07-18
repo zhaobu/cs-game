@@ -5,14 +5,12 @@ import (
 	"cy/other/im/codec"
 	"cy/other/im/codec/protobuf"
 	"cy/other/im/inner"
-	"cy/other/im/logic/db"
-	"cy/other/im/pb"
+
+	impb "cy/other/im/pb"
 	"fmt"
 	"runtime/debug"
 	"strconv"
 	"time"
-
-	"github.com/sirupsen/logrus"
 )
 
 func (p *logic) SendMsgReq(ctx context.Context, args *codec.MsgPayload, reply *codec.MsgPayload) (err error) {
@@ -21,22 +19,10 @@ func (p *logic) SendMsgReq(ctx context.Context, args *codec.MsgPayload, reply *c
 	rsp := &impb.SendMsgRsp{}
 
 	defer func() {
-		stack := ""
 		r := recover()
 		if r != nil {
-			stack = string(debug.Stack())
+			log.Errorf("recover info,fromid=%d,toid=%d,flag=%v,plname=%s,req=%v,rsp=%v,err=%s,r=%s,stack=%s", args.FromUID, args.ToUID, args.Flag, args.PayloadName, req, rsp, err, r, string(debug.Stack()))
 		}
-		logrus.WithFields(logrus.Fields{
-			"fromid": args.FromUID,
-			"toid":   args.ToUID,
-			"flag":   args.Flag,
-			"plname": args.PayloadName,
-			"err":    err,
-			"r":      r,
-			"stack":  stack,
-			"req":    req,
-			"rsp":    rsp,
-		}).Info()
 	}()
 
 	pb, err := protobuf.Unmarshal(args.PayloadName, args.Payload)
@@ -93,7 +79,7 @@ func (p *logic) SendMsgReq(ctx context.Context, args *codec.MsgPayload, reply *c
 	sessID := inner.SessionID(req.From, req.To, args.IsBroadCast(), args.IsMultiCast())
 
 	for _, sk := range storeKeys {
-		req := &db.ChatMsg{
+		req := &ChatMsg{
 			StoreKey:   sk,
 			MsgID:      ut,
 			SessionKey: sessID,

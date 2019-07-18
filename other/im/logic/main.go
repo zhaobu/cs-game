@@ -2,7 +2,7 @@ package main
 
 import (
 	"cy/other/im/cache"
-	"cy/other/im/logic/db"
+
 	"cy/other/im/util"
 	"flag"
 	"fmt"
@@ -10,7 +10,9 @@ import (
 	"runtime/debug"
 	"time"
 
-	"github.com/sirupsen/logrus"
+	zaplog "cy/other/im/common/logger"
+
+	"go.uber.org/zap"
 
 	_ "github.com/RussellLuo/timingwheel"
 	metrics "github.com/rcrowley/go-metrics"
@@ -25,38 +27,47 @@ var (
 	cliGate client.XClient
 
 	//tw = timingwheel.NewTimingWheel(time.Millisecond, 20)
+	release  = flag.Bool("release", false, "run mode")
+	nodeName = flag.String("nodeName", "logic", "nodeName")
+
+	log  *zap.SugaredLogger //printf风格
+	tlog *zap.Logger        //structured 风格
 )
 
-func init() {
-	logrus.SetFormatter(&logrus.JSONFormatter{})
-	logName := fmt.Sprintf("logic_%d_%d.log", os.Getpid(), time.Now().Unix())
-	file, err := os.OpenFile(logName, os.O_CREATE|os.O_WRONLY, 0666)
-	if err == nil {
-		logrus.SetOutput(file)
+func initLog() {
+	var logName, logLevel string
+	if *release {
+		logLevel = "info"
+		logName = fmt.Sprintf("./log/%s_%d_%s.log", *nodeName, os.Getpid(), time.Now().Format("2006_01_02"))
 	} else {
-		logrus.SetOutput(os.Stdout)
+		logName = fmt.Sprintf("./log/%s.log", *nodeName)
+		logLevel = "debug"
 	}
+	tlog = zaplog.InitLogger(logName, logLevel, !*release)
+	log = tlog.Sugar()
 }
 
 func main() {
 	var (
-		consulAddr = flag.String("consulAddr", "127.0.0.1:8500", "consul address")
+		consulAddr = flag.String("consulAddr", "192.168.0.10:8500", "consul address")
 		basePath   = flag.String("base", "/cy_im", "consul prefix path")
 		addr       = flag.String("addr", "", "listen address")
 		redisAddr  = flag.String("redisaddr", "192.168.0.10:6379", "redis address")
 	)
 	flag.Parse()
 
+	initLog()
+
 	defer func() {
 		if r := recover(); r != nil {
-			logrus.Error(string(debug.Stack()))
+			log.Error(string(debug.Stack()))
 		}
 	}()
 
-	db.InitTS()
+	InitTS()
 
 	if err := cache.Init(*redisAddr); err != nil {
-		logrus.Error(err.Error())
+		log.Error(err.Error())
 		return
 	}
 
@@ -67,13 +78,13 @@ func main() {
 	if *addr == "" {
 		taddr, err := util.AllocListenAddr()
 		if err != nil {
-			logrus.Error(err.Error())
+			log.Error(err.Error())
 			return
 		}
 		*addr = taddr.String()
 	}
 
-	logrus.Info("listen at:", *addr)
+	log.Info("listen at:", *addr)
 
 	{
 		d := client.NewConsulDiscovery(*basePath, "Gate", []string{*consulAddr}, nil)
@@ -87,7 +98,7 @@ func main() {
 	s.RegisterName("Logic", new(logic), "")
 	err = s.Serve("tcp", *addr)
 	if err != nil {
-		logrus.Error(err.Error())
+		log.Error(err.Error())
 	}
 }
 
@@ -101,7 +112,7 @@ func addRegistryPlugin(s *server.Server, addr, consulAddr, basePath string) {
 	}
 	err := r.Start()
 	if err != nil {
-		logrus.Error(err.Error())
+		log.Error(err.Error())
 	}
 	s.Plugins.Add(r)
 }

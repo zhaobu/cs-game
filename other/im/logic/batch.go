@@ -6,15 +6,13 @@ import (
 	"cy/other/im/codec"
 	"cy/other/im/codec/protobuf"
 	"cy/other/im/inner"
-	"cy/other/im/logic/db"
-	"cy/other/im/pb"
+	impb "cy/other/im/pb"
 	"cy/other/im/pb/misc"
 	"strconv"
 	"sync"
 	"time"
 
 	"github.com/aperdana/batcher"
-	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -42,14 +40,14 @@ func batchOperator(reqs []interface{}) {
 		return
 	}
 
-	var batchReqs []*db.ChatMsg
+	var batchReqs []*ChatMsg
 
 	unreadCnt := make(map[uint64]int64)
 	gm := &misc.GroupMsg{}
 	var toUID uint64
 
 	for _, req := range reqs {
-		batchReq, ok := req.(*db.ChatMsg)
+		batchReq, ok := req.(*ChatMsg)
 		if !ok {
 			continue
 		}
@@ -75,14 +73,14 @@ func batchOperator(reqs []interface{}) {
 		gm = protobuf.GroupAppend(gm, mn).(*misc.GroupMsg)
 	}
 
-	db.BatchWriteChatMsg(batchReqs)
+	BatchWriteChatMsg(batchReqs)
 
 	if toUID != 0 {
 		cache.ChangeUnreadCnt(toUID, unreadCnt)
-		logrus.WithFields(logrus.Fields{"uid": toUID, "urcnt": unreadCnt}).Info("change unread cnt")
+		log.Infof("change unread cnt,uid=%d,unreadCnt=%v", toUID, unreadCnt)
 
 		if queryPlace(toUID) != "" {
-			logrus.WithFields(logrus.Fields{"touid": toUID}).Info("online")
+			log.Infof("online,touid=%d", toUID)
 			pntf := codec.NewMsgPayload()
 			pntf.ToUID = toUID
 			var err error
@@ -90,7 +88,7 @@ func batchOperator(reqs []interface{}) {
 			if err == nil {
 				cliGate.Go(context.Background(), "BackEnd", pntf, nil, nil)
 			} else {
-				logrus.WithFields(logrus.Fields{"touid": toUID}).Info("offline")
+				log.Infof("offline,touid=%d", toUID)
 			}
 		}
 	}

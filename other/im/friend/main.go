@@ -5,14 +5,14 @@ import (
 	"cy/other/im/util"
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"runtime/debug"
 	"time"
 
+	. "cy/other/im/common/logger"
+
 	"github.com/aliyun/aliyun-tablestore-go-sdk/tablestore"
 	metrics "github.com/rcrowley/go-metrics"
-	"github.com/sirupsen/logrus"
 	"github.com/smallnest/rpcx/client"
 	"github.com/smallnest/rpcx/server"
 	"github.com/smallnest/rpcx/serverplugin"
@@ -27,6 +27,8 @@ var (
 	accessKeyID     = flag.String("accessKeyID", `LTAIssLCxHELxHAq`, "accessKeyId")
 	accessKeySecret = flag.String("accessKeySecret", `645bzZ5iJxPru921GNrvkYNIm2Uhnf`, "accessKeySecret")
 	redisAddr       = flag.String("redisaddr", "192.168.0.10:6379", "redis address")
+	release         = flag.Bool("release", false, "run mode")
+	nodeName        = flag.String("nodeName", "friend", "nodeName")
 
 	cliGate client.XClient
 
@@ -35,15 +37,16 @@ var (
 
 type friend int
 
-func init() {
-	logrus.SetFormatter(&logrus.JSONFormatter{})
-	logName := fmt.Sprintf("friend_%d_%d.log", os.Getpid(), time.Now().Unix())
-	file, err := os.OpenFile(logName, os.O_CREATE|os.O_WRONLY, 0666)
-	if err == nil {
-		logrus.SetOutput(file)
+func initlog() {
+	var logName, logLevel string
+	if *release {
+		logLevel = "info"
+		logName = fmt.Sprintf("./log/%s_%d_%s.log", *nodeName, os.Getpid(), time.Now().Format("2006_01_02"))
 	} else {
-		logrus.SetOutput(os.Stdout)
+		logName = fmt.Sprintf("./log/%s.log", *nodeName)
+		logLevel = "debug"
 	}
+	InitLogger(logName, logLevel, !*release)
 }
 
 func main() {
@@ -56,6 +59,7 @@ func main() {
 		fmt.Println(string(debug.Stack()))
 	}()
 
+	initlog()
 	if *addr == "" {
 		taddr, err := util.AllocListenAddr()
 		if err != nil {
@@ -64,11 +68,10 @@ func main() {
 		}
 		*addr = taddr.String()
 	}
-
-	logrus.Info("listen at:", *addr)
+	Log.Infof("listen at:%s", *addr)
 
 	if err := cache.Init(*redisAddr); err != nil {
-		logrus.Error(err.Error())
+		Log.Error(err)
 		return
 	}
 
@@ -100,7 +103,7 @@ func addRegistryPlugin(s *server.Server) {
 	}
 	err := r.Start()
 	if err != nil {
-		log.Fatal(err)
+		Log.Fatal(err)
 	}
 	s.Plugins.Add(r)
 }

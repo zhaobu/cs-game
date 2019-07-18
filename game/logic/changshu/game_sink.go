@@ -999,6 +999,8 @@ func (self *GameSink) huCard(chairId int32) error {
 		self.operAction.updateCardInfo(cardInfo, []int32{huInfo.Card}, nil)
 	}
 
+	//处理胡牌时留手3张的风牌产生的花
+	self.operAction.HandleRemainPengCard(self.players[chairId])
 	//记录胡牌牌型
 	self.gameBalance.loseChair = huInfo.LoseChair
 	self.gameBalance.huCard = huInfo.Card

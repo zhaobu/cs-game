@@ -1,4 +1,4 @@
-package db
+package main
 
 import (
 	"crypto/md5"
@@ -7,7 +7,6 @@ import (
 	"strconv"
 
 	"github.com/aliyun/aliyun-tablestore-go-sdk/tablestore"
-	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -50,9 +49,7 @@ func BatchWriteChatMsg(reqs []*ChatMsg) (err error) {
 		return
 	}
 
-	logrus.WithFields(logrus.Fields{
-		"reqs": reqs,
-	}).Info("db.BatchWriteChatMsg")
+	log.Infof("db.BatchWriteChatMsg,reqs=%v", reqs)
 
 	batchWriteReq := &tablestore.BatchWriteRowRequest{}
 	for _, req := range reqs {
@@ -104,15 +101,7 @@ func BatchWriteChatMsg(reqs []*ChatMsg) (err error) {
 
 func RangeGetMsgRecord(storeKey string, startMsgid, endMsgid int64, limit int32) (result []*ChatMsg, err error) {
 	defer func() {
-		logrus.WithFields(logrus.Fields{
-			"storeKey":   storeKey,
-			"startMsgid": startMsgid,
-			"endMsgid":   endMsgid,
-			"limit":      limit,
-			"len":        len(result),
-			"result":     result,
-			"err":        err,
-		}).Info("db.RangeGetMsgRecord")
+		log.Info("db.RangeGetMsgRecord,storeKey=%s,startMsgid=%d,endMsgid=%d,limit=%d,result=%v,err=%s", storeKey, startMsgid, endMsgid, limit, result, err)
 	}()
 
 	h := md5.New()
@@ -208,15 +197,7 @@ func RangeGetMsgRecord(storeKey string, startMsgid, endMsgid int64, limit int32)
 
 func RangeGetBySessionKey(storeKey, sessionKey string, startMsgid int64, limit int32) (result []*ChatMsg, err error) {
 	defer func() {
-		logrus.WithFields(logrus.Fields{
-			"storeKey":   storeKey,
-			"sessionKey": sessionKey,
-			"startMsgid": startMsgid,
-			"limit":      limit,
-			"len":        len(result),
-			"result":     result,
-			"err":        err,
-		}).Info("db.RangeGetBySessionKey")
+		log.Info("db.RangeGetBySessionKey,storeKey=%s,sessionKey=%s,startMsgid=%d,limit=%d,result=%v,err=%s", storeKey, sessionKey, startMsgid, limit, result, err)
 	}()
 
 	h := md5.New()

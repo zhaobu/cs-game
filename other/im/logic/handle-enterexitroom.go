@@ -5,11 +5,9 @@ import (
 	"cy/other/im/cache"
 	"cy/other/im/codec"
 	"cy/other/im/codec/protobuf"
-	"cy/other/im/pb"
+	impb "cy/other/im/pb"
 	"fmt"
 	"runtime/debug"
-
-	"github.com/sirupsen/logrus"
 )
 
 func (p *logic) EnterExitRoom(ctx context.Context, args *codec.MsgPayload, reply *codec.MsgPayload) (err error) {
@@ -17,20 +15,10 @@ func (p *logic) EnterExitRoom(ctx context.Context, args *codec.MsgPayload, reply
 	var ok bool
 
 	defer func() {
-		stack := ""
 		r := recover()
 		if r != nil {
-			stack = string(debug.Stack())
+			log.Errorf("recover info,fromid=%d,toid=%d,flag=%v,plname=%s,req=%v,err=%s,r=%s,stack=%s", args.FromUID, args.ToUID, args.Flag, args.PayloadName, req, err, r, string(debug.Stack()))
 		}
-		logrus.WithFields(logrus.Fields{
-			"fromid": args.FromUID,
-			"toid":   args.ToUID,
-			"flag":   args.Flag,
-			"plname": args.PayloadName,
-			"err":    err,
-			"r":      r,
-			"stack":  stack,
-		}).Info()
 	}()
 
 	pb, err := protobuf.Unmarshal(args.PayloadName, args.Payload)

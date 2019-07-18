@@ -2,12 +2,12 @@ package main
 
 import (
 	"cy/other/im/inner"
-	"cy/other/im/logic/db"
+	
 	"fmt"
 	"os"
 	"time"
 
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 )
 
 func testWriteChatMsg() {
@@ -66,13 +66,13 @@ func testReadChatMsg2() {
 }
 
 func init() {
-	logrus.SetFormatter(&logrus.JSONFormatter{})
+	log.SetFormatter(&log.JSONFormatter{})
 	logName := fmt.Sprintf("logic_%d_%d.log", os.Getpid(), time.Now().Unix())
 	file, err := os.OpenFile(logName, os.O_CREATE|os.O_WRONLY, 0666)
 	if err == nil {
-		logrus.SetOutput(file)
+		log.SetOutput(file)
 	} else {
-		logrus.SetOutput(os.Stdout)
+		log.SetOutput(os.Stdout)
 	}
 }
 

@@ -4,23 +4,19 @@ import (
 	"context"
 	"cy/other/im/codec"
 	"cy/other/im/codec/protobuf"
-	"cy/other/im/friend/db/result"
+	. "cy/other/im/common/logger"
+	"cy/other/im/friend/db"
 	friendpb "cy/other/im/pb/friend"
 	"fmt"
 	"runtime/debug"
 	"strconv"
-
-	"github.com/sirupsen/logrus"
 )
 
 func (p *friend) AddFriendResultAck(ctx context.Context, args *codec.MsgPayload, reply *codec.MsgPayload) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("%v", r)
-			logrus.WithFields(logrus.Fields{
-				"stack": string(debug.Stack()),
-			}).Error()
-
+			Log.Errorf("recover info, err=%s,stack info:%s", err, string(debug.Stack()))
 		}
 	}()
 
@@ -33,13 +29,9 @@ func (p *friend) AddFriendResultAck(ctx context.Context, args *codec.MsgPayload,
 		return fmt.Errorf("not friendpb.AddFriendResultAck")
 	}
 
-	logrus.WithFields(logrus.Fields{
-		"name":   args.PayloadName,
-		"fromid": args.FromUID,
-		"detail": req,
-	}).Info("handle")
+	Log.Infof("args info:name=%s,fromid=%d,detail=%v", args.PayloadName, args.FromUID, req)
 
 	msgID, _ := strconv.ParseInt(req.MsgID, 10, 64)
-	result.DeleteAddFriendResult(tsdbCli, fmt.Sprintf("uid:%d", args.FromUID), msgID)
+	db.DeleteAddFriendResult(tsdbCli, fmt.Sprintf("uid:%d", args.FromUID), msgID)
 	return nil
 }

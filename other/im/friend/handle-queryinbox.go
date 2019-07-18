@@ -4,24 +4,22 @@ import (
 	"context"
 	"cy/other/im/codec"
 	"cy/other/im/codec/protobuf"
-	"cy/other/im/friend/db/notif"
-	"cy/other/im/friend/db/result"
+	. "cy/other/im/common/logger"
+	"cy/other/im/friend/db"
 	friendpb "cy/other/im/pb/friend"
 	"cy/other/im/pb/misc"
 	"fmt"
 	"runtime/debug"
 	"strconv"
 
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 )
 
 func (p *friend) QueryInbox(ctx context.Context, args *codec.MsgPayload, reply *codec.MsgPayload) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = fmt.Errorf("%v", r)
-			logrus.WithFields(logrus.Fields{
-				"stack": string(debug.Stack()),
-			}).Error()
+			Log.Errorf("recover info:%s", string(debug.Stack()))
 		}
 	}()
 
@@ -34,17 +32,12 @@ func (p *friend) QueryInbox(ctx context.Context, args *codec.MsgPayload, reply *
 		return fmt.Errorf("not friendpb.QueryInbox")
 	}
 
-	logrus.WithFields(logrus.Fields{
-		"name":   args.PayloadName,
-		"fromid": args.FromUID,
-		"detail": req,
-	}).Info("handle")
-
+	Tlog.Info("handle info", zap.String("name", args.PayloadName), zap.Uint64("fromid", args.FromUID), zap.Any("detail", req))
 	gm := &misc.GroupMsg{}
 
 	// 1>
 	startMsgID, _ := strconv.ParseInt(req.StartMsgID, 10, 64)
-	findResult1, err := notif.RangeGetAddFriendNotif(
+	findResult1, err := db.RangeGetAddFriendNotif(
 		tsdbCli,
 		fmt.Sprintf("uid:%d", args.FromUID),
 		startMsgID,
@@ -62,11 +55,11 @@ func (p *friend) QueryInbox(ctx context.Context, args *codec.MsgPayload, reply *
 			gm = protobuf.GroupAppend(gm, addFriendNotif).(*misc.GroupMsg)
 		}
 	} else {
-		logrus.WithFields(logrus.Fields{}).Warn(err)
+		Tlog.Error("err info ", zap.Error(err))
 	}
 
 	// 2>
-	findResult2, err := result.RangeGetAddFriendResult(
+	findResult2, err := db.RangeGetAddFriendResult(
 		tsdbCli,
 		fmt.Sprintf("uid:%d", args.FromUID),
 		startMsgID,
@@ -84,20 +77,17 @@ func (p *friend) QueryInbox(ctx context.Context, args *codec.MsgPayload, reply *
 			gm = protobuf.GroupAppend(gm, addFriendResult).(*misc.GroupMsg)
 		}
 	} else {
-		logrus.WithFields(logrus.Fields{}).Warn(err)
+		Tlog.Error("err info ", zap.Error(err))
 	}
 
-	logrus.WithFields(logrus.Fields{
-		"len gm.Msgs": len(gm.Msgs),
-		"gm.Msgs":     gm.Msgs,
-	}).Info()
+	Tlog.Info("gm info", zap.Int("len gm.Msgs", len(gm.Msgs)), zap.Any("gm.Msgs", gm.Msgs))
 
 	if len(gm.Msgs) > 0 {
 		reply.Seq = args.Seq
 		reply.ToUID = args.FromUID
 		reply.PayloadName, reply.Payload, err = protobuf.Marshal(gm)
 		if err != nil {
-			logrus.WithFields(logrus.Fields{}).Warn(err)
+			Tlog.Error("err info ", zap.Error(err))
 		}
 	}
 

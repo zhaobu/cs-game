@@ -63,7 +63,7 @@ func (s *tcpServer) accept() error {
 		if err != nil {
 			return err
 		}
-		fmt.Println("new connect: ", nc.RemoteAddr())
+		log.Debug("new connect: ", nc.RemoteAddr())
 		go s.serveConn(nc)
 	}
 }
