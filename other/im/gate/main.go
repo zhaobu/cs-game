@@ -62,6 +62,8 @@ func main() {
 		return
 	}
 
+	go innerServer()
+
 	{
 		d := client.NewConsulDiscovery(*basePath, "Logic", []string{*consulAddr}, nil)
 		cliLogic = client.NewXClient("Logic", client.Failtry, client.SelectByUser, d, client.DefaultOption)
@@ -83,7 +85,6 @@ func main() {
 
 	Log.Info("listen at:", *iaddr)
 
-	go innerServer()
 
 	cfg := &serverConfig{
 		id:         *iaddr,

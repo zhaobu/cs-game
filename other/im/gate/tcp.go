@@ -40,8 +40,7 @@ func (s *tcpServer) start(network, laddr string) error {
 	}
 	s.l = l
 
-	fmt.Println("listen at:", l.Addr())
-
+	Log.Debug("tcp listen at:", l.Addr())
 	return s.accept()
 }
 
