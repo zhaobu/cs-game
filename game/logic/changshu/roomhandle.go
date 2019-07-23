@@ -21,7 +21,9 @@ func checkArg(req *pbgame.MakeDeskReq) (*pbgame_logic.CreateArg, error) {
 	if !ok {
 		return nil, fmt.Errorf("not *pbgame_logic.Arg")
 	}
-
+	if arg.PaymentType == 3 && req.ClubMasterUid == 0 {
+		return nil, fmt.Errorf("群主支付时,群主uid为0")
+	}
 	return arg, nil
 }
 
@@ -163,7 +165,7 @@ func (self *roomHandle) HandleSitDownReq(uid uint64, req *pbgame.SitDownReq, rsp
 	return
 }
 
-func (self *roomHandle) HandleMakeDeskReq(uid uint64, deskID uint64, req *pbgame.MakeDeskReq, rsp *pbgame.MakeDeskRsp) bool {
+func (self *roomHandle) HandleMakeDeskReq(uid, clubMasterUid uint64, deskID uint64, req *pbgame.MakeDeskReq, rsp *pbgame.MakeDeskRsp) bool {
 	//检查玩家是否已经在别的房间中
 	d := getDeskByUID(uid)
 	if d != nil {
@@ -181,8 +183,12 @@ func (self *roomHandle) HandleMakeDeskReq(uid uint64, deskID uint64, req *pbgame
 
 	//构建桌子参数
 	deskArg := &pbgame_logic.DeskArg{Args: arg, Enable: true, Type: pbcommon.DeskType_DTFriend, FeeType: pbgame.FeeType_FTMasonry, DeskID: deskID}
-	newD := makeDesk(deskArg, uid, deskID, req.ClubID, self.RoomServie)
-	if err = newD.updateWealth(uid, 0); err != nil {
+	newD := makeDesk(deskArg, uid, clubMasterUid, deskID, req.ClubID, self.RoomServie)
+	payUid := uid
+	if arg.PaymentType == 3 { //群主支付
+		payUid = req.ClubMasterUid
+	}
+	if err = newD.updateWealth(payUid, 0); err != nil {
 		tlog.Error("err 预扣钻失败", zap.Error(err))
 		rsp.Code = pbgame.MakeDeskRspCode_MakeDeskNotEnoughMoney
 		return false

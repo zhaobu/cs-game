@@ -101,13 +101,7 @@ func (self *GameSink) Ctor(config *pbgame_logic.CreateArg) error {
 
 //重置游戏
 func (self *GameSink) reset() {
-	if self.desk.curInning == 1 {
-		//所有玩家坐下后才初始化战绩记录
-		// log.Debugf("传入前:%v", self.desk.getBaseDeskInfo())
-		self.record.Init(self.desk.getBaseDeskInfo(), self.players, self.desk.clubId, self.desk.masterUid)
-		// log.Debugf("传入后:%v", self.desk.getBaseDeskInfo())
-	}
-	self.record.Reset(self.desk.curInning)
+
 	//AllInfo
 	self.gameAllInfo = gameAllInfo{}
 	self.operOrder = make(map[PriorityOrder][]*OperPriority, self.game_config.PlayerCount)
@@ -276,6 +270,13 @@ func (self *GameSink) randDice() [2]int32 {
 
 //开始发牌
 func (self *GameSink) deal_card() {
+	if self.desk.curInning == 1 {
+		//所有玩家坐下切换内存后才初始化战绩记录
+		// log.Debugf("传入前:%v", self.desk.getBaseDeskInfo())
+		self.record.Init(self.desk.getBaseDeskInfo(), self.players, self.desk.clubId, self.desk.masterUid)
+		// log.Debugf("传入后:%v", self.desk.getBaseDeskInfo())
+	}
+	self.record.Reset(self.desk.curInning)
 	self.changGameState(pbgame_logic.GameStatus_GSPlaying)
 	//随机2个色子,用于客户端选择从牌堆摸牌的方向
 	msg := &pbgame_logic.S2CStartGame{BankerId: self.bankerId, CurInning: self.desk.curInning, LeftTime: 15}

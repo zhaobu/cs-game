@@ -39,24 +39,25 @@ type voteInfo struct {
 	voteTime   time.Time                    //玩家发起投票时间点
 }
 type Desk struct {
-	mu          sync.Mutex
-	rmu         sync.RWMutex
-	gameNode    *tpl.RoomServie
-	clubId      int64                    //俱乐部id
-	masterUid   uint64                   //房主uid
-	deskId      uint64                   //桌子id
-	curInning   uint32                   //第几局
-	gameStatus  pbgame_logic.GameStatus  //游戏状态
-	gameSink    *GameSink                //游戏逻辑
-	deskPlayers map[uint64]*deskUserInfo //本桌玩家信息,玩家uid到deskPlayers
-	playChair   map[int32]*deskUserInfo  //玩家chairid到deskPlayers,座位号从0开始
-	deskConfig  *pbgame_logic.DeskArg    //桌子参数
-	timerManger map[mj.EmtimerID]*timingwheel.Timer
+	mu            sync.Mutex
+	rmu           sync.RWMutex
+	gameNode      *tpl.RoomServie
+	clubId        int64                    //俱乐部id
+	masterUid     uint64                   //房主uid
+	clubMasterUid uint64                   //俱乐部群主uid
+	deskId        uint64                   //桌子id
+	curInning     uint32                   //第几局
+	gameStatus    pbgame_logic.GameStatus  //游戏状态
+	gameSink      *GameSink                //游戏逻辑
+	deskPlayers   map[uint64]*deskUserInfo //本桌玩家信息,玩家uid到deskPlayers
+	playChair     map[int32]*deskUserInfo  //玩家chairid到deskPlayers,座位号从0开始
+	deskConfig    *pbgame_logic.DeskArg    //桌子参数
+	timerManger   map[mj.EmtimerID]*timingwheel.Timer
 	*voteInfo
 }
 
-func makeDesk(deskArg *pbgame_logic.DeskArg, masterUid, deskID uint64, clubID int64, gameNode *tpl.RoomServie) *Desk {
-	d := &Desk{deskId: deskID, clubId: clubID, masterUid: masterUid, deskConfig: deskArg, gameNode: gameNode}
+func makeDesk(deskArg *pbgame_logic.DeskArg, masterUid, clubMasterUid, deskID uint64, clubID int64, gameNode *tpl.RoomServie) *Desk {
+	d := &Desk{deskId: deskID, clubId: clubID, masterUid: masterUid, clubMasterUid: clubMasterUid, deskConfig: deskArg, gameNode: gameNode}
 	d.gameSink = &GameSink{desk: d}
 	d.gameSink.Ctor(deskArg.Args)
 	d.playChair = make(map[int32]*deskUserInfo)
@@ -197,6 +198,10 @@ func (d *Desk) doSitDown(uid uint64, chair int32, rsp *pbgame.SitDownRsp) {
 	d.sendDeskInfo(0)
 	//再判断游戏开始
 	if d.checkStart() {
+		//游戏开始时,如果是aa支付,房主没有在房间玩游戏,就退还房主预扣的钱
+		if d.deskConfig.Args.PaymentType == 2 && d.GetChairidByUid(d.masterUid) == -1 {
+			d.updateWealth(d.masterUid, 1)
+		}
 		d.curInning = 1
 		d.changUserState(0, pbgame.UserDeskStatus_UDSPlaying)
 		d.gameSink.changGameState(pbgame_logic.GameStatus_GSDice)
@@ -261,8 +266,8 @@ func (d *Desk) doExit(uid uint64, rsp *pbgame.ExitDeskRsp) {
 			tlog.Info("doExit时 d.doStandUp 失败", zap.Any("rsp.Code", rsp.Code))
 			return
 		}
-		//退还扣的钱(房主预扣的钱要等游戏结束再判断是否需要退还)
-		if uid != d.masterUid {
+		//退还扣的钱(房主预扣的钱要等游戏开始再判断是否需要退还)
+		if uid != d.masterUid && d.deskConfig.Args.PaymentType == 2 {
 			d.updateWealth(uid, 1)
 		}
 	}
@@ -432,8 +437,12 @@ func (d *Desk) gameEnd(endType pbgame_logic.GameEndType) {
 //真正销毁桌子
 func (d *Desk) realDestroyDesk(reqType pbgame.DestroyDeskType) {
 	//如果房主没有在房间玩游戏,就退还房主预扣的钱
-	if d.curInning == 0 || d.curInning > 0 && d.GetChairidByUid(d.masterUid) == -1 {
-		d.updateWealth(d.masterUid, 1)
+	if d.curInning == 0 {
+		if d.deskConfig.Args.PaymentType == 3 { //俱乐部群主支付
+			d.updateWealth(d.clubMasterUid, 1)
+		} else {
+			d.updateWealth(d.masterUid, 1)
+		}
 	}
 	//处理房间所有人的状态
 	msg := &pbgame.DestroyDeskResultNotif{DeskID: d.deskId, Result: 1, Type: reqType}

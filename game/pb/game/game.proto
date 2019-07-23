@@ -55,7 +55,8 @@ message MakeDeskReq {
   string GameName = 2;
   string GameArgMsgName = 3;  // 具体游戏参数 如 pbgame_ddz.RoomArg
   bytes GameArgMsgValue = 4;
-  int64 ClubID = 5;
+  int64 ClubID = 5;          //俱乐部Id
+  uint64 ClubMasterUid = 6;  // 群主Id
 }
 
 //创建桌子code
