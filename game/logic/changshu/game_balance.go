@@ -32,7 +32,6 @@ const (
 type GameBalance struct {
 	game_config  *pbgame_logic.CreateArg //游戏参数
 	startDice    StartDiceType           //开局色子
-	huangzhuang  bool                    //是否荒庄
 	baozi        int32                   //本局豹子倍数
 	gameIndex    int32                   //第几局
 	loseChair    int32                   //丢分玩家
@@ -44,6 +43,7 @@ type GameBalance struct {
 	duLongHua    int32                   //独龙杠花
 	allCards     [][]int32               //扳的所有牌
 	hitIndex     [][]int32               //扳到的杠头的索引
+	canBaozi     bool                    //建房参数是否能豹子翻倍
 }
 
 func init() {
@@ -110,17 +110,22 @@ func init() {
 
 func (self *GameBalance) Init(config *pbgame_logic.CreateArg) {
 	self.game_config = config
+	for _, v := range config.Rule {
+		if v.Val == 2 {
+			self.canBaozi = true
+			break
+		}
+	}
 }
 
 func (self *GameBalance) Reset() {
 	//依据上一局结果判断是否豹子翻倍
-	if self.huangzhuang || self.startDice == StartDice_Two {
+	if self.canBaozi && self.huCard == 0 || self.startDice == StartDice_Two {
 		self.baozi = 2
 	} else {
 		self.baozi = 1
 	}
 	self.startDice = StartDice_None
-	self.huangzhuang = false
 	self.loseChair = -1
 	self.gangHuaChair = -1
 	self.huCard = 0
@@ -143,7 +148,7 @@ func (self *GameBalance) AddScoreTimes(balanceResult *mj.PlayerBalanceResult, op
 
 //处理豹子翻倍
 func (self *GameBalance) DealStartDice(randRes [2]int32) {
-	if randRes[0] == randRes[1] {
+	if self.canBaozi && randRes[0] == randRes[1] {
 		self.baozi = 2
 		self.startDice = StartDice_One
 		if randRes[0] == 1 || randRes[0] == 4 {
@@ -154,7 +159,7 @@ func (self *GameBalance) DealStartDice(randRes [2]int32) {
 
 //计算杠头数
 func (self *GameBalance) CalGangTou(leftCards []int32, bankerId int32) { // 杠头  1 扳4个 2 扳8个 3 独龙杠
-	if self.game_config.Barhead == 3 {
+	if self.game_config.Barhead == 3 && self.huCard != 0 {
 		if len(leftCards) > 0 {
 			self.duLongHua = 5
 			if mj.GetCardColor(leftCards[len(leftCards)-1]) < 4 {

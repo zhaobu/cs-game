@@ -373,7 +373,7 @@ func (self *RpcHandle) MakeDeskReq(ctx context.Context, args *codec.Message, rep
 		cache.AddClubDeskRelation(req.ClubID, newDeskID)
 	}
 
-	if self.service.roomHandle.HandleMakeDeskReq(args.UserID, newDeskID, req, rsp) {
+	if self.service.roomHandle.HandleMakeDeskReq(args.UserID, req.ClubMasterUid, newDeskID, req, rsp) {
 		deskInfo := rsp.Info
 		deskInfo.CreateVlaueHash = uint64(crc32.ChecksumIEEE(req.GameArgMsgValue))
 		deskInfo.ID = newDeskID
