@@ -356,6 +356,7 @@ message MakeDeskReq {
     string GameArgMsgName = 3;  // 具体游戏参数 如 pbgame_ddz.RoomArg
     bytes GameArgMsgValue = 4;
     int64 ClubID = 5;
+    uint64 ClubMasterUid = 6;  // 群主Id
 }
 
 //解散桌子 只有群主能解散

@@ -139,8 +139,8 @@ func main() {
 		return
 	}
 
-	net.Init(*netAddr)       //初始化net
-	err = net.GetCondition() //获取抽奖配置表
+	net.Init(*netAddr) //初始化net
+	// err = net.GetCondition() //获取抽奖配置表
 	if err != nil {
 		tlog.Error("net.GetCondition err", zap.Error(err))
 	}

@@ -61,6 +61,15 @@ func (self *GameRecord) Init(info *pbgame_logic.GameDeskInfo, players []*PlayerI
 	}
 }
 
+//打色子后换座位号
+func (self *GameRecord) ChangeChair(players []*PlayerInfo) {
+	self.record.CurGameInfo.GamePlayers = nil
+	for _, v := range players {
+		uinfo := &mgo.RoomPlayerInfo{UserId: v.BaseInfo.Uid, Name: v.BaseInfo.Nickname, Score: 0, PreScore: 0}
+		self.record.CurGameInfo.GamePlayers = append(self.record.CurGameInfo.GamePlayers, uinfo)
+	}
+}
+
 //每局重置
 func (self *GameRecord) Reset(curinning uint32) {
 	for _, v := range self.record.CurGameInfo.GamePlayers {

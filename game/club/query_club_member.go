@@ -53,6 +53,7 @@ func (p *club) QueryClubMemberReq(ctx context.Context, args *codec.Message, repl
 			Agree:    m.Agree,
 			UserName: cu.UserName,
 			Profile:  cu.Profile,
+			Online:   cu.Online,
 		})
 		cu.RUnlock()
 	}

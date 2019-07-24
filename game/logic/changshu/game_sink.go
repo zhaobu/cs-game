@@ -130,6 +130,13 @@ func (self *GameSink) StartGame() {
 	self.isPlaying = true
 	self.reset()
 	if self.desk.curInning == 1 {
+		if self.desk.curInning == 1 {
+			//所有玩家坐下切换内存后才初始化战绩记录
+			// log.Debugf("传入前:%v", self.desk.getBaseDeskInfo())
+			self.record.Init(self.desk.getBaseDeskInfo(), self.players, self.desk.clubId, self.desk.masterUid)
+			// log.Debugf("传入后:%v", self.desk.getBaseDeskInfo())
+		}
+		self.record.Reset(self.desk.curInning)
 		//通知第一个玩家投色子
 		self.sendData(-1, &pbgame_logic.S2CThrowDice{ChairId: 0})
 		self.curThrowDice = 0
@@ -270,14 +277,8 @@ func (self *GameSink) randDice() [2]int32 {
 
 //开始发牌
 func (self *GameSink) deal_card() {
-	if self.desk.curInning == 1 {
-		//所有玩家坐下切换内存后才初始化战绩记录
-		// log.Debugf("传入前:%v", self.desk.getBaseDeskInfo())
-		self.record.Init(self.desk.getBaseDeskInfo(), self.players, self.desk.clubId, self.desk.masterUid)
-		// log.Debugf("传入后:%v", self.desk.getBaseDeskInfo())
-	}
-	self.record.Reset(self.desk.curInning)
 	self.changGameState(pbgame_logic.GameStatus_GSPlaying)
+	self.record.ChangeChair(self.players)
 	//随机2个色子,用于客户端选择从牌堆摸牌的方向
 	msg := &pbgame_logic.S2CStartGame{BankerId: self.bankerId, CurInning: self.desk.curInning, LeftTime: 15}
 	msg.DiceValue = make([]*pbgame_logic.Cyint32, 2)
@@ -1159,7 +1160,7 @@ func (self *GameSink) gameReconnect(recInfo *pbgame_logic.GameDeskInfo, uid uint
 		recInfo.LeftNum = int32(len(self.leftCard))
 		if chairId != -1 {
 			//发送听牌信息
-			if self.curOutChair != -1 {
+			if self.curOutChair == chairId {
 				if listenMsg, ok := self.operAction.GetListenInfo(chairId, self.players, nil, self.leftCard); ok {
 					recInfo.ListenResult = listenMsg.ListenResult
 				}

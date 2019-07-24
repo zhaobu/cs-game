@@ -50,12 +50,13 @@ func (p *club) MakeDeskReq(ctx context.Context, args *codec.Message, reply *code
 	}
 
 	m, find := cc.Members[args.UserID]
-	if !find || (m.Identity == identityBlack ) {
+	if !find || (m.Identity == identityBlack) {
 		cc.Unlock()
 		rsp.Code = 11
 		return
 	}
 	desk := cc.desks
+	clubmaster := cc.MasterUserID
 	cc.Unlock()
 	destorydesks := []*pbcommon.DeskInfo{}
 	for _, v := range desk {
@@ -63,15 +64,15 @@ func (p *club) MakeDeskReq(ctx context.Context, args *codec.Message, reply *code
 			destorydesks = append(destorydesks, v)
 		}
 	}
-	if len(destorydesks) >= 10 {			//空桌子已达上限
+	if len(destorydesks) >= 10 { //空桌子已达上限
 		rsp.Code = 8
 		return
 	}
 	cli, err := getGameCli(req.GameName)
 	if err != nil {
-		rsp.Code = 2					//创建桌子参数错误
+		rsp.Code = 2 //创建桌子参数错误
 		return
-	}else{
+	} else {
 		rsp.Code = 1
 	}
 	reqRCall := &codec.Message{}
@@ -81,6 +82,7 @@ func (p *club) MakeDeskReq(ctx context.Context, args *codec.Message, reply *code
 		GameArgMsgName:  req.GameArgMsgName,
 		GameArgMsgValue: req.GameArgMsgValue,
 		ClubID:          req.ClubID,
+		ClubMasterUid:   clubmaster,
 	}, reqRCall)
 	reqRCall.UserID = req.Head.UserID
 	rspRCall := &codec.Message{}
