@@ -178,8 +178,9 @@ func (self *HuLib) CheckHuType(cardInfo *PlayerCardInfo, balanceInfo *PlayserBal
 func (self *HuLib) checkBaseHuHua(cardInfo *PlayerCardInfo, balanceInfo *PlayserBalanceInfo, huMode EmHuMode) bool {
 	huaShu := balanceInfo.GetPingHuHua()
 	if huaShu == 0 && huMode == HuMode_ZIMO { //没花的情况下手牌里有两张一样的风牌，可自摸
+		add_card := cardInfo.HandCards[len(cardInfo.HandCards)-1]
 		for i := 41; i < 47; i++ {
-			if cardInfo.StackCards[int32(i)] > 1 {
+			if cardInfo.StackCards[int32(i)] > 1 && add_card >= 41 && add_card <= 47 {
 				return true
 			}
 		}

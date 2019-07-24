@@ -120,7 +120,7 @@ func (self *GameBalance) Init(config *pbgame_logic.CreateArg) {
 
 func (self *GameBalance) Reset() {
 	//依据上一局结果判断是否豹子翻倍
-	if self.canBaozi && self.huCard == 0 || self.startDice == StartDice_Two {
+	if self.canBaozi && (self.huCard == 0 || self.startDice == StartDice_Two) {
 		self.baozi = 2
 	} else {
 		self.baozi = 1

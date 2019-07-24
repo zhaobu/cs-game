@@ -425,6 +425,24 @@ func (self *OperAtion) HandleGangCard(playerInfo *mj.PlayerInfo, loseCardInfo *m
 
 }
 
+//处理被抢杠胡玩家
+func (self *OperAtion) HandleCancelQiangGangHu(playerInfo *mj.PlayerInfo, card int32) {
+	cardInfo := &playerInfo.CardInfo
+	for _, v := range cardInfo.RiverCards { //去掉之前的补杠变为碰
+		if v.Card == card {
+			v.Type = pbgame_logic.OperType_Oper_PENG
+			break
+		}
+	}
+	cardInfo.PengCards[card] = card
+	if card >= 41 { //万条筒补杠算1花，东南西北中发白补杠算3花
+		playerInfo.BalanceInfo.GangPoint -= 3
+	} else {
+		playerInfo.BalanceInfo.GangPoint -= 1
+	}
+	delete(cardInfo.GangCards, card)
+}
+
 //处理补花
 func (self *OperAtion) HandleBuHua(playerInfo *mj.PlayerInfo, huaCards []int32) {
 	playerInfo.CardInfo.HuaCards = append(playerInfo.CardInfo.HuaCards, huaCards...)

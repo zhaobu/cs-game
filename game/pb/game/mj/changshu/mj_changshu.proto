@@ -205,6 +205,7 @@ message S2CStartGame {
   int32 left_time = 7;               //超时时间
   S2CHaveOperation banker_oper = 8;  //庄家能做的操作
   string json_all_cards = 9;  //所有玩家手牌,(按Json_UserCardInfo格式解析)
+  int32 baozi = 10;           //豹子倍数(1:不翻倍2:翻倍)
 }
 
 //第一次补花信息
@@ -419,4 +420,5 @@ message GameDeskInfo {
   int32 left_oper_time = 17;               //剩余操作时间
   int32 total_num = 18;                    //总牌数
   string listen_result = 19;  //听牌信息(按照Json_Listen解析)
+  int32 baozi = 20;           //豹子倍数(1:不翻倍2:翻倍)
 }

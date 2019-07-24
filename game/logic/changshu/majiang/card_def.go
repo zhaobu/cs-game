@@ -69,7 +69,7 @@ var threePlayerCardDef = []int32{
 }
 
 //二人麻将
-var twoPlayerCardDef = threePlayerCardDef
+var twoPlayerCardDef = fourPlayerCardDef
 
 var (
 	log       *zap.SugaredLogger //majiang package的log

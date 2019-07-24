@@ -35,6 +35,7 @@ type gameAllInfo struct {
 	curOutChair    int32                             //当前出牌玩家
 	lastOutChair   int32                             //上次出牌玩家
 	lastOutCard    int32                             //上次出的牌
+	lastGangChair  int32                             //上次杠牌玩家(抢杠胡时,抢过玩家取消杠,杠牌玩家要摸牌)
 	laiziCard      map[int32]int32                   //癞子牌
 	hasHu          bool                              //是否有人胡牌
 	hasFirstBuHua  []bool                            //是否已经进行过第一次补花
@@ -116,7 +117,7 @@ func (self *GameSink) reset() {
 	self.curThrowDice = -1
 	self.curOutChair = -1
 	self.lastOutChair = -1
-
+	self.lastGangChair = -1
 	//PrivateInfo
 	self.gameBalance.Reset()
 	for _, v := range self.players {
@@ -284,6 +285,7 @@ func (self *GameSink) deal_card() {
 	msg.DiceValue = make([]*pbgame_logic.Cyint32, 2)
 	self.drawDiceValue = self.randDice()
 	self.gameBalance.DealStartDice(self.drawDiceValue)
+	msg.Baozi = self.gameBalance.baozi
 	for i, rnd := range self.drawDiceValue {
 		msg.DiceValue[i] = &pbgame_logic.Cyint32{T: rnd}
 	}
@@ -914,35 +916,6 @@ func (self *GameSink) gangCard(chairId, card int32) error {
 		log.Debugf("%s 暗杠,杠牌为%d", self.logHeadUser(chairId), card)
 	}
 
-	willWait := false
-	//判断抢杠胡
-	if gangType == pbgame_logic.OperType_Oper_BU_GANG {
-		for k, v := range self.players {
-			if int32(k) != chairId && self.canOperInfo[int32(k)].CanHu.Empty() { //避免抢杠胡玩家取消后重复判断抢杠胡
-				ret := self.operAction.QiangGangAnalysis(v, card, int32(k), int32(chairId))
-				if !ret.Empty() {
-					//统计并记录玩家可以进行的操作
-					msg := &pbgame_logic.S2CHaveOperation{ChairId: int32(k)}
-					self.countCanOper(ret, int32(k), msg)
-					willWait = true
-
-					//发送玩家可进行的操作
-					log.Infof("%s 可进行的操作%+v", self.logHeadUser(int32(k)), ret)
-					self.sendData(int32(k), msg)
-				}
-			}
-		}
-	}
-
-	//如果能抢杠胡,需要等待玩家操作
-	if willWait {
-		log.Debugf("%s 操作杠时其他玩家可以抢杠胡,需要等待", self.logHeadUser(chairId))
-		self.insertWaitOper(chairId, GangOrder, &WaitOperRecord{Card: card})
-		self.haswaitOper[chairId] = true
-		return nil
-	}
-	self.resetOper()
-
 	msg := &pbgame_logic.BS2CGangCard{ChairId: chairId, Card: card, Type: pbgame_logic.GangType(gangType), LoseChair: loseChair}
 	self.sendData(-1, msg)
 	//游戏回放记录
@@ -959,7 +932,32 @@ func (self *GameSink) gangCard(chairId, card int32) error {
 	self.haswaitOper[chairId] = false
 	self.resetOper()
 
-	self.drawCard(chairId, 1)
+	willWait := false
+	//判断抢杠胡
+	if gangType == pbgame_logic.OperType_Oper_BU_GANG {
+		for k, v := range self.players {
+			if int32(k) != chairId {
+				ret := self.operAction.QiangGangAnalysis(v, card, int32(k), int32(chairId))
+				if !ret.Empty() {
+					//统计并记录玩家可以进行的操作
+					msg := &pbgame_logic.S2CHaveOperation{ChairId: int32(k)}
+					self.countCanOper(ret, int32(k), msg)
+					willWait = true
+					//发送玩家可进行的操作
+					log.Infof("%s 可进行的操作%+v", self.logHeadUser(int32(k)), ret)
+					self.sendData(int32(k), msg)
+				}
+			}
+		}
+	}
+
+	//如果能抢杠胡,需要等待玩家操作
+	if willWait {
+		self.lastGangChair = chairId //记录杠牌玩家,如果有抢杠胡玩家取消杠,需要摸牌
+		log.Debugf("%s 操作杠时其他玩家可以抢杠胡,需要等待其他玩家操作", self.logHeadUser(chairId))
+	} else {
+		self.drawCard(chairId, 1)
+	}
 	return nil
 }
 
@@ -1026,8 +1024,7 @@ func (self *GameSink) huCard(chairId int32) error {
 		if huInfo.HuMode == mj.HuMode_PAOHU {
 			for _, v := range huInfo.HuList {
 				if v == mj.HuType_QiangGangHu {
-					loseCardInfo := &self.players[huInfo.LoseChair].CardInfo
-					self.operAction.updateCardInfo(loseCardInfo, nil, []int32{huInfo.Card})
+					self.operAction.HandleCancelQiangGangHu(self.players[huInfo.LoseChair], huInfo.Card)
 					break
 				}
 			}
@@ -1079,7 +1076,12 @@ func (self *GameSink) cancelOper(chairId int32) error {
 
 	//取消操作后,由上次出牌玩家下家抓牌
 	if self.curOutChair != chairId {
-		self.drawCard(GetNextChair(self.lastOutChair, self.game_config.PlayerCount), 0)
+		drawChair := GetNextChair(self.lastOutChair, self.game_config.PlayerCount)
+		if self.lastGangChair != -1 {
+			drawChair = self.lastGangChair
+			self.lastGangChair = -1
+		}
+		self.drawCard(drawChair, 1)
 	}
 	return nil
 }
@@ -1158,6 +1160,7 @@ func (self *GameSink) gameReconnect(recInfo *pbgame_logic.GameDeskInfo, uid uint
 
 		recInfo.LastOutCard = self.lastOutCard
 		recInfo.LeftNum = int32(len(self.leftCard))
+		recInfo.Baozi = self.gameBalance.baozi
 		if chairId != -1 {
 			//发送听牌信息
 			if self.curOutChair == chairId {
