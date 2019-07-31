@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	influxdb "github.com/influxdata/influxdb/client/v2"
+	influxdb "github.com/influxdata/influxdb1-client/v2"
 	"github.com/sirupsen/logrus"
 )
 
@@ -78,8 +78,7 @@ func NewInfluxDB(config *Config, clients ...influxdb.Client) (hook *InfluxDBHook
 // Fire adds a new InfluxDB point based off of Logrus entry
 func (hook *InfluxDBHook) Fire(entry *logrus.Entry) (err error) {
 	// If passing a "message" field then it will be overridden by the entry Message
-
-	entry.Data["msg"] = entry.Message
+	entry.Data["message"] = entry.Message
 
 	measurement := hook.measurement
 	if result, ok := getTag(entry.Data, "measurement"); ok {
@@ -129,7 +128,6 @@ func (hook *InfluxDBHook) addPoint(pt *influxdb.Point) (err error) {
 	if len(hook.batchP.Points()) < hook.batchCount {
 		return nil
 	}
-
 	return hook.writePoints()
 }
 

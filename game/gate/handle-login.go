@@ -46,7 +46,7 @@ func loginBySessionID(loginReq *pblogin.LoginReq) (loginRsp *pblogin.LoginRsp) {
 	return
 }
 
-func backendLoginReq(s *session,loginReq *pblogin.LoginReq) (loginRsp *pblogin.LoginRsp) {
+func backendLoginReq(s *session, loginReq *pblogin.LoginReq) (loginRsp *pblogin.LoginRsp) {
 	loginRsp = &pblogin.LoginRsp{}
 	if loginReq.Head != nil {
 		loginRsp.Head = &pbcommon.RspHead{Seq: loginReq.Head.Seq}
@@ -110,7 +110,7 @@ func backendLoginReq(s *session,loginReq *pblogin.LoginReq) (loginRsp *pblogin.L
 		loginRsp.Code = pblogin.LoginRspCode_Succ
 	case pblogin.LoginType_XianLiao:
 		xlid := loginReq.ID
-		if xlid == ""  {
+		if xlid == "" {
 			loginRsp.Code = pblogin.LoginRspCode_IdOrPwdFailed
 			return
 		}
@@ -127,18 +127,17 @@ func backendLoginReq(s *session,loginReq *pblogin.LoginReq) (loginRsp *pblogin.L
 	}
 
 	if loginRsp.Code == pblogin.LoginRspCode_Succ {
-		if rid, err := uuid.NewV4(); err == nil {
-			loginRsp.User.IP = strings.Split(s.tc.RemoteAddr().String(),":")[0] 		//获取用户IP
-			err = mgo.UpdateUserIP(loginRsp.User.UserID,loginRsp.User.IP)	//写入数据库
-			if err != nil{
-				tlog.Info("更新用户IP 错误", zap.Any("uId", loginRsp.User.UserID),zap.Any("IP", loginRsp.User.IP))
-			}
-			err = mgo.UpdateUserLocation(loginRsp.User.UserID,loginReq.Longitude,loginReq.Latitude,loginReq.Place)	//写入数据库
-			if err != nil{
-				tlog.Info("更新用户定位 错误", zap.Any("uId", loginRsp.User.UserID))
-			}
-			loginRsp.User, _ = mgo.UpdateSessionID(loginRsp.User.UserID, rid.String())
+		rid := uuid.NewV4()
+		loginRsp.User.IP = strings.Split(s.tc.RemoteAddr().String(), ":")[0] //获取用户IP
+		err := mgo.UpdateUserIP(loginRsp.User.UserID, loginRsp.User.IP)      //写入数据库
+		if err != nil {
+			tlog.Info("更新用户IP 错误", zap.Any("uId", loginRsp.User.UserID), zap.Any("IP", loginRsp.User.IP))
 		}
+		err = mgo.UpdateUserLocation(loginRsp.User.UserID, loginReq.Longitude, loginReq.Latitude, loginReq.Place) //写入数据库
+		if err != nil {
+			tlog.Info("更新用户定位 错误", zap.Any("uId", loginRsp.User.UserID))
+		}
+		loginRsp.User, _ = mgo.UpdateSessionID(loginRsp.User.UserID, rid.String())
 	}
 	return
 }
