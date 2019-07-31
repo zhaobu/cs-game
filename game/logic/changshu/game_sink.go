@@ -1076,12 +1076,12 @@ func (self *GameSink) cancelOper(chairId int32) error {
 
 	//取消操作后,由上次出牌玩家下家抓牌
 	if self.curOutChair != chairId {
-		drawChair := GetNextChair(self.lastOutChair, self.game_config.PlayerCount)
 		if self.lastGangChair != -1 {
-			drawChair = self.lastGangChair
+			self.drawCard(self.lastGangChair, 1)
 			self.lastGangChair = -1
+		} else {
+			self.drawCard(GetNextChair(self.lastOutChair, self.game_config.PlayerCount), 0)
 		}
-		self.drawCard(drawChair, 1)
 	}
 	return nil
 }
@@ -1192,7 +1192,7 @@ func (self *GameSink) gameReconnect(recInfo *pbgame_logic.GameDeskInfo, uid uint
 			}
 			v.JsonCardInfo = util.PB2JSON(tmp, false)
 		}
-	case pbgame_logic.GameStatus_GSGameEnd: //游戏结束等待下局中
+	case pbgame_logic.GameStatus_GSGameEnd, pbgame_logic.GameStatus_GSGameReady: //游戏结束等待下局中
 		for _, v := range recInfo.GameUser {
 			k := v.ChairId
 			userInfo := self.players[k]

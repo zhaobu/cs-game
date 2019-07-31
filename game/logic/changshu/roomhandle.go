@@ -28,8 +28,8 @@ func checkArg(req *pbgame.MakeDeskReq) (*pbgame_logic.CreateArg, error) {
 }
 
 func calcFee(arg *pbgame_logic.CreateArg) (change int64) {
-	// 支付方式 1 房主支付 2 AA支付
-	if arg.PaymentType == 1 {
+	// 支付方式 1 房主支付 2 AA支付 3 群主支付
+	if arg.PaymentType == 1 || arg.PaymentType == 3 {
 		change = int64(int32(arg.RInfo.Fee) * arg.PlayerCount)
 	} else if arg.PaymentType == 2 {
 		change = int64(arg.RInfo.Fee)
