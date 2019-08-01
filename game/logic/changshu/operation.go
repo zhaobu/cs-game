@@ -299,7 +299,7 @@ func (self *OperAtion) checkPengGang(stackCards map[int32]int32, card int32) boo
 
 //出牌后分析能做的操作
 func (self *OperAtion) OutCardAnalysis(playerInfo *mj.PlayerInfo, outCard, chairId, outChair, leftCardNum int32) *CanOperInfo {
-	log.Infof("玩家%d出牌,检测玩家%d能做的操作", outChair, chairId)
+	roomlog.Infof("玩家%d出牌,检测玩家%d能做的操作", outChair, chairId)
 	cardInfo := &playerInfo.CardInfo
 	ret := NewCanOper()
 	if leftCardNum > 0 {
@@ -419,7 +419,7 @@ func (self *OperAtion) HandleGangCard(playerInfo *mj.PlayerInfo, loseCardInfo *m
 			playerInfo.BalanceInfo.GangPoint += 1
 		}
 	} else {
-		log.Errorf("杠类型错误,gangType=%d", gangType)
+		roomlog.Errorf("杠类型错误,gangType=%d", gangType)
 	}
 	cardInfo.GangCards[card] = gangType
 
@@ -458,12 +458,12 @@ func (self *OperAtion) GetGangType(cardInfo *mj.PlayerCardInfo, card int32) pbga
 	} else if cardInfo.StackCards[card] == 3 { //明杠
 		return pbgame_logic.OperType_Oper_MING_GANG
 	}
-	log.Errorf("杠类型判断错误")
+	roomlog.Errorf("杠类型判断错误")
 	return pbgame_logic.OperType_Oper_None
 }
 
 func (self *OperAtion) QiangGangAnalysis(playerInfo *mj.PlayerInfo, card, chairId, loseChair int32) *CanOperInfo {
-	log.Infof("玩家%d补杠,检测玩家%d能否抢杠胡", loseChair, chairId)
+	roomlog.Infof("玩家%d补杠,检测玩家%d能否抢杠胡", loseChair, chairId)
 	ret := NewCanOper()
 	cardInfo := &playerInfo.CardInfo
 	//判断是否能胡

@@ -100,6 +100,7 @@ func initLog() {
 	} else {
 		logName = fmt.Sprintf("./log/%s.log", gameName)
 		logLevel = "debug"
+		os.RemoveAll("./log/roomlog/")
 	}
 	tlog = zaplog.InitLogger(logName, logLevel, !*release)
 	log = tlog.Sugar()

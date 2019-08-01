@@ -3,11 +3,13 @@ package main
 import (
 	"cy/game/cache"
 	"cy/game/codec/protobuf"
+	zaplog "cy/game/common/logger"
 	"cy/game/db/mgo"
 	mj "cy/game/logic/changshu/majiang"
 	"cy/game/logic/tpl"
 	"cy/game/util"
 	"fmt"
+	"runtime/debug"
 	"time"
 
 	pbcommon "cy/game/pb/common"
@@ -19,6 +21,11 @@ import (
 	"github.com/RussellLuo/timingwheel"
 	"github.com/gogo/protobuf/proto"
 	"go.uber.org/zap"
+)
+
+var (
+	roomlog  *zap.SugaredLogger //printf风格
+	troomlog *zap.Logger
 )
 
 const dissInterval time.Duration = time.Second * 2  //解散间隔2s
@@ -56,7 +63,20 @@ type Desk struct {
 	*voteInfo
 }
 
+func initRoomLog(deskId uint64) {
+	var logName, logLevel string
+	logName = fmt.Sprintf("./log/roomlog/%s_%d_%s.log", gameName, deskId, time.Now().Format("01021504"))
+	if *release {
+		logLevel = "info"
+	} else {
+		logLevel = "debug"
+	}
+	troomlog = zaplog.InitLogger(logName, logLevel, !*release)
+	roomlog = troomlog.Sugar()
+}
+
 func makeDesk(deskArg *pbgame_logic.DeskArg, masterUid, clubMasterUid, deskID uint64, clubID int64, gameNode *tpl.RoomServie) *Desk {
+	initRoomLog(deskID)
 	d := &Desk{deskId: deskID, clubId: clubID, masterUid: masterUid, clubMasterUid: clubMasterUid, deskConfig: deskArg, gameNode: gameNode}
 	d.gameSink = &GameSink{desk: d}
 	d.gameSink.Ctor(deskArg.Args)
@@ -115,13 +135,13 @@ func (d *Desk) checkStart() bool {
 
 //玩家加入桌子后变成观察者
 func (d *Desk) doJoin(uid uint64, rsp *pbgame.JoinDeskRsp) {
-	tlog.Info("玩家doJoin加入房间", zap.Uint64("uid", uid), zap.Uint64("deksId", d.deskId))
+	troomlog.Info("玩家doJoin加入房间", zap.Uint64("uid", uid), zap.Uint64("deksId", d.deskId))
 
 	var err error
 	dUserInfo := &deskUserInfo{userStatus: pbgame.UserDeskStatus_UDSLook, chairId: -1}
 	userInfo, err := mgo.QueryUserInfo(uid)
 	if err != nil {
-		tlog.Info("玩家doJoin加入房间时,mgo.QueryUserInfo err", zap.Uint64("uid", uid), zap.Uint64("deksId", d.deskId))
+		troomlog.Info("玩家doJoin加入房间时,mgo.QueryUserInfo err", zap.Uint64("uid", uid), zap.Uint64("deksId", d.deskId))
 		rsp.Code = pbgame.JoinDeskRspCode_JoinDeskUserStatusErr
 		return
 	}
@@ -134,10 +154,10 @@ func (d *Desk) doJoin(uid uint64, rsp *pbgame.JoinDeskRsp) {
 
 //坐下后由观察者变为游戏玩家
 func (d *Desk) doSitDown(uid uint64, chair int32, rsp *pbgame.SitDownRsp) {
-	tlog.Info("玩家doSitDown坐下准备", zap.Uint64("uid", uid), zap.Uint64("deksId", d.deskId))
+	troomlog.Info("玩家doSitDown坐下准备", zap.Uint64("uid", uid), zap.Uint64("deksId", d.deskId))
 	userInfo, err := mgo.QueryUserInfo(uid)
 	if err != nil {
-		tlog.Info("玩家doSitDown坐下准备时,mgo.QueryUserInfo err", zap.Uint64("uid", uid), zap.Uint64("deksId", d.deskId))
+		troomlog.Info("玩家doSitDown坐下准备时,mgo.QueryUserInfo err", zap.Uint64("uid", uid), zap.Uint64("deksId", d.deskId))
 		rsp.Code = pbgame.SitDownRspCode_SitDownNotInDesk
 		return
 	}
@@ -146,7 +166,7 @@ func (d *Desk) doSitDown(uid uint64, chair int32, rsp *pbgame.SitDownRsp) {
 		for _, v := range d.playChair {
 			if userInfo.IP == v.info.IP {
 				rsp.Code = pbgame.SitDownRspCode_SitDownIPLimit
-				tlog.Info("玩家doSitDown坐下准备时IP限制,不允许坐下", zap.Uint64("uid", uid), zap.Uint64("deksId", d.deskId))
+				troomlog.Info("玩家doSitDown坐下准备时IP限制,不允许坐下", zap.Uint64("uid", uid), zap.Uint64("deksId", d.deskId))
 				return
 			}
 		}
@@ -156,7 +176,7 @@ func (d *Desk) doSitDown(uid uint64, chair int32, rsp *pbgame.SitDownRsp) {
 		for _, v := range d.playChair {
 			if util.DistanceGeo(userInfo.Latitude, userInfo.Longitude, v.info.Latitude, v.info.Longitude) < 500.00 {
 				rsp.Code = pbgame.SitDownRspCode_SitDownDistanceSoClose
-				tlog.Info("玩家doSitDown坐下准备时距离限制,不允许坐下", zap.Uint64("uid", uid), zap.Uint64("deksId", d.deskId))
+				troomlog.Info("玩家doSitDown坐下准备时距离限制,不允许坐下", zap.Uint64("uid", uid), zap.Uint64("deksId", d.deskId))
 				return
 			}
 		}
@@ -165,21 +185,21 @@ func (d *Desk) doSitDown(uid uint64, chair int32, rsp *pbgame.SitDownRsp) {
 	dUserInfo := d.deskPlayers[uid]
 	//检查是否重复坐下
 	if dUserInfo.userStatus != pbgame.UserDeskStatus_UDSLook || dUserInfo.chairId != -1 {
-		tlog.Info("玩家doSitDown坐下准备时chairId != -1", zap.Uint64("uid", uid), zap.Uint64("deksId", d.deskId))
+		troomlog.Info("玩家doSitDown坐下准备时chairId != -1", zap.Uint64("uid", uid), zap.Uint64("deksId", d.deskId))
 		rsp.Code = pbgame.SitDownRspCode_SitDownGameStatusErr
 		return
 	}
 
 	//判断座位是否为空
 	if !d.checkPos(chair) {
-		tlog.Info("玩家doSitDown坐下准备时座位已经有人", zap.Uint64("uid", uid), zap.Uint64("deksId", d.deskId))
+		troomlog.Info("玩家doSitDown坐下准备时座位已经有人", zap.Uint64("uid", uid), zap.Uint64("deksId", d.deskId))
 		rsp.Code = pbgame.SitDownRspCode_SitDownNotEmpty
 		return
 	}
 	//检查钱是否够(房主建房时已经预扣)
 	if uid != d.masterUid && d.deskConfig.Args.PaymentType == 2 {
 		if err := d.updateWealth(uid, 0); err != nil {
-			tlog.Error("err mgo.UpdateWealthPre()", zap.Error(err))
+			troomlog.Error("err mgo.UpdateWealthPre()", zap.Error(err))
 			rsp.Code = pbgame.SitDownRspCode_SitDownNotEnoughMoney
 			return
 		}
@@ -226,18 +246,18 @@ func (d *Desk) changUserState(uid uint64, uState pbgame.UserDeskStatus) {
 
 //起立后由玩家变为观察者
 func (d *Desk) doStandUp(chairId int32) pbgame.ExitDeskRspCode {
-	tlog.Info("玩家doStandUp起立", zap.Int32("chairId", chairId), zap.Uint64("uid", d.GetUidByChairid(chairId)), zap.Uint64("deksId", d.deskId))
+	troomlog.Info("玩家doStandUp起立", zap.Int32("chairId", chairId), zap.Uint64("uid", d.GetUidByChairid(chairId)), zap.Uint64("deksId", d.deskId))
 	if d.curInning > 0 {
-		tlog.Info("doStandUp时 游戏已经开始")
+		troomlog.Info("doStandUp时 游戏已经开始")
 		return pbgame.ExitDeskRspCode_ExitDeskPlaying
 	}
 	dUserInfo := d.playChair[chairId]
 	if dUserInfo.userStatus == pbgame.UserDeskStatus_UDSPlaying {
-		tlog.Info("doStandUp时 userStatus=pbgame.UserDeskStatus_UDSPlaying")
+		troomlog.Info("doStandUp时 userStatus=pbgame.UserDeskStatus_UDSPlaying")
 		return pbgame.ExitDeskRspCode_ExitDeskPlaying
 	}
 	if !d.gameSink.Exitlayer(chairId) {
-		tlog.Info("doStandUp时 d.gameSink.Exitlayer 出错")
+		troomlog.Info("doStandUp时 d.gameSink.Exitlayer 出错")
 		return pbgame.ExitDeskRspCode_ExitDeskPlaying
 	}
 
@@ -254,7 +274,7 @@ func (d *Desk) doStandUp(chairId int32) pbgame.ExitDeskRspCode {
 func (d *Desk) doExit(uid uint64, rsp *pbgame.ExitDeskRsp) {
 	dUserInfo := d.deskPlayers[uid]
 	if dUserInfo == nil {
-		tlog.Info("doExit时 d.deskPlayers[uid]=nil")
+		troomlog.Info("doExit时 d.deskPlayers[uid]=nil")
 		rsp.Code = pbgame.ExitDeskRspCode_ExitDeskNotInDesk
 		return
 	}
@@ -263,7 +283,7 @@ func (d *Desk) doExit(uid uint64, rsp *pbgame.ExitDeskRsp) {
 	if chairId != -1 {
 		rsp.Code = d.doStandUp(chairId)
 		if rsp.Code != pbgame.ExitDeskRspCode_ExitDeskSucc {
-			tlog.Info("doExit时 d.doStandUp 失败", zap.Any("rsp.Code", rsp.Code))
+			troomlog.Info("doExit时 d.doStandUp 失败", zap.Any("rsp.Code", rsp.Code))
 			return
 		}
 		//退还扣的钱(房主预扣的钱要等游戏开始再判断是否需要退还)
@@ -291,7 +311,8 @@ func (d *Desk) updateDeskInfo(changeTyp int32) {
 	}
 	deskInfo, err := cache.QueryDeskInfo(d.deskId)
 	if err != nil {
-		tlog.Error("err cache.QueryDeskInfo", zap.Error(err))
+		roomlog.Errorf("debug stack info=%s", string(debug.Stack()))
+		troomlog.Error("err cache.QueryDeskInfo", zap.Error(err))
 		return
 	}
 	if d.gameStatus <= pbgame_logic.GameStatus_GSWait {
@@ -392,7 +413,7 @@ func (d *Desk) doDestroyDesk(uid uint64, req *pbgame.DestroyDeskReq, rsp *pbgame
 //玩家选择解散请求
 func (d *Desk) doVoteDestroyDesk(uid uint64, req *pbgame.VoteDestroyDeskReq) {
 	if d.voteOption[uid] != pbgame.VoteOption_VoteOptionNone {
-		tlog.Info("doVoteDestroyDesk already do option", zap.Uint64("uid", uid))
+		troomlog.Info("doVoteDestroyDesk already do option", zap.Uint64("uid", uid))
 		return
 	}
 	d.voteOption[uid] = req.Option
@@ -497,17 +518,17 @@ func (d *Desk) updateWealth(uid uint64, tag int) (err error) {
 func (d *Desk) doAction(uid uint64, actionName string, actionValue []byte) {
 	pb, err := protobuf.Unmarshal(actionName, actionValue)
 	if err != nil {
-		log.Warnf("deskid %d invalid action %s", d.deskId, actionName)
+		roomlog.Warnf("deskid %d invalid action %s", d.deskId, actionName)
 		return
 	}
 	d.mu.Lock()
 	defer d.mu.Unlock()
 
-	log.Infof("doAction uid: %v,actionName: %s,actionValue: %s", uid, actionName, util.PB2JSON(pb, true))
+	roomlog.Infof("doAction uid: %v,actionName: %s,actionValue: %s", uid, actionName, util.PB2JSON(pb, true))
 
 	chairId := d.GetChairidByUid(uid)
 	if -1 == chairId {
-		log.Infof("can find chairId by uid%d", uid)
+		roomlog.Infof("can find chairId by uid%d", uid)
 		return
 	}
 	switch v := pb.(type) {
@@ -530,8 +551,19 @@ func (d *Desk) doAction(uid uint64, actionName string, actionValue []byte) {
 	case *pbgame_logic.C2SGetGameRecord:
 		d.gameSink.getGameRecord(chairId)
 	default:
-		log.Warnf("invalid type %s", actionName)
+		roomlog.Warnf("invalid type %s", actionName)
 	}
+}
+
+//方便打印日志到单个房间
+func (d *Desk) ToGate(pb proto.Message, uids ...uint64) {
+	roomlog.Infof("ToGate uid: %v,msgName: %s,msgValue: %s", uids, proto.MessageName(pb), util.PB2JSON(pb, true))
+	d.gameNode.ToGate(pb, uids...)
+}
+
+func (d *Desk) ToGateNormal(pb proto.Message, uids ...uint64) {
+	roomlog.Infof("ToGateNormal uid: %v,msgName: %s,msgValue: %s", uids, proto.MessageName(pb), util.PB2JSON(pb, true))
+	d.gameNode.ToGateNormal(pb, uids...)
 }
 
 //_uid为0时发送给所有人,包括观察者
@@ -543,10 +575,10 @@ func (d *Desk) SendData(_uid uint64, pb proto.Message) {
 			uids[i] = uid
 			i++
 		}
-		d.gameNode.ToGateNormal(pb, uids...)
+		d.ToGateNormal(pb, uids...)
 		return
 	}
-	d.gameNode.ToGateNormal(pb, _uid)
+	d.ToGateNormal(pb, _uid)
 }
 
 //_uid为0时发送给所有人,包括观察者
@@ -558,21 +590,21 @@ func (d *Desk) SendGameMessage(_uid uint64, pb proto.Message) {
 			uids[i] = uid
 			i++
 		}
-		d.gameNode.ToGate(pb, uids...)
+		d.ToGate(pb, uids...)
 		return
 	}
-	d.gameNode.ToGate(pb, _uid)
+	d.ToGate(pb, _uid)
 }
 
 //发送消息给除所有观察者
-func (d *Desk) SendDataAllLook(pb proto.Message) {
+func (d *Desk) SendGameMessageAllLook(pb proto.Message) {
 	uids := []uint64{}
 	for uid, v := range d.deskPlayers {
 		if v.userStatus == pbgame.UserDeskStatus_UDSLook {
 			uids = append(uids, uid)
 		}
 	}
-	d.gameNode.ToGate(pb, uids...)
+	d.ToGate(pb, uids...)
 }
 
 //发送消息给除_uid其他所有人
@@ -583,7 +615,7 @@ func (d *Desk) SendGameMessageOther(_uid uint64, pb proto.Message) {
 			uids = append(uids, uid)
 		}
 	}
-	d.gameNode.ToGate(pb, uids...)
+	d.ToGate(pb, uids...)
 }
 
 //根据uid查找chair_id
@@ -619,7 +651,7 @@ func (d *Desk) cancel_timer(tID mj.EmtimerID) {
 	t, ok := d.timerManger[tID]
 	d.rmu.Unlock()
 	if !ok {
-		log.Infof("取消定时器时定时器不存在")
+		roomlog.Infof("取消定时器时定时器不存在")
 		return
 	}
 	t.Stop()

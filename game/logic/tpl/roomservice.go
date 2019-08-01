@@ -10,6 +10,7 @@ import (
 	"cy/game/util"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/RussellLuo/timingwheel"
@@ -102,9 +103,13 @@ func (self *RoomServie) ToGateNormal(pb proto.Message, uids ...uint64) error {
 	if len(uids) == 0 {
 		return nil
 	}
-	if _, ok := pb.(*pbgame.GameNotif); !ok { //游戏消息在ToGate里打印
-		// self.tlog.Info("ToGateNormal", zap.Any("uids", uids), zap.String("msgName", proto.MessageName(pb)), zap.String("msgValue", util.PB2JSON(pb, false)))
-		self.log.Infof("ToGateNormal uid: %v,msgName: %s,msgValue: %s", uids, proto.MessageName(pb), util.PB2JSON(pb, true))
+
+	pbName := proto.MessageName(pb)
+	if _, ok := pb.(*pbgame.GameNotif); !ok { //pbgame和pbgame_logic消息打印在房间日志里
+		if strings.Index(pbName, "pbgame") == -1 {
+			// self.tlog.Info("ToGateNormal", zap.Any("uids", uids), zap.String("msgName", proto.MessageName(pb)), zap.String("msgValue", util.PB2JSON(pb, false)))
+			self.log.Infof("ToGateNormal uid: %v,msgName: %s,msgValue: %s", uids, pbName, util.PB2JSON(pb, true))
+		}
 	}
 	msg := &codec.Message{}
 	err := codec.Pb2Msg(pb, msg)
@@ -134,13 +139,16 @@ func (self *RoomServie) ToGateNormal(pb proto.Message, uids ...uint64) error {
 	return err
 }
 
-//ToGate发送游戏消息
+//ToGate发送游戏消息(只发送类似pbgame_logic包了一层的消息)
 func (self *RoomServie) ToGate(pb proto.Message, uids ...uint64) error {
 	if len(uids) == 0 {
 		return nil
 	}
 	// self.tlog.Info("ToGate", zap.Any("uids", uids), zap.String("msgName", proto.MessageName(pb)), zap.String("msgValue", util.PB2JSON(pb, false)))
-	self.log.Infof("ToGate uid: %v,msgName: %s,msgValue: %s", uids, proto.MessageName(pb), util.PB2JSON(pb, true))
+	//pbgame_logic消息打印在房间日志里
+	if _, ok := pb.(*pbgame.GameNotif); !ok {
+		self.log.Infof("ToGate uid: %v,msgName: %s,msgValue: %s", uids, proto.MessageName(pb), util.PB2JSON(pb, true))
+	}
 	var err error
 	notif := &pbgame.GameNotif{}
 	notif.NotifName, notif.NotifValue, err = protobuf.Marshal(pb)
