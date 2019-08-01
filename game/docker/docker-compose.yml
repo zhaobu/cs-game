@@ -1,18 +1,22 @@
-version: "3"
+version: "3.7"
 
 # 申明同一个网络
 networks:
   gamenet:
-    # 申明网络已经在外部创建
-    external:
-      name: game_net
+    name: gamenet
+    # external:true # 申明网络已经在外部创建
 
 # 游戏数据卷
 volumes:
-  gamedata:
-    # 申明卷已经在外部创建
-    external:
-      name: game_data
+  consuldata:
+    # external:true # 申明卷已经在外部创建
+    name: consuldata
+  # gamedata:
+  #   name: gamedata
+  mongodata:
+    name: mongodata
+  redisdata:
+    name: redisdata            
 
 # 服务
 services:
@@ -212,7 +216,7 @@ services:
     command: /usr/local/etc/redis/redis.conf
     volumes:
       # 持久存储redis的数据
-      - gamedata:/data
+      - redisdata:/data
       # 挂载本地配置文件
       - ./redis.conf:/usr/local/etc/redis/redis.conf
 
@@ -228,7 +232,8 @@ services:
     command: ["mongod", "-f", "/etc/mongo/mongod.conf"]
     volumes:
       # 持久存储mongodb的数据
-      - gamedata:/data/db:rw
+      - mongodata:/data/db:rw
+      - mongodata:/data/configdb:rw
       # 挂载本地配置文件
       - ./mongod.conf:/etc/mongo/mongod.conf:rw
 
@@ -243,9 +248,8 @@ services:
         # 给网络取别名,可以用consul和discovery找到
         aliases:
           - discovery
-    # volumes:
-    # - gamedata:/gamedata
-
+    volumes:
+      - consuldata:/consul/data
   # initdb:
   #   image: golang:alpine
   #   working_dir: /go/src/cy/game/bin/linux
