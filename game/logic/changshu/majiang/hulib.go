@@ -33,7 +33,7 @@ func (self *HuLib) normalHu(cardInfo *PlayerCardInfo, gui_num int) bool {
 		if key, ok := var2key[card]; ok {
 			checkcard[key] = int(num)
 		} else {
-			log.Errorf("牌值%v不存在,请检查!!!", card)
+			roomlog.Errorf("牌值%v不存在,请检查!!!", card)
 		}
 	}
 
@@ -130,7 +130,7 @@ func (self *HuLib) CheckHuType(cardInfo *PlayerCardInfo, balanceInfo *PlayserBal
 
 	//判断是否有花牌
 	if hasHuaCard(cardInfo) {
-		log.Errorf("检测胡牌时还有花牌")
+		roomlog.Errorf("检测胡牌时还有花牌")
 		return false, nil
 	}
 	baseHu := false
@@ -205,7 +205,7 @@ func (self *HuLib) OneCardCanListen(cardInfo *PlayerCardInfo, balanceInfo *Plays
 
 	//判断是否有花牌
 	if hasHuaCard(cardInfo) {
-		log.Errorf("检测胡牌时还有花牌")
+		roomlog.Errorf("检测胡牌时还有花牌")
 		return false
 	}
 	baseHu := false

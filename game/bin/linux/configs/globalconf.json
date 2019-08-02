@@ -4,10 +4,10 @@
         "Release": false,
         "RedisAddr": "redis:6379",
         "RedisDb": 1,
-        "MgoURI": "mongodb:27017/game",
+        "MgoURI": "mongodb://mongodb:27017/game",
         "NetAddr": "http://192.168.0.207:8096"
     },
-    "HttpConf":{
+    "HttpConf": {
         "Addr": "http:8082"
     },
     "ClubConf": {
@@ -17,14 +17,14 @@
         "Addr": "center:9201"
     },
     "GateConf": {
-        "Addr": "gate:9876"
+        "Addr": "0.0.0.0:9876"
     },
     "GameConfs": {
         "MjLibPath": "./configs/mjhulib",
         "GameNode": {
             "11101": {
-                "Addr": "changshu:9603",
-                "TplName":"./configs/changshou.json",
+                "Addr": "changshou:9603",
+                "TplName": "./configs/changshou.json",
                 "GameName": "changshu",
                 "GameTest": "./configs/changshutest.json"
             }

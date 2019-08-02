@@ -9,6 +9,7 @@ import (
 	"cy/game/logic/tpl"
 	"cy/game/util"
 	"fmt"
+	"os"
 	"runtime/debug"
 	"time"
 
@@ -19,13 +20,14 @@ import (
 	"sync"
 
 	"github.com/RussellLuo/timingwheel"
-	"github.com/gogo/protobuf/proto"
+	"github.com/golang/protobuf/proto"
 	"go.uber.org/zap"
 )
 
 var (
 	roomlog  *zap.SugaredLogger //printf风格
 	troomlog *zap.Logger
+	logName  string
 )
 
 const dissInterval time.Duration = time.Second * 2  //解散间隔2s
@@ -64,7 +66,7 @@ type Desk struct {
 }
 
 func initRoomLog(deskId uint64) {
-	var logName, logLevel string
+	var logLevel string
 	logName = fmt.Sprintf("./log/roomlog/%s_%d_%s.log", gameName, deskId, time.Now().Format("01021504"))
 	if *release {
 		logLevel = "info"
@@ -480,6 +482,14 @@ func (d *Desk) realDestroyDesk(reqType pbgame.DestroyDeskType) {
 	cache.DeleteClubDeskRelation(d.deskId)
 	cache.DelDeskInfo(d.deskId)
 	cache.FreeDeskID(d.deskId)
+	//如果房间游戏没有开始,就删除日志
+	roomlog = nil
+	troomlog = nil
+	if d.curInning == 0 {
+		if err := os.Remove(logName); err != nil {
+			log.Errorf("roomlog delete err:%s", err)
+		}
+	}
 }
 
 // 更新财富(tag:0:表示预扣,1:返还)
@@ -557,13 +567,14 @@ func (d *Desk) doAction(uid uint64, actionName string, actionValue []byte) {
 
 //方便打印日志到单个房间
 func (d *Desk) ToGate(pb proto.Message, uids ...uint64) {
-	roomlog.Infof("ToGate uid: %v,msgName: %s,msgValue: %s", uids, proto.MessageName(pb), util.PB2JSON(pb, true))
-	d.gameNode.ToGate(pb, uids...)
+	fmt.Println(logName)
+	roomlog.Infof("ToGate uid: %v,msgName:%s,msgValue: %s", uids, proto.MessageName(pb), util.PB2JSON(pb, true))
+	d.gameNode.ToGate(pb, false, uids...)
 }
 
 func (d *Desk) ToGateNormal(pb proto.Message, uids ...uint64) {
-	roomlog.Infof("ToGateNormal uid: %v,msgName: %s,msgValue: %s", uids, proto.MessageName(pb), util.PB2JSON(pb, true))
-	d.gameNode.ToGateNormal(pb, uids...)
+	roomlog.Infof("ToGateNormal uid: %v,msgName:%s,msgValue: %s", uids, proto.MessageName(pb), util.PB2JSON(pb, true))
+	d.gameNode.ToGateNormal(pb, false, uids...)
 }
 
 //_uid为0时发送给所有人,包括观察者

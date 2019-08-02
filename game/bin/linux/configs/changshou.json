@@ -48,7 +48,7 @@
         "PlayerCount": 4,
         "Dipiao": 0, 
         "RInfo": {"LoopCnt":8, "Fee":1},
-        "PaymentType": 2, 
+        "PaymentType": 1, 
         "Voice": 1,
         "LimitIP": 2
     }   

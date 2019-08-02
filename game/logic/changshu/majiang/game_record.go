@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/gogo/protobuf/proto"
+	"github.com/golang/protobuf/proto"
 	"go.uber.org/zap"
 )
 
@@ -130,7 +130,7 @@ func (self *GameRecord) RecordGameAction(msg proto.Message) {
 	var err error
 	act.ActName, act.ActValue, err = protobuf.Marshal(msg)
 	if err != nil {
-		log.Error("protobuf.Marshal err", zap.Error(err))
+		roomlog.Error("protobuf.Marshal err", zap.Error(err))
 	}
 	self.record.CurGameInfo.RePlayData = append(self.record.CurGameInfo.RePlayData, act)
 }
@@ -141,5 +141,7 @@ func (self *GameRecord) RecordGameEnd(players []*PlayerInfo) {
 		self.record.CurGameInfo.GamePlayers[k].Score = v.BalanceInfo.Point
 		self.record.CurGameInfo.GamePlayers[k].PreScore = v.BalanceResult.Point
 	}
-	mgo.AddGameRecord(self.record)
+	if err := mgo.AddGameRecord(self.record); err != nil {
+		roomlog.Errorf("插入游戏记录失败:err=%s", err)
+	}
 }

@@ -107,7 +107,7 @@ func (self *RpcHandle) DestroyDeskReq(ctx context.Context, args *codec.Message, 
 	}
 
 	defer func() {
-		self.service.ToGateNormal(rsp, args.UserID)
+		self.service.ToGateNormal(rsp, true, args.UserID)
 	}()
 
 	//self.service.tlog.Info("recv from gate", zap.Uint64("uid", args.UserID), zap.String("msgName", args.Name), zap.Any("msgValue", *req))
@@ -152,7 +152,7 @@ func (self *RpcHandle) ExitDeskReq(ctx context.Context, args *codec.Message, rep
 	}
 
 	defer func() {
-		self.service.ToGateNormal(rsp, args.UserID)
+		self.service.ToGateNormal(rsp, true, args.UserID)
 	}()
 
 	//self.service.tlog.Info("recv from gate", zap.Uint64("uid", args.UserID), zap.String("msgName", args.Name), zap.Any("msgValue", *req))
@@ -233,7 +233,7 @@ func (self *RpcHandle) JoinDeskReq(ctx context.Context, args *codec.Message, rep
 
 	defer func() {
 		if rsp.Code != pbgame.JoinDeskRspCode_JoinDeskSucc {
-			self.service.ToGateNormal(rsp, args.UserID)
+			self.service.ToGateNormal(rsp, true, args.UserID)
 		}
 	}()
 
@@ -301,7 +301,7 @@ func (self *RpcHandle) SitDownReq(ctx context.Context, args *codec.Message, repl
 	defer func() {
 		//为保证消息顺序,准备成功消息,游戏内部发送
 		if rsp.Code != pbgame.SitDownRspCode_SitDownSucc {
-			self.service.ToGateNormal(rsp, args.UserID)
+			self.service.ToGateNormal(rsp, true, args.UserID)
 		}
 
 	}()
@@ -343,7 +343,7 @@ func (self *RpcHandle) MakeDeskReq(ctx context.Context, args *codec.Message, rep
 	var newDeskID uint64
 
 	defer func() {
-		self.service.ToGateNormal(rsp, args.UserID)
+		self.service.ToGateNormal(rsp, true, args.UserID)
 
 		if rsp.Code == pbgame.MakeDeskRspCode_MakeDeskSucc && req.ClubID != 0 {
 			self.service.SendDeskChangeNotif(req.ClubID, newDeskID, 1)
@@ -429,7 +429,7 @@ func (self *RpcHandle) QueryDeskInfoReq(ctx context.Context, args *codec.Message
 	}
 
 	defer func() {
-		self.service.ToGateNormal(rsp, args.UserID)
+		self.service.ToGateNormal(rsp, true, args.UserID)
 	}()
 
 	//self.service.tlog.Info("recv from gate", zap.Uint64("uid", args.UserID), zap.String("msgName", args.Name), zap.Any("msgValue", *req))
@@ -470,7 +470,7 @@ func (self *RpcHandle) QueryGameConfigReq(ctx context.Context, args *codec.Messa
 	}
 
 	defer func() {
-		self.service.ToGateNormal(rsp, args.UserID)
+		self.service.ToGateNormal(rsp, true, args.UserID)
 	}()
 
 	//self.service.tlog.Info("recv from gate", zap.Uint64("uid", args.UserID), zap.String("msgName", args.Name), zap.Any("msgValue", *req))

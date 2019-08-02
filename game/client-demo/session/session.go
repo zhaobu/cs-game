@@ -7,7 +7,6 @@ import (
 	pbgame "cy/game/pb/game"
 	"net"
 
-	"github.com/gogo/protobuf/proto"
 	"go.uber.org/zap"
 )
 

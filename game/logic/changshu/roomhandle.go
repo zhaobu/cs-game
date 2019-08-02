@@ -44,7 +44,7 @@ func (self *roomHandle) HandleGameCommandReq(uid uint64, req *pbgame.GameCommand
 	if rsp.ErrMsg != "" {
 		rsp.Code = 1
 	}
-	self.RoomServie.ToGateNormal(rsp, uid)
+	self.RoomServie.ToGateNormal(rsp, true, uid)
 }
 
 //HandleVoteDestroyDeskReq玩家选择解散请求

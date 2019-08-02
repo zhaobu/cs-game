@@ -72,7 +72,7 @@ var threePlayerCardDef = []int32{
 var twoPlayerCardDef = fourPlayerCardDef
 
 var (
-	log       *zap.SugaredLogger //majiang package的log
+	roomlog   *zap.SugaredLogger //majiang package的log
 	testCards TestHandCards
 )
 
@@ -80,7 +80,7 @@ type CardDef struct {
 }
 
 func (self *CardDef) Init(logptr *zap.SugaredLogger) {
-	log = logptr
+	roomlog = logptr
 }
 
 func (self *CardDef) GetBaseCard(playerCount int32) []int32 {
@@ -95,7 +95,7 @@ func (self *CardDef) GetBaseCard(playerCount int32) []int32 {
 		card = make([]int32, len(twoPlayerCardDef))
 		copy(card, twoPlayerCardDef)
 	} else {
-		log.Error("玩家人数有问题")
+		roomlog.Error("玩家人数有问题")
 		return nil
 	}
 	return card
@@ -177,7 +177,7 @@ func (self *CardDef) DealCard(rawcards []int32, playercount, bankerID int32) (ha
 		}
 	}
 
-	log.Warnf("玩家手牌为%+v", player_cards)
+	roomlog.Warnf("玩家手牌为%+v", player_cards)
 	return player_cards, rawcards[:leftNum] //返回所有玩家摸到的牌和随机牌库剩下的牌
 }
 
@@ -187,7 +187,7 @@ func Add_stack(m map[int32]int32, cards ...int32) {
 		if _, ok := m[card]; ok {
 			m[card] = m[card] + 1
 			if m[card] > 4 {
-				log.Errorf("加牌%d时牌数量>4,stack=%s", card, string(debug.Stack()))
+				roomlog.Errorf("加牌%d时牌数量>4,stack=%s", card, string(debug.Stack()))
 			}
 		} else {
 			m[card] = 1
@@ -204,7 +204,7 @@ func Sub_stack(m map[int32]int32, cards ...int32) {
 				delete(m, card)
 			}
 		} else {
-			log.Errorf("减牌%d时牌数量为0,stack=%s", card, string(debug.Stack()))
+			roomlog.Errorf("减牌%d时牌数量为0,stack=%s", card, string(debug.Stack()))
 		}
 	}
 }

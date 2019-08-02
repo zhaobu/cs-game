@@ -14,7 +14,7 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/gogo/protobuf/proto"
+	"github.com/golang/protobuf/proto"
 )
 
 var (
@@ -137,11 +137,12 @@ func (self *GameSink) StartGame() {
 			self.record.Init(self.desk.getBaseDeskInfo(), self.players, self.desk.clubId, self.desk.masterUid)
 			// roomlog.Debugf("传入后:%v", self.desk.getBaseDeskInfo())
 		}
-		self.record.Reset(self.desk.curInning)
 		//通知第一个玩家投色子
+		self.record.Reset(self.desk.curInning)
 		self.sendData(-1, &pbgame_logic.S2CThrowDice{ChairId: 0})
 		self.curThrowDice = 0
 	} else {
+		self.record.Reset(self.desk.curInning)
 		//由上局确定本局庄家
 		self.bankerId = self.nextBankerId
 		self.deal_card()
