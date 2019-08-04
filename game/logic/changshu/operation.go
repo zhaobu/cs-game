@@ -4,12 +4,15 @@ import (
 	mj "cy/game/logic/changshu/majiang"
 	pbgame_logic "cy/game/pb/game/mj/changshu"
 	"cy/game/util"
+
+	"go.uber.org/zap"
 )
 
 //麻将操作
 type OperAtion struct {
 	game_config *pbgame_logic.CreateArg //游戏参数
 	laiziCard   map[int32]int32         //癞子牌
+	log         *zap.SugaredLogger      //printf风格
 }
 
 type ChiCardTb [2]int32 //用来吃的2张牌
@@ -146,9 +149,10 @@ type OperPriority struct {
 // 	self.ChiCard = ChiCardTb{}
 // }
 
-func (self *OperAtion) Init(config *pbgame_logic.CreateArg, laizi map[int32]int32) {
+func (self *OperAtion) Init(config *pbgame_logic.CreateArg, laizi map[int32]int32, log *zap.SugaredLogger) {
 	self.game_config = config
 	self.laiziCard = laizi
+	self.log = log
 }
 
 //获取两个优先级中的较大者
@@ -299,7 +303,7 @@ func (self *OperAtion) checkPengGang(stackCards map[int32]int32, card int32) boo
 
 //出牌后分析能做的操作
 func (self *OperAtion) OutCardAnalysis(playerInfo *mj.PlayerInfo, outCard, chairId, outChair, leftCardNum int32) *CanOperInfo {
-	roomlog.Infof("玩家%d出牌,检测玩家%d能做的操作", outChair, chairId)
+	self.log.Infof("玩家%d出牌,检测玩家%d能做的操作", outChair, chairId)
 	cardInfo := &playerInfo.CardInfo
 	ret := NewCanOper()
 	if leftCardNum > 0 {
@@ -419,7 +423,7 @@ func (self *OperAtion) HandleGangCard(playerInfo *mj.PlayerInfo, loseCardInfo *m
 			playerInfo.BalanceInfo.GangPoint += 1
 		}
 	} else {
-		roomlog.Errorf("杠类型错误,gangType=%d", gangType)
+		self.log.Errorf("杠类型错误,gangType=%d", gangType)
 	}
 	cardInfo.GangCards[card] = gangType
 
@@ -458,12 +462,12 @@ func (self *OperAtion) GetGangType(cardInfo *mj.PlayerCardInfo, card int32) pbga
 	} else if cardInfo.StackCards[card] == 3 { //明杠
 		return pbgame_logic.OperType_Oper_MING_GANG
 	}
-	roomlog.Errorf("杠类型判断错误")
+	self.log.Errorf("杠类型判断错误")
 	return pbgame_logic.OperType_Oper_None
 }
 
 func (self *OperAtion) QiangGangAnalysis(playerInfo *mj.PlayerInfo, card, chairId, loseChair int32) *CanOperInfo {
-	roomlog.Infof("玩家%d补杠,检测玩家%d能否抢杠胡", loseChair, chairId)
+	self.log.Infof("玩家%d补杠,检测玩家%d能否抢杠胡", loseChair, chairId)
 	ret := NewCanOper()
 	cardInfo := &playerInfo.CardInfo
 	//判断是否能胡
