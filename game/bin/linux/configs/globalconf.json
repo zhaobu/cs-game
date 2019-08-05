@@ -17,7 +17,7 @@
         "Addr": "center:9201"
     },
     "GateConf": {
-        "Addr": "0.0.0.0:9876"
+        "Addr": "gate:9876"
     },
     "GameConfs": {
         "MjLibPath": "./configs/mjhulib",

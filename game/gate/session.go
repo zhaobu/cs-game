@@ -80,13 +80,9 @@ func (s *session) repeatLogin(newSess *session) {
 
 func (s *session) recv() (err error) {
 	defer func() {
-		r := recover()
-		stack := ""
-		if r != nil {
-			stack = string(debug.Stack())
+		if err := recover(); err != nil {
+			log.Errorf("recover info:err:%s,stackinfo:%s", err, string(debug.Stack()))
 		}
-
-		tlog.Error("recover info", zap.Any("err", err), zap.Any("recover", r), zap.Any("stack", stack))
 		s.stop()
 	}()
 
@@ -113,7 +109,7 @@ func (s *session) recv() (err error) {
 func (s *session) handleInput() (err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			tlog.Error("recover info", zap.Any("err", err), zap.Any("recover", r), zap.Any("stack", string(debug.Stack())))
+			log.Errorf("recover info:err:%s,stackinfo:%s", err, string(debug.Stack()))
 		}
 
 		if err != nil {
@@ -324,8 +320,8 @@ func (s *session) sendMsg(msg *codec.Message) {
 		tlog.Info("send client", zap.Uint64("uid", s.uid), zap.String("name", msg.Name))
 	}
 	defer func() {
-		if r := recover(); r != nil {
-			tlog.Error("recover info", zap.Any("recover", r), zap.String("stack", string(debug.Stack())))
+		if err := recover(); err != nil {
+			log.Errorf("recover info:err:%s,stackinfo:%s", err, string(debug.Stack()))
 		}
 	}()
 
