@@ -3,11 +3,10 @@ package majiang
 import (
 	"cy/game/configs"
 	"cy/game/util"
+	"fmt"
 	"math/rand"
 	"runtime/debug"
 	"time"
-
-	"go.uber.org/zap"
 )
 
 //card_def文件写对牌的定义
@@ -72,15 +71,11 @@ var threePlayerCardDef = []int32{
 var twoPlayerCardDef = fourPlayerCardDef
 
 var (
-	roomlog   *zap.SugaredLogger //majiang package的log
 	testCards TestHandCards
 )
 
 type CardDef struct {
-}
-
-func (self *CardDef) Init(logptr *zap.SugaredLogger) {
-	roomlog = logptr
+	*RoomLog //桌子日志
 }
 
 func (self *CardDef) GetBaseCard(playerCount int32) []int32 {
@@ -95,7 +90,7 @@ func (self *CardDef) GetBaseCard(playerCount int32) []int32 {
 		card = make([]int32, len(twoPlayerCardDef))
 		copy(card, twoPlayerCardDef)
 	} else {
-		roomlog.Error("玩家人数有问题")
+		self.Log.Error("玩家人数有问题")
 		return nil
 	}
 	return card
@@ -177,26 +172,27 @@ func (self *CardDef) DealCard(rawcards []int32, playercount, bankerID int32) (ha
 		}
 	}
 
-	roomlog.Warnf("玩家手牌为%+v", player_cards)
+	self.Log.Warnf("玩家手牌为%+v", player_cards)
 	return player_cards, rawcards[:leftNum] //返回所有玩家摸到的牌和随机牌库剩下的牌
 }
 
 //加
-func Add_stack(m map[int32]int32, cards ...int32) {
+func Add_stack(m map[int32]int32, cards ...int32) (err error) {
 	for _, card := range cards {
 		if _, ok := m[card]; ok {
 			m[card] = m[card] + 1
 			if m[card] > 4 {
-				roomlog.Errorf("加牌%d时牌数量>4,stack=%s", card, string(debug.Stack()))
+				err = fmt.Errorf("加牌%d时牌数量>4,stack=%s", card, string(debug.Stack()))
 			}
 		} else {
 			m[card] = 1
 		}
 	}
+	return
 }
 
 //减
-func Sub_stack(m map[int32]int32, cards ...int32) {
+func Sub_stack(m map[int32]int32, cards ...int32) (err error) {
 	for _, card := range cards {
 		if num, ok := m[card]; ok {
 			m[card] = num - 1
@@ -204,9 +200,10 @@ func Sub_stack(m map[int32]int32, cards ...int32) {
 				delete(m, card)
 			}
 		} else {
-			roomlog.Errorf("减牌%d时牌数量为0,stack=%s", card, string(debug.Stack()))
+			err = fmt.Errorf("减牌%d时牌数量为0,stack=%s", card, string(debug.Stack()))
 		}
 	}
+	return
 }
 
 //统计牌数量(withOutHua为true时表示不统计花牌)

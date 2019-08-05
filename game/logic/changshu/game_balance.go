@@ -6,8 +6,6 @@ import (
 	pbgame_logic "cy/game/pb/game/mj/changshu"
 	"math/rand"
 	"time"
-
-	"go.uber.org/zap"
 )
 
 type HuScoreInfo struct {
@@ -32,7 +30,7 @@ const (
 
 //结算信息
 type GameBalance struct {
-	log          *zap.SugaredLogger
+	*mj.RoomLog                          //桌子日志
 	game_config  *pbgame_logic.CreateArg //游戏参数
 	startDice    StartDiceType           //开局色子
 	baozi        int32                   //本局豹子倍数
@@ -111,9 +109,8 @@ func init() {
 	}
 }
 
-func (self *GameBalance) Init(config *pbgame_logic.CreateArg, log *zap.SugaredLogger) {
+func (self *GameBalance) Init(config *pbgame_logic.CreateArg) {
 	self.game_config = config
-	self.log = log
 	for _, v := range config.Rule {
 		if v.Val == 2 {
 			self.canBaozi = true
@@ -197,7 +194,7 @@ func (self *GameBalance) CalGangTou(leftCards []int32, bankerId int32) { // 杠�
 		}
 		chairId = mj.GetNextChair(chairId, self.game_config.PlayerCount)
 	}
-	self.log.Debugf("扳杠头结果:self.duLongHua=%d,\nself.allCards=%+v,\nself.hitIndex=%+v", self.duLongHua, self.allCards, self.hitIndex)
+	self.Log.Debugf("扳杠头结果:self.duLongHua=%d,\nself.allCards=%+v,\nself.hitIndex=%+v", self.duLongHua, self.allCards, self.hitIndex)
 }
 
 //算分

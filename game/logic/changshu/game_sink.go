@@ -17,11 +17,6 @@ import (
 	"github.com/golang/protobuf/proto"
 )
 
-var (
-	cardDef mj.CardDef //牌定义
-	huLib   mj.HuLib   //胡牌算法
-)
-
 //游戏公共信息
 type gameAllInfo struct {
 	waitHigestOper *OperPriority                     //当前等待中的最高优先级的操作
@@ -45,6 +40,7 @@ type gameAllInfo struct {
 }
 
 type gamePrivateInfo struct {
+	cardDef      mj.CardDef              //牌定义
 	gameBalance  GameBalance             //游戏结束信息
 	operAction   OperAtion               //操作
 	record       mj.GameRecord           //游戏战绩回放
@@ -60,6 +56,13 @@ type GameSink struct {
 	isPlaying       bool  //是否在游戏中
 	gameAllInfo           //游戏公共信息(每局所有数据都初始化)
 	gamePrivateInfo       //游戏私有信息(每局部分数据初始化)
+}
+
+func (self *GameSink) initRoomLog() {
+	self.cardDef.RoomLog = self.desk.RoomLog
+	self.gameBalance.RoomLog = self.desk.RoomLog
+	self.operAction.RoomLog = self.desk.RoomLog
+	self.record.RoomLog = self.desk.RoomLog
 }
 
 ////////////////////////调用desk接口函数START/////////////////////////////
@@ -81,7 +84,7 @@ func (self *GameSink) sendDataAllLook(msg proto.Message) {
 func (self *GameSink) sendDataOther(chairId int32, msg proto.Message) {
 	uid := self.desk.GetUidByChairid(chairId)
 	if uid == 0 {
-		self.desk.tlog.Error("sendDataOther时uid=0")
+		self.desk.Tlog.Error("sendDataOther时uid=0")
 	}
 	self.desk.SendGameMessageOther(uid, msg)
 }
@@ -90,13 +93,13 @@ func (self *GameSink) sendDataOther(chairId int32, msg proto.Message) {
 
 //构建游戏
 func (self *GameSink) Ctor(config *pbgame_logic.CreateArg) error {
+	self.initRoomLog()
 	self.game_config = config
-	cardDef.Init(self.desk.log)
 	self.isPlaying = false
 	self.players = make([]*mj.PlayerInfo, config.PlayerCount)
-	self.baseCard = cardDef.GetBaseCard(config.PlayerCount)
-	self.operAction.Init(config, self.laiziCard, self.desk.log)
-	self.gameBalance.Init(config, self.desk.log)
+	self.baseCard = self.cardDef.GetBaseCard(config.PlayerCount)
+	self.operAction.Init(config, self.laiziCard)
+	self.gameBalance.Init(config)
 	return nil
 }
 
@@ -127,15 +130,15 @@ func (self *GameSink) reset() {
 
 //开始游戏
 func (self *GameSink) StartGame() {
-	self.desk.log.Infof("%s 第%d局游戏开始", self.logHeadUser(-1), self.desk.curInning)
+	self.desk.Log.Infof("%s 第%d局游戏开始", self.logHeadUser(-1), self.desk.curInning)
 	self.isPlaying = true
 	self.reset()
 	if self.desk.curInning == 1 {
 		if self.desk.curInning == 1 {
 			//所有玩家坐下切换内存后才初始化战绩记录
-			// self.desk.log.Debugf("传入前:%v", self.desk.getBaseDeskInfo())
+			// self.desk.Log.Debugf("传入前:%v", self.desk.getBaseDeskInfo())
 			self.record.Init(self.desk.getBaseDeskInfo(), self.players, self.desk.clubId, self.desk.masterUid)
-			// self.desk.log.Debugf("传入后:%v", self.desk.getBaseDeskInfo())
+			// self.desk.Log.Debugf("传入后:%v", self.desk.getBaseDeskInfo())
 		}
 		//通知第一个玩家投色子
 		self.record.Reset(self.desk.curInning)
@@ -152,7 +155,7 @@ func (self *GameSink) StartGame() {
 //玩家加入游戏
 func (self *GameSink) AddPlayer(chairId int32, uid uint64, uinfo *pbcommon.UserInfo) bool {
 	if self.game_config.PlayerCount <= chairId {
-		self.desk.log.Errorf("%s 加入房间失败,人数已满,游戏开始人数为%d", self.logHeadUser(chairId), self.game_config.PlayerCount)
+		self.desk.Log.Errorf("%s 加入房间失败,人数已满,游戏开始人数为%d", self.logHeadUser(chairId), self.game_config.PlayerCount)
 		return false
 	}
 	self.players[chairId] = mj.MakePlayers()
@@ -163,7 +166,7 @@ func (self *GameSink) AddPlayer(chairId int32, uid uint64, uinfo *pbcommon.UserI
 //玩家退出游戏
 func (self *GameSink) Exitlayer(chairId int32) bool {
 	if int(chairId) >= len(self.players) {
-		self.desk.log.Error("Exitlayer 时int(chairId) >= len(self.players)")
+		self.desk.Log.Error("Exitlayer 时int(chairId) >= len(self.players)")
 		return false
 	}
 	self.players[chairId] = nil
@@ -180,12 +183,12 @@ func (self *GameSink) changGameState(gState pbgame_logic.GameStatus) {
 func (self *GameSink) ThrowDice(chairId int32, req *pbgame_logic.C2SThrowDice) {
 	//检查是否当前投色子的玩家
 	if self.curThrowDice != chairId {
-		self.desk.log.Warnf("%s 投色子失败,当前应投色子玩家为%d", self.logHeadUser(chairId), self.curThrowDice)
+		self.desk.Log.Warnf("%s 投色子失败,当前应投色子玩家为%d", self.logHeadUser(chairId), self.curThrowDice)
 		return
 	}
 	//检查玩家是否已经投过
 	if self.diceResult[chairId][0] != 0 {
-		self.desk.log.Warnf("%s 已经投过色子", self.logHeadUser(chairId))
+		self.desk.Log.Warnf("%s 已经投过色子", self.logHeadUser(chairId))
 		return
 	}
 
@@ -224,7 +227,7 @@ func (self *GameSink) dealDiceResult() {
 		diceRes[i].dice = self.diceResult[i][0] + self.diceResult[i][1]
 		diceRes[i].oldChairId = int32(i)
 	}
-	self.desk.log.Debugf("排序前,dices=%+v", diceRes)
+	self.desk.Log.Debugf("排序前,dices=%+v", diceRes)
 	//排序，实现比较方法即可
 	sort.Slice(diceRes, func(i, j int) bool {
 		if diceRes[i].dice == diceRes[j].dice {
@@ -232,7 +235,7 @@ func (self *GameSink) dealDiceResult() {
 		}
 		return diceRes[i].dice > diceRes[j].dice
 	})
-	self.desk.log.Debugf("排序后,dices=%+v", diceRes)
+	self.desk.Log.Debugf("排序后,dices=%+v", diceRes)
 
 	//发送换座位结果
 	posInfo := make([]*pbgame_logic.ChangePosInfo, len(diceRes))
@@ -244,7 +247,7 @@ func (self *GameSink) dealDiceResult() {
 	newdiceResult := ([4][2]int32{})
 	newplayers := make([]*mj.PlayerInfo, len(self.players))
 	newplayChair := map[int32]*deskUserInfo{}
-	self.desk.log.Debugf("切换内存前,self.diceResult=%+v,self.players=%+v,self.desk.playChair=%+v", self.diceResult, self.players, self.desk.playChair)
+	self.desk.Log.Debugf("切换内存前,self.diceResult=%+v,self.players=%+v,self.desk.playChair=%+v", self.diceResult, self.players, self.desk.playChair)
 
 	for newChair, res := range diceRes {
 		newdiceResult[newChair] = self.diceResult[res.oldChairId]
@@ -255,7 +258,7 @@ func (self *GameSink) dealDiceResult() {
 	self.diceResult = newdiceResult[:]
 	self.players = newplayers
 	self.desk.playChair = newplayChair
-	self.desk.log.Debugf("切换内存后,self.diceResult=%+v,self.players=%+v,self.desk.playChair=%+v", self.diceResult, self.players, self.desk.playChair)
+	self.desk.Log.Debugf("切换内存后,self.diceResult=%+v,self.players=%+v,self.desk.playChair=%+v", self.diceResult, self.players, self.desk.playChair)
 
 	//记录庄家
 	self.bankerId = 0
@@ -293,9 +296,9 @@ func (self *GameSink) deal_card() {
 
 	//洗牌
 	self.shuffle_cards()
-	self.desk.tlog.Debug("发牌前的牌库为", zap.Any("self.leftCard", self.leftCard))
+	self.desk.Tlog.Debug("发牌前的牌库为", zap.Any("self.leftCard", self.leftCard))
 	var player_cards [][]int32
-	player_cards, self.leftCard = cardDef.DealCard(self.leftCard, self.game_config.PlayerCount, self.bankerId)
+	player_cards, self.leftCard = self.cardDef.DealCard(self.leftCard, self.game_config.PlayerCount, self.bankerId)
 
 	//庄家手牌
 	bankerCardInfo := &self.players[self.bankerId].CardInfo
@@ -330,7 +333,7 @@ func (self *GameSink) deal_card() {
 		tmp.HandCards[int32(k)] = &pbgame_logic.Json_UserCardInfoCards{Cards: v.CardInfo.HandCards}
 		recordCard.HandCards[int32(k)] = tmp.HandCards[int32(k)]
 		msg.JsonAllCards = util.PB2JSON(tmp, false)
-		self.desk.log.Warnf("%s手牌为:%v", self.logHeadUser(int32(k)), player_cards[k])
+		self.desk.Log.Warnf("%s手牌为:%v", self.logHeadUser(int32(k)), player_cards[k])
 		//给每个玩家发送游戏开始消息
 		self.sendData(int32(k), msg)
 	}
@@ -354,18 +357,18 @@ func switchToCyint32(cards []int32) []*pbgame_logic.Cyint32 {
 //玩家第一次补花,返回所有的花牌,所有摸到的牌
 func (self *GameSink) firstBuHuaCards(chairId int32) (huaCards, moCards []int32) {
 	if self.hasFirstBuHua[chairId] {
-		self.desk.tlog.Error("玩家第一次补花执行了多次", zap.Int32("chairId", chairId))
+		self.desk.Tlog.Error("玩家第一次补花执行了多次", zap.Int32("chairId", chairId))
 	}
 	self.hasFirstBuHua[chairId] = true
 	cardInfo := &self.players[chairId].CardInfo
-	self.desk.tlog.Debug("玩家第一次补花前手牌数据为", zap.Int32("chairId", chairId), zap.Any("cardInfo", cardInfo))
+	self.desk.Tlog.Debug("玩家第一次补花前手牌数据为", zap.Int32("chairId", chairId), zap.Any("cardInfo", cardInfo))
 
 	tmpHandCards := make([]int32, len(cardInfo.HandCards))
 	copy(tmpHandCards, cardInfo.HandCards)
 	for _, card := range tmpHandCards {
 		if mj.IsHuaCard(card) {
 			tmpHuaCards, moCard := self.drawOneCard()
-			self.desk.tlog.Debug("补花", zap.Int32("huacard", card), zap.Any("moCard", moCard), zap.Any("tmpHuaCards", tmpHuaCards))
+			self.desk.Tlog.Debug("补花", zap.Int32("huacard", card), zap.Any("moCard", moCard), zap.Any("tmpHuaCards", tmpHuaCards))
 			self.operAction.updateCardInfo(cardInfo, nil, []int32{card}) //减掉原有的花
 			self.operAction.updateCardInfo(cardInfo, moCard, nil)        //加上摸到的牌
 			tmpHuaCards = append(tmpHuaCards, card)                      //加上原有的花
@@ -373,7 +376,7 @@ func (self *GameSink) firstBuHuaCards(chairId int32) (huaCards, moCards []int32)
 			moCards = append(moCards, moCard...)                         //记录摸到的牌
 		}
 	}
-	self.desk.tlog.Debug("玩家第一次补花后手牌数据为", zap.Int32("chairId", chairId), zap.Any("cardInfo", cardInfo))
+	self.desk.Tlog.Debug("玩家第一次补花后手牌数据为", zap.Int32("chairId", chairId), zap.Any("cardInfo", cardInfo))
 	return
 }
 
@@ -394,11 +397,11 @@ func (self *GameSink) drawOneCard() (huaCards, moCard []int32) {
 		huaCards = append(huaCards, card)
 		num++
 		if num > 12 {
-			self.desk.tlog.Error("drawOneCard死循环")
+			self.desk.Tlog.Error("drawOneCard死循环")
 			break
 		}
 	}
-	self.desk.tlog.Debug("drawOneCard 结果", zap.Any("huaCards", huaCards), zap.Any("moCard", moCard))
+	self.desk.Tlog.Debug("drawOneCard 结果", zap.Any("huaCards", huaCards), zap.Any("moCard", moCard))
 	return
 }
 
@@ -413,7 +416,7 @@ func (self *GameSink) resetOper() {
 
 //摸牌 last(0从牌前摸,1从摸牌尾)
 func (self *GameSink) drawCard(chairId, last int32) error {
-	self.desk.log.Debugf("%s,摸牌操作,last=%d", self.logHeadUser(chairId), last)
+	self.desk.Log.Debugf("%s,摸牌操作,last=%d", self.logHeadUser(chairId), last)
 	//检查游戏是否结束
 	if len(self.leftCard) <= 0 {
 		self.gameEnd(pbgame_logic.GameEndType_EndDeuce)
@@ -425,10 +428,10 @@ func (self *GameSink) drawCard(chairId, last int32) error {
 	msg := &pbgame_logic.BS2CDrawCard{ChairId: chairId, DrawPos: last}
 	var huaCards, moCards []int32
 	var moCount int //总共摸牌的次数
-	self.desk.log.Debugf("%s,玩家%d摸牌前手牌数据为%+v,牌库剩余牌:%v", self.logHeadUser(chairId), chairId, self.players[chairId].CardInfo, self.leftCard)
+	self.desk.Log.Debugf("%s,玩家%d摸牌前手牌数据为%+v,牌库剩余牌:%v", self.logHeadUser(chairId), chairId, self.players[chairId].CardInfo, self.leftCard)
 	if !self.hasFirstBuHua[chairId] { //没有进行过第一次补花,先补掉手上的牌
 		if mj.GetHuaCount(self.players[chairId].CardInfo.StackCards) > 0 {
-			self.desk.log.Debugf("%s 第一次摸牌,需要补花,补花前剩余[%d]张", self.logHeadUser(chairId), len(self.leftCard))
+			self.desk.Log.Debugf("%s 第一次摸牌,需要补花,补花前剩余[%d]张", self.logHeadUser(chairId), len(self.leftCard))
 			huaCards, moCards = self.firstBuHuaCards(chairId)
 			moCount += len(huaCards)
 		}
@@ -471,7 +474,7 @@ func (self *GameSink) drawCard(chairId, last int32) error {
 	}
 	//分析能否暗杠,补杠,自摸胡
 	ret := self.operAction.DrawcardAnalysis(self.players[chairId], chairId, card, int32(len(self.leftCard)), huModeTags)
-	self.desk.log.Infof("%s 摸牌后操作分析ret=%+v", self.logHeadUser(chairId), ret)
+	self.desk.Log.Infof("%s 摸牌后操作分析ret=%+v", self.logHeadUser(chairId), ret)
 	//更新玩家card_info表
 	self.operAction.HandleDrawCard(cardInfo, card)
 	//发送听牌信息
@@ -509,7 +512,7 @@ func (self *GameSink) checkAfterChiPeng(chairId, pengCard int32) {
 	cardInfo := &self.players[chairId].CardInfo
 	//分析能否暗杠,补杠,不能补杠刚刚碰的那张牌
 	ret := self.operAction.AfterChiPengAnalysis(cardInfo, chairId, pengCard)
-	self.desk.log.Infof("%s 吃碰后操作分析ret=%+v", self.logHeadUser(chairId), ret)
+	self.desk.Log.Infof("%s 吃碰后操作分析ret=%+v", self.logHeadUser(chairId), ret)
 	//统计能做的操作
 	if !ret.Empty() {
 		msg := &pbgame_logic.S2CHaveOperation{ChairId: chairId}
@@ -521,31 +524,31 @@ func (self *GameSink) checkAfterChiPeng(chairId, pengCard int32) {
 
 //出牌
 func (self *GameSink) outCard(chairId, card int32) error {
-	self.desk.log.Debugf("%s,出牌操作,card=%d", self.logHeadUser(chairId), card)
+	self.desk.Log.Debugf("%s,出牌操作,card=%d", self.logHeadUser(chairId), card)
 	//检查是否在游戏中
 	if !self.isPlaying {
-		self.desk.log.Errorf("%s 出牌失败,不在游戏中", self.logHeadUser(chairId))
+		self.desk.Log.Errorf("%s 出牌失败,不在游戏中", self.logHeadUser(chairId))
 		return nil
 	}
 	//检查是否轮到自己出牌
 	if self.curOutChair != chairId {
-		self.desk.log.Errorf("%s 出牌失败,还没轮到你", self.logHeadUser(chairId))
+		self.desk.Log.Errorf("%s 出牌失败,还没轮到你", self.logHeadUser(chairId))
 		return nil
 	}
 	//出牌前检测是否还有其可执行的操作没有完成
 	if !self.canOperInfo[chairId].Empty() {
-		self.desk.log.Infof("%s 出牌时还有其他操作，取消所有能做的操作", self.logHeadUser(chairId))
+		self.desk.Log.Infof("%s 出牌时还有其他操作，取消所有能做的操作", self.logHeadUser(chairId))
 		self.resetOper()
 	}
 	cardInfo := &self.players[chairId].CardInfo
 	//判断是否有这张牌
 	if _, ok := cardInfo.StackCards[card]; !ok {
-		self.desk.log.Errorf("%s 出牌失败,手上没有这张牌", self.logHeadUser(chairId))
+		self.desk.Log.Errorf("%s 出牌失败,手上没有这张牌", self.logHeadUser(chairId))
 		return nil
 	}
 	//检查是否是吃碰后不能打的牌
 	if cardInfo.CanNotOut[card] == card {
-		self.desk.log.Errorf("%s 出牌失败,是吃碰后不能打的牌", self.logHeadUser(chairId))
+		self.desk.Log.Errorf("%s 出牌失败,是吃碰后不能打的牌", self.logHeadUser(chairId))
 		return nil
 	}
 	cardInfo.GuoPeng = map[int32]int32{}
@@ -568,7 +571,7 @@ func (self *GameSink) outCard(chairId, card int32) error {
 				self.countCanOper(ret, int32(k), msg)
 				willWait = true
 				//发送玩家可进行的操作
-				self.desk.log.Infof("%s 可进行的操作%+v", self.logHeadUser(int32(k)), ret)
+				self.desk.Log.Infof("%s 可进行的操作%+v", self.logHeadUser(int32(k)), ret)
 				self.sendData(int32(k), msg)
 			}
 		}
@@ -643,10 +646,10 @@ func (self *GameSink) countCanOper(ret *CanOperInfo, chairId int32, msg *pbgame_
 //洗牌
 func (self *GameSink) shuffle_cards() {
 	if !*release && configs.Conf.GameNode[gameName].GameTest != "" {
-		self.leftCard = cardDef.GetDebugCards(gameName, self.baseCard, self.game_config.PlayerCount)
+		self.leftCard = self.cardDef.GetDebugCards(gameName, self.baseCard, self.game_config.PlayerCount)
 		return
 	}
-	self.desk.log.Debugf("*release=%v,configs.Conf.GameNode[gameName].GameTest=%v", *release, configs.Conf.GameNode[gameName].GameTest)
+	self.desk.Log.Debugf("*release=%v,configs.Conf.GameNode[gameName].GameTest=%v", *release, configs.Conf.GameNode[gameName].GameTest)
 	self.leftCard = mj.RandCards(self.baseCard)
 }
 
@@ -655,7 +658,7 @@ func (self *GameSink) checkPlayerOperationNeedWait(chairId int32, curOrder Prior
 	var otherOrder, waitOrder PriorityOrder = NoneOrder, NoneOrder
 	for k, v := range self.operOrder {
 		for k1, v1 := range v {
-			self.desk.log.Debugf("self.operOrder[%d][%d]=%+v", k, k1, v1)
+			self.desk.Log.Debugf("self.operOrder[%d][%d]=%+v", k, k1, v1)
 		}
 	}
 	//检查其他人能做的最高优先级操作
@@ -684,7 +687,7 @@ func (self *GameSink) checkPlayerOperationNeedWait(chairId int32, curOrder Prior
 	} else if maxOrder == waitOrder {
 		return 3
 	}
-	self.desk.log.Errorf("异常操作优先结果")
+	self.desk.Log.Errorf("异常操作优先结果")
 	return 0
 }
 
@@ -710,7 +713,7 @@ func (self *GameSink) insertWaitOper(chairId int32, op PriorityOrder, info inter
 		return
 	}
 	if self.waitHigestOper != nil {
-		self.desk.log.Debugf("%s 高优先级操作%v替换掉低优先级操作%v", self.logHeadUser(chairId), op, self.waitHigestOper.Op)
+		self.desk.Log.Debugf("%s 高优先级操作%v替换掉低优先级操作%v", self.logHeadUser(chairId), op, self.waitHigestOper.Op)
 	}
 	self.waitHigestOper = &OperPriority{ChairId: chairId, Op: op, Info: info}
 }
@@ -718,24 +721,24 @@ func (self *GameSink) insertWaitOper(chairId int32, op PriorityOrder, info inter
 //唤醒等待中的操作
 func (self *GameSink) dealWaitOper(chairId int32) {
 	if self.waitHigestOper == nil {
-		self.desk.log.Errorf("%s 唤醒操作时self.waitHigestOper == nil", self.logHeadUser(chairId))
+		self.desk.Log.Errorf("%s 唤醒操作时self.waitHigestOper == nil", self.logHeadUser(chairId))
 	}
 	info, _ := self.waitHigestOper.Info.(*WaitOperRecord)
 	switch self.waitHigestOper.Op {
 	case ChiOrder:
-		self.desk.log.Debugf("%s 唤醒操作吃", self.logHeadUser(chairId))
+		self.desk.Log.Debugf("%s 唤醒操作吃", self.logHeadUser(chairId))
 		self.chiCard(self.waitHigestOper.ChairId, info.Card, info.ChiType)
 	case PengOrder:
-		self.desk.log.Debugf("%s 唤醒操作碰", self.logHeadUser(chairId))
+		self.desk.Log.Debugf("%s 唤醒操作碰", self.logHeadUser(chairId))
 		self.pengCard(self.waitHigestOper.ChairId, info.Card)
 	case GangOrder:
-		self.desk.log.Debugf("%s 唤醒操作杠", self.logHeadUser(chairId))
+		self.desk.Log.Debugf("%s 唤醒操作杠", self.logHeadUser(chairId))
 		self.gangCard(self.waitHigestOper.ChairId, info.Card)
 	case HuOrder:
-		self.desk.log.Debugf("%s 唤醒操作胡", self.logHeadUser(chairId))
+		self.desk.Log.Debugf("%s 唤醒操作胡", self.logHeadUser(chairId))
 		self.huCard(self.waitHigestOper.ChairId)
 	default:
-		self.desk.log.Debugf("%s 唤醒操作时,类型转换失败", self.logHeadUser(chairId))
+		self.desk.Log.Debugf("%s 唤醒操作时,类型转换失败", self.logHeadUser(chairId))
 		return
 	}
 	self.waitHigestOper = nil
@@ -743,38 +746,38 @@ func (self *GameSink) dealWaitOper(chairId int32) {
 
 //吃
 func (self *GameSink) chiCard(chairId, card int32, chiType uint32) error {
-	self.desk.log.Debugf("%s,吃牌操作,card=%d,chiType=%d", self.logHeadUser(chairId), card, chiType)
+	self.desk.Log.Debugf("%s,吃牌操作,card=%d,chiType=%d", self.logHeadUser(chairId), card, chiType)
 	//检查是否在游戏中
 	if !self.isPlaying {
-		self.desk.log.Errorf("%s 吃牌失败,不在游戏中", self.logHeadUser(chairId))
+		self.desk.Log.Errorf("%s 吃牌失败,不在游戏中", self.logHeadUser(chairId))
 		return nil
 	}
 	//检测是否能吃
 	if self.canOperInfo[chairId] == nil || self.canOperInfo[chairId].CanChi.Empty() {
-		self.desk.log.Errorf("%s 吃牌失败,没有该操作", self.logHeadUser(chairId))
+		self.desk.Log.Errorf("%s 吃牌失败,没有该操作", self.logHeadUser(chairId))
 		return nil
 	}
 	//校验操作参数合法性
 	if chiType == 0 || card != self.canOperInfo[chairId].CanChi.Card || chiType != (self.canOperInfo[chairId].CanChi.ChiType&chiType) {
-		self.desk.log.Errorf("%s 吃牌失败,没有该吃类型,或者牌不对,card=%d,chiType=%d,CanChi=%+v", self.logHeadUser(chairId), card, chiType, self.canOperInfo[chairId].CanChi)
+		self.desk.Log.Errorf("%s 吃牌失败,没有该吃类型,或者牌不对,card=%d,chiType=%d,CanChi=%+v", self.logHeadUser(chairId), card, chiType, self.canOperInfo[chairId].CanChi)
 		return nil
 	}
 	self.deletePlayerOperOrder(chairId)
 	//检查玩家当前操作是否需要等待
 	res := self.checkPlayerOperationNeedWait(chairId, ChiOrder)
 	if res == 2 { //需要等待其他人操作
-		self.desk.log.Debugf("%s 操作吃需要等待其他人", self.logHeadUser(chairId))
+		self.desk.Log.Debugf("%s 操作吃需要等待其他人", self.logHeadUser(chairId))
 		self.insertWaitOper(chairId, ChiOrder, &WaitOperRecord{Card: card, ChiType: chiType})
 		self.haswaitOper[chairId] = true
 		return nil
 	} else if res == 3 { //唤醒等待中的操作
-		self.desk.log.Debugf("%s 操作吃,唤醒等待中的操作", self.logHeadUser(chairId))
+		self.desk.Log.Debugf("%s 操作吃,唤醒等待中的操作", self.logHeadUser(chairId))
 		self.dealWaitOper(chairId)
 		return nil
 	}
 	//判断是否已经胡
 	if self.hasHu {
-		self.desk.log.Debugf("%s 操作吃,因为已经有人胡牌,游戏结束", self.logHeadUser(chairId))
+		self.desk.Log.Debugf("%s 操作吃,因为已经有人胡牌,游戏结束", self.logHeadUser(chairId))
 		self.gameEnd(pbgame_logic.GameEndType_EndHu)
 		return nil
 	}
@@ -803,38 +806,38 @@ func (self *GameSink) chiCard(chairId, card int32, chiType uint32) error {
 
 //碰
 func (self *GameSink) pengCard(chairId, card int32) error {
-	self.desk.log.Debugf("%s,碰牌操作,card=%d", self.logHeadUser(chairId), card)
+	self.desk.Log.Debugf("%s,碰牌操作,card=%d", self.logHeadUser(chairId), card)
 	//检查是否在游戏中
 	if !self.isPlaying {
-		self.desk.log.Errorf("%s 碰牌失败,不在游戏中", self.logHeadUser(chairId))
+		self.desk.Log.Errorf("%s 碰牌失败,不在游戏中", self.logHeadUser(chairId))
 		return nil
 	}
 	//检测是否能碰
 	if self.canOperInfo[chairId] == nil || self.canOperInfo[chairId].CanPeng.Empty() {
-		self.desk.log.Errorf("%s 碰牌失败,没有该操作", self.logHeadUser(chairId))
+		self.desk.Log.Errorf("%s 碰牌失败,没有该操作", self.logHeadUser(chairId))
 		return nil
 	}
 	//校验操作参数合法性
 	if card != self.canOperInfo[chairId].CanPeng.Card {
-		self.desk.log.Errorf("%s 碰牌失败,碰的牌不对,card=%d,CanPeng=%+v", self.logHeadUser(chairId), card, self.canOperInfo[chairId].CanPeng)
+		self.desk.Log.Errorf("%s 碰牌失败,碰的牌不对,card=%d,CanPeng=%+v", self.logHeadUser(chairId), card, self.canOperInfo[chairId].CanPeng)
 		return nil
 	}
 	self.deletePlayerOperOrder(chairId)
 	//检查玩家当前操作是否需要等待
 	res := self.checkPlayerOperationNeedWait(chairId, PengOrder)
 	if res == 2 { //需要等待其他人操作
-		self.desk.log.Debugf("%s 操作碰需要等待其他人", self.logHeadUser(chairId))
+		self.desk.Log.Debugf("%s 操作碰需要等待其他人", self.logHeadUser(chairId))
 		self.insertWaitOper(chairId, PengOrder, &WaitOperRecord{Card: card})
 		self.haswaitOper[chairId] = true
 		return nil
 	} else if res == 3 { //唤醒等待中的操作
-		self.desk.log.Debugf("%s 操作碰,唤醒等待中的操作", self.logHeadUser(chairId))
+		self.desk.Log.Debugf("%s 操作碰,唤醒等待中的操作", self.logHeadUser(chairId))
 		self.dealWaitOper(chairId)
 		return nil
 	}
 	//判断是否已经胡
 	if self.hasHu {
-		self.desk.log.Debugf("%s 操作碰,因为已经有人胡牌,游戏结束", self.logHeadUser(chairId))
+		self.desk.Log.Debugf("%s 操作碰,因为已经有人胡牌,游戏结束", self.logHeadUser(chairId))
 		self.gameEnd(pbgame_logic.GameEndType_EndHu)
 		return nil
 	}
@@ -863,38 +866,38 @@ func (self *GameSink) pengCard(chairId, card int32) error {
 
 //杠
 func (self *GameSink) gangCard(chairId, card int32) error {
-	self.desk.log.Debugf("%s,杠牌操作,card=%d", self.logHeadUser(chairId), card)
+	self.desk.Log.Debugf("%s,杠牌操作,card=%d", self.logHeadUser(chairId), card)
 	//检查是否在游戏中
 	if !self.isPlaying {
-		self.desk.log.Errorf("%s 杠牌失败,不在游戏中", self.logHeadUser(chairId))
+		self.desk.Log.Errorf("%s 杠牌失败,不在游戏中", self.logHeadUser(chairId))
 		return nil
 	}
 	//检测是否能杠
 	if self.canOperInfo[chairId] == nil || self.canOperInfo[chairId].CanGang.Empty() {
-		self.desk.log.Errorf("%s 杠牌失败,没有该操作", self.logHeadUser(chairId))
+		self.desk.Log.Errorf("%s 杠牌失败,没有该操作", self.logHeadUser(chairId))
 		return nil
 	}
 	//校验操作参数合法性
 	if _, ok := self.canOperInfo[chairId].CanGang.GangList[card]; !ok {
-		self.desk.log.Errorf("%s 杠牌失败,牌不对,card=%d,CanGang=%+v", self.logHeadUser(chairId), card, self.canOperInfo[chairId].CanGang)
+		self.desk.Log.Errorf("%s 杠牌失败,牌不对,card=%d,CanGang=%+v", self.logHeadUser(chairId), card, self.canOperInfo[chairId].CanGang)
 		return nil
 	}
 	self.deletePlayerOperOrder(chairId)
 	//检查玩家当前操作是否需要等待
 	res := self.checkPlayerOperationNeedWait(chairId, GangOrder)
 	if res == 2 { //需要等待其他人操作
-		self.desk.log.Debugf("%s 操作杠需要等待其他人", self.logHeadUser(chairId))
+		self.desk.Log.Debugf("%s 操作杠需要等待其他人", self.logHeadUser(chairId))
 		self.insertWaitOper(chairId, GangOrder, &WaitOperRecord{Card: card})
 		self.haswaitOper[chairId] = true
 		return nil
 	} else if res == 3 { //唤醒等待中的操作
-		self.desk.log.Debugf("%s 操作杠,唤醒等待中的操作", self.logHeadUser(chairId))
+		self.desk.Log.Debugf("%s 操作杠,唤醒等待中的操作", self.logHeadUser(chairId))
 		self.dealWaitOper(chairId)
 		return nil
 	}
 	//判断是否已经胡
 	if self.hasHu {
-		self.desk.log.Debugf("%s 操作杠,因为已经有人胡牌,游戏结束", self.logHeadUser(chairId))
+		self.desk.Log.Debugf("%s 操作杠,因为已经有人胡牌,游戏结束", self.logHeadUser(chairId))
 		self.gameEnd(pbgame_logic.GameEndType_EndHu)
 		return nil
 	}
@@ -908,13 +911,13 @@ func (self *GameSink) gangCard(chairId, card int32) error {
 
 	var loseChair int32 = -1                            //如果是补杠,为碰牌时被碰玩家
 	if gangType == pbgame_logic.OperType_Oper_BU_GANG { //补杠
-		self.desk.log.Debugf("%s 补杠,杠牌为%d", self.logHeadUser(chairId), card)
+		self.desk.Log.Debugf("%s 补杠,杠牌为%d", self.logHeadUser(chairId), card)
 		loseChair = self.players[chairId].CardInfo.PengCards[card]
 	} else if gangType == pbgame_logic.OperType_Oper_MING_GANG { //明杠
-		self.desk.log.Debugf("%s 明杠,杠牌为%d", self.logHeadUser(chairId), card)
+		self.desk.Log.Debugf("%s 明杠,杠牌为%d", self.logHeadUser(chairId), card)
 		loseChair = self.lastOutChair
 	} else if gangType == pbgame_logic.OperType_Oper_AN_GANG { //暗杠
-		self.desk.log.Debugf("%s 暗杠,杠牌为%d", self.logHeadUser(chairId), card)
+		self.desk.Log.Debugf("%s 暗杠,杠牌为%d", self.logHeadUser(chairId), card)
 	}
 
 	msg := &pbgame_logic.BS2CGangCard{ChairId: chairId, Card: card, Type: pbgame_logic.GangType(gangType), LoseChair: loseChair}
@@ -945,7 +948,7 @@ func (self *GameSink) gangCard(chairId, card int32) error {
 					self.countCanOper(ret, int32(k), msg)
 					willWait = true
 					//发送玩家可进行的操作
-					self.desk.log.Infof("%s 可进行的操作%+v", self.logHeadUser(int32(k)), ret)
+					self.desk.Log.Infof("%s 可进行的操作%+v", self.logHeadUser(int32(k)), ret)
 					self.sendData(int32(k), msg)
 				}
 			}
@@ -955,7 +958,7 @@ func (self *GameSink) gangCard(chairId, card int32) error {
 	//如果能抢杠胡,需要等待玩家操作
 	if willWait {
 		self.lastGangChair = chairId //记录杠牌玩家,如果有抢杠胡玩家取消杠,需要摸牌
-		self.desk.log.Debugf("%s 操作杠时其他玩家可以抢杠胡,需要等待其他玩家操作", self.logHeadUser(chairId))
+		self.desk.Log.Debugf("%s 操作杠时其他玩家可以抢杠胡,需要等待其他玩家操作", self.logHeadUser(chairId))
 	} else {
 		self.drawCard(chairId, 1)
 	}
@@ -964,27 +967,27 @@ func (self *GameSink) gangCard(chairId, card int32) error {
 
 //胡
 func (self *GameSink) huCard(chairId int32) error {
-	self.desk.log.Debugf("%s,胡牌操作", self.logHeadUser(chairId))
+	self.desk.Log.Debugf("%s,胡牌操作", self.logHeadUser(chairId))
 	//检查是否在游戏中
 	if !self.isPlaying {
-		self.desk.log.Errorf("%s 胡牌失败,不在游戏中", self.logHeadUser(chairId))
+		self.desk.Log.Errorf("%s 胡牌失败,不在游戏中", self.logHeadUser(chairId))
 		return nil
 	}
 	//检测是否能胡
 	if self.canOperInfo[chairId] == nil || self.canOperInfo[chairId].CanHu.Empty() {
-		self.desk.log.Errorf("%s 胡牌失败,没有该操作", self.logHeadUser(chairId))
+		self.desk.Log.Errorf("%s 胡牌失败,没有该操作", self.logHeadUser(chairId))
 		return nil
 	}
 	self.deletePlayerOperOrder(chairId)
 	//检查玩家当前操作是否需要等待
 	res := self.checkPlayerOperationNeedWait(chairId, HuOrder)
 	if res == 2 { //需要等待其他人操作
-		self.desk.log.Debugf("%s 操作胡需要等待其他人", self.logHeadUser(chairId))
+		self.desk.Log.Debugf("%s 操作胡需要等待其他人", self.logHeadUser(chairId))
 		self.insertWaitOper(chairId, HuOrder, nil)
 		self.haswaitOper[chairId] = true
 		return nil
 	} else if res == 3 { //唤醒等待中的操作
-		self.desk.log.Errorf("%s 操作胡执行了唤醒操作,checking!!!!", self.logHeadUser(chairId))
+		self.desk.Log.Errorf("%s 操作胡执行了唤醒操作,checking!!!!", self.logHeadUser(chairId))
 		return nil
 	}
 
@@ -1037,15 +1040,15 @@ func (self *GameSink) huCard(chairId int32) error {
 
 //取消操作
 func (self *GameSink) cancelOper(chairId int32) error {
-	self.desk.log.Debugf("%s,取消操作", self.logHeadUser(chairId))
+	self.desk.Log.Debugf("%s,取消操作", self.logHeadUser(chairId))
 	//检查是否在游戏中
 	if !self.isPlaying {
-		self.desk.log.Errorf("%s 取消失败,不在游戏中", self.logHeadUser(chairId))
+		self.desk.Log.Errorf("%s 取消失败,不在游戏中", self.logHeadUser(chairId))
 		return nil
 	}
 	//检测是否能取消
 	if self.canOperInfo[chairId] == nil || self.canOperInfo[chairId].Empty() || !self.deletePlayerOperOrder(chairId) {
-		self.desk.log.Errorf("%s 取消失败,没有可取消的操作", self.logHeadUser(chairId))
+		self.desk.Log.Errorf("%s 取消失败,没有可取消的操作", self.logHeadUser(chairId))
 		return nil
 	}
 
@@ -1055,16 +1058,16 @@ func (self *GameSink) cancelOper(chairId int32) error {
 	//检查玩家当前操作是否需要等待
 	res := self.checkPlayerOperationNeedWait(chairId, NoneOrder)
 	if res == 2 { //需要等待其他人操作
-		self.desk.log.Debugf("%s 取消操作需要等待其他人", self.logHeadUser(chairId))
+		self.desk.Log.Debugf("%s 取消操作需要等待其他人", self.logHeadUser(chairId))
 		return nil
 	} else if res == 3 { //唤醒等待中的操作
-		self.desk.log.Debugf("%s 取消操作,唤醒等待中的操作", self.logHeadUser(chairId))
+		self.desk.Log.Debugf("%s 取消操作,唤醒等待中的操作", self.logHeadUser(chairId))
 		self.dealWaitOper(chairId)
 		return nil
 	}
 	//判断是否已经胡
 	if self.hasHu {
-		self.desk.log.Debugf("%s 取消操作,因为已经有人胡牌,游戏结束", self.logHeadUser(chairId))
+		self.desk.Log.Debugf("%s 取消操作,因为已经有人胡牌,游戏结束", self.logHeadUser(chairId))
 		self.gameEnd(pbgame_logic.GameEndType_EndHu)
 		return nil
 	}
@@ -1090,7 +1093,7 @@ func (self *GameSink) cancelOper(chairId int32) error {
 //游戏结束
 func (self *GameSink) gameEnd(endType pbgame_logic.GameEndType) {
 	self.changGameState(pbgame_logic.GameStatus_GSGameEnd)
-	self.desk.log.Infof("%s 第%d局游戏结束,结束原因%d,结束时剩余牌为%v", self.logHeadUser(-1), self.desk.curInning, endType, self.leftCard)
+	self.desk.Log.Infof("%s 第%d局游戏结束,结束原因%d,结束时剩余牌为%v", self.logHeadUser(-1), self.desk.curInning, endType, self.leftCard)
 	if !self.isPlaying { //可能是解散导致游戏结束
 		self.desk.gameEnd(endType)
 		return
@@ -1134,7 +1137,7 @@ func (self *GameSink) afterGameEnd(endType pbgame_logic.GameEndType) {
 //断线重连
 func (self *GameSink) gameReconnect(recInfo *pbgame_logic.GameDeskInfo, uid uint64) {
 	chairId := self.desk.GetChairidByUid(uid)
-	self.desk.log.Infof("%s 第%d局玩家%d断线重连,chairId=%d", self.logHeadUser(-1), self.desk.curInning, uid, chairId)
+	self.desk.Log.Infof("%s 第%d局玩家%d断线重连,chairId=%d", self.logHeadUser(-1), self.desk.curInning, uid, chairId)
 	//chairId为-1时为观察者游戏中途进入房间
 	switch recInfo.GameStatus {
 	case pbgame_logic.GameStatus_GSDice: //投色子
@@ -1257,7 +1260,7 @@ func (self *GameSink) doWantCards(chairId int32, cards []int32) (errMsg string) 
 		leftCardsStack = mj.CalStackCards(self.baseCard, false)
 	}
 	cardsStack := mj.CalStackCards(cards, false)
-	self.desk.log.Debugf("%s 玩家要牌,cards=%v", self.logHeadUser(chairId), cards)
+	self.desk.Log.Debugf("%s 玩家要牌,cards=%v", self.logHeadUser(chairId), cards)
 	for _, v := range cards {
 		if !mj.IsVaildCard(v) {
 			errMsg = fmt.Sprintf("指定的牌%v不合法,要牌失败", v)
@@ -1273,10 +1276,10 @@ func (self *GameSink) doWantCards(chairId int32, cards []int32) (errMsg string) 
 		//调整牌库的顺序
 		tmpLeftCards := mj.DelCards(cardsStack, cards, self.leftCard)
 		self.leftCard = append(tmpLeftCards, mj.ReversaCards(cards)...)
-		self.desk.tlog.Debug("已经发过牌要牌")
+		self.desk.Tlog.Debug("已经发过牌要牌")
 	} else { //没发过牌
-		self.desk.tlog.Debug("没发过牌要牌")
-		cardDef.DebugCardsFromClient(gameName, cards)
+		self.desk.Tlog.Debug("没发过牌要牌")
+		self.cardDef.DebugCardsFromClient(gameName, cards)
 	}
 
 	return ""
@@ -1285,7 +1288,7 @@ func (self *GameSink) doWantCards(chairId int32, cards []int32) (errMsg string) 
 //准备下一局
 func (self *GameSink) getReady(uid uint64) {
 	if self.desk.deskPlayers[uid].userStatus == pbgame.UserDeskStatus_UDSSitDown {
-		self.desk.log.Debugf("%s 准备下一局时重复准备", self.logHeadUser(self.desk.GetChairidByUid(uid)))
+		self.desk.Log.Debugf("%s 准备下一局时重复准备", self.logHeadUser(self.desk.GetChairidByUid(uid)))
 		return
 	}
 	self.desk.changUserState(uid, pbgame.UserDeskStatus_UDSSitDown)

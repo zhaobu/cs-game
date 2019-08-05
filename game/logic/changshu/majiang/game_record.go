@@ -25,6 +25,7 @@ type RankCell struct {
 }
 
 type GameRecord struct {
+	*RoomLog    //桌子日志
 	TotalInning uint32
 	RankInfo    []*RankCell       //总分排行
 	UserScore   []map[int32]int32 //战绩流水
@@ -130,7 +131,7 @@ func (self *GameRecord) RecordGameAction(msg proto.Message) {
 	var err error
 	act.ActName, act.ActValue, err = protobuf.Marshal(msg)
 	if err != nil {
-		roomlog.Error("protobuf.Marshal err", zap.Error(err))
+		self.Log.Error("protobuf.Marshal err", zap.Error(err))
 	}
 	self.record.CurGameInfo.RePlayData = append(self.record.CurGameInfo.RePlayData, act)
 }
@@ -142,6 +143,6 @@ func (self *GameRecord) RecordGameEnd(players []*PlayerInfo) {
 		self.record.CurGameInfo.GamePlayers[k].PreScore = v.BalanceResult.Point
 	}
 	if err := mgo.AddGameRecord(self.record); err != nil {
-		roomlog.Errorf("插入游戏记录失败:err=%s", err)
+		self.Log.Errorf("插入游戏记录失败:err=%s", err)
 	}
 }
