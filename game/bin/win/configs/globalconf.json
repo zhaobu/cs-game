@@ -24,7 +24,7 @@
         "GameNode": {
             "11101": {
                 "Addr": "192.168.0.110:9603",
-                "TplName": "./configs/changshou.json",
+                "TplName": "./configs/changshu.json",
                 "GameName": "changshu",
                 "GameTest": "./configs/changshutest.json"
             }

@@ -23,8 +23,8 @@
         "MjLibPath": "./configs/mjhulib",
         "GameNode": {
             "11101": {
-                "Addr": "changshou:9603",
-                "TplName": "./configs/changshou.json",
+                "Addr": "changshu:9603",
+                "TplName": "./configs/changshu.json",
                 "GameName": "changshu",
                 "GameTest": "./configs/changshutest.json"
             }
