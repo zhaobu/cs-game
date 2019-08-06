@@ -2,7 +2,7 @@ set CGO_ENABLED=0
 
 go build -tags netgo -tags consul -o bin/linux/http cy/game/http
 
-go build -tags netgo -tags consul -o bin/linux/gate cy/game/gate
+GOOS=linux GOARCH=amd64 CGO_ENABLED=0  go build -tags netgo -tags consul -o bin/linux/gate cy/game/gate
 
 go build -tags netgo -tags consul -o bin/linux/center cy/game/center
 
