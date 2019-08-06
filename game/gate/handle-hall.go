@@ -193,11 +193,13 @@ func (s *session) handleHallUpdateBindMobileReq(userID uint64, req *pbhall.Updat
 	}
 	rsp.Code = 1
 	//推送net
-	tlog.Info("推送用户绑定手机信息", zap.Any("Uid", userID), zap.Any("Mobile", req.Mobile))
-	err = net.PushUserBindPhone(userID,req.Mobile)
-	if err != nil{
-		tlog.Error("推送用户绑定手机信息 错误", zap.Any("Uid", userID), zap.Any("Mobile", req.Mobile),zap.Any("err",err.Error()))
-	}
+	//tlog.Info("推送用户绑定手机信息", zap.Any("Uid", userID), zap.Any("Mobile", req.Mobile))
+	go func() {
+		err = net.PushUserBindPhone(userID,req.Mobile)
+		if err != nil{
+			tlog.Error("推送用户绑定手机信息 错误", zap.Any("Uid", userID), zap.Any("Mobile", req.Mobile),zap.Any("err",err.Error()))
+		}
+	}()
 }
 
 //绑定闲聊账号

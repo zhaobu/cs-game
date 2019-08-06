@@ -73,10 +73,12 @@ func backendLoginReq(s *session, loginReq *pblogin.LoginReq) (loginRsp *pblogin.
 			return
 		}
 		if isregister { //新注册用户
-			err := net.PushUserRegister(loginRsp.User)
-			if err != nil {
-				log.Errorf(err.Error())
-			}
+			go func() {
+				err := net.PushUserRegister(loginRsp.User)
+				if err != nil {
+					log.Errorf(err.Error())
+				}
+			}()
 		}
 		loginRsp.Code = pblogin.LoginRspCode_Succ
 	case pblogin.LoginType_Phone:

@@ -199,7 +199,9 @@ func AddUserCurrDayStatistics(gr *WirteRecord) (err error) {
 		}
 		ud.StatisticsPlay++
 		if int(ud.StatisticsPlay) == net.Bureau { //达到抽奖次数
-			net.GetletteNum(ud.UserId, int(ud.StatisticsPlay))
+			go func() {
+				net.GetletteNum(ud.UserId, int(ud.StatisticsPlay))
+			}()
 		}
 		_, err = mgoSess.DB("").C(UserCurrDayStatisticsTable).Upsert(bson.M{"_id": v.UserId}, ud)
 		if err != nil {

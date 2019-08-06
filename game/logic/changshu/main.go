@@ -141,10 +141,12 @@ func main() {
 	}
 
 	net.Init(*netAddr) //初始化net
-	// err = net.GetCondition() //获取抽奖配置表
-	if err != nil {
-		tlog.Error("net.GetCondition err", zap.Error(err))
-	}
+	go func() {
+		err = net.GetCondition() //获取抽奖配置表
+		if err != nil {
+			tlog.Error("net.GetCondition err", zap.Error(err))
+		}
+	}()
 
 	s := server.NewServer()
 	addRegistryPlugin(s)

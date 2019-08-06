@@ -25,18 +25,18 @@ func PushUserRegister(info *pbcommon.UserInfo) (err error) {
 	url := netAddr + "/Register/RegisterUser"
 	request, err := http.NewRequest("POST", url, reader)
 	if err != nil {
-		return fmt.Errorf("推送用户注册信息到 .net  PushUserRegister 错误1 err:%s", err)
+		return fmt.Errorf("推送用户注册信息到 .net  PushUserRegister url=[%s] param=[%s] 错误1 err:%s",url,bytesData, err)
 	}
 	request.Header.Set("Content-Type", "application/json")
 	client := http.Client{}
 	resp, err := client.Do(request)
 	defer resp.Body.Close()
 	if err != nil {
-		return fmt.Errorf("推送用户注册信息到 .net  PushUserRegister 错误2 err:%s", err)
+		return fmt.Errorf("推送用户注册信息到 .net  PushUserRegister url=[%s] param=[%s]  错误2 err:%s",url,bytesData,err)
 	}
 	resCode := resp.StatusCode
 	if resCode != 200 {
-		return fmt.Errorf("推送用户注册信息到 .net  PushUserRegister 错误3 resCode:%d", resCode)
+		return fmt.Errorf("推送用户注册信息到 .net  PushUserRegister url=[%s] param=[%s] 错误3 resCode:%d ",url,bytesData, resCode)
 	}
 	return
 }
@@ -56,14 +56,14 @@ func PushUserBindPhone(uId uint64, Phone string) (err error) {
 	url := netAddr + "/user/bindPhone"
 	request, err := http.NewRequest("POST", url, reader)
 	if err != nil {
-		return fmt.Errorf("推送用户手机绑定 .net  PushUserBindPhone  错误1 err:%s", err)
+		return fmt.Errorf("推送用户手机绑定 .net  PushUserBindPhone url=[%s] param=[%s]  错误1 err:%s",url,bytesData, err)
 	}
 	request.Header.Set("Content-Type", "application/json")
 	client := http.Client{}
 	resp, err := client.Do(request)
 	defer resp.Body.Close()
 	if err != nil {
-		return fmt.Errorf("推送用户手机绑定 .net  PushUserBindPhone  错误2 err:%s", err)
+		return fmt.Errorf("推送用户手机绑定 .net  PushUserBindPhone url=[%s] param=[%s]  错误2 err:%s",url,bytesData, err)
 	}
 	return
 }
