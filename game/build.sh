@@ -1,4 +1,4 @@
-set GOOS=linux GOARCH=amd64 CGO_ENABLED=0
+export GOOS=linux GOARCH=amd64 CGO_ENABLED=0
 
 go build  -tags consul -o bin/linux/http cy/game/http
 
