@@ -1,4 +1,4 @@
-set GOOS=linux
+set CGO_ENABLED=0
 
 go build -tags netgo -tags consul -o bin/linux/http cy/game/http
 
