@@ -38,6 +38,7 @@ services:
     volumes:
       # GOPATH目录
       - ../:/go/src/cy/game:rw
+      - /etc/localtime:/etc/localtime:ro
     labels:
       - name="liwei"
     # working_dir: /go/src
@@ -75,6 +76,7 @@ services:
     command: ["center", "true"]
     volumes:
       # GOPATH目录
+      - /etc/localtime:/etc/localtime:ro
       - ../:/go/src/cy/game:rw
     labels:
       - name="liwei"
@@ -109,6 +111,7 @@ services:
     command: ["club", "true"]
     volumes:
       # GOPATH目录
+      - /etc/localtime:/etc/localtime:ro
       - ../:/go/src/cy/game:rw
     labels:
       - name="liwei"
@@ -143,6 +146,7 @@ services:
     command: ["http", "true"]
     volumes:
       # GOPATH目录
+      - /etc/localtime:/etc/localtime:ro
       - ../:/go/src/cy/game:rw
     labels:
       - name="liwei"
@@ -179,6 +183,7 @@ services:
     command: ["changshu", "true"]
     volumes:
       # GOPATH目录
+      - /etc/localtime:/etc/localtime:ro
       - ../:/go/src/cy/game:rw
     labels:
       - name="liwei"
