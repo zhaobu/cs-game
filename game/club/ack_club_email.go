@@ -186,8 +186,11 @@ func ackTransferMaster(e *mgo.ClubEmail, req *pbclub.AckClubEmailReq) int32 {
 
 		cc.Members[oldMaster].Identity = identityNormal
 		cc.Members[newMaster].Identity = identityMaster
-
 		cc.MasterUserID = newMaster
+		cu := mustGetUserOther(newMaster)
+		cu.RLock()
+		cc.Profile = cu.Profile
+		cu.RUnlock()
 		cc.noCommit = true
 		cc.Unlock()
 

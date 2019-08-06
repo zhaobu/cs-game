@@ -4,7 +4,7 @@ version: "3.7"
 networks:
   gamenet:
     name: gamenet
-    # external:true # 申明网络已经在外部创建
+    # external: true # 申明网络已经在外部创建
 
 # 游戏数据卷
 volumes:
@@ -16,7 +16,7 @@ volumes:
   mongodata:
     name: mongodata
   redisdata:
-    name: redisdata            
+    name: redisdata
 
 # 服务
 services:

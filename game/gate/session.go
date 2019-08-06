@@ -335,8 +335,8 @@ func (s *session) batchOperator(reqs []interface{}) {
 	}
 
 	defer func() {
-		if r := recover(); r != nil {
-			tlog.Error("recover info", zap.Any("recover", r), zap.String("stack", string(debug.Stack())))
+		if err := recover(); err != nil {
+			log.Errorf("recover info:err:%s,stackinfo:%s", err, string(debug.Stack()))
 		}
 	}()
 

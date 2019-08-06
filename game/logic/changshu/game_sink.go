@@ -414,7 +414,7 @@ func (self *GameSink) resetOper() {
 	self.operOrder = map[PriorityOrder][]*OperPriority{}
 }
 
-//摸牌 last(0从牌前摸,1从摸牌尾)
+//摸牌 last(0从牌前摸,1表示杠后从摸牌尾)
 func (self *GameSink) drawCard(chairId, last int32) error {
 	self.desk.Log.Debugf("%s,摸牌操作,last=%d", self.logHeadUser(chairId), last)
 	//检查游戏是否结束
