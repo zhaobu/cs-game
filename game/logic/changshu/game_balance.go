@@ -34,7 +34,6 @@ type GameBalance struct {
 	game_config  *pbgame_logic.CreateArg //游戏参数
 	startDice    StartDiceType           //开局色子
 	baozi        int32                   //本局豹子倍数
-	gameIndex    int32                   //第几局
 	loseChair    int32                   //丢分玩家
 	gangHuaChair int32                   //杠上花玩家
 	huCard       int32                   //胡的牌
@@ -119,9 +118,9 @@ func (self *GameBalance) Init(config *pbgame_logic.CreateArg) {
 	}
 }
 
-func (self *GameBalance) Reset() {
+func (self *GameBalance) Reset(curInning uint32) {
 	//依据上一局结果判断是否豹子翻倍
-	if self.canBaozi && (self.huCard == 0 || self.startDice == StartDice_Two) {
+	if curInning > 1 && self.canBaozi && (self.huCard == 0 || self.startDice == StartDice_Two) {
 		self.baozi = 2
 	} else {
 		self.baozi = 1

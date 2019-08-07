@@ -122,7 +122,7 @@ func (self *GameSink) reset() {
 	self.lastOutChair = -1
 	self.lastGangChair = -1
 	//PrivateInfo
-	self.gameBalance.Reset()
+	self.gameBalance.Reset(self.desk.curInning)
 	for _, v := range self.players {
 		v.Reset()
 	}

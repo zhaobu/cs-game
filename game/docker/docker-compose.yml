@@ -11,8 +11,6 @@ volumes:
   consuldata:
     # external:true # 申明卷已经在外部创建
     name: consuldata
-  # gamedata:
-  #   name: gamedata
   mongodata:
     name: mongodata
   redisdata:
