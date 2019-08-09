@@ -178,6 +178,12 @@ func (self *HuLib) CheckHuType(cardInfo *PlayerCardInfo, balanceInfo *PlayserBal
 //检查基本胡花数够不够
 func (self *HuLib) checkBaseHuHua(cardInfo *PlayerCardInfo, balanceInfo *PlayserBalanceInfo, huMode EmHuMode) bool {
 	huaShu := balanceInfo.GetPingHuHua()
+	//加上手上留有的暗刻花
+	for card, v := range cardInfo.StackCards {
+		if card >= 41 && card <= 46 && v == 3 { //东南西北中发白碰牌算2花
+			huaShu += 2
+		}
+	}
 	if huaShu == 0 && huMode == HuMode_ZIMO { //没花的情况下手牌里有两张一样的风牌，可自摸
 		add_card := cardInfo.HandCards[len(cardInfo.HandCards)-1]
 		for i := 41; i < 47; i++ {
