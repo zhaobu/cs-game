@@ -464,7 +464,7 @@ func (d *Desk) realDestroyDesk(reqType pbgame.DestroyDeskType) {
 	d.updateDeskInfo(3) //通知俱乐部更新桌子信息
 	deleteID2desk(d.deskId)
 	cache.DeleteClubDeskRelation(d.deskId)
-	cache.DelDeskInfo(d.deskId)
+	cache.DelDeskInfo(d.deskId, d.Log)
 	cache.FreeDeskID(d.deskId)
 	//如果房间游戏没有开始,就删除日志
 	if d.curInning == 0 {
@@ -677,6 +677,11 @@ func (d *Desk) OnOffLine(uid uint64, online bool) {
 					//广播选择
 					d.SendData(uid, &pbgame.VoteDestroyDeskNotif{DeskID: d.deskId, VoteUser: d.voteInfo.voteUser, LeftTime: int32(leftTime.Seconds()), VoteResult: d.getVoteResult()})
 				}
+				//广播玩家上线消息给所有玩家
+				d.SendData(0, &pbgame.GameUserOnOffLineNotif{UserID: uid, Oper: 1})
+			} else {
+				//广播玩家下线消息给所有玩家
+				d.SendData(0, &pbgame.GameUserOnOffLineNotif{UserID: uid, Oper: 0})
 			}
 		} else {
 			if !online { //观察者下线

@@ -106,15 +106,27 @@ func (self *PlayerBalanceResult) init() {
 	self.ScoreTimes = map[EmScoreTimes]int32{}
 }
 
-//删除手牌中的某张牌,delAll为true时删除所有的delcard
-func RemoveCard(handCards []int32, delcard int32, delAll bool) ([]int32, bool) {
+//删除手牌中的某张牌,delAll为true时删除所有的delcard,front为false时表示从后往前删(删除出过的牌时)
+func RemoveCard(handCards []int32, delcard int32, delAll, front bool) ([]int32, bool) {
 	del := false
-	for i, card := range handCards {
-		if card == delcard {
-			handCards = append(handCards[:i], handCards[i+1:]...)
-			del = true
-			if !delAll {
-				break
+	if front { //从前往后删
+		for i, card := range handCards {
+			if card == delcard {
+				handCards = append(handCards[:i], handCards[i+1:]...)
+				del = true
+				if !delAll {
+					break
+				}
+			}
+		}
+	} else { //从后往前删
+		for i := len(handCards) - 1; i >= 0; i-- {
+			if handCards[i] == delcard {
+				handCards = append(handCards[:i], handCards[i+1:]...)
+				del = true
+				if !delAll {
+					break
+				}
 			}
 		}
 	}

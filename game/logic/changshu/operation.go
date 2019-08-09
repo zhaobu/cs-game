@@ -188,7 +188,7 @@ func (self *OperAtion) updateCardInfo(cardInfo *mj.PlayerCardInfo, addCards, sub
 	} else if len(subCards) != 0 {
 		mj.Sub_stack(cardInfo.StackCards, subCards...)
 		for _, card := range subCards {
-			cardInfo.HandCards, _ = mj.RemoveCard(cardInfo.HandCards, card, false)
+			cardInfo.HandCards, _ = mj.RemoveCard(cardInfo.HandCards, card, false, false)
 		}
 	}
 }
@@ -357,7 +357,7 @@ func (self *OperAtion) HandleChiCard(cardInfo *mj.PlayerCardInfo, loseCardInfo *
 	cardInfo.RiverCards = append(cardInfo.RiverCards, &pbgame_logic.OperRecord{Type: operType, Card: card, LoseChair: loseChair})
 
 	//处理出牌玩家,把牌从出过的牌中拿走
-	loseCardInfo.OutCards, _ = mj.RemoveCard(loseCardInfo.OutCards, card, false)
+	loseCardInfo.OutCards, _ = mj.RemoveCard(loseCardInfo.OutCards, card, false, false)
 }
 
 //处理碰牌(cardInfo为碰牌玩家,loseCardInfo为出牌玩家)
@@ -368,7 +368,7 @@ func (self *OperAtion) HandlePengCard(playerInfo *mj.PlayerInfo, loseCardInfo *m
 	cardInfo.PengCards[card] = loseChair
 	cardInfo.RiverCards = append(cardInfo.RiverCards, &pbgame_logic.OperRecord{Type: pbgame_logic.OperType_Oper_PENG, Card: card, LoseChair: loseChair})
 	//处理出牌玩家,把牌从出过的牌中拿走
-	loseCardInfo.OutCards, _ = mj.RemoveCard(loseCardInfo.OutCards, card, false)
+	loseCardInfo.OutCards, _ = mj.RemoveCard(loseCardInfo.OutCards, card, false, false)
 	if card >= 41 && card <= 46 { //东南西北中发白碰牌算1花
 		playerInfo.BalanceInfo.FengPoint += 1
 	}
@@ -413,7 +413,7 @@ func (self *OperAtion) HandleGangCard(playerInfo *mj.PlayerInfo, loseCardInfo *m
 		self.updateCardInfo(cardInfo, nil, []int32{card, card, card})
 		cardInfo.RiverCards = append(cardInfo.RiverCards, &pbgame_logic.OperRecord{Type: gangType, Card: card, LoseChair: loseChair})
 		//处理出牌玩家,把牌从出过的牌中拿走
-		loseCardInfo.OutCards, _ = mj.RemoveCard(loseCardInfo.OutCards, card, false)
+		loseCardInfo.OutCards, _ = mj.RemoveCard(loseCardInfo.OutCards, card, false, false)
 		if card >= 41 { //万条筒明杠算1花，东南西北中发白明杠算3花
 			playerInfo.BalanceInfo.GangPoint += 3
 		} else {

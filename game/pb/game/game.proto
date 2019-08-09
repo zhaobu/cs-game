@@ -267,3 +267,9 @@ message GameCommandNotif {
   CmdType CmdType = 2;  //执行的命令码
   string CmdInfo = 3;   //指令内容
 }
+
+//玩家上下线
+message GameUserOnOffLineNotif {
+  uint64 UserID = 1;
+  int32 Oper = 2;  // 0表示下线,1表示上线
+}

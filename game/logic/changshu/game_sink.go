@@ -1207,9 +1207,9 @@ func (self *GameSink) gameReconnect(recInfo *pbgame_logic.GameDeskInfo, uid uint
 
 func (self *GameSink) logHeadUser(chairId int32) string {
 	if chairId == -1 {
-		return fmt.Sprintf("房间[%d] :", self.desk.deskId)
+		return fmt.Sprintf("房间[%d],第%d局 :", self.desk.deskId, self.desk.curInning)
 	} else {
-		return fmt.Sprintf("房间[%d] 玩家[%s,%d]:", self.desk.deskId, self.players[chairId].BaseInfo.Nickname, chairId)
+		return fmt.Sprintf("房间[%d] 玩家[%s,%d],第%d局:", self.desk.deskId, self.players[chairId].BaseInfo.Nickname, chairId, self.desk.curInning)
 	}
 }
 

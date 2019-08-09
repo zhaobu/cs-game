@@ -4,7 +4,10 @@ import (
 	pbcommon "cy/game/pb/common"
 	"encoding/json"
 	"fmt"
+	"runtime/debug"
 	"strconv"
+
+	"go.uber.org/zap"
 
 	"github.com/gomodule/redigo/redis"
 )
@@ -56,10 +59,10 @@ func AddDeskInfo(info *pbcommon.DeskInfo) (err error) {
 	return nil
 }
 
-func DelDeskInfo(deskID uint64) {
+func DelDeskInfo(deskID uint64, log *zap.SugaredLogger) {
 	c := redisPool.Get()
 	defer c.Close()
-
+	log.Debugf("测试何时删除房间信息debug stack info=%s", string(debug.Stack()))
 	c.Do("DEL", fmt.Sprintf("deskinfo:%d", deskID))
 }
 

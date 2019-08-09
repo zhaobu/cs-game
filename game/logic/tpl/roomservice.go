@@ -4,12 +4,10 @@ import (
 	"cy/game/cache"
 	"cy/game/codec"
 	"cy/game/codec/protobuf"
-	pbcommon "cy/game/pb/common"
 	pbgame "cy/game/pb/game"
 	pbinner "cy/game/pb/inner"
 	"cy/game/util"
 	"encoding/json"
-	"fmt"
 	"time"
 
 	"github.com/RussellLuo/timingwheel"
@@ -62,8 +60,7 @@ func (self *RoomServie) Init(gameName, gameID string, _tlog *zap.Logger, redisAd
 	self.log = _tlog.Sugar()
 	self.Timer = timingwheel.NewTimingWheel(time.Second, 60) //一个节点一个定时器
 	self.Timer.Start()
-	self.delInvalidDesk()
-	// self.checkDeskLongTime()
+	// self.delInvalidDesk()
 	go util.Subscribe(redisAddr, redisDb, "inner_broadcast", self.onMessage)
 }
 
@@ -172,51 +169,51 @@ func (self *RoomServie) SendDeskChangeNotif(cid int64, did uint64, changeTyp int
 	}
 }
 
-func (self *RoomServie) delInvalidDesk() {
-	var delDesks []uint64
-	for _, key := range cache.SCAN("deskinfo:*", 50) {
-		var deskID uint64
-		fmt.Sscanf(key, "deskinfo:%d", &deskID)
-		deskInfo, err := cache.QueryDeskInfo(deskID)
-		if err != nil {
-			continue
-		}
+// func (self *RoomServie) delInvalidDesk() {
+// 	var delDesks []uint64
+// 	for _, key := range cache.SCAN("deskinfo:*", 50) {
+// 		var deskID uint64
+// 		fmt.Sscanf(key, "deskinfo:%d", &deskID)
+// 		deskInfo, err := cache.QueryDeskInfo(deskID)
+// 		if err != nil {
+// 			continue
+// 		}
 
-		if deskInfo.GameName != self.GameName || deskInfo.GameID != self.GameID {
-			continue
-		}
+// 		if deskInfo.GameName != self.GameName || deskInfo.GameID != self.GameID {
+// 			continue
+// 		}
 
-		delDesks = append(delDesks, deskID)
-	}
+// 		delDesks = append(delDesks, deskID)
+// 	}
 
-	for _, key := range cache.SCAN("sessioninfo:*", 50) {
-		var userID uint64
-		fmt.Sscanf(key, "sessioninfo:%d", &userID)
-		sessInfo, err := cache.QuerySessionInfo(userID)
-		if err != nil {
-			continue
-		}
+// 	for _, key := range cache.SCAN("sessioninfo:*", 50) {
+// 		var userID uint64
+// 		fmt.Sscanf(key, "sessioninfo:%d", &userID)
+// 		sessInfo, err := cache.QuerySessionInfo(userID)
+// 		if err != nil {
+// 			continue
+// 		}
 
-		if sessInfo.GameName != self.GameName ||
-			sessInfo.GameID != self.GameID ||
-			sessInfo.Status != pbcommon.UserStatus_InGameing {
-			continue
-		}
+// 		if sessInfo.GameName != self.GameName ||
+// 			sessInfo.GameID != self.GameID ||
+// 			sessInfo.Status != pbcommon.UserStatus_InGameing {
+// 			continue
+// 		}
 
-		for _, deskID := range delDesks {
-			if sessInfo.AtDeskID == deskID {
-				cache.ExitGame(userID, sessInfo.GameName, sessInfo.GameID, deskID)
-				break
-			}
-		}
-	}
+// 		for _, deskID := range delDesks {
+// 			if sessInfo.AtDeskID == deskID {
+// 				cache.ExitGame(userID, sessInfo.GameName, sessInfo.GameID, deskID)
+// 				break
+// 			}
+// 		}
+// 	}
 
-	for _, deskID := range delDesks {
-		cache.DeleteClubDeskRelation(deskID)
-		cache.DelDeskInfo(deskID)
-		cache.FreeDeskID(deskID)
-	}
-}
+// 	for _, deskID := range delDesks {
+// 		cache.DeleteClubDeskRelation(deskID)
+// 		cache.DelDeskInfo(deskID)
+// 		cache.FreeDeskID(deskID)
+// 	}
+// }
 
 func (self *RoomServie) onMessage(channel string, data []byte) error {
 	m := &codec.Message{}
