@@ -338,6 +338,7 @@ func (d *Desk) getBaseDeskInfo() *pbgame_logic.GameDeskInfo {
 		userInfo.Info = user.info
 		userInfo.ChairId = chair
 		userInfo.UserStatus = user.userStatus
+		userInfo.Online = user.online
 		msg.GameUser = append(msg.GameUser, userInfo)
 	}
 	return msg
