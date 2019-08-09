@@ -136,7 +136,11 @@ func (self *roomHandle) HandleSitDownReq(uid uint64, req *pbgame.SitDownReq, rsp
 	}
 	//如果是俱乐部房间,检查权限
 	if d.clubId != 0 {
-		rspCode := mgo.CheckSitDownClubRoom(uid, d.clubId, nil)
+		allUser := make([]uint64, 0, len(d.playChair))
+		for _, v := range d.playChair {
+			allUser = append(allUser, v.info.UserID)
+		}
+		rspCode := mgo.CheckSitDownClubRoom(uid, d.clubId, allUser)
 		if rspCode != 0 {
 			switch rspCode {
 			case 1:
