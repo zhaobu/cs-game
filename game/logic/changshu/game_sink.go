@@ -1287,6 +1287,10 @@ func (self *GameSink) doWantCards(chairId int32, cards []int32) (errMsg string) 
 
 //准备下一局
 func (self *GameSink) getReady(uid uint64) {
+	if self.desk.deskPlayers[uid].userStatus != pbgame.UserDeskStatus_UDSGameEnd {
+		self.desk.Log.Debugf("%s 准备下一局时玩家状态不对", self.logHeadUser(self.desk.GetChairidByUid(uid)))
+		return
+	}
 	if self.desk.deskPlayers[uid].userStatus == pbgame.UserDeskStatus_UDSSitDown {
 		self.desk.Log.Debugf("%s 准备下一局时重复准备", self.logHeadUser(self.desk.GetChairidByUid(uid)))
 		return
