@@ -3,6 +3,7 @@ version: "3.7"
 # 服务
 services:
   gobuild:
+    container_name: gobuild
     image: golang:alpine
     volumes:
       # GOPATH目录
