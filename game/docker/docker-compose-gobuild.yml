@@ -10,5 +10,6 @@ services:
     working_dir: /go/src
     # 打开标准输入，可以接受外部输入
     stdin_open: true
+    command: bin/bash
     # 模拟一个伪终端
     tty: true
