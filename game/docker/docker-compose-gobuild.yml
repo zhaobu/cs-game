@@ -2,7 +2,7 @@ version: "3.7"
 
 # 服务
 services:
-  gate:
+  gobuild:
     image: golang:alpine
     volumes:
       # GOPATH目录
@@ -10,6 +10,5 @@ services:
     working_dir: /go/src
     # 打开标准输入，可以接受外部输入
     stdin_open: true
-    entrypoint: [ bin/bash ]
     # 模拟一个伪终端
     tty: true
