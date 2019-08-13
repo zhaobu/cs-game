@@ -56,7 +56,7 @@ func QueryUserGameRecordReq(c *gin.Context){
 		result.List[i] = &QueryUserGameRecordPlayerReturn{
 			UserID:v.UserId,
 			NickName: v.Name,
-			GetScore: v.Score,
+			GetScore: v.PreScore,
 		}
 		if err != nil{
 			result.List[i].HeadImgUrl = udata.Profile
