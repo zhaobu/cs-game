@@ -19,7 +19,7 @@ var _ = math.Inf
 // is compatible with the proto package it is being compiled against.
 // A compilation error at this line likely means your copy of the
 // proto package needs to be updated.
-const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
+const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
 type GameAction struct {
 	ActName              string   `protobuf:"bytes,1,opt,name=ActName,proto3" json:"ActName,omitempty"`
@@ -68,10 +68,10 @@ func (m *GameAction) GetActValue() []byte {
 	return nil
 }
 
-// 查询房间游戏记录数据请求(点击战绩按钮或者俱乐部内查找)
+//查询房间游戏记录数据请求(点击战绩按钮或者俱乐部内查找)
 type QueryRoomRecordReq struct {
 	Head *common.ReqHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
-	// 查询类型 1按userId 查询2按俱乐部id 查询3按俱乐部+房间号查询
+	//查询类型 1按userId 查询2按俱乐部id 查询3按俱乐部+房间号查询
 	UserIdentity         int32    `protobuf:"varint,2,opt,name=UserIdentity,proto3" json:"UserIdentity,omitempty"`
 	QueryType            int32    `protobuf:"varint,3,opt,name=QueryType,proto3" json:"QueryType,omitempty"`
 	QueryUserId          uint64   `protobuf:"varint,4,opt,name=QueryUserId,proto3" json:"QueryUserId,omitempty"`
@@ -244,7 +244,7 @@ func (m *RoomPlayerInfo) GetTotalScore() int32 {
 	return 0
 }
 
-// 房间记录
+//房间记录
 type RoomRecord struct {
 	RoomRecordId         string            `protobuf:"bytes,1,opt,name=RoomRecordId,proto3" json:"RoomRecordId,omitempty"`
 	GameStartTime        int64             `protobuf:"varint,2,opt,name=GameStartTime,proto3" json:"GameStartTime,omitempty"`
@@ -356,7 +356,7 @@ func (m *RoomRecord) GetGameRecordIds() []string {
 	return nil
 }
 
-// 查询房间游戏记录数据回应
+//查询房间游戏记录数据回应
 type QueryRoomRecordRsp struct {
 	Head                 *common.RspHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
 	Error                int32           `protobuf:"varint,2,opt,name=Error,proto3" json:"Error,omitempty"`
@@ -444,7 +444,7 @@ func (m *QueryRoomRecordRsp) GetPageCount() int32 {
 	return 0
 }
 
-// 查询游戏记录请求(点击详情按钮)
+//查询游戏记录请求(点击详情按钮)
 type QueryGameRecordReq struct {
 	Head                 *common.ReqHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
 	RoomRecordId         string          `protobuf:"bytes,2,opt,name=RoomRecordId,proto3" json:"RoomRecordId,omitempty"`
@@ -555,7 +555,7 @@ func (m *GamePlayerInfo) GetPreScore() int32 {
 	return 0
 }
 
-// 游戏单局记录
+//游戏单局记录
 type GameRecord struct {
 	GameRecordId         string            `protobuf:"bytes,1,opt,name=GameRecordId,proto3" json:"GameRecordId,omitempty"`
 	Index                uint32            `protobuf:"varint,2,opt,name=Index,proto3" json:"Index,omitempty"`
@@ -627,7 +627,7 @@ func (m *GameRecord) GetGamePlayers() []*GamePlayerInfo {
 	return nil
 }
 
-// 查询游戏记录请求
+//查询游戏记录请求
 type QueryGameRecordRsp struct {
 	Head                 *common.RspHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
 	Error                int32           `protobuf:"varint,2,opt,name=Error,proto3" json:"Error,omitempty"`
@@ -683,7 +683,7 @@ func (m *QueryGameRecordRsp) GetRecords() []*GameRecord {
 	return nil
 }
 
-// 查询游戏复盘数据请求(点击游戏回放按钮)
+//查询游戏复盘数据请求(点击游戏回放按钮)
 type QueryGameRePlaydReq struct {
 	Head                 *common.ReqHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
 	GameRecordId         string          `protobuf:"bytes,2,opt,name=GameRecordId,proto3" json:"GameRecordId,omitempty"`
@@ -786,7 +786,7 @@ func (m *QueryGameRePlaydRsp) GetRePlayData() []*GameAction {
 	return nil
 }
 
-// 查询俱乐部统计请求
+//查询俱乐部统计请求
 type QueryClubStatisticsReq struct {
 	Head                 *common.ReqHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
 	QueryType            int32           `protobuf:"varint,2,opt,name=QueryType,proto3" json:"QueryType,omitempty"`
@@ -858,7 +858,7 @@ func (m *QueryClubStatisticsReq) GetQueryEndTime() int64 {
 	return 0
 }
 
-// 统计数据
+//统计数据
 type StatisticsData struct {
 	UserId               uint64   `protobuf:"varint,1,opt,name=UserId,proto3" json:"UserId,omitempty"`
 	Name                 string   `protobuf:"bytes,2,opt,name=Name,proto3" json:"Name,omitempty"`
@@ -922,7 +922,7 @@ func (m *StatisticsData) GetStatistics() int64 {
 	return 0
 }
 
-// 查询俱乐部统计回应
+//查询俱乐部统计回应
 type QueryClubStatisticsRsp struct {
 	Head                 *common.RspHead   `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
 	Error                int32             `protobuf:"varint,2,opt,name=Error,proto3" json:"Error,omitempty"`

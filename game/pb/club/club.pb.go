@@ -19,7 +19,7 @@ var _ = math.Inf
 // is compatible with the proto package it is being compiled against.
 // A compilation error at this line likely means your copy of the
 // proto package needs to be updated.
-const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
+const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
 // 成员信息
 type MemberInfo struct {
@@ -2290,7 +2290,7 @@ func (m *ClubEmailRsp) GetEmails() []*ClubEmail {
 	return nil
 }
 
-// 校验是否可以解散俱乐部桌子
+//校验是否可以解散俱乐部桌子
 type CheckCanDestoryDeskReq struct {
 	ClubID               int64    `protobuf:"varint,1,opt,name=ClubID,proto3" json:"ClubID,omitempty"`
 	UserID               uint64   `protobuf:"varint,2,opt,name=UserID,proto3" json:"UserID,omitempty"`
@@ -2346,7 +2346,7 @@ func (m *CheckCanDestoryDeskReq) GetDeskID() uint64 {
 	return 0
 }
 
-// 校验是否可以解散俱乐部桌子
+//校验是否可以解散俱乐部桌子
 type CheckCanDestoryDeskRsp struct {
 	Error                int32    `protobuf:"varint,1,opt,name=Error,proto3" json:"Error,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -2386,7 +2386,7 @@ func (m *CheckCanDestoryDeskRsp) GetError() int32 {
 	return 0
 }
 
-// 刷新俱乐部桌子信息
+//刷新俱乐部桌子信息
 type RefreshClubDesks struct {
 	Head                 *common.ReqHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
 	ClubID               int64           `protobuf:"varint,2,opt,name=ClubID,proto3" json:"ClubID,omitempty"`
@@ -2434,7 +2434,7 @@ func (m *RefreshClubDesks) GetClubID() int64 {
 	return 0
 }
 
-// 查询俱乐部成员关系列表请求 需要管理员以上权限
+//查询俱乐部成员关系列表请求 需要管理员以上权限
 type QueryClubMemberRelationReq struct {
 	Head                 *common.ReqHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
 	ClubID               int64           `protobuf:"varint,2,opt,name=ClubID,proto3" json:"ClubID,omitempty"`
@@ -2490,7 +2490,7 @@ func (m *QueryClubMemberRelationReq) GetUserID() uint64 {
 	return 0
 }
 
-// 查询俱乐部成员关系列表回应
+//查询俱乐部成员关系列表回应
 type QueryClubMemberRelationRsp struct {
 	Head                 *common.RspHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
 	Code                 int32           `protobuf:"varint,2,opt,name=Code,proto3" json:"Code,omitempty"`
@@ -2546,7 +2546,7 @@ func (m *QueryClubMemberRelationRsp) GetMembers() []*MemberInfo {
 	return nil
 }
 
-// 添加俱乐部成员关系
+//添加俱乐部成员关系
 type AddClubMemberRelationReq struct {
 	Head                 *common.ReqHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
 	ClubID               int64           `protobuf:"varint,2,opt,name=ClubID,proto3" json:"ClubID,omitempty"`
@@ -2610,7 +2610,7 @@ func (m *AddClubMemberRelationReq) GetRelationUserID() uint64 {
 	return 0
 }
 
-// 添加俱乐部成员关系
+//添加俱乐部成员关系
 type AddClubMemberRelationRsp struct {
 	Head                 *common.RspHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
 	Code                 int32           `protobuf:"varint,2,opt,name=Code,proto3" json:"Code,omitempty"`
@@ -2658,7 +2658,7 @@ func (m *AddClubMemberRelationRsp) GetCode() int32 {
 	return 0
 }
 
-// 添加俱乐部成员关系
+//添加俱乐部成员关系
 type RemoveClubMemberRelationReq struct {
 	Head                 *common.ReqHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
 	ClubID               int64           `protobuf:"varint,2,opt,name=ClubID,proto3" json:"ClubID,omitempty"`
@@ -2722,7 +2722,7 @@ func (m *RemoveClubMemberRelationReq) GetRelationUserID() uint64 {
 	return 0
 }
 
-// 添加俱乐部成员关系
+//添加俱乐部成员关系
 type RemoveClubMemberRelationRsp struct {
 	Head                 *common.RspHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
 	Code                 int32           `protobuf:"varint,2,opt,name=Code,proto3" json:"Code,omitempty"`
@@ -2770,7 +2770,7 @@ func (m *RemoveClubMemberRelationRsp) GetCode() int32 {
 	return 0
 }
 
-// 校验用户是否能加入俱乐部桌子请求
+//校验用户是否能加入俱乐部桌子请求
 type CheckCanJoinClubDeskReq struct {
 	ClubID               int64    `protobuf:"varint,1,opt,name=ClubID,proto3" json:"ClubID,omitempty"`
 	DeskUserIds          []uint64 `protobuf:"varint,2,rep,packed,name=DeskUserIds,proto3" json:"DeskUserIds,omitempty"`
@@ -2826,7 +2826,7 @@ func (m *CheckCanJoinClubDeskReq) GetJoinUserId() uint64 {
 	return 0
 }
 
-// 校验用户是否能加入俱乐部桌子回应
+//校验用户是否能加入俱乐部桌子回应
 type CheckCanJoinClubDeskRsp struct {
 	Code                 int32    `protobuf:"varint,1,opt,name=Code,proto3" json:"Code,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -2946,7 +2946,7 @@ func (m *MakeDeskReq) GetClubMasterUid() uint64 {
 	return 0
 }
 
-// 解散桌子 只有群主能解散
+//解散桌子 只有群主能解散
 type DestroyDeskReq struct {
 	Head                 *common.ReqHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
 	ClubID               int64           `protobuf:"varint,2,opt,name=ClubID,proto3" json:"ClubID,omitempty"`

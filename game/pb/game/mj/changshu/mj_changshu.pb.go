@@ -20,9 +20,9 @@ var _ = math.Inf
 // is compatible with the proto package it is being compiled against.
 // A compilation error at this line likely means your copy of the
 // proto package needs to be updated.
-const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
+const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
-// 游戏状态
+//游戏状态
 type GameStatus int32
 
 const (
@@ -156,7 +156,7 @@ func (GangType) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_424db99e24b65537, []int{3}
 }
 
-// 胡牌类型
+//胡牌类型
 type HuType int32
 
 const (
@@ -799,7 +799,7 @@ func (m *Cyint32) GetT() int32 {
 	return 0
 }
 
-// /////////////////////////c-s///////////////////////////
+///////////////////////////c-s///////////////////////////
 // 投色子
 type C2SThrowDice struct {
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -872,7 +872,7 @@ func (m *C2SOutCard) GetCard() int32 {
 	return 0
 }
 
-// 碰牌
+//碰牌
 type C2SPengCard struct {
 	Card                 int32    `protobuf:"varint,1,opt,name=card,proto3" json:"card,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -912,7 +912,7 @@ func (m *C2SPengCard) GetCard() int32 {
 	return 0
 }
 
-// 杠牌
+//杠牌
 type C2SGangCard struct {
 	Card                 int32    `protobuf:"varint,1,opt,name=card,proto3" json:"card,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -952,7 +952,7 @@ func (m *C2SGangCard) GetCard() int32 {
 	return 0
 }
 
-// 吃牌
+//吃牌
 type C2SChiCard struct {
 	Card                 int32    `protobuf:"varint,1,opt,name=card,proto3" json:"card,omitempty"`
 	ChiType              uint32   `protobuf:"varint,2,opt,name=chi_type,json=chiType,proto3" json:"chi_type,omitempty"`
@@ -1000,7 +1000,7 @@ func (m *C2SChiCard) GetChiType() uint32 {
 	return 0
 }
 
-// 胡牌
+//胡牌
 type C2SHuCard struct {
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -1032,7 +1032,7 @@ func (m *C2SHuCard) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_C2SHuCard proto.InternalMessageInfo
 
-// 取消操作
+//取消操作
 type C2SCancelAction struct {
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -1064,7 +1064,7 @@ func (m *C2SCancelAction) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_C2SCancelAction proto.InternalMessageInfo
 
-// 准备下一局
+//准备下一局
 type C2SGetReady struct {
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -1096,7 +1096,7 @@ func (m *C2SGetReady) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_C2SGetReady proto.InternalMessageInfo
 
-// 查询战绩
+//查询战绩
 type C2SGetGameRecord struct {
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -1128,7 +1128,7 @@ func (m *C2SGetGameRecord) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_C2SGetGameRecord proto.InternalMessageInfo
 
-// /////////////////////////s-c///////////////////////////
+///////////////////////////s-c///////////////////////////
 type Json_Listen struct {
 	Info                 map[int32]*Json_ListenCards `protobuf:"bytes,1,rep,name=info,proto3" json:"info,omitempty" protobuf_key:"varint,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 	XXX_NoUnkeyedLiteral struct{}                    `json:"-"`
@@ -1294,7 +1294,7 @@ func (m *S2CListenCards) GetListenResult() string {
 	return ""
 }
 
-// 玩家准备下一局
+//玩家准备下一局
 type BS2CGetReady struct {
 	UserId               uint64   `protobuf:"varint,1,opt,name=userId,proto3" json:"userId,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -1334,7 +1334,7 @@ func (m *BS2CGetReady) GetUserId() uint64 {
 	return 0
 }
 
-// 更改状态
+//更改状态
 type BS2CUpdateGameStatus struct {
 	GameStatus           GameStatus `protobuf:"varint,1,opt,name=game_status,json=gameStatus,proto3,enum=pbgame_mj_changshu.GameStatus" json:"game_status,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}   `json:"-"`
@@ -1374,7 +1374,7 @@ func (m *BS2CUpdateGameStatus) GetGameStatus() GameStatus {
 	return GameStatus_GSNone
 }
 
-// 通知玩家投色子
+//通知玩家投色子
 type S2CThrowDice struct {
 	ChairId              int32    `protobuf:"varint,1,opt,name=chair_id,json=chairId,proto3" json:"chair_id,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -1414,7 +1414,7 @@ func (m *S2CThrowDice) GetChairId() int32 {
 	return 0
 }
 
-// 玩家投色子结果
+//玩家投色子结果
 type BS2CThrowDiceResult struct {
 	ChairId              int32      `protobuf:"varint,1,opt,name=chair_id,json=chairId,proto3" json:"chair_id,omitempty"`
 	DiceValue            []*Cyint32 `protobuf:"bytes,2,rep,name=dice_value,json=diceValue,proto3" json:"dice_value,omitempty"`
@@ -1509,7 +1509,7 @@ func (m *ChangePosInfo) GetUserId() uint64 {
 	return 0
 }
 
-// 换位结果
+//换位结果
 type S2CChangePos struct {
 	PosInfo              []*ChangePosInfo `protobuf:"bytes,1,rep,name=pos_info,json=posInfo,proto3" json:"pos_info,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}         `json:"-"`
@@ -1549,7 +1549,7 @@ func (m *S2CChangePos) GetPosInfo() []*ChangePosInfo {
 	return nil
 }
 
-// 玩家该轮的操作
+//玩家该轮的操作
 type S2CHaveOperation struct {
 	OperMask             uint32     `protobuf:"varint,1,opt,name=oper_mask,json=operMask,proto3" json:"oper_mask,omitempty"`
 	ChairId              int32      `protobuf:"varint,2,opt,name=chair_id,json=chairId,proto3" json:"chair_id,omitempty"`
@@ -1699,7 +1699,7 @@ func (m *Json_UserCardInfoCards) GetCards() []int32 {
 	return nil
 }
 
-// 游戏开始
+//游戏开始
 type S2CStartGame struct {
 	BankerId             int32             `protobuf:"varint,1,opt,name=banker_id,json=bankerId,proto3" json:"banker_id,omitempty"`
 	LeftNum              int32             `protobuf:"varint,2,opt,name=left_num,json=leftNum,proto3" json:"left_num,omitempty"`
@@ -1811,7 +1811,7 @@ func (m *S2CStartGame) GetBaozi() int32 {
 	return 0
 }
 
-// 第一次补花信息
+//第一次补花信息
 type Json_FirstBuHua struct {
 	HuaCards             []int32  `protobuf:"varint,1,rep,packed,name=hua_cards,json=huaCards,proto3" json:"hua_cards,omitempty"`
 	MoCards              []int32  `protobuf:"varint,2,rep,packed,name=mo_cards,json=moCards,proto3" json:"mo_cards,omitempty"`
@@ -1867,7 +1867,7 @@ func (m *Json_FirstBuHua) GetMoCount() int32 {
 	return 0
 }
 
-// 玩家摸牌
+//玩家摸牌
 type BS2CDrawCard struct {
 	ChairId              int32    `protobuf:"varint,1,opt,name=chair_id,json=chairId,proto3" json:"chair_id,omitempty"`
 	LeftNum              int32    `protobuf:"varint,2,opt,name=left_num,json=leftNum,proto3" json:"left_num,omitempty"`
@@ -1931,7 +1931,7 @@ func (m *BS2CDrawCard) GetJsonDrawInfo() string {
 	return ""
 }
 
-// 玩家第一次补花(玩家还未进行第一次补花,可以进行吃碰,吃碰后进行第一次补花)
+//玩家第一次补花(玩家还未进行第一次补花,可以进行吃碰,吃碰后进行第一次补花)
 type BS2CFirstBuHua struct {
 	ChairId              int32    `protobuf:"varint,1,opt,name=chair_id,json=chairId,proto3" json:"chair_id,omitempty"`
 	LeftNum              int32    `protobuf:"varint,2,opt,name=left_num,json=leftNum,proto3" json:"left_num,omitempty"`
@@ -1987,7 +1987,7 @@ func (m *BS2CFirstBuHua) GetJsonFirstBuhua() string {
 	return ""
 }
 
-// 玩家出牌
+//玩家出牌
 type BS2COutCard struct {
 	ChairId              int32    `protobuf:"varint,1,opt,name=chair_id,json=chairId,proto3" json:"chair_id,omitempty"`
 	Card                 int32    `protobuf:"varint,2,opt,name=card,proto3" json:"card,omitempty"`
@@ -2035,7 +2035,7 @@ func (m *BS2COutCard) GetCard() int32 {
 	return 0
 }
 
-// 玩家碰牌
+//玩家碰牌
 type BS2CPengCard struct {
 	ChairId              int32    `protobuf:"varint,1,opt,name=chair_id,json=chairId,proto3" json:"chair_id,omitempty"`
 	Card                 int32    `protobuf:"varint,2,opt,name=card,proto3" json:"card,omitempty"`
@@ -2091,12 +2091,12 @@ func (m *BS2CPengCard) GetLoseChair() int32 {
 	return 0
 }
 
-// 玩家杠牌
+//玩家杠牌
 type BS2CGangCard struct {
 	ChairId int32    `protobuf:"varint,1,opt,name=chair_id,json=chairId,proto3" json:"chair_id,omitempty"`
 	Card    int32    `protobuf:"varint,2,opt,name=card,proto3" json:"card,omitempty"`
 	Type    GangType `protobuf:"varint,3,opt,name=type,proto3,enum=pbgame_mj_changshu.GangType" json:"type,omitempty"`
-	// 放杠的玩家,暗杠为-1,补杠时为碰牌时被碰玩家,明杠时为出牌玩家
+	//放杠的玩家,暗杠为-1,补杠时为碰牌时被碰玩家,明杠时为出牌玩家
 	LoseChair            int32    `protobuf:"varint,4,opt,name=lose_chair,json=loseChair,proto3" json:"lose_chair,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
@@ -2156,7 +2156,7 @@ func (m *BS2CGangCard) GetLoseChair() int32 {
 	return 0
 }
 
-// 玩家吃牌
+//玩家吃牌
 type BS2CChiCard struct {
 	ChairId              int32    `protobuf:"varint,1,opt,name=chair_id,json=chairId,proto3" json:"chair_id,omitempty"`
 	Card                 int32    `protobuf:"varint,2,opt,name=card,proto3" json:"card,omitempty"`
@@ -2212,7 +2212,7 @@ func (m *BS2CChiCard) GetChiType() uint32 {
 	return 0
 }
 
-// 玩家胡牌
+//玩家胡牌
 type BS2CHuCard struct {
 	ChairId              int32    `protobuf:"varint,1,opt,name=chair_id,json=chairId,proto3" json:"chair_id,omitempty"`
 	HuCard               int32    `protobuf:"varint,2,opt,name=hu_card,json=huCard,proto3" json:"hu_card,omitempty"`
@@ -2402,7 +2402,7 @@ func (m *Json_PlayerBalance_Info) GetBanHitIndex() []int32 {
 	return nil
 }
 
-// 单局游戏结束
+//单局游戏结束
 type BS2CGameEnd struct {
 	CurInning            uint32      `protobuf:"varint,1,opt,name=cur_inning,json=curInning,proto3" json:"cur_inning,omitempty"`
 	Banker               int32       `protobuf:"varint,2,opt,name=banker,proto3" json:"banker,omitempty"`
@@ -2654,7 +2654,7 @@ func (m *Json_GameRecord_InningInfo) GetScore() map[int32]int32 {
 	return nil
 }
 
-// 战绩记录
+//战绩记录
 type S2CGameRecord struct {
 	TotalInning          uint32            `protobuf:"varint,2,opt,name=total_inning,json=totalInning,proto3" json:"total_inning,omitempty"`
 	RankInfo             []*GameRecordRank `protobuf:"bytes,3,rep,name=rank_info,json=rankInfo,proto3" json:"rank_info,omitempty"`
@@ -2929,7 +2929,7 @@ type GameDeskInfo struct {
 	GameName   string     `protobuf:"bytes,1,opt,name=game_name,json=gameName,proto3" json:"game_name,omitempty"`
 	Arg        *DeskArg   `protobuf:"bytes,2,opt,name=arg,proto3" json:"arg,omitempty"`
 	GameStatus GameStatus `protobuf:"varint,3,opt,name=game_status,json=gameStatus,proto3,enum=pbgame_mj_changshu.GameStatus" json:"game_status,omitempty"`
-	// 准备的玩家信息(数组索引和chair_id不一定相同)
+	//准备的玩家信息(数组索引和chair_id不一定相同)
 	GameUser             []*DeskUserInfo   `protobuf:"bytes,4,rep,name=game_user,json=gameUser,proto3" json:"game_user,omitempty"`
 	CurInning            uint32            `protobuf:"varint,5,opt,name=cur_inning,json=curInning,proto3" json:"cur_inning,omitempty"`
 	BankerId             int32             `protobuf:"varint,6,opt,name=banker_id,json=bankerId,proto3" json:"banker_id,omitempty"`

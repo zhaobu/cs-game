@@ -19,9 +19,9 @@ var _ = math.Inf
 // is compatible with the proto package it is being compiled against.
 // A compilation error at this line likely means your copy of the
 // proto package needs to be updated.
-const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
+const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
-// 游戏状态
+//游戏状态
 type GameStatus int32
 
 const (
@@ -698,7 +698,7 @@ type DeskUserInfo struct {
 	Double DoubleCode       `protobuf:"varint,7,opt,name=Double,proto3,enum=pbgame_ddz.DoubleCode" json:"Double,omitempty"`
 	Oper   OperMask         `protobuf:"varint,8,opt,name=Oper,proto3,enum=pbgame_ddz.OperMask" json:"Oper,omitempty"`
 	Mask   int32            `protobuf:"varint,9,opt,name=Mask,proto3" json:"Mask,omitempty"`
-	// bool IsFreeOut = 10; // 是否自由出牌
+	//bool IsFreeOut = 10; // 是否自由出牌
 	LastCards            []byte   `protobuf:"bytes,10,opt,name=LastCards,proto3" json:"LastCards,omitempty"`
 	Lct                  CardType `protobuf:"varint,11,opt,name=Lct,proto3,enum=pbgame_ddz.CardType" json:"Lct,omitempty"`
 	HaveCards            []byte   `protobuf:"bytes,12,opt,name=HaveCards,proto3" json:"HaveCards,omitempty"`

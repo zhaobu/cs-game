@@ -19,7 +19,7 @@ var _ = math.Inf
 // is compatible with the proto package it is being compiled against.
 // A compilation error at this line likely means your copy of the
 // proto package needs to be updated.
-const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
+const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
 // 查询支持游戏 c -> s
 type QueryGameListReq struct {
@@ -282,7 +282,7 @@ func (m *QueryUserInfoRsp) GetInfo() *common.UserInfo {
 	return nil
 }
 
-// 查询用户绑定信息
+//查询用户绑定信息
 type QueryUserBuildInfoReq struct {
 	Head                 *common.ReqHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
@@ -322,7 +322,7 @@ func (m *QueryUserBuildInfoReq) GetHead() *common.ReqHead {
 	return nil
 }
 
-// 查询用户绑定信息
+//查询用户绑定信息
 type QueryUserBuildInfoRsp struct {
 	Head                 *common.RspHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
 	IsBuildPhone         bool            `protobuf:"varint,2,opt,name=IsBuildPhone,proto3" json:"IsBuildPhone,omitempty"`

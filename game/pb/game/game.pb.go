@@ -19,9 +19,9 @@ var _ = math.Inf
 // is compatible with the proto package it is being compiled against.
 // A compilation error at this line likely means your copy of the
 // proto package needs to be updated.
-const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
+const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
-// 玩家在桌子中状态
+//玩家在桌子中状态
 type UserDeskStatus int32
 
 const (
@@ -56,7 +56,7 @@ func (UserDeskStatus) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_2a9278d664c0c01e, []int{0}
 }
 
-// 扣费类型
+//扣费类型
 type FeeType int32
 
 const (
@@ -85,7 +85,7 @@ func (FeeType) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_2a9278d664c0c01e, []int{1}
 }
 
-// 创建桌子code
+//创建桌子code
 type MakeDeskRspCode int32
 
 const (
@@ -144,7 +144,7 @@ func (MakeDeskRspCode) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_2a9278d664c0c01e, []int{2}
 }
 
-// 加入桌子code
+//加入桌子code
 type JoinDeskRspCode int32
 
 const (
@@ -185,7 +185,7 @@ func (JoinDeskRspCode) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_2a9278d664c0c01e, []int{3}
 }
 
-// 坐下准备code
+//坐下准备code
 type SitDownRspCode int32
 
 const (
@@ -241,7 +241,7 @@ func (SitDownRspCode) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_2a9278d664c0c01e, []int{4}
 }
 
-// 离开桌子code
+//离开桌子code
 type ExitDeskRspCode int32
 
 const (
@@ -276,7 +276,7 @@ func (ExitDeskRspCode) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_2a9278d664c0c01e, []int{5}
 }
 
-// 点击解散按钮方式
+//点击解散按钮方式
 type DestroyDeskType int32
 
 const (
@@ -314,7 +314,7 @@ func (DestroyDeskType) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_2a9278d664c0c01e, []int{6}
 }
 
-// 申请解散回应code
+//申请解散回应code
 type DestroyDeskRspCode int32
 
 const (
@@ -1162,7 +1162,7 @@ func (m *DestroyDeskReq) GetType() DestroyDeskType {
 	return DestroyDeskType_DestroyTypeGame
 }
 
-// 申请解散回应
+//申请解散回应
 type DestroyDeskRsp struct {
 	Head                 *common.RspHead    `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
 	Code                 DestroyDeskRspCode `protobuf:"varint,2,opt,name=Code,proto3,enum=pbgame.DestroyDeskRspCode" json:"Code,omitempty"`
@@ -1226,7 +1226,7 @@ func (m *DestroyDeskRsp) GetErrMsg() string {
 	return ""
 }
 
-// 房间解散结果通知
+//房间解散结果通知
 type DestroyDeskResultNotif struct {
 	DeskID               uint64          `protobuf:"varint,1,opt,name=DeskID,proto3" json:"DeskID,omitempty"`
 	Result               int32           `protobuf:"varint,2,opt,name=Result,proto3" json:"Result,omitempty"`
@@ -1330,7 +1330,7 @@ func (m *VoteDestroyDeskReq) GetOption() VoteOption {
 	return VoteOption_VoteOptionNone
 }
 
-// 投票解散信息
+//投票解散信息
 type VoteDestroyDeskInfo struct {
 	UserID               uint64     `protobuf:"varint,1,opt,name=UserID,proto3" json:"UserID,omitempty"`
 	Option               VoteOption `protobuf:"varint,2,opt,name=Option,proto3,enum=pbgame.VoteOption" json:"Option,omitempty"`
@@ -1546,7 +1546,7 @@ func (m *GameNotif) GetNotifValue() []byte {
 	return nil
 }
 
-// 发送游戏指令 c -> s
+//发送游戏指令 c -> s
 type GameCommandReq struct {
 	Head                 *common.ReqHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
 	CmdType              CmdType         `protobuf:"varint,2,opt,name=CmdType,proto3,enum=pbgame.CmdType" json:"CmdType,omitempty"`
@@ -1602,7 +1602,7 @@ func (m *GameCommandReq) GetCmdInfo() string {
 	return ""
 }
 
-// 发送游戏指令 s -> c
+//发送游戏指令 s -> c
 type GameCommandRsp struct {
 	Head                 *common.RspHead `protobuf:"bytes,1,opt,name=Head,proto3" json:"Head,omitempty"`
 	CmdType              CmdType         `protobuf:"varint,2,opt,name=CmdType,proto3,enum=pbgame.CmdType" json:"CmdType,omitempty"`
@@ -1666,7 +1666,7 @@ func (m *GameCommandRsp) GetErrMsg() string {
 	return ""
 }
 
-// 游戏指令通知,发送给1个或者多个人
+//游戏指令通知,发送给1个或者多个人
 type GameCommandNotif struct {
 	UserID               uint64   `protobuf:"varint,1,opt,name=UserID,proto3" json:"UserID,omitempty"`
 	CmdType              CmdType  `protobuf:"varint,2,opt,name=CmdType,proto3,enum=pbgame.CmdType" json:"CmdType,omitempty"`
@@ -1722,7 +1722,7 @@ func (m *GameCommandNotif) GetCmdInfo() string {
 	return ""
 }
 
-// 玩家上下线
+//玩家上下线
 type GameUserOnOffLineNotif struct {
 	UserID               uint64   `protobuf:"varint,1,opt,name=UserID,proto3" json:"UserID,omitempty"`
 	Oper                 int32    `protobuf:"varint,2,opt,name=Oper,proto3" json:"Oper,omitempty"`

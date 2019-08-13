@@ -18,7 +18,7 @@ var _ = math.Inf
 // is compatible with the proto package it is being compiled against.
 // A compilation error at this line likely means your copy of the
 // proto package needs to be updated.
-const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
+const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
 type UserStatus int32
 
@@ -51,7 +51,7 @@ func (UserStatus) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_8f954d82c0b891f6, []int{0}
 }
 
-// 桌子类型
+//桌子类型
 type DeskType int32
 
 const (
