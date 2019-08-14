@@ -23,8 +23,8 @@ import (
 	"go.uber.org/zap"
 )
 
-const dissInterval time.Duration = time.Second * 2 //解散间隔2s
-const dissTimeOut time.Duration = time.Second * 10 //投票解散时间120s
+const dissInterval time.Duration = time.Second * 2  //解散间隔2s
+const dissTimeOut time.Duration = time.Second * 120 //投票解散时间120s
 
 type deskUserInfo struct {
 	chairId    int32                 //座位号
@@ -212,7 +212,7 @@ func (d *Desk) doSitDown(uid uint64, chair int32, rsp *pbgame.SitDownRsp) {
 		d.changUserState(0, pbgame.UserDeskStatus_UDSPlaying)
 		d.gameSink.changGameState(pbgame_logic.GameStatus_GSDice)
 		d.gameSink.StartGame()
-		d.set_timer(mj.TID_LongTime, 20*time.Second, func() {
+		d.set_timer(mj.TID_LongTime, 2*time.Hour, func() {
 			d.dealDestroyDesk(pbgame.DestroyDeskType_DestroyTypeTimeOut)
 		})
 	}
