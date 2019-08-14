@@ -23,8 +23,8 @@ import (
 	"go.uber.org/zap"
 )
 
-const dissInterval time.Duration = time.Second * 2  //解散间隔2s
-const dissTimeOut time.Duration = time.Second * 120 //投票解散时间120s
+const dissInterval time.Duration = time.Second * 2 //解散间隔2s
+const dissTimeOut time.Duration = time.Second * 10 //投票解散时间120s
 
 type deskUserInfo struct {
 	chairId    int32                 //座位号
@@ -212,7 +212,7 @@ func (d *Desk) doSitDown(uid uint64, chair int32, rsp *pbgame.SitDownRsp) {
 		d.changUserState(0, pbgame.UserDeskStatus_UDSPlaying)
 		d.gameSink.changGameState(pbgame_logic.GameStatus_GSDice)
 		d.gameSink.StartGame()
-		d.set_timer(mj.TID_LongTime, 2*time.Hour, func() {
+		d.set_timer(mj.TID_LongTime, 20*time.Second, func() {
 			d.dealDestroyDesk(pbgame.DestroyDeskType_DestroyTypeTimeOut)
 		})
 	}
@@ -473,6 +473,10 @@ func (d *Desk) realDestroyDesk(reqType pbgame.DestroyDeskType) {
 			d.Log.Errorf("房间日志 delete err:%s", err)
 		}
 	}
+	//取消所有的定时器
+	d.cancel_timer(mj.TID_LongTime)
+	d.cancel_timer(mj.TID_Destory)
+	d.cancel_timer(mj.TID_Common)
 }
 
 // 更新财富(tag:0:表示预扣,1:返还)
@@ -628,6 +632,9 @@ func (d *Desk) GetUidByChairid(chairId int32) uint64 {
 }
 
 func (d *Desk) set_timer(tID mj.EmtimerID, dura time.Duration, f func()) {
+	if _, ok := d.timerManger[tID]; ok { //如果存在定时器先删除
+		d.cancel_timer(tID)
+	}
 	exefun := func() {
 		if d != nil {
 			f()
