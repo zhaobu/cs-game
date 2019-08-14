@@ -195,7 +195,7 @@ func (s *session) handleHallUpdateBindMobileReq(userID uint64, req *pbhall.Updat
 	//推送net
 	//tlog.Info("推送用户绑定手机信息", zap.Any("Uid", userID), zap.Any("Mobile", req.Mobile))
 	go func() {
-		err = net.PushUserBindPhone(userID,req.Mobile)
+		err = net.PushUserBindPhone(userID,1,req.Mobile)
 		if err != nil{
 			tlog.Error("推送用户绑定手机信息 错误", zap.Any("Uid", userID), zap.Any("Mobile", req.Mobile),zap.Any("err",err.Error()))
 		}
@@ -235,6 +235,13 @@ func (s *session) handleHallBindXianLiaoAccountReq(userID uint64,req *pbhall.Bin
 		return
 	}
 	rsp.Code = 1
+
+	go func() {
+		err = net.PushUserBindPhone(userID,2,req.XianLiaoId)
+		if err != nil{
+			tlog.Error("推送用户绑定手机信息 错误", zap.Any("Uid", userID), zap.Any("Mobile", req.XianLiaoId),zap.Any("err",err.Error()))
+		}
+	}()
 }
 
 func queryGameList() (gamelist []string, err error) {

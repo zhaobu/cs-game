@@ -42,12 +42,13 @@ func PushUserRegister(info *pbcommon.UserInfo) (err error) {
 }
 
 //绑定手机号
-func PushUserBindPhone(uId uint64, Phone string) (err error) {
+func PushUserBindPhone(uId uint64,buildType int, Phone string) (err error) {
 	song := make(map[string]interface{})
 	song["UserId"] = uId
+	song["Bype"] = buildType
 	song["Phone"] = Phone
 	song["Time"] = time.Now().Format("20060102150405")
-	song["Sign"] = md5V(fmt.Sprintf("%d%s%s%s", uId, Phone, song["Time"].(string), NetKey))
+	song["Sign"] = md5V(fmt.Sprintf("%d%d%s%s%s", uId,buildType, Phone, song["Time"].(string), NetKey))
 	bytesData, err := json.Marshal(song)
 	if err != nil {
 		return fmt.Errorf("推送用户手机绑定 .net  PushUserBindPhone 序列化参数错误 err:%s", err)
