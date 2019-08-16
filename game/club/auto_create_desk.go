@@ -6,9 +6,9 @@ import (
 	"cy/game/codec"
 	"cy/game/codec/protobuf"
 	"cy/game/db/mgo"
-	"cy/game/pb/common"
-	"cy/game/pb/game"
-	"cy/game/pb/inner"
+	pbcommon "cy/game/pb/common"
+	pbgame "cy/game/pb/game"
+	pbinner "cy/game/pb/inner"
 	"hash/crc32"
 
 	"github.com/sirupsen/logrus"
@@ -57,9 +57,9 @@ func flashDesk(n *pbinner.DeskChangeNotif) {
 			needCheck = true
 		}
 		if needCheck {
-			setting,cid,masterUserID := checkAutoCreate(n.ClubID)
+			setting, cid, masterUserID := checkAutoCreate(n.ClubID)
 			if len(setting) > 0 {
-				createDesk(setting,cid,masterUserID)
+				createDesk(setting, cid, masterUserID)
 			}
 		}
 	}
@@ -67,7 +67,7 @@ func flashDesk(n *pbinner.DeskChangeNotif) {
 	go sendClubChangeInfo(n.ClubID, clubChangeTypUpdateNoTips, 0)
 }
 
-func checkAutoCreate(_cid int64)(setting []*mgo.DeskSetting, cid int64, masterUserID uint64) {
+func checkAutoCreate(_cid int64) (setting []*mgo.DeskSetting, cid int64, masterUserID uint64) {
 	logrus.Infof("checkAutoCreate %d", _cid)
 	var needCreateGameArgs []*mgo.DeskSetting
 
@@ -93,7 +93,7 @@ func checkAutoCreate(_cid int64)(setting []*mgo.DeskSetting, cid int64, masterUs
 			//fmt.Printf("检测俱乐部房间 a.Status=%s \n",b.Status)
 			//fmt.Printf("检测俱乐部房间\n a.CreateVlaueHash =%d  b.CreateVlaueHash =%d  \n",crc32.ChecksumIEEE(a.GameArgMsgValue),b.CreateVlaueHash)
 			//fmt.Printf("a GameArgMsgValue = %d a CreateVlaueHash = %d \n",crc32.ChecksumIEEE(a.GameArgMsgValue),a.GameArgMsgValue)
-			if a.GameName == b.GameName && b.Status == "1" &&  b.CreateVlaueHash == uint64(crc32.ChecksumIEEE(a.GameArgMsgValue)) { //判断是否有空的对应玩法的桌子
+			if a.GameName == b.GameName && b.Status == "1" && b.CreateVlaueHash == uint64(crc32.ChecksumIEEE(a.GameArgMsgValue)) { //判断是否有空的对应玩法的桌子
 				//fmt.Printf("找到一个相同的空房间 %d\n",b.CreateVlaueHash)
 				have = true
 				break
@@ -114,7 +114,7 @@ func checkAutoCreate(_cid int64)(setting []*mgo.DeskSetting, cid int64, masterUs
 	//if len(needCreateGameArgs) > 0 {
 	//	createDesk(needCreateGameArgs, _cid, masterUserID)
 	//}
-	return needCreateGameArgs,_cid,cc.MasterUserID
+	return needCreateGameArgs, _cid, cc.MasterUserID
 }
 
 func createDesk(setting []*mgo.DeskSetting, cid int64, masterUserID uint64) {
@@ -133,6 +133,7 @@ func createDesk(setting []*mgo.DeskSetting, cid int64, masterUserID uint64) {
 			GameArgMsgName:  s.GameArgMsgName,
 			GameArgMsgValue: s.GameArgMsgValue,
 			ClubID:          cid,
+			ClubMasterUid:   masterUserID,
 		}, reqRCall)
 		reqRCall.UserID = masterUserID
 		rspRCall := &codec.Message{}
@@ -141,7 +142,7 @@ func createDesk(setting []*mgo.DeskSetting, cid int64, masterUserID uint64) {
 }
 
 //销毁桌子
-func destoryDesk(uId uint64,desks... *pbcommon.DeskInfo){
+func destoryDesk(uId uint64, desks ...*pbcommon.DeskInfo) {
 	for _, s := range desks {
 		cli, err := getGameCli(s.GameName)
 		if err != nil {
@@ -149,9 +150,9 @@ func destoryDesk(uId uint64,desks... *pbcommon.DeskInfo){
 		}
 		reqRCall := &codec.Message{}
 		codec.Pb2Msg(&pbgame.DestroyDeskReq{
-			Head:            &pbcommon.ReqHead{UserID: uId},
-			DeskID:s.ID,
-			Type:pbgame.DestroyDeskType_DestroyTypeClub,
+			Head:   &pbcommon.ReqHead{UserID: uId},
+			DeskID: s.ID,
+			Type:   pbgame.DestroyDeskType_DestroyTypeClub,
 		}, reqRCall)
 		reqRCall.UserID = uId
 		rspRCall := &codec.Message{}

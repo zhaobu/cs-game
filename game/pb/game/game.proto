@@ -273,3 +273,15 @@ message GameUserOnOffLineNotif {
   uint64 UserID = 1;
   int32 Oper = 2;  // 0表示下线,1表示上线
 }
+
+//语音房间状态
+enum VoiceStatus {
+  VoiceStatusNone = 0;  //不在房间
+  VoiceStatusIn = 1;    //在房间
+}
+
+//玩家加入离开语音房间
+message GameUserVoiceStatus {
+  pbcommon.ReqHead Head = 1;
+  VoiceStatus Status = 2;
+}

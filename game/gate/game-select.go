@@ -87,18 +87,6 @@ func (s *session) getGameAddr(msg *codec.Message) (gameName, gameID string) {
 			}
 		}
 		s.sendPb(&pbgame.JoinDeskRsp{Code: pbgame.JoinDeskRspCode_JoinDeskNotExist})
-	// case proto.MessageName((*pbgame.SitDownReq)(nil)):
-	// 	sitDwonReq, ok := pb.(*pbgame.SitDownReq)
-	// 	if !ok {
-	// 		return
-	// 	}
-	// 	deskInfo, err := cache.QueryDeskInfo(joinDeskReq.DeskID)
-	// 	if err == nil && deskInfo != nil {
-	// 		if deskInfo.GameName != "" && deskInfo.GameID != "" {
-	// 			return deskInfo.GameName, deskInfo.GameID
-	// 		}
-	// 	}
-	// 	s.sendPb(&pbgame.JoinDeskRsp{Code: pbgame.JoinDeskRspCode_JoinDeskNotExist})
 	case proto.MessageName((*pbgame.QueryDeskInfoReq)(nil)):
 		queryDeskInfoReq, ok := pb.(*pbgame.QueryDeskInfoReq)
 		if !ok {
