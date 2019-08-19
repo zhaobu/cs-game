@@ -281,7 +281,20 @@ enum VoiceStatus {
 }
 
 //玩家加入离开语音房间
-message GameUserVoiceStatus {
+message GameUserVoiceStatusReq {
   pbcommon.ReqHead Head = 1;
   VoiceStatus Status = 2;
+}
+
+enum VoiceStatusRspCode {
+  VoiceStatusRspCodeSucc = 0;        //语音状态切换成功
+  VoiceStatusRspCodeNotPlayer = 1;   //语音状态切换时不是游戏玩家
+  VoiceStatusRspCodeNotPlaying = 2;  //语音状态切换时游戏未开始
+  VoiceStatusRspCodeNoDesk = 3;      //语音状态切换时桌子不存在
+}
+
+//玩家加入离开语音房间结果
+message GameUserVoiceStatusRsp {
+  pbcommon.RspHead Head = 1;
+  VoiceStatusRspCode Code = 2;
 }

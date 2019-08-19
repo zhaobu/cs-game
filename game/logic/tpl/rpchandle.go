@@ -20,6 +20,42 @@ type RpcHandle struct {
 	service *RoomServie
 }
 
+//GameUserVoiceStatus 玩家语音状态切换
+func (self *RpcHandle) GameUserVoiceStatus(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
+	defer func() {
+		r := recover()
+		if r != nil {
+			self.service.log.Errorf("recover info: uid:%d stack:%s", args.UserID, string(debug.Stack()))
+		}
+	}()
+
+	pb, err := codec.Msg2Pb(args)
+	if err != nil {
+		self.service.tlog.Error("error info", zap.Error(err))
+		return err
+	}
+	self.service.log.Infof("recv from gate uid: %v,msgName: %s,pb: %s", args.UserID, args.Name, util.PB2JSON(pb, true))
+
+	req, ok := pb.(*pbgame.GameUserVoiceStatusReq)
+	if !ok {
+		err = fmt.Errorf("not *pbgame.GameUserVoiceStatusReq")
+		self.service.tlog.Error("error info", zap.Error(err))
+		return
+	}
+
+	rsp := &pbgame.GameUserVoiceStatusRsp{Code: pbgame.VoiceStatusRspCode_VoiceStatusRspCodeSucc}
+	if req.Head != nil {
+		rsp.Head = &pbcommon.RspHead{Seq: req.Head.Seq}
+	}
+
+	defer func() {
+		self.service.ToGateNormal(rsp, true, args.UserID)
+	}()
+
+	self.service.roomHandle.HandleGameUserVoiceStatusReq(args.UserID, req, rsp)
+	return
+}
+
 //GameCommandReq发送指令
 func (self *RpcHandle) GameCommandReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
 	defer func() {

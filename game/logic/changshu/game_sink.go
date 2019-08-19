@@ -1137,7 +1137,7 @@ func (self *GameSink) afterGameEnd(endType pbgame_logic.GameEndType) {
 //断线重连
 func (self *GameSink) gameReconnect(recInfo *pbgame_logic.GameDeskInfo, uid uint64) {
 	chairId := self.desk.GetChairidByUid(uid)
-	self.desk.Log.Infof("%s 第%d局玩家%d断线重连,chairId=%d", self.logHeadUser(-1), self.desk.curInning, uid, chairId)
+	self.desk.Log.Infof("%s 第%d局userId:%d断线重连,chairId=%d", self.logHeadUser(-1), self.desk.curInning, uid, chairId)
 	//chairId为-1时为观察者游戏中途进入房间
 	switch recInfo.GameStatus {
 	case pbgame_logic.GameStatus_GSDice: //投色子

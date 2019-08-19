@@ -27,11 +27,12 @@ const dissInterval time.Duration = time.Second * 2  //解散间隔2s
 const dissTimeOut time.Duration = time.Second * 120 //投票解散时间120s
 
 type deskUserInfo struct {
-	chairId    int32                 //座位号
-	info       *pbcommon.UserInfo    //个人信息
-	userStatus pbgame.UserDeskStatus //桌子中状态
-	lastDiss   time.Time             //上次申请解散时间
-	online     bool                  //是否在线
+	chairId     int32                 //座位号
+	info        *pbcommon.UserInfo    //个人信息
+	userStatus  pbgame.UserDeskStatus //桌子中状态
+	lastDiss    time.Time             //上次申请解散时间
+	online      bool                  //是否在线
+	voiceStatus pbgame.VoiceStatus    //语音状态
 }
 
 //投票解散信息
@@ -196,6 +197,7 @@ func (d *Desk) doSitDown(uid uint64, chair int32, rsp *pbgame.SitDownRsp) {
 		d.gameSink.changGameState(pbgame_logic.GameStatus_GSWait)
 	}
 	d.playChair[chair] = dUserInfo
+	dUserInfo.online = true
 	d.gameSink.AddPlayer(chair, uid, dUserInfo.info)
 	//先发送加入成功消息
 	rsp.Code = pbgame.SitDownRspCode_SitDownSucc
@@ -246,7 +248,7 @@ func (d *Desk) doStandUp(chairId int32) pbgame.ExitDeskRspCode {
 		d.Tlog.Info("doStandUp时 d.gameSink.Exitlayer 出错")
 		return pbgame.ExitDeskRspCode_ExitDeskPlaying
 	}
-
+	dUserInfo.online = false
 	dUserInfo.chairId = -1
 	dUserInfo.userStatus = pbgame.UserDeskStatus_UDSLook
 	delete(d.playChair, chairId)
@@ -339,6 +341,7 @@ func (d *Desk) getBaseDeskInfo() *pbgame_logic.GameDeskInfo {
 		userInfo.ChairId = chair
 		userInfo.UserStatus = user.userStatus
 		userInfo.Online = user.online
+		userInfo.VoiceStatus = user.voiceStatus
 		msg.GameUser = append(msg.GameUser, userInfo)
 	}
 	return msg
@@ -395,6 +398,11 @@ func (d *Desk) doDestroyDesk(uid uint64, req *pbgame.DestroyDeskReq, rsp *pbgame
 		d.dealDestroyDesk(req.Type)
 	}
 	rsp.Code = pbgame.DestroyDeskRspCode_DestroyDeskSucc
+}
+
+//玩家语音状态改变
+func (d *Desk) doChangeGameUserVoiceStatus(uid uint64, req *pbgame.GameUserVoiceStatusReq) {
+	d.deskPlayers[uid].voiceStatus = req.Status
 }
 
 //玩家选择解散请求
