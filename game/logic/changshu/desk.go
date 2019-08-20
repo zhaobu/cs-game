@@ -58,6 +58,7 @@ type Desk struct {
 	timerManger   map[mj.EmtimerID]*timingwheel.Timer //定时器管理
 	*voteInfo                                         //投票信息
 	*mj.RoomLog                                       //桌子日志
+	payMoney      bool                                //是否需要扣钻(第一局非解散结束后才能扣钻)
 }
 
 func makeDesk(deskArg *pbgame_logic.DeskArg, masterUid, clubMasterUid, deskID uint64, clubID int64, gameNode *tpl.RoomServie) *Desk {
@@ -452,8 +453,8 @@ func (d *Desk) gameEnd(endType pbgame_logic.GameEndType) {
 
 //真正销毁桌子
 func (d *Desk) realDestroyDesk(reqType pbgame.DestroyDeskType) {
-	//如果房主没有在房间玩游戏,就退还房主预扣的钱
-	if d.curInning == 0 {
+	//第一局如果房主没有在房间玩游戏,就退还房主或者俱乐部群主预扣的钱
+	if !d.payMoney {
 		if d.deskConfig.Args.PaymentType == 3 { //俱乐部群主支付
 			d.updateWealth(d.clubMasterUid, 1)
 		} else {

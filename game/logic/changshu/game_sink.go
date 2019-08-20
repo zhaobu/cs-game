@@ -1098,6 +1098,9 @@ func (self *GameSink) gameEnd(endType pbgame_logic.GameEndType) {
 		self.desk.gameEnd(endType)
 		return
 	}
+	if self.desk.curInning > 1 || endType == pbgame_logic.GameEndType_EndDeuce || endType == pbgame_logic.GameEndType_EndHu {
+		self.desk.payMoney = true
+	}
 	self.isPlaying = false
 	//发送小结算信息
 	msg := &pbgame_logic.BS2CGameEnd{CurInning: self.desk.curInning, Banker: self.bankerId, EndType: endType}
@@ -1119,7 +1122,9 @@ func (self *GameSink) gameEnd(endType pbgame_logic.GameEndType) {
 		scoreInfo[int32(k)] = v.BalanceInfo.Point
 	}
 	self.record.AddGameRecord(scoreInfo)
-	self.record.RecordGameEnd(self.players)
+	if self.desk.payMoney {
+		self.record.RecordGameEnd(self.players)
+	}
 	//主动发送一下战绩
 	self.getGameRecord(-1)
 	//游戏记录
