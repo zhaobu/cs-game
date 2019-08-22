@@ -11,7 +11,7 @@ type gameCommond struct {
 
 func (self *gameCommond) HandleCommond(uid uint64, req *pbgame.GameCommandReq, rsp *pbgame.GameCommandRsp) {
 	switch req.CmdType {
-	case pbgame.CmdType_CmdEmoji, pbgame.CmdType_CmdProps, pbgame.CmdType_CmdPhrase: //发送表情,道具,短语
+	case pbgame.CmdType_CmdEmoji, pbgame.CmdType_CmdProps, pbgame.CmdType_CmdPhrase, pbgame.CmdType_CmdVoicemail: //发送表情,道具,短语,语音留言
 		self.SendFixedInfo(uid, req, rsp)
 	case 2: //要牌
 		self.CmdWantCard(uid, req, rsp)
