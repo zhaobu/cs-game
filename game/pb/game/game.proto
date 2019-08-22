@@ -244,6 +244,7 @@ enum CmdType {
   CmdDebugCard = 2;  //配牌,要牌
   CmdProps = 3;      //发送道具
   CmdPhrase = 4;     //发送短语
+  CmdVoicemail = 5;  //语音留言
 }
 
 //发送游戏指令 c -> s
