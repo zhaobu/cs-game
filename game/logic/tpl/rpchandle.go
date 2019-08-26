@@ -21,7 +21,7 @@ type RpcHandle struct {
 }
 
 //GameUserVoiceStatus 玩家语音状态切换
-func (self *RpcHandle) GameUserVoiceStatus(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
+func (self *RpcHandle) GameUserVoiceStatusReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
 	defer func() {
 		r := recover()
 		if r != nil {
