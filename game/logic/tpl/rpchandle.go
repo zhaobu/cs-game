@@ -42,17 +42,7 @@ func (self *RpcHandle) GameUserVoiceStatus(ctx context.Context, args *codec.Mess
 		self.service.tlog.Error("error info", zap.Error(err))
 		return
 	}
-
-	rsp := &pbgame.GameUserVoiceStatusRsp{Code: pbgame.VoiceStatusRspCode_VoiceStatusRspCodeSucc}
-	if req.Head != nil {
-		rsp.Head = &pbcommon.RspHead{Seq: req.Head.Seq}
-	}
-
-	defer func() {
-		self.service.ToGateNormal(rsp, true, args.UserID)
-	}()
-
-	self.service.roomHandle.HandleGameUserVoiceStatusReq(args.UserID, req, rsp)
+	self.service.roomHandle.HandleGameUserVoiceStatusReq(args.UserID, req)
 	return
 }
 

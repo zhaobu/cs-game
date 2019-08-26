@@ -404,6 +404,8 @@ func (d *Desk) doDestroyDesk(uid uint64, req *pbgame.DestroyDeskReq, rsp *pbgame
 //玩家语音状态改变
 func (d *Desk) doChangeGameUserVoiceStatus(uid uint64, req *pbgame.GameUserVoiceStatusReq) {
 	d.deskPlayers[uid].voiceStatus = req.Status
+	//广播给其他人有玩家语音状态改变
+	d.SendDataPlayer(0, &pbgame.GameUserVoiceStatusNotif{UserID: uid, Status: req.Status, MemberId: req.MemberId})
 }
 
 //玩家选择解散请求
@@ -579,6 +581,21 @@ func (d *Desk) SendData(_uid uint64, pb proto.Message) {
 		var i int = 0
 		for uid, _ := range d.deskPlayers {
 			uids[i] = uid
+			i++
+		}
+		d.ToGateNormal(pb, uids...)
+		return
+	}
+	d.ToGateNormal(pb, _uid)
+}
+
+//_uid为0时发送给所有游戏玩家
+func (d *Desk) SendDataPlayer(_uid uint64, pb proto.Message) {
+	if _uid == 0 {
+		uids := make([]uint64, len(d.playChair))
+		var i int = 0
+		for _, v := range d.playChair {
+			uids[i] = v.info.UserID
 			i++
 		}
 		d.ToGateNormal(pb, uids...)

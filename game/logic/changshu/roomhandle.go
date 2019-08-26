@@ -38,24 +38,21 @@ func calcFee(arg *pbgame_logic.CreateArg) (change int64) {
 }
 
 //HandleGameUserVoiceStatusReq 玩家语音状态
-func (self *roomHandle) HandleGameUserVoiceStatusReq(uid uint64, req *pbgame.GameUserVoiceStatusReq, rsp *pbgame.GameUserVoiceStatusRsp) {
+func (self *roomHandle) HandleGameUserVoiceStatusReq(uid uint64, req *pbgame.GameUserVoiceStatusReq) {
 	//检查桌子是否存在
 	d := getDeskByUID(uid)
 	if d == nil {
 		tlog.Info("HandleGameUserVoiceStatusReq find no desk", zap.Uint64("uid", uid))
-		rsp.Code = pbgame.VoiceStatusRspCode_VoiceStatusRspCodeNoDesk
 		return
 	}
 	//检查游戏是否开始
 	if d.gameStatus < pbgame_logic.GameStatus_GSDice {
 		tlog.Info("HandleGameUserVoiceStatusReq 游戏还未开始", zap.Uint64("uid", uid))
-		rsp.Code = pbgame.VoiceStatusRspCode_VoiceStatusRspCodeNotPlaying
 		return
 	}
 	//检查是否游戏玩家
 	if d.GetChairidByUid(uid) == -1 {
 		tlog.Info("HandleGameUserVoiceStatusReq 不是游戏玩家", zap.Uint64("uid", uid))
-		rsp.Code = pbgame.VoiceStatusRspCode_VoiceStatusRspCodeNotPlayer
 		return
 	}
 	d.doChangeGameUserVoiceStatus(uid, req)
