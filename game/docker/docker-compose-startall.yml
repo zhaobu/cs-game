@@ -65,6 +65,7 @@ services:
       options:
         max-size: "1000k"
         max-file: "20"
+    restart: on-failure
 
   center:
     build:
@@ -99,6 +100,7 @@ services:
       options:
         max-size: "1000k"
         max-file: "20"
+    restart: on-failure
 
   club:
     build:
@@ -133,6 +135,7 @@ services:
       options:
         max-size: "1000k"
         max-file: "20"
+    restart: on-failure
 
   http:
     build:
@@ -169,6 +172,7 @@ services:
       options:
         max-size: "1000k"
         max-file: "20"
+    restart: on-failure
 
   changshu:
     build:
@@ -203,6 +207,7 @@ services:
       options:
         max-size: "1000k"
         max-file: "20"
+    restart: on-failure
 
   redis:
     image: redis:latest
@@ -219,6 +224,7 @@ services:
       - redisdata:/data
       # 挂载本地配置文件
       - ./redis.conf:/usr/local/etc/redis/redis.conf
+    restart: on-failure
 
   mongodb:
     image: mongo:latest
@@ -236,6 +242,7 @@ services:
       - mongodata:/data/configdb:rw
       # 挂载本地配置文件
       - ./mongod.conf:/etc/mongo/mongod.conf:rw
+    restart: on-failure
 
   consul:
     image: consul:latest
@@ -250,6 +257,7 @@ services:
           - discovery
     volumes:
       - consuldata:/consul/data
+    restart: on-failure
   # initdb:
   #   image: golang:alpine
   #   working_dir: /go/src/cy/game/bin/linux
