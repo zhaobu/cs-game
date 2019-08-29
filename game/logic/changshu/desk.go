@@ -27,12 +27,12 @@ const dissInterval time.Duration = time.Second * 2  //解散间隔2s
 const dissTimeOut time.Duration = time.Second * 120 //投票解散时间120s
 
 type deskUserInfo struct {
-	chairId     int32                 //座位号
-	info        *pbcommon.UserInfo    //个人信息
-	userStatus  pbgame.UserDeskStatus //桌子中状态
-	lastDiss    time.Time             //上次申请解散时间
-	online      bool                  //是否在线
-	voiceStatus pbgame.VoiceStatus    //语音状态
+	chairId       int32                 //座位号
+	info          *pbcommon.UserInfo    //个人信息
+	userStatus    pbgame.UserDeskStatus //桌子中状态
+	lastDiss      time.Time             //上次申请解散时间
+	online        bool                  //是否在线
+	voiceMemberId int32                 //语音sdk玩家id
 }
 
 //投票解散信息
@@ -342,7 +342,7 @@ func (d *Desk) getBaseDeskInfo() *pbgame_logic.GameDeskInfo {
 		userInfo.ChairId = chair
 		userInfo.UserStatus = user.userStatus
 		userInfo.Online = user.online
-		userInfo.VoiceStatus = user.voiceStatus
+		userInfo.VoiceMemberid = user.voiceMemberId
 		msg.GameUser = append(msg.GameUser, userInfo)
 	}
 	return msg
@@ -403,7 +403,11 @@ func (d *Desk) doDestroyDesk(uid uint64, req *pbgame.DestroyDeskReq, rsp *pbgame
 
 //玩家语音状态改变
 func (d *Desk) doChangeGameUserVoiceStatus(uid uint64, req *pbgame.GameUserVoiceStatusReq) {
-	d.deskPlayers[uid].voiceStatus = req.Status
+	if req.Status == pbgame.VoiceStatus_VoiceStatusIn {
+		d.deskPlayers[uid].voiceMemberId = req.MemberId
+	} else {
+		d.deskPlayers[uid].voiceMemberId = 0
+	}
 	//广播给其他人有玩家语音状态改变
 	d.SendDataPlayer(0, &pbgame.GameUserVoiceStatusNotif{UserID: uid, Status: req.Status, MemberId: req.MemberId})
 }

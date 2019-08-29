@@ -397,7 +397,7 @@ message DeskUserInfo {
   repeated OperRecord record_cards = 7;  //操作记录
   int32 dice_value = 8;                  //打色子结果
   bool online = 9;                       //在线状态
-  pbgame.VoiceStatus voice_status = 10;  //语音状态
+  int32 voice_memberid = 10;  //语音sdk玩家id(为0时表示不在语音房间)
 }
 
 // 断线重连、进入桌子 桌子信息 s -> c
@@ -424,4 +424,3 @@ message GameDeskInfo {
   string listen_result = 19;  //听牌信息(按照Json_Listen解析)
   int32 baozi = 20;           //豹子倍数(1:不翻倍2:翻倍)
 }
-
