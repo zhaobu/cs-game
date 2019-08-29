@@ -48,6 +48,7 @@ func main() {
 	r.POST("/SetUserRedName", api.SetUserRedNameReq)								//设置用户红名
 	r.POST("/QueryUserParGameInfo", api.QueryUserParGameInfoReq)					//查询用户参与游戏信息
 	r.POST("/QueryUserGameRecord", api.QueryUserGameRecordReq)						//查询用户战绩信息
+	r.POST("/BuildAgent", api.BuildAgentReq)										//绑定代理信息
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	r.Run(*addr)
 }
