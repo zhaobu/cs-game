@@ -277,8 +277,9 @@ message GameUserOnOffLineNotif {
 
 //语音房间状态
 enum VoiceStatus {
-  VoiceStatusNone = 0;  //不在房间
-  VoiceStatusIn = 1;    //在房间
+  VoiceStatusNone = 0;
+  VoiceStatusNotIn = 1;  //不在房间
+  VoiceStatusIn = 2;     //在房间
 }
 
 //玩家加入离开语音房间
