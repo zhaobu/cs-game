@@ -242,11 +242,10 @@ func generateMobileCaptcha() string {
 }
 
 func sendMobileCaptcha(mobile string, captcha string) error {
-	client, err := sdk.NewClientWithAccessKey("default", "LTAIlctikPyE8yy1", "dFrHFwwiWZ8bMlGt63sybVCJ0Su9zg")
+	client, err := sdk.NewClientWithAccessKey("default", "LTAI4FeBZzVGdJ4uJ6Jk4Xjo", "69Q6D7zHrsbP8kgWoAw80GO4WddxNC")
 	if err != nil {
 		return err
 	}
-
 	request := requests.NewCommonRequest()
 	request.Method = "POST"
 	request.Scheme = "https" // https | http
