@@ -699,11 +699,11 @@ func (d *Desk) timerMangerDelete(tID mj.EmtimerID) {
 func (d *Desk) OnOffLine(uid uint64, online bool) {
 	dUserInfo := d.deskPlayers[uid]
 	dUserInfo.online = online
-	if d.curInning == 0 { //游戏开始前
-		if !online { //下线
-			d.doExit(uid, &pbgame.ExitDeskRsp{})
-		}
-	} else { //游戏中
+	// if d.curInning == 0 { //游戏开始前
+	// 	if !online { //下线
+	// 		d.doExit(uid, &pbgame.ExitDeskRsp{})
+	// 	}
+	// } else { //游戏中
 		if dUserInfo.userStatus >= pbgame.UserDeskStatus_UDSSitDown {
 			if online { //游戏玩家上线
 				//重新从mgo获取session信息
@@ -726,5 +726,5 @@ func (d *Desk) OnOffLine(uid uint64, online bool) {
 				d.doExit(uid, &pbgame.ExitDeskRsp{})
 			}
 		}
-	}
+	// }
 }
