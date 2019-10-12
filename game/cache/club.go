@@ -1,7 +1,7 @@
 package cache
 
 import (
-	"cy/game/pb/common"
+	"game/pb/common"
 	"fmt"
 	"strconv"
 

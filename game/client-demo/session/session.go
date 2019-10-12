@@ -1,10 +1,10 @@
 package session
 
 import (
-	"cy/game/codec"
-	"cy/game/codec/protobuf"
-	pbcommon "cy/game/pb/common"
-	pbgame "cy/game/pb/game"
+	"game/codec"
+	"game/codec/protobuf"
+	pbcommon "game/pb/common"
+	pbgame "game/pb/game"
 	"net"
 
 	"go.uber.org/zap"

@@ -2,7 +2,7 @@ package codec
 
 import (
 	"bytes"
-	"cy/game/codec/protobuf"
+	"game/codec/protobuf"
 	"encoding/binary"
 	"fmt"
 	"io"

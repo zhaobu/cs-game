@@ -2,10 +2,10 @@ package main
 
 import (
 	"context"
-	"cy/game/codec"
-	"cy/game/db/mgo"
-	"cy/game/pb/club"
-	"cy/game/pb/common"
+	"game/codec"
+	"game/db/mgo"
+	"game/pb/club"
+	"game/pb/common"
 	"fmt"
 	"time"
 

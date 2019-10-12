@@ -2,8 +2,8 @@ package main
 
 //game_balance文件写算分方法
 import (
-	mj "cy/game/logic/changshu/majiang"
-	pbgame_logic "cy/game/pb/game/mj/changshu"
+	mj "game/logic/changshu/majiang"
+	pbgame_logic "game/pb/game/mj/changshu"
 	"math/rand"
 	"time"
 )

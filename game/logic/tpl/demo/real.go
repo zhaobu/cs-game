@@ -1,10 +1,10 @@
 package main
 
 import (
-	"cy/game/codec/protobuf"
-	"cy/game/db/mgo"
-	pbgame "cy/game/pb/game"
-	cs "cy/game/pb/game/mj/changshu"
+	"game/codec/protobuf"
+	"game/db/mgo"
+	pbgame "game/pb/game"
+	cs "game/pb/game/mj/changshu"
 	"fmt"
 )
 

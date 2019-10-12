@@ -13,6 +13,10 @@ func _galMulAVX512Parallel82(in, out [][]byte, matrix *[matrixSize82]byte, addTo
 //go:noescape
 func _galMulAVX512Parallel84(in, out [][]byte, matrix *[matrixSize84]byte, addTo bool)
 
+func init() {
+	amd64 = true
+}
+
 const (
 	dimIn        = 8                            // Number of input rows processed simultaneously
 	dimOut82     = 2                            // Number of output rows processed simultaneously for x2 routine
@@ -98,7 +102,7 @@ func galMulAVX512Parallel82(in, out [][]byte, matrixRows [][]byte, inputOffset, 
 	for c := inputOffset; c < inputOffset+dimIn; c++ {
 		for iRow := outputOffset; iRow < outputOffset+dimOut82; iRow++ {
 			if c < len(matrixRows[iRow]) {
-				mt := mulTable[matrixRows[iRow][c]]
+				mt := mulTable[matrixRows[iRow][c]][:256]
 				for i := done; i < len(in[0]); i++ {
 					if c == 0 { // only set value for first input column
 						out[iRow][i] = mt[in[c][i]]
@@ -140,7 +144,7 @@ func galMulAVX512Parallel84(in, out [][]byte, matrixRows [][]byte, inputOffset, 
 	for c := inputOffset; c < inputOffset+dimIn; c++ {
 		for iRow := outputOffset; iRow < outputOffset+dimOut84; iRow++ {
 			if c < len(matrixRows[iRow]) {
-				mt := mulTable[matrixRows[iRow][c]]
+				mt := mulTable[matrixRows[iRow][c]][:256]
 				for i := done; i < len(in[0]); i++ {
 					if c == 0 { // only set value for first input column
 						out[iRow][i] = mt[in[c][i]]

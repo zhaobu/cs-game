@@ -1,8 +1,8 @@
 package main
 
 import (
-	"cy/game/db/mgo"
-	"cy/game/hall/web"
+	"game/db/mgo"
+	"game/hall/web"
 	"encoding/json"
 	"fmt"
 	"net/http"

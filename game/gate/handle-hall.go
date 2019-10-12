@@ -1,13 +1,13 @@
 package main
 
 import (
-	"cy/game/cache"
-	"cy/game/codec"
-	"cy/game/codec/protobuf"
-	"cy/game/db/mgo"
-	"cy/game/net"
-	"cy/game/pb/common"
-	"cy/game/pb/hall"
+	"game/cache"
+	"game/codec"
+	"game/codec/protobuf"
+	"game/db/mgo"
+	"game/net"
+	"game/pb/common"
+	"game/pb/hall"
 	"encoding/json"
 	"fmt"
 	"go.uber.org/zap"

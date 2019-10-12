@@ -1,13 +1,13 @@
 package desk
 
 import (
-	"cy/game/cache"
-	"cy/game/codec/protobuf"
-	"cy/game/db/mgo"
-	pbcommon "cy/game/pb/common"
-	pbgame "cy/game/pb/game"
-	pbgame_ddz "cy/game/pb/game/ddz"
-	"cy/game/util"
+	"game/cache"
+	"game/codec/protobuf"
+	"game/db/mgo"
+	pbcommon "game/pb/common"
+	pbgame "game/pb/game"
+	pbgame_ddz "game/pb/game/ddz"
+	"game/util"
 	"fmt"
 	"time"
 )

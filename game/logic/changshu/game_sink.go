@@ -1,13 +1,13 @@
 package main
 
 import (
-	"cy/game/configs"
-	mj "cy/game/logic/changshu/majiang"
-	pbcommon "cy/game/pb/common"
-	pbgame "cy/game/pb/game"
-	pbgame_logic "cy/game/pb/game/mj/changshu"
-	"cy/game/util"
 	"fmt"
+	"game/configs"
+	mj "game/logic/changshu/majiang"
+	pbcommon "game/pb/common"
+	pbgame "game/pb/game"
+	pbgame_logic "game/pb/game/mj/changshu"
+	"game/util"
 	"math/rand"
 	"sort"
 	"time"

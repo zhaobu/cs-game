@@ -1,7 +1,7 @@
 package main
 
 import (
-	"cy/game/util"
+	"game/util"
 	"fmt"
 )
 

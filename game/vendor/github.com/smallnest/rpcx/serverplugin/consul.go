@@ -214,9 +214,13 @@ func (p *ConsulRegisterPlugin) Register(name string, rcvr interface{}, metadata 
 	return
 }
 
+func (p *ConsulRegisterPlugin) RegisterFunction(serviceName, fname string, fn interface{}, metadata string) error {
+	return p.Register(serviceName, fn, metadata)
+}
+
 func (p *ConsulRegisterPlugin) Unregister(name string) (err error) {
 	if "" == strings.TrimSpace(name) {
-		err = errors.New("Register service `name` can't be empty")
+		err = errors.New("Unregister service `name` can't be empty")
 		return
 	}
 

@@ -1,7 +1,7 @@
 syntax = "proto3";
 
-import "cy/game/pb/common/common.proto";
-import "cy/game/pb/game/game.proto";
+import "game/pb/common/common.proto";
+import "game/pb/game/game.proto";
 
 package pbgame_mj_changshu;
 

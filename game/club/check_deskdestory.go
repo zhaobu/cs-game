@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
-	"cy/game/codec"
-	"cy/game/pb/club"
+	"game/codec"
+	"game/pb/club"
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"time"

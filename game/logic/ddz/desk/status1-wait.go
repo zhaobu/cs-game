@@ -1,8 +1,8 @@
 package desk
 
 import (
-	"cy/game/cache"
-	"cy/game/pb/game/ddz"
+	"game/cache"
+	"game/pb/game/ddz"
 )
 
 func (d *desk) enterWait() {

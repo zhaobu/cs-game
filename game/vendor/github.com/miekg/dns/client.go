@@ -7,8 +7,11 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/binary"
+	"fmt"
 	"io"
+	"io/ioutil"
 	"net"
+	"net/http"
 	"strings"
 	"time"
 )
@@ -16,6 +19,8 @@ import (
 const (
 	dnsTimeout     time.Duration = 2 * time.Second
 	tcpIdleTimeout time.Duration = 8 * time.Second
+
+	dohMimeType = "application/dns-message"
 )
 
 // A Conn represents a connection to a DNS server.
@@ -39,6 +44,7 @@ type Client struct {
 	DialTimeout    time.Duration     // net.DialTimeout, defaults to 2 seconds, or net.Dialer.Timeout if expiring earlier - overridden by Timeout when that value is non-zero
 	ReadTimeout    time.Duration     // net.Conn.SetReadTimeout value for connections, defaults to 2 seconds - overridden by Timeout when that value is non-zero
 	WriteTimeout   time.Duration     // net.Conn.SetWriteTimeout value for connections, defaults to 2 seconds - overridden by Timeout when that value is non-zero
+	HTTPClient     *http.Client      // The http.Client to use for DNS-over-HTTPS
 	TsigSecret     map[string]string // secret(s) for Tsig map[<zonename>]<base64 secret>, zonename must be in canonical form (lowercase, fqdn, see RFC 4034 Section 6.2)
 	SingleInflight bool              // if true suppress multiple outstanding queries for the same Qname, Qtype and Qclass
 	group          singleflight
@@ -126,6 +132,11 @@ func (c *Client) Dial(address string) (conn *Conn, err error) {
 // attribute appropriately
 func (c *Client) Exchange(m *Msg, address string) (r *Msg, rtt time.Duration, err error) {
 	if !c.SingleInflight {
+		if c.Net == "https" {
+			// TODO(tmthrgd): pipe timeouts into exchangeDOH
+			return c.exchangeDOH(context.TODO(), m, address)
+		}
+
 		return c.exchange(m, address)
 	}
 
@@ -138,6 +149,11 @@ func (c *Client) Exchange(m *Msg, address string) (r *Msg, rtt time.Duration, er
 		cl = cl1
 	}
 	r, rtt, err, shared := c.group.Do(m.Question[0].Name+t+cl, func() (*Msg, time.Duration, error) {
+		if c.Net == "https" {
+			// TODO(tmthrgd): pipe timeouts into exchangeDOH
+			return c.exchangeDOH(context.TODO(), m, address)
+		}
+
 		return c.exchange(m, address)
 	})
 	if r != nil && shared {
@@ -181,6 +197,67 @@ func (c *Client) exchange(m *Msg, a string) (r *Msg, rtt time.Duration, err erro
 	}
 	rtt = time.Since(t)
 	return r, rtt, err
+}
+
+func (c *Client) exchangeDOH(ctx context.Context, m *Msg, a string) (r *Msg, rtt time.Duration, err error) {
+	p, err := m.Pack()
+	if err != nil {
+		return nil, 0, err
+	}
+
+	req, err := http.NewRequest(http.MethodPost, a, bytes.NewReader(p))
+	if err != nil {
+		return nil, 0, err
+	}
+
+	req.Header.Set("Content-Type", dohMimeType)
+	req.Header.Set("Accept", dohMimeType)
+
+	hc := http.DefaultClient
+	if c.HTTPClient != nil {
+		hc = c.HTTPClient
+	}
+
+	if ctx != context.Background() && ctx != context.TODO() {
+		req = req.WithContext(ctx)
+	}
+
+	t := time.Now()
+
+	resp, err := hc.Do(req)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer closeHTTPBody(resp.Body)
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, 0, fmt.Errorf("dns: server returned HTTP %d error: %q", resp.StatusCode, resp.Status)
+	}
+
+	if ct := resp.Header.Get("Content-Type"); ct != dohMimeType {
+		return nil, 0, fmt.Errorf("dns: unexpected Content-Type %q; expected %q", ct, dohMimeType)
+	}
+
+	p, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	rtt = time.Since(t)
+
+	r = new(Msg)
+	if err := r.Unpack(p); err != nil {
+		return r, 0, err
+	}
+
+	// TODO: TSIG? Is it even supported over DoH?
+
+	return r, rtt, nil
+}
+
+func closeHTTPBody(r io.ReadCloser) error {
+	io.Copy(ioutil.Discard, io.LimitReader(r, 8<<20))
+	return r.Close()
 }
 
 // ReadMsg reads a message from the connection co.
@@ -320,12 +397,16 @@ func (co *Conn) Read(p []byte) (n int, err error) {
 			return 0, err
 		}
 		if l > len(p) {
-			return l, io.ErrShortBuffer
+			return int(l), io.ErrShortBuffer
 		}
 		return tcpRead(r, p[:l])
 	}
 	// UDP connection
-	return co.Conn.Read(p)
+	n, err = co.Conn.Read(p)
+	if err != nil {
+		return n, err
+	}
+	return n, err
 }
 
 // WriteMsg sends a message through the connection co.
@@ -347,8 +428,10 @@ func (co *Conn) WriteMsg(m *Msg) (err error) {
 	if err != nil {
 		return err
 	}
-	_, err = co.Write(out)
-	return err
+	if _, err = co.Write(out); err != nil {
+		return err
+	}
+	return nil
 }
 
 // Write implements the net.Conn Write method.
@@ -370,7 +453,8 @@ func (co *Conn) Write(p []byte) (n int, err error) {
 		n, err := io.Copy(w, bytes.NewReader(p))
 		return int(n), err
 	}
-	return co.Conn.Write(p)
+	n, err = co.Conn.Write(p)
+	return n, err
 }
 
 // Return the appropriate timeout for a specific request
@@ -437,7 +521,11 @@ func ExchangeConn(c net.Conn, m *Msg) (r *Msg, err error) {
 // DialTimeout acts like Dial but takes a timeout.
 func DialTimeout(network, address string, timeout time.Duration) (conn *Conn, err error) {
 	client := Client{Net: network, Dialer: &net.Dialer{Timeout: timeout}}
-	return client.Dial(address)
+	conn, err = client.Dial(address)
+	if err != nil {
+		return nil, err
+	}
+	return conn, nil
 }
 
 // DialWithTLS connects to the address on the named network with TLS.
@@ -446,7 +534,12 @@ func DialWithTLS(network, address string, tlsConfig *tls.Config) (conn *Conn, er
 		network += "-tls"
 	}
 	client := Client{Net: network, TLSConfig: tlsConfig}
-	return client.Dial(address)
+	conn, err = client.Dial(address)
+
+	if err != nil {
+		return nil, err
+	}
+	return conn, nil
 }
 
 // DialTimeoutWithTLS acts like DialWithTLS but takes a timeout.
@@ -455,13 +548,21 @@ func DialTimeoutWithTLS(network, address string, tlsConfig *tls.Config, timeout 
 		network += "-tls"
 	}
 	client := Client{Net: network, Dialer: &net.Dialer{Timeout: timeout}, TLSConfig: tlsConfig}
-	return client.Dial(address)
+	conn, err = client.Dial(address)
+	if err != nil {
+		return nil, err
+	}
+	return conn, nil
 }
 
 // ExchangeContext acts like Exchange, but honors the deadline on the provided
 // context, if present. If there is both a context deadline and a configured
 // timeout on the client, the earliest of the two takes effect.
 func (c *Client) ExchangeContext(ctx context.Context, m *Msg, a string) (r *Msg, rtt time.Duration, err error) {
+	if !c.SingleInflight && c.Net == "https" {
+		return c.exchangeDOH(ctx, m, a)
+	}
+
 	var timeout time.Duration
 	if deadline, ok := ctx.Deadline(); !ok {
 		timeout = 0
@@ -470,7 +571,7 @@ func (c *Client) ExchangeContext(ctx context.Context, m *Msg, a string) (r *Msg,
 	}
 	// not passing the context to the underlying calls, as the API does not support
 	// context. For timeouts you should set up Client.Dialer and call Client.Exchange.
-	// TODO(tmthrgd,miekg): this is a race condition.
+	// TODO(tmthrgd): this is a race condition
 	c.Dialer = &net.Dialer{Timeout: timeout}
 	return c.Exchange(m, a)
 }

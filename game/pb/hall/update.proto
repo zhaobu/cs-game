@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-import "cy/game/pb/common/head.proto";
+import "game/pb/common/head.proto";
 
 package pbhall;
 

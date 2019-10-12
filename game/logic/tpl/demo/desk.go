@@ -1,9 +1,9 @@
 package main
 
 import (
-	"cy/game/pb/common"
-	"cy/game/pb/game"
-	cs "cy/game/pb/game/mj/changshu"
+	"game/pb/common"
+	"game/pb/game"
+	cs "game/pb/game/mj/changshu"
 	"sync"
 )
 

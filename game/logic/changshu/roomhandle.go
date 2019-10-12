@@ -1,11 +1,11 @@
 package main
 
 import (
-	"cy/game/codec/protobuf"
-	"cy/game/db/mgo"
-	pbcommon "cy/game/pb/common"
-	pbgame "cy/game/pb/game"
-	pbgame_logic "cy/game/pb/game/mj/changshu"
+	"game/codec/protobuf"
+	"game/db/mgo"
+	pbcommon "game/pb/common"
+	pbgame "game/pb/game"
+	pbgame_logic "game/pb/game/mj/changshu"
 	"fmt"
 
 	"go.uber.org/zap"

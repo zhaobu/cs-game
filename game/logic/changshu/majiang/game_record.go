@@ -1,12 +1,12 @@
 package majiang
 
 import (
-	"cy/game/codec/protobuf"
-	"cy/game/db/mgo"
-	pbcommon "cy/game/pb/common"
-	pbgame_logic "cy/game/pb/game/mj/changshu"
+	"game/codec/protobuf"
+	"game/db/mgo"
+	pbcommon "game/pb/common"
+	pbgame_logic "game/pb/game/mj/changshu"
 
-	"cy/game/util"
+	"game/util"
 	"sort"
 	"strconv"
 	"time"

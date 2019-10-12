@@ -2,7 +2,7 @@ package net
 
 import (
 	"bytes"
-	pbcommon "cy/game/pb/common"
+	pbcommon "game/pb/common"
 	"encoding/json"
 	"fmt"
 	"net/http"

@@ -1,9 +1,9 @@
 package desk
 
 import (
-	"cy/game/logic/ddz/card"
-	"cy/game/pb/common"
-	"cy/game/pb/game/ddz"
+	"game/logic/ddz/card"
+	"game/pb/common"
+	"game/pb/game/ddz"
 	"sync"
 	"time"
 

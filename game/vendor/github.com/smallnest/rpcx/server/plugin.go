@@ -16,7 +16,7 @@ type PluginContainer interface {
 	All() []Plugin
 
 	DoRegister(name string, rcvr interface{}, metadata string) error
-	DoRegisterFunction(name string, fn interface{}, metadata string) error
+	DoRegisterFunction(serviceName, fname string, fn interface{}, metadata string) error
 	DoUnregister(name string) error
 
 	DoPostConnAccept(net.Conn) (net.Conn, bool)
@@ -24,6 +24,8 @@ type PluginContainer interface {
 
 	DoPreReadRequest(ctx context.Context) error
 	DoPostReadRequest(ctx context.Context, r *protocol.Message, e error) error
+
+	DoPreHandleRequest(ctx context.Context, req *protocol.Message) error
 
 	DoPreWriteResponse(context.Context, *protocol.Message, *protocol.Message) error
 	DoPostWriteResponse(context.Context, *protocol.Message, *protocol.Message, error) error
@@ -45,7 +47,7 @@ type (
 
 	// RegisterFunctionPlugin is .
 	RegisterFunctionPlugin interface {
-		RegisterFunction(name string, fn interface{}, metadata string) error
+		RegisterFunction(serviceName, fname string, fn interface{}, metadata string) error
 	}
 
 	// PostConnAcceptPlugin represents connection accept plugin.
@@ -68,6 +70,11 @@ type (
 	//PostReadRequestPlugin represents .
 	PostReadRequestPlugin interface {
 		PostReadRequest(ctx context.Context, r *protocol.Message, e error) error
+	}
+
+	//PreHandleRequestPlugin represents .
+	PreHandleRequestPlugin interface {
+		PreHandleRequest(ctx context.Context, r *protocol.Message) error
 	}
 
 	//PreWriteResponsePlugin represents .
@@ -140,11 +147,11 @@ func (p *pluginContainer) DoRegister(name string, rcvr interface{}, metadata str
 }
 
 // DoRegisterFunction invokes DoRegisterFunction plugin.
-func (p *pluginContainer) DoRegisterFunction(name string, fn interface{}, metadata string) error {
+func (p *pluginContainer) DoRegisterFunction(serviceName, fname string, fn interface{}, metadata string) error {
 	var es []error
 	for _, rp := range p.plugins {
 		if plugin, ok := rp.(RegisterFunctionPlugin); ok {
-			err := plugin.RegisterFunction(name, fn, metadata)
+			err := plugin.RegisterFunction(serviceName, fname, fn, metadata)
 			if err != nil {
 				es = append(es, err)
 			}
@@ -223,6 +230,20 @@ func (p *pluginContainer) DoPostReadRequest(ctx context.Context, r *protocol.Mes
 	for i := range p.plugins {
 		if plugin, ok := p.plugins[i].(PostReadRequestPlugin); ok {
 			err := plugin.PostReadRequest(ctx, r, e)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+// DoPreHandleRequest invokes PreHandleRequest plugin.
+func (p *pluginContainer) DoPreHandleRequest(ctx context.Context, r *protocol.Message) error {
+	for i := range p.plugins {
+		if plugin, ok := p.plugins[i].(PreHandleRequestPlugin); ok {
+			err := plugin.PreHandleRequest(ctx, r)
 			if err != nil {
 				return err
 			}

@@ -2,12 +2,12 @@ package main
 
 import (
 	"context"
-	"cy/game/codec"
-	"cy/game/db/mgo"
-	pbcommon "cy/game/pb/common"
-	pbgamerecord "cy/game/pb/gamerecord"
-	"cy/game/util"
-	sort "cy/game/util/tools/Sort"
+	"game/codec"
+	"game/db/mgo"
+	pbcommon "game/pb/common"
+	pbgamerecord "game/pb/gamerecord"
+	"game/util"
+	sort "game/util/tools/Sort"
 	"fmt"
 	"github.com/robfig/cron"
 	"sync"

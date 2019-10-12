@@ -1,7 +1,7 @@
 package mgo
 
 import (
-	"cy/game/net"
+	"game/net"
 	"strconv"
 
 	"github.com/globalsign/mgo"

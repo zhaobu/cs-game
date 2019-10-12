@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
-	"cy/game/codec"
-	"cy/game/logic/ddz/desk"
-	pbgame "cy/game/pb/game"
+	"game/codec"
+	"game/logic/ddz/desk"
+	pbgame "game/pb/game"
 	"fmt"
 	"runtime/debug"
 

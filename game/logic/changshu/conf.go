@@ -1,7 +1,7 @@
 package main
 
 import (
-	pbgame_logic "cy/game/pb/game/mj/changshu"
+	pbgame_logic "game/pb/game/mj/changshu"
 	"encoding/json"
 	"io/ioutil"
 

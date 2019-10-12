@@ -1,8 +1,8 @@
 package main
 
 import (
-	"cy/game/codec"
-	"cy/game/util"
+	"game/codec"
+	"game/util"
 	"encoding/json"
 	"sync"
 	"time"

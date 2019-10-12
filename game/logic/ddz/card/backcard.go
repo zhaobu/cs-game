@@ -1,7 +1,7 @@
 package card
 
 import (
-	"cy/game/pb/game/ddz"
+	"game/pb/game/ddz"
 )
 
 func BackCardType2Mul(ct pbgame_ddz.BackCardType) uint32 {

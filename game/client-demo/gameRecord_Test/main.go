@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
-	"cy/game/codec"
-	"cy/game/pb/gamerecord"
+	"game/codec"
+	"game/pb/gamerecord"
 	"flag"
 	"fmt"
 	//"github.com/globalsign/mgo/bson"

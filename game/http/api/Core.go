@@ -2,8 +2,8 @@ package api
 
 import (
 	"crypto/md5"
-	"cy/game/codec"
-	zaplog "cy/game/common/logger"
+	"game/codec"
+	zaplog "game/common/logger"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"

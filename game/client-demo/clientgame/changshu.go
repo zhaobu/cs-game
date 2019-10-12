@@ -1,17 +1,17 @@
 package clientgame
 
 import (
-	csession "cy/game/client-demo/session"
-	"cy/game/codec/protobuf"
+	csession "game/client-demo/session"
+	"game/codec/protobuf"
 	"encoding/json"
 	"regexp"
 	"strconv"
 
-	// mj "cy/game/logic/changshu/majiang"
-	pbcommon "cy/game/pb/common"
-	pbgame "cy/game/pb/game"
-	pbgame_logic "cy/game/pb/game/mj/changshu"
-	"cy/game/util"
+	// mj "game/logic/changshu/majiang"
+	pbcommon "game/pb/common"
+	pbgame "game/pb/game"
+	pbgame_logic "game/pb/game/mj/changshu"
+	"game/util"
 	"fmt"
 
 	"go.uber.org/zap"

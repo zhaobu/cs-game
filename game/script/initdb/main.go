@@ -1,7 +1,7 @@
 package main
 
 import (
-	"cy/game/configs"
+	"game/configs"
 	"flag"
 	"fmt"
 

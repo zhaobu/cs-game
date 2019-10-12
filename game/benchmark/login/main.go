@@ -2,10 +2,10 @@ package main
 
 import (
 	"crypto/rand"
-	"cy/game/codec"
-	"cy/game/codec/protobuf"
-	"cy/game/pb/common"
-	"cy/game/pb/login"
+	"game/codec"
+	"game/codec/protobuf"
+	"game/pb/common"
+	"game/pb/login"
 	"flag"
 	"fmt"
 	"net"

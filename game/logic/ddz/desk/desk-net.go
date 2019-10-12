@@ -1,11 +1,11 @@
 package desk
 
 import (
-	"cy/game/codec"
-	"cy/game/codec/protobuf"
-	"cy/game/db/mgo"
-	pbcommon "cy/game/pb/common"
-	pbgame "cy/game/pb/game"
+	"game/codec"
+	"game/codec/protobuf"
+	"game/db/mgo"
+	pbcommon "game/pb/common"
+	pbgame "game/pb/game"
 	"encoding/json"
 
 	"github.com/golang/protobuf/proto"

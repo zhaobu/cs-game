@@ -21,11 +21,15 @@ func (rr *SIG) Sign(k crypto.Signer, m *Msg) ([]byte, error) {
 	if rr.KeyTag == 0 || len(rr.SignerName) == 0 || rr.Algorithm == 0 {
 		return nil, ErrKey
 	}
+	rr.Header().Rrtype = TypeSIG
+	rr.Header().Class = ClassANY
+	rr.Header().Ttl = 0
+	rr.Header().Name = "."
+	rr.OrigTtl = 0
+	rr.TypeCovered = 0
+	rr.Labels = 0
 
-	rr.Hdr = RR_Header{Name: ".", Rrtype: TypeSIG, Class: ClassANY, Ttl: 0}
-	rr.OrigTtl, rr.TypeCovered, rr.Labels = 0, 0, 0
-
-	buf := make([]byte, m.Len()+Len(rr))
+	buf := make([]byte, m.Len()+rr.len())
 	mbuf, err := m.PackBuffer(buf)
 	if err != nil {
 		return nil, err
@@ -103,7 +107,7 @@ func (rr *SIG) Verify(k *KEY, buf []byte) error {
 	anc := binary.BigEndian.Uint16(buf[6:])
 	auc := binary.BigEndian.Uint16(buf[8:])
 	adc := binary.BigEndian.Uint16(buf[10:])
-	offset := headerSize
+	offset := 12
 	var err error
 	for i := uint16(0); i < qdc && offset < buflen; i++ {
 		_, offset, err = UnpackDomainName(buf, offset)
@@ -163,7 +167,7 @@ func (rr *SIG) Verify(k *KEY, buf []byte) error {
 	}
 	// If key has come from the DNS name compression might
 	// have mangled the case of the name
-	if !strings.EqualFold(signername, k.Header().Name) {
+	if strings.ToLower(signername) != strings.ToLower(k.Header().Name) {
 		return &Error{err: "signer name doesn't match key name"}
 	}
 	sigend := offset

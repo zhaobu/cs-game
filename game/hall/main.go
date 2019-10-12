@@ -1,8 +1,8 @@
 package main
 
 import (
-	"cy/game/db/mgo"
-	_ "cy/game/docs"
+	"game/db/mgo"
+	_ "game/docs"
 	"flag"
 
 	"github.com/gin-gonic/gin"

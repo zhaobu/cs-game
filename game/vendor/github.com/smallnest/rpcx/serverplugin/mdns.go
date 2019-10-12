@@ -66,31 +66,33 @@ func (p *MDNSRegisterPlugin) Start() error {
 		go func() {
 			defer p.server.Shutdown()
 
-			// refresh service TTL
-			select {
-			case <-p.dying:
-				close(p.done)
-				return
-			case <-ticker.C:
-				if p.server == nil && len(p.Services) == 0 {
-					break
-				}
+			for {
+				// refresh service TTL
+				select {
+				case <-p.dying:
+					close(p.done)
+					return
+				case <-ticker.C:
+					if p.server == nil && len(p.Services) == 0 {
+						break
+					}
 
-				var data []byte
-				if p.Metrics != nil {
-					clientMeter := metrics.GetOrRegisterMeter("clientMeter", p.Metrics)
-					data = []byte(strconv.FormatInt(clientMeter.Count()/60, 10))
-				}
+					var data []byte
+					if p.Metrics != nil {
+						clientMeter := metrics.GetOrRegisterMeter("clientMeter", p.Metrics)
+						data = []byte(strconv.FormatInt(clientMeter.Count()/60, 10))
+					}
 
-				//set this same metrics for all services at this server
-				for _, sm := range p.Services {
-					v, _ := url.ParseQuery(string(sm.Meta))
-					v.Set("tps", string(data))
-					sm.Meta = v.Encode()
+					//set this same metrics for all services at this server
+					for _, sm := range p.Services {
+						v, _ := url.ParseQuery(string(sm.Meta))
+						v.Set("tps", string(data))
+						sm.Meta = v.Encode()
+					}
+					ss, _ := json.Marshal(p.Services)
+					s := url.QueryEscape(string(ss))
+					p.server.SetText([]string{s})
 				}
-				ss, _ := json.Marshal(p.Services)
-				s := url.QueryEscape(string(ss))
-				p.server.SetText([]string{s})
 			}
 		}()
 	}
@@ -166,6 +168,10 @@ func (p *MDNSRegisterPlugin) Register(name string, rcvr interface{}, metadata st
 	s := url.QueryEscape(string(ss))
 	p.server.SetText([]string{s})
 	return
+}
+
+func (p *MDNSRegisterPlugin) RegisterFunction(serviceName, fname string, fn interface{}, metadata string) error {
+	return p.Register(serviceName, fn, metadata)
 }
 
 func (p *MDNSRegisterPlugin) Unregister(name string) (err error) {

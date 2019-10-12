@@ -2,11 +2,11 @@ package main
 
 import (
 	"crypto/tls"
-	"cy/game/cache"
-	zaplog "cy/game/common/logger"
-	"cy/game/configs"
-	"cy/game/db/mgo"
-	"cy/game/net"
+	"game/cache"
+	zaplog "game/common/logger"
+	"game/configs"
+	"game/db/mgo"
+	"game/net"
 	"flag"
 	"fmt"
 	"os"
@@ -29,7 +29,7 @@ var (
 	redisAddr  = flag.String("redisAddr", "192.168.0.90:6379", "redis address")
 	redisDb    = flag.Int("redisDb", 1, "redis db select")
 	mgoURI     = flag.String("mgo", "mongodb://192.168.0.90:27017/game", "mongo connection URI")
-	aliAppCode = flag.String("aliCode", `4fc26616d3304bacb757c9bb503e02be`, "ali APPCODE")
+	aliAppCode = flag.String("aliCode", `c091b052e9dd467fa1f49789be7add07`, "ali APPCODE")
 	netAddr    = flag.String("netaddr", `http://192.168.0.207:8096`, ",Net Addr") //后台服务器地址
 	mgr        = newManager()
 

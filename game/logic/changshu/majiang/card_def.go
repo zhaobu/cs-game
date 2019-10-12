@@ -1,8 +1,8 @@
 package majiang
 
 import (
-	"cy/game/configs"
-	"cy/game/util"
+	"game/configs"
+	"game/util"
 	"fmt"
 	"math/rand"
 	"runtime/debug"

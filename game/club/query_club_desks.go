@@ -1,10 +1,10 @@
 package main
 
 import (
-	"cy/game/codec"
+	"game/codec"
 	"context"
-	pbclub "cy/game/pb/club"
-	pbcommon "cy/game/pb/common"
+	pbclub "game/pb/club"
+	pbcommon "game/pb/common"
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"runtime/debug"

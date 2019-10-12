@@ -1,13 +1,13 @@
 package main
 
 import (
-	"cy/game/cache"
-	zaplog "cy/game/common/logger"
-	"cy/game/configs"
-	"cy/game/db/mgo"
-	"cy/game/logic/tpl"
-	"cy/game/net"
-	"cy/game/util"
+	"game/cache"
+	zaplog "game/common/logger"
+	"game/configs"
+	"game/db/mgo"
+	"game/logic/tpl"
+	"game/net"
+	"game/util"
 	"flag"
 	"fmt"
 	"os"

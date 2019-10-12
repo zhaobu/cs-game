@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
-	"cy/game/cache"
-	"cy/game/codec"
-	pbgame "cy/game/pb/game"
+	"game/cache"
+	"game/codec"
+	pbgame "game/pb/game"
 	"fmt"
 	"sync"
 

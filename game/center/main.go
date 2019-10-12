@@ -1,17 +1,17 @@
 package main
 
 import (
-	"cy/game/cache"
-	"cy/game/configs"
-	"cy/game/db/mgo"
-	"cy/game/util"
+	"game/cache"
+	"game/configs"
+	"game/db/mgo"
+	"game/util"
 	"flag"
 	"fmt"
 	"os"
 	"runtime/debug"
 	"time"
 
-	zaplog "cy/game/common/logger"
+	zaplog "game/common/logger"
 
 	"github.com/gomodule/redigo/redis"
 	metrics "github.com/rcrowley/go-metrics"

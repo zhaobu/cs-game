@@ -1,17 +1,17 @@
 package main
 
 import (
-	clientgame "cy/game/client-demo/clientgame"
-	csession "cy/game/client-demo/session"
-	"cy/game/codec"
-	zaplog "cy/game/common/logger"
-	pbcommon "cy/game/pb/common"
-	pbgame "cy/game/pb/game"
-	pbgamerecord "cy/game/pb/gamerecord"
-	pblogin "cy/game/pb/login"
+	clientgame "game/client-demo/clientgame"
+	csession "game/client-demo/session"
+	"game/codec"
+	zaplog "game/common/logger"
+	pbcommon "game/pb/common"
+	pbgame "game/pb/game"
+	pbgamerecord "game/pb/gamerecord"
+	pblogin "game/pb/login"
 	"time"
 
-	"cy/game/util"
+	"game/util"
 	"encoding/json"
 	"fmt"
 	"net"

@@ -1,7 +1,7 @@
 package api
 
 import (
-	"cy/game/db/mgo"
+	"game/db/mgo"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"

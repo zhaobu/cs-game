@@ -1,8 +1,8 @@
 package desk
 
 import (
-	"cy/game/logic/ddz/card"
-	"cy/game/pb/game/ddz"
+	"game/logic/ddz/card"
+	"game/pb/game/ddz"
 	"fmt"
 	"time"
 

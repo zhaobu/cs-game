@@ -1,7 +1,7 @@
 package main
 
 import (
-	"cy/game/db/mgo"
+	"game/db/mgo"
 	"sync"
 )
 

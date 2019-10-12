@@ -1,6 +1,6 @@
 package main
 
-import  "cy/game/util/tools/FilterLib"
+import  "game/util/tools/FilterLib"
 
 func main()  {
 	FilterLib := FilterLib.NewFilterLib([]string{"大爷","ox"})

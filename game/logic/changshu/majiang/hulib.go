@@ -2,8 +2,8 @@ package majiang
 
 //封装胡牌算法
 import (
-	mjhulib "cy/game/common/mjhulib"
-	pbgame_logic "cy/game/pb/game/mj/changshu"
+	mjhulib "game/common/mjhulib"
+	pbgame_logic "game/pb/game/mj/changshu"
 )
 
 var (

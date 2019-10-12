@@ -1,15 +1,15 @@
 package main
 
 import (
-	"cy/game/cache"
-	"cy/game/codec"
-	"cy/game/codec/protobuf"
-	"cy/game/db/mgo"
-	"cy/game/net"
-	pbcommon "cy/game/pb/common"
-	pblogin "cy/game/pb/login"
 	"encoding/json"
 	"fmt"
+	"game/cache"
+	"game/codec"
+	"game/codec/protobuf"
+	"game/db/mgo"
+	"game/net"
+	pbcommon "game/pb/common"
+	pblogin "game/pb/login"
 	"math/rand"
 	"strings"
 
@@ -135,11 +135,9 @@ func backendLoginReq(s *session, loginReq *pblogin.LoginReq) (loginRsp *pblogin.
 		if err != nil {
 			tlog.Info("更新用户IP 错误", zap.Any("uId", loginRsp.User.UserID), zap.Any("IP", loginRsp.User.IP))
 		}
-		if loginReq.Longitude != 0 || loginReq.Latitude != 0 ||  loginReq.Place != "" {
-			err = mgo.UpdateUserLocation(loginRsp.User.UserID, loginReq.Longitude, loginReq.Latitude, loginReq.Place) //写入数据库
-			if err != nil {
-				tlog.Info("更新用户定位 错误", zap.Any("uId", loginRsp.User.UserID))
-			}
+		err = mgo.UpdateUserLocation(loginRsp.User.UserID, loginReq.Longitude, loginReq.Latitude, loginReq.Place) //写入数据库
+		if err != nil {
+			tlog.Info("更新用户定位 错误", zap.Any("uId", loginRsp.User.UserID))
 		}
 		loginRsp.User, _ = mgo.UpdateSessionID(loginRsp.User.UserID, rid.String())
 	}
@@ -248,6 +246,7 @@ func sendMobileCaptcha(mobile string, captcha string) error {
 	if err != nil {
 		return err
 	}
+
 	request := requests.NewCommonRequest()
 	request.Method = "POST"
 	request.Scheme = "https" // https | http

@@ -1,7 +1,7 @@
 package desk
 
 import (
-	"cy/game/pb/game/ddz"
+	"game/pb/game/ddz"
 	"time"
 )
 

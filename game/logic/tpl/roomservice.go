@@ -1,12 +1,12 @@
 package tpl
 
 import (
-	"cy/game/cache"
-	"cy/game/codec"
-	"cy/game/codec/protobuf"
-	pbgame "cy/game/pb/game"
-	pbinner "cy/game/pb/inner"
-	"cy/game/util"
+	"game/cache"
+	"game/codec"
+	"game/codec/protobuf"
+	pbgame "game/pb/game"
+	pbinner "game/pb/inner"
+	"game/util"
 	"encoding/json"
 	"time"
 

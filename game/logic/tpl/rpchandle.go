@@ -2,12 +2,12 @@ package tpl
 
 import (
 	"context"
-	"cy/game/cache"
-	"cy/game/codec"
-	"cy/game/db/mgo"
-	pbcommon "cy/game/pb/common"
-	pbgame "cy/game/pb/game"
-	"cy/game/util"
+	"game/cache"
+	"game/codec"
+	"game/db/mgo"
+	pbcommon "game/pb/common"
+	pbgame "game/pb/game"
+	"game/util"
 	"fmt"
 	"hash/crc32"
 	"runtime/debug"

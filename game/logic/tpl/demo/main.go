@@ -1,9 +1,9 @@
 package main
 
 import (
-	"cy/game/db/mgo"
-	"cy/game/logic/tpl"
-	"cy/game/util"
+	"game/db/mgo"
+	"game/logic/tpl"
+	"game/util"
 	"flag"
 	"fmt"
 	"os"

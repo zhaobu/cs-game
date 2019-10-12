@@ -1,9 +1,9 @@
 package main
 
 import (
-	mj "cy/game/logic/changshu/majiang"
-	pbgame_logic "cy/game/pb/game/mj/changshu"
-	"cy/game/util"
+	mj "game/logic/changshu/majiang"
+	pbgame_logic "game/pb/game/mj/changshu"
+	"game/util"
 )
 
 //麻将操作
@@ -240,7 +240,7 @@ func (self *OperAtion) DrawcardAnalysis(playerInfo *mj.PlayerInfo, chairId, card
 		ret.CanGang = CanGangOper{GangList: gangOper, ChairId: chairId}
 	}
 
-	if leftCardNum == 0 {
+	if leftCardNum == 1 {
 		huModeTags[mj.HuModeTag_HaiDiLaoYue] = true
 	}
 	//判断是否能胡

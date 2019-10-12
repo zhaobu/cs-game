@@ -1,9 +1,9 @@
 package main
 
 import (
-	"cy/game/cache"
-	"cy/game/logic/ddz/desk"
-	"cy/game/util"
+	"game/cache"
+	"game/logic/ddz/desk"
+	"game/util"
 	"flag"
 	"fmt"
 	"os"

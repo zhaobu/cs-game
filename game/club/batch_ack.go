@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
-	"cy/game/codec"
-	"cy/game/db/mgo"
-	"cy/game/pb/club"
+	"game/codec"
+	"game/db/mgo"
+	"game/pb/club"
 	"fmt"
 
 	"github.com/sirupsen/logrus"

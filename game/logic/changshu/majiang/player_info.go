@@ -1,6 +1,6 @@
 package majiang
 
-import pbgame_logic "cy/game/pb/game/mj/changshu"
+import pbgame_logic "game/pb/game/mj/changshu"
 
 type PlayerInfo struct {
 	CardInfo      PlayerCardInfo      //玩家牌局信息

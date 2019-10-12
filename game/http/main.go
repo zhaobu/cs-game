@@ -1,9 +1,9 @@
 package main
 
 import (
-	"cy/game/configs"
-	"cy/game/db/mgo"
-	"cy/game/http/api"
+	"game/configs"
+	"game/db/mgo"
+	"game/http/api"
 	"flag"
 	"github.com/gin-gonic/gin"
 	ginSwagger "github.com/swaggo/gin-swagger"

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"cy/game/db/mgo"
-	pbgame "cy/game/pb/game"
+	"game/db/mgo"
+	pbgame "game/pb/game"
 	"fmt"
 )
 

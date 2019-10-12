@@ -1,7 +1,7 @@
 package main
 
 import (
-	cs "cy/game/pb/game/mj/changshu"
+	cs "game/pb/game/mj/changshu"
 	"encoding/json"
 	"io/ioutil"
 )

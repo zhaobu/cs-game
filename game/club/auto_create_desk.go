@@ -2,13 +2,13 @@ package main
 
 import (
 	"context"
-	"cy/game/cache"
-	"cy/game/codec"
-	"cy/game/codec/protobuf"
-	"cy/game/db/mgo"
-	pbcommon "cy/game/pb/common"
-	pbgame "cy/game/pb/game"
-	pbinner "cy/game/pb/inner"
+	"game/cache"
+	"game/codec"
+	"game/codec/protobuf"
+	"game/db/mgo"
+	pbcommon "game/pb/common"
+	pbgame "game/pb/game"
+	pbinner "game/pb/inner"
 	"hash/crc32"
 
 	"github.com/sirupsen/logrus"

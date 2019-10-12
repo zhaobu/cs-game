@@ -2,11 +2,11 @@ package main
 
 import (
 	"context"
-	"cy/game/codec"
-	"cy/game/codec/protobuf"
-	pbcenter "cy/game/pb/center"
-	pbcommon "cy/game/pb/common"
-	pbinner "cy/game/pb/inner"
+	"game/codec"
+	"game/codec/protobuf"
+	pbcenter "game/pb/center"
+	pbcommon "game/pb/common"
+	pbinner "game/pb/inner"
 	"fmt"
 	"runtime/debug"
 )

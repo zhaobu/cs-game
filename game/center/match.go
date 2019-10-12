@@ -2,11 +2,11 @@ package main
 
 import (
 	"context"
-	"cy/game/cache"
-	"cy/game/codec"
-	pbcenter "cy/game/pb/center"
-	pbcommon "cy/game/pb/common"
-	pbinner "cy/game/pb/inner"
+	"game/cache"
+	"game/codec"
+	pbcenter "game/pb/center"
+	pbcommon "game/pb/common"
+	pbinner "game/pb/inner"
 	"encoding/json"
 	"fmt"
 	"math/rand"

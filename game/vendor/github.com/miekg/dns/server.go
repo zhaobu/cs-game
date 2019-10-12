@@ -82,7 +82,6 @@ type ConnectionStater interface {
 
 type response struct {
 	msg            []byte
-	closed         bool // connection has been closed
 	hijacked       bool // connection has been hijacked by handler
 	tsigTimersOnly bool
 	tsigStatus     error
@@ -162,11 +161,11 @@ type defaultReader struct {
 	*Server
 }
 
-func (dr defaultReader) ReadTCP(conn net.Conn, timeout time.Duration) ([]byte, error) {
+func (dr *defaultReader) ReadTCP(conn net.Conn, timeout time.Duration) ([]byte, error) {
 	return dr.readTCP(conn, timeout)
 }
 
-func (dr defaultReader) ReadUDP(conn *net.UDPConn, timeout time.Duration) ([]byte, *SessionUDP, error) {
+func (dr *defaultReader) ReadUDP(conn *net.UDPConn, timeout time.Duration) ([]byte, *SessionUDP, error) {
 	return dr.readUDP(conn, timeout)
 }
 
@@ -203,6 +202,9 @@ type Server struct {
 	IdleTimeout func() time.Duration
 	// Secret(s) for Tsig map[<zonename>]<base64 secret>. The zonename must be in canonical form (lowercase, fqdn, see RFC 4034 Section 6.2).
 	TsigSecret map[string]string
+	// Unsafe instructs the server to disregard any sanity checks and directly hand the message to
+	// the handler. It will specifically not check if the query has the QR bit not set.
+	Unsafe bool
 	// If NotifyStartedFunc is set it is called once the server has started listening.
 	NotifyStartedFunc func()
 	// DecorateReader is optional, allows customization of the process that reads raw DNS messages.
@@ -214,9 +216,6 @@ type Server struct {
 	// Whether to set the SO_REUSEPORT socket option, allowing multiple listeners to be bound to a single address.
 	// It is only supported on go1.11+ and when using ListenAndServe.
 	ReusePort bool
-	// AcceptMsgFunc will check the incoming message and will reject it early in the process.
-	// By default DefaultMsgAcceptFunc will be used.
-	MsgAcceptFunc MsgAcceptFunc
 
 	// UDP packet or TCP connection queue
 	queue chan *response
@@ -299,9 +298,6 @@ func (srv *Server) init() {
 
 	if srv.UDPSize == 0 {
 		srv.UDPSize = MinMsgSize
-	}
-	if srv.MsgAcceptFunc == nil {
-		srv.MsgAcceptFunc = defaultMsgAcceptFunc
 	}
 
 	srv.udpPool.New = makeUDPBuffer(srv.UDPSize)
@@ -463,10 +459,11 @@ var testShutdownNotify *sync.Cond
 
 // getReadTimeout is a helper func to use system timeout if server did not intend to change it.
 func (srv *Server) getReadTimeout() time.Duration {
+	rtimeout := dnsTimeout
 	if srv.ReadTimeout != 0 {
-		return srv.ReadTimeout
+		rtimeout = srv.ReadTimeout
 	}
-	return dnsTimeout
+	return rtimeout
 }
 
 // serveTCP starts a TCP listener for the server.
@@ -517,7 +514,7 @@ func (srv *Server) serveUDP(l *net.UDPConn) error {
 		srv.NotifyStartedFunc()
 	}
 
-	reader := Reader(defaultReader{srv})
+	reader := Reader(&defaultReader{srv})
 	if srv.DecorateReader != nil {
 		reader = srv.DecorateReader(reader)
 	}
@@ -587,7 +584,7 @@ func (srv *Server) serve(w *response) {
 		w.wg.Done()
 	}()
 
-	reader := Reader(defaultReader{srv})
+	reader := Reader(&defaultReader{srv})
 	if srv.DecorateReader != nil {
 		reader = srv.DecorateReader(reader)
 	}
@@ -632,34 +629,14 @@ func (srv *Server) disposeBuffer(w *response) {
 }
 
 func (srv *Server) serveDNS(w *response) {
-	dh, off, err := unpackMsgHdr(w.msg, 0)
-	if err != nil {
-		// Let client hang, they are sending crap; any reply can be used to amplify.
-		return
-	}
-
 	req := new(Msg)
-	req.setHdr(dh)
-
-	switch srv.MsgAcceptFunc(dh) {
-	case MsgAccept:
-	case MsgIgnore:
-		return
-	case MsgReject:
-		req.SetRcodeFormatError(req)
-		// Are we allowed to delete any OPT records here?
-		req.Ns, req.Answer, req.Extra = nil, nil, nil
-
-		w.WriteMsg(req)
-		srv.disposeBuffer(w)
-		return
+	err := req.Unpack(w.msg)
+	if err != nil { // Send a FormatError back
+		x := new(Msg)
+		x.SetRcodeFormatError(req)
+		w.WriteMsg(x)
 	}
-
-	if err := req.unpack(dh, w.msg, off); err != nil {
-		req.SetRcodeFormatError(req)
-		req.Ns, req.Answer, req.Extra = nil, nil, nil
-
-		w.WriteMsg(req)
+	if err != nil || !srv.Unsafe && req.Response {
 		srv.disposeBuffer(w)
 		return
 	}
@@ -751,10 +728,6 @@ func (srv *Server) readUDP(conn *net.UDPConn, timeout time.Duration) ([]byte, *S
 
 // WriteMsg implements the ResponseWriter.WriteMsg method.
 func (w *response) WriteMsg(m *Msg) (err error) {
-	if w.closed {
-		return &Error{err: "WriteMsg called after Close"}
-	}
-
 	var data []byte
 	if w.tsigSecret != nil { // if no secrets, dont check for the tsig (which is a longer check)
 		if t := m.IsTsig(); t != nil {
@@ -776,13 +749,10 @@ func (w *response) WriteMsg(m *Msg) (err error) {
 
 // Write implements the ResponseWriter.Write method.
 func (w *response) Write(m []byte) (int, error) {
-	if w.closed {
-		return 0, &Error{err: "Write called after Close"}
-	}
-
 	switch {
 	case w.udp != nil:
-		return WriteToSessionUDP(w.udp, m, w.udpSession)
+		n, err := WriteToSessionUDP(w.udp, m, w.udpSession)
+		return n, err
 	case w.tcp != nil:
 		lm := len(m)
 		if lm < 2 {
@@ -798,7 +768,7 @@ func (w *response) Write(m []byte) (int, error) {
 		n, err := io.Copy(w.tcp, bytes.NewReader(m))
 		return int(n), err
 	default:
-		panic("dns: internal error: udp and tcp both nil")
+		panic("dns: Write called after Close")
 	}
 }
 
@@ -810,7 +780,7 @@ func (w *response) LocalAddr() net.Addr {
 	case w.tcp != nil:
 		return w.tcp.LocalAddr()
 	default:
-		panic("dns: internal error: udp and tcp both nil")
+		panic("dns: LocalAddr called after Close")
 	}
 }
 
@@ -822,7 +792,7 @@ func (w *response) RemoteAddr() net.Addr {
 	case w.tcp != nil:
 		return w.tcp.RemoteAddr()
 	default:
-		panic("dns: internal error: udpSession and tcp both nil")
+		panic("dns: RemoteAddr called after Close")
 	}
 }
 
@@ -837,20 +807,13 @@ func (w *response) Hijack() { w.hijacked = true }
 
 // Close implements the ResponseWriter.Close method
 func (w *response) Close() error {
-	if w.closed {
-		return &Error{err: "connection already closed"}
+	// Can't close the udp conn, as that is actually the listener.
+	if w.tcp != nil {
+		e := w.tcp.Close()
+		w.tcp = nil
+		return e
 	}
-	w.closed = true
-
-	switch {
-	case w.udp != nil:
-		// Can't close the udp conn, as that is actually the listener.
-		return nil
-	case w.tcp != nil:
-		return w.tcp.Close()
-	default:
-		panic("dns: internal error: udp and tcp both nil")
-	}
+	return nil
 }
 
 // ConnectionState() implements the ConnectionStater.ConnectionState() interface.

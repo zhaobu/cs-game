@@ -2,11 +2,11 @@ package main
 
 import (
 	"context"
-	"cy/game/cache"
-	"cy/game/codec"
-	"cy/game/logic/ddz/desk"
-	"cy/game/pb/common"
-	"cy/game/pb/inner"
+	"game/cache"
+	"game/codec"
+	"game/logic/ddz/desk"
+	"game/pb/common"
+	"game/pb/inner"
 	"fmt"
 	"runtime/debug"
 	"time"

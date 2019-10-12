@@ -1,7 +1,7 @@
 package main
 
 import (
-	pbgame "cy/game/pb/game"
+	pbgame "game/pb/game"
 	"encoding/json"
 	"fmt"
 )

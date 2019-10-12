@@ -2,10 +2,10 @@ package main
 
 import (
 	"context"
-	"cy/game/codec"
-	"cy/game/codec/protobuf"
-	"cy/game/logic/ddz/desk"
-	pbinner "cy/game/pb/inner"
+	"game/codec"
+	"game/codec/protobuf"
+	"game/logic/ddz/desk"
+	pbinner "game/pb/inner"
 	"fmt"
 	"runtime/debug"
 

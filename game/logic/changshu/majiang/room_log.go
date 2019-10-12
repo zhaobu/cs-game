@@ -1,7 +1,7 @@
 package majiang
 
 import (
-	zaplog "cy/game/common/logger"
+	zaplog "game/common/logger"
 	"fmt"
 	"time"
 

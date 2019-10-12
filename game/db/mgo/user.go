@@ -1,9 +1,9 @@
 package mgo
 
 import (
-	pbcommon "cy/game/pb/common"
-	pbgame "cy/game/pb/game"
-	"cy/game/util"
+	pbcommon "game/pb/common"
+	pbgame "game/pb/game"
+	"game/util"
 	"fmt"
 	"time"
 

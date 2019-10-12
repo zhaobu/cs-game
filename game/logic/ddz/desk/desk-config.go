@@ -1,11 +1,11 @@
 package desk
 
 import (
-	"cy/game/codec/protobuf"
+	"game/codec/protobuf"
 
-	pbcommon "cy/game/pb/common"
-	pbgame "cy/game/pb/game"
-	pbgame_ddz "cy/game/pb/game/ddz"
+	pbcommon "game/pb/common"
+	pbgame "game/pb/game"
+	pbgame_ddz "game/pb/game/ddz"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"

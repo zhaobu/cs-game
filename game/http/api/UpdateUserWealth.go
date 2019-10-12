@@ -1,8 +1,8 @@
 package api
 
 import (
-	"cy/game/db/mgo"
-	pbhall "cy/game/pb/hall"
+	"game/db/mgo"
+	pbhall "game/pb/hall"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"

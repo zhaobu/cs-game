@@ -3,13 +3,13 @@
 package main
 
 import (
-	"cy/game/cache"
-	"cy/game/codec"
-	"cy/game/codec/protobuf"
-	"cy/game/configs"
-	"cy/game/db/mgo"
-	pbinner "cy/game/pb/inner"
-	"cy/game/util"
+	"game/cache"
+	"game/codec"
+	"game/codec/protobuf"
+	"game/configs"
+	"game/db/mgo"
+	pbinner "game/pb/inner"
+	"game/util"
 	"encoding/json"
 	"flag"
 	"fmt"

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"cy/game/db/mgo"
-	pbclub "cy/game/pb/club"
+	"game/db/mgo"
+	pbclub "game/pb/club"
 )
 
 func sendClubChangeInfo(clubID int64, typ clubChangeTyp, changeUserID uint64) {

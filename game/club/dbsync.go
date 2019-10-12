@@ -1,9 +1,9 @@
 package main
 
 import (
-	"cy/game/cache"
-	"cy/game/db/mgo"
-	pbcommon "cy/game/pb/common"
+	"game/cache"
+	"game/db/mgo"
+	pbcommon "game/pb/common"
 	"time"
 )
 

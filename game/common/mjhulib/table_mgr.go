@@ -1,7 +1,7 @@
 package mjlib
 
 import (
-	"cy/game/configs"
+	"game/configs"
 	"fmt"
 )
 

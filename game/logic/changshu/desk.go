@@ -1,21 +1,21 @@
 package main
 
 import (
-	"cy/game/cache"
-	"cy/game/codec/protobuf"
-	"cy/game/db/mgo"
-	mj "cy/game/logic/changshu/majiang"
-	"cy/game/logic/tpl"
-	"cy/game/util"
+	"game/cache"
+	"game/codec/protobuf"
+	"game/db/mgo"
+	mj "game/logic/changshu/majiang"
+	"game/logic/tpl"
+	"game/util"
 	"fmt"
 	"os"
 	"runtime/debug"
 	"time"
 
-	pbcommon "cy/game/pb/common"
-	pbgame "cy/game/pb/game"
-	pbgame_logic "cy/game/pb/game/mj/changshu"
-	pbhall "cy/game/pb/hall"
+	pbcommon "game/pb/common"
+	pbgame "game/pb/game"
+	pbgame_logic "game/pb/game/mj/changshu"
+	pbhall "game/pb/hall"
 	"sync"
 
 	"github.com/RussellLuo/timingwheel"

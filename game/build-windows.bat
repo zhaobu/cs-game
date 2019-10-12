@@ -1,17 +1,17 @@
 set GOOS=windows
 
-go build -tags consul -o bin/win/http.exe cy/game/http
+go build -tags consul -o bin/win/http.exe game/http
 
-go build -tags consul -o bin/win/gate.exe cy/game/gate
+go build -tags consul -o bin/win/gate.exe game/gate
 
-go build -tags consul -o bin/win/center.exe cy/game/center
+go build -tags consul -o bin/win/center.exe game/center
 
-go build -tags consul -o bin/win/club.exe cy/game/club
+go build -tags consul -o bin/win/club.exe game/club
 
-REM go build -tags consul -o bin/win/ddz.exe cy/game/logic/ddz
+REM go build -tags consul -o bin/win/ddz.exe game/logic/ddz
 
-go build -o bin/win/initdb.exe cy/game/script/initdb
+go build -o bin/win/initdb.exe game/script/initdb
 
-go build -tags consul -o bin/win/changshu.exe cy/game/logic/changshu
+go build -tags consul -o bin/win/changshu.exe game/logic/changshu
 
 REM pause

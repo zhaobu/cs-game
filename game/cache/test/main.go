@@ -1,7 +1,7 @@
 package main
 
 import (
-	"cy/game/cache"
+	"game/cache"
 	"fmt"
 )
 
