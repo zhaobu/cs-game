@@ -240,7 +240,7 @@ func (self *OperAtion) DrawcardAnalysis(playerInfo *mj.PlayerInfo, chairId, card
 		ret.CanGang = CanGangOper{GangList: gangOper, ChairId: chairId}
 	}
 
-	if leftCardNum == 1 {
+	if leftCardNum == 0 {
 		huModeTags[mj.HuModeTag_HaiDiLaoYue] = true
 	}
 	//判断是否能胡
