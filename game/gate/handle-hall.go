@@ -47,6 +47,8 @@ func (s *session) handleHall(msg *codec.Message) error {
 		s.handleHallQueryUserPointCardInfoReq(msg.UserID, v)
 	case *pbhall.PointCardExchangeReq:
 		s.handleHallPointCardExchangeReq(msg.UserID, v)
+	case *pbhall.QueryUserDeskInfosReq:
+		s.handleHallQueryUserDeskInfosReq(msg.UserID, v)
 	default:
 		return fmt.Errorf("bad type:%+v", v)
 	}
@@ -351,6 +353,25 @@ func (s *session) handleHallPointCardExchangeReq(uid uint64, req *pbhall.PointCa
 				MasonryChange: int64(data.ExchangeNum),
 			}
 			defer s.sendPb(wcmsg)
+		}
+	}
+}
+
+//查询用户桌子信息
+func (s *session) handleHallQueryUserDeskInfosReq(uid uint64, req *pbhall.QueryUserDeskInfosReq) {
+	rsp := &pbhall.QueryUserDeskInfosRsp{
+		Desks: []*pbcommon.DeskInfo{},
+	}
+	if req.Head != nil {
+		rsp.Head = &pbcommon.RspHead{Seq: req.Head.Seq}
+	}
+	defer func() {
+		s.sendPb(rsp)
+	}()
+	_, data := cache.GetUserDesk(uid)
+	for _, v := range data {
+		if deskinfo, err := cache.QueryDeskInfo(v); err == nil {
+			rsp.Desks = append(rsp.Desks, deskinfo)
 		}
 	}
 }

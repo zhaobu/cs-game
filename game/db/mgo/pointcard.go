@@ -1,7 +1,10 @@
 package mgo
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/globalsign/mgo"
@@ -39,7 +42,7 @@ func QueryUserPointcard(uId uint64) (data *UserPointcardData, err error) {
 //添加用户点卡数据
 func AddUserPointcard(uId uint64, orderId string, buytime int64, exchangenum uint32) {
 	pdata := PointcardData{
-		PcId:           fmt.Sprintf("%d%d", uId, buytime),
+		PcId:           MakeMD5(fmt.Sprintf("%07d%d", uId, buytime)),
 		OrderId:        orderId,
 		Buytime:        buytime,
 		ExchangeNum:    exchangenum,
@@ -83,4 +86,10 @@ func ExchangePointcard(uId uint64, pcId string) (code int32, data *PointcardData
 		}
 	}
 	return 1, nil
+}
+
+func MakeMD5(str string) string {
+	h := md5.New()
+	h.Write([]byte(str))
+	return strings.ToUpper(hex.EncodeToString(h.Sum(nil)))
 }

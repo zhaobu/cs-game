@@ -1,9 +1,9 @@
 package cache
 
 import (
-	pbcommon "game/pb/common"
 	"encoding/json"
 	"fmt"
+	pbcommon "game/pb/common"
 	"strconv"
 
 	"go.uber.org/zap"
@@ -55,10 +55,15 @@ func AddDeskInfo(info *pbcommon.DeskInfo) (err error) {
 	if r != 1 {
 		return fmt.Errorf("exists desk %d", info.ID)
 	}
+	AddUserDesk(info.CreateUserID, info.ID)
 	return nil
 }
 
 func DelDeskInfo(deskID uint64, log *zap.SugaredLogger) {
+	deskinfo, err := QueryDeskInfo(deskID)
+	if err == nil {
+		DelUserDesk(deskinfo.CreateUserID, deskinfo.ID)
+	}
 	c := redisPool.Get()
 	defer c.Close()
 	// log.Debugf("测试何时删除房间信息debug stack info=%s", string(debug.Stack()))
