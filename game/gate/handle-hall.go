@@ -1,18 +1,20 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"game/cache"
 	"game/codec"
 	"game/codec/protobuf"
 	"game/db/mgo"
 	"game/net"
-	"game/pb/common"
-	"game/pb/hall"
-	"encoding/json"
-	"fmt"
-	"go.uber.org/zap"
+	pbcommon "game/pb/common"
+	pbgame "game/pb/game"
+	pbhall "game/pb/hall"
 	"strings"
 	"time"
+
+	"go.uber.org/zap"
 
 	"github.com/astaxie/beego/httplib"
 )
@@ -40,7 +42,11 @@ func (s *session) handleHall(msg *codec.Message) error {
 	case *pbhall.UpdateIdCardReq:
 		s.handleHallUpdateIdCardReq(msg.UserID, v)
 	case *pbhall.QueryUserBuildInfoReq:
-		s.handleHallQueryUserBuildInfoReq(msg.UserID,v)
+		s.handleHallQueryUserBuildInfoReq(msg.UserID, v)
+	case *pbhall.QueryUserPointCardInfoReq:
+		s.handleHallQueryUserPointCardInfoReq(msg.UserID, v)
+	case *pbhall.PointCardExchangeReq:
+		s.handleHallPointCardExchangeReq(msg.UserID, v)
 	default:
 		return fmt.Errorf("bad type:%+v", v)
 	}
@@ -195,15 +201,15 @@ func (s *session) handleHallUpdateBindMobileReq(userID uint64, req *pbhall.Updat
 	//推送net
 	//tlog.Info("推送用户绑定手机信息", zap.Any("Uid", userID), zap.Any("Mobile", req.Mobile))
 	go func() {
-		err = net.PushUserBindPhone(userID,1,req.Mobile)
-		if err != nil{
-			tlog.Error("推送用户绑定手机信息 错误", zap.Any("Uid", userID), zap.Any("Mobile", req.Mobile),zap.Any("err",err.Error()))
+		err = net.PushUserBindPhone(userID, 1, req.Mobile)
+		if err != nil {
+			tlog.Error("推送用户绑定手机信息 错误", zap.Any("Uid", userID), zap.Any("Mobile", req.Mobile), zap.Any("err", err.Error()))
 		}
 	}()
 }
 
 //绑定闲聊账号
-func (s *session) handleHallBindXianLiaoAccountReq(userID uint64,req *pbhall.BindXianLiaoAccountReq){
+func (s *session) handleHallBindXianLiaoAccountReq(userID uint64, req *pbhall.BindXianLiaoAccountReq) {
 	tlog.Info("收到用户绑定闲聊信息", zap.Any("userID", userID), zap.Any("req", req))
 	rsp := &pbhall.BindXianLiaoAccountRsp{}
 	if req.Head != nil {
@@ -237,9 +243,9 @@ func (s *session) handleHallBindXianLiaoAccountReq(userID uint64,req *pbhall.Bin
 	rsp.Code = 1
 
 	go func() {
-		err = net.PushUserBindPhone(userID,2,req.XianLiaoId)
-		if err != nil{
-			tlog.Error("推送用户绑定手机信息 错误", zap.Any("Uid", userID), zap.Any("Mobile", req.XianLiaoId),zap.Any("err",err.Error()))
+		err = net.PushUserBindPhone(userID, 2, req.XianLiaoId)
+		if err != nil {
+			tlog.Error("推送用户绑定手机信息 错误", zap.Any("Uid", userID), zap.Any("Mobile", req.XianLiaoId), zap.Any("err", err.Error()))
 		}
 	}()
 }
@@ -272,12 +278,12 @@ func queryGameList() (gamelist []string, err error) {
 }
 
 //查询用户绑定信息
-func (s *session) handleHallQueryUserBuildInfoReq(uid uint64, req *pbhall.QueryUserBuildInfoReq){
+func (s *session) handleHallQueryUserBuildInfoReq(uid uint64, req *pbhall.QueryUserBuildInfoReq) {
 	rsp := &pbhall.QueryUserBuildInfoRsp{
-		IsBuildPhone:false,
-		PhoneNumber:"",
-		IsBuildXianLiao:false,
-		XianLiaoAccount:"",
+		IsBuildPhone:    false,
+		PhoneNumber:     "",
+		IsBuildXianLiao: false,
+		XianLiaoAccount: "",
 	}
 	if req.Head != nil {
 		rsp.Head = &pbcommon.RspHead{Seq: req.Head.Seq}
@@ -286,12 +292,65 @@ func (s *session) handleHallQueryUserBuildInfoReq(uid uint64, req *pbhall.QueryU
 		s.sendPb(rsp)
 	}()
 	Info, _ := mgo.QueryUserInfo(s.uid)
-	if Info.Mobile != ""{
+	if Info.Mobile != "" {
 		rsp.IsBuildPhone = true
 		rsp.PhoneNumber = Info.Mobile
 	}
-	if Info.XLID != ""{
+	if Info.XLID != "" {
 		rsp.IsBuildXianLiao = true
 		rsp.XianLiaoAccount = Info.XLID
+	}
+}
+
+//查询点卡信息
+func (s *session) handleHallQueryUserPointCardInfoReq(uid uint64, req *pbhall.QueryUserPointCardInfoReq) {
+	rsp := &pbhall.QueryUserPointCardInfoRsp{
+		PCards: []*pbhall.PointCardInfo{},
+	}
+	if req.Head != nil {
+		rsp.Head = &pbcommon.RspHead{Seq: req.Head.Seq}
+	}
+	defer func() {
+		s.sendPb(rsp)
+	}()
+	data, err := mgo.QueryUserPointcard(uid)
+	if err == nil {
+		for _, v := range data.Pointcards {
+			rsp.PCards = append(rsp.PCards, &pbhall.PointCardInfo{
+				PcId:          v.PcId,
+				BuyTime:       v.Buytime,
+				ExchangeNum:   v.ExchangeNum,
+				ExchangeState: uint32(v.ExchangeState),
+				ExchangeTime:  v.ExchangeTime,
+			})
+		}
+	}
+}
+
+//点卡兑换
+func (s *session) handleHallPointCardExchangeReq(uid uint64, req *pbhall.PointCardExchangeReq) {
+	rsp := &pbhall.PointCardExchangeRsp{
+		ErrorCode: 0,
+	}
+	if req.Head != nil {
+		rsp.Head = &pbcommon.RspHead{Seq: req.Head.Seq}
+	}
+	defer func() {
+		s.sendPb(rsp)
+	}()
+	code, data := mgo.ExchangePointcard(uid, req.PcId)
+	rsp.ErrorCode = uint32(code)
+	if code == 0 {
+		userinfo, err := mgo.UpdateWealth(uid, pbgame.FeeType_FTMasonry, int64(data.ExchangeNum))
+		if err == nil {
+			wcmsg := &pbhall.UserWealthChange{
+				UserID:        userinfo.UserID,
+				Gold:          userinfo.Gold,
+				GoldChange:    0,
+				Masonry:       userinfo.Masonry,
+				MasonryChange: int64(data.ExchangeNum),
+			}
+			defer s.sendPb(wcmsg)
+		}
 	}
 }

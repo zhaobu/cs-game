@@ -67,3 +67,42 @@ message UserWealthChange {
   uint64 Masonry = 4;
   int64 MasonryChange = 5;
 }
+
+//c-s 查询用户点卡信息
+message QueryUserPointCardInfoReq{
+  pbcommon.ReqHead Head = 1;
+}
+
+message PointCardInfo{
+  string PcId =1;
+  int64 BuyTime =2;
+  uint32 ExchangeNum = 3;
+  uint32 ExchangeState = 4; //0未兑换 1已兑换
+  int64 ExchangeTime =5; //兑换时间
+}
+
+//c-s 查询用户点卡信息
+message QueryUserPointCardInfoRsp{
+  pbcommon.RspHead Head = 1;
+  repeated PointCardInfo PCards = 2;
+}
+
+
+message PointCardExchangeReq {
+  pbcommon.ReqHead Head = 1;
+  string PcId =2;
+}
+
+message PointCardExchangeRsp {
+  pbcommon.RspHead Head = 1;
+  uint32 ErrorCode = 2; //0成功 1点卡不存在 2点卡已失效
+}
+
+
+message QueryUserDeskInfosReq{
+  pbcommon.ReqHead Head = 1;
+}
+message QueryUserDeskInfosRsp{
+  pbcommon.RspHead Head = 1;
+  repeated pbcommon.DeskInfo Desks = 2;
+}
