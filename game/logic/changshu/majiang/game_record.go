@@ -85,10 +85,10 @@ func (self *GameRecord) Reset(curinning uint32) {
 //记录游戏战绩
 func (self *GameRecord) AddGameRecord(info map[int32]int32) {
 	self.UserScore = append(self.UserScore, info)
-	for k, v := range info {
-		self.RankInfo[k].TotalScore += v
-		if v > 0 {
-			self.RankInfo[k].WinTimes++
+	for _, v := range self.RankInfo {
+		v.TotalScore += info[v.ChairId]
+		if info[v.ChairId] > 0 {
+			v.WinTimes++
 		}
 	}
 	self.TotalInning++
