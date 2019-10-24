@@ -133,7 +133,7 @@ func UpsertUserInfo(u *pbcommon.UserInfo) (*pbcommon.UserInfo, bool, error) {
 
 			// 新玩家初始财富，必须要赋值，不能用客户端传过来的
 			u.Gold = 5000
-			u.Masonry = 80000
+			u.Masonry = 8
 			u.GoldPre = 0
 			u.MasonryPre = 0
 			u.RegisterTime = time.Now().Unix() //注册时间
