@@ -1,6 +1,8 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"game/cache"
 	zaplog "game/common/logger"
 	"game/configs"
@@ -8,8 +10,6 @@ import (
 	"game/logic/tpl"
 	"game/net"
 	"game/util"
-	"flag"
-	"fmt"
 	"os"
 	"time"
 

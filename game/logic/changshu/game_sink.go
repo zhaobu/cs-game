@@ -19,24 +19,25 @@ import (
 
 //游戏公共信息
 type gameAllInfo struct {
-	waitHigestOper *OperPriority                     //当前等待中的最高优先级的操作
-	operOrder      map[PriorityOrder][]*OperPriority //操作优先级
-	canOperInfo    map[int32]*CanOperInfo            //玩家能做的操作
-	haswaitOper    []bool                            //玩家是否有等待中的操作
-	diceResult     [][2]int32                        //投色子结果
-	bankerId       int32                             //庄家id
-	leftCard       []int32                           //发完牌后剩余的牌
-	curThrowDice   int32                             //当前投色子的玩家
-	curOutChair    int32                             //当前出牌玩家
-	lastOutChair   int32                             //上次出牌玩家
-	lastOutCard    int32                             //上次出的牌
-	lastGangChair  int32                             //上次杠牌玩家(抢杠胡时,抢过玩家取消杠,杠牌玩家要摸牌)
-	laiziCard      map[int32]int32                   //癞子牌
-	hasHu          bool                              //是否有人胡牌
-	hasFirstBuHua  []bool                            //是否已经进行过第一次补花
-	wantCards      [][]int32                         //玩家指定要的牌
-	drawDiceValue  [2]int32                          //发牌色子
-	// readyInfo      map[int32]bool                    //玩家准备下一局状态
+	waitHigestOper   *OperPriority                     //当前等待中的最高优先级的操作
+	operOrder        map[PriorityOrder][]*OperPriority //操作优先级
+	canOperInfo      map[int32]*CanOperInfo            //玩家能做的操作
+	haswaitOper      []bool                            //玩家是否有等待中的操作
+	diceResult       [][2]int32                        //投色子结果
+	bankerId         int32                             //庄家id
+	leftCard         []int32                           //发完牌后剩余的牌
+	curThrowDice     int32                             //当前投色子的玩家
+	curOutChair      int32                             //当前出牌玩家
+	lastOutChair     int32                             //上次出牌玩家
+	lastOutCard      int32                             //上次出的牌
+	lastGangChair    int32                             //上次杠牌玩家(抢杠胡时,抢过玩家取消杠,杠牌玩家要摸牌)
+	laiziCard        map[int32]int32                   //癞子牌
+	hasHu            bool                              //是否有人胡牌
+	hasFirstBuHua    []bool                            //是否已经进行过第一次补花
+	wantCards        [][]int32                         //玩家指定要的牌
+	drawDiceValue    [2]int32                          //发牌色子
+	dbPaoHuPassChair int32                             //一炮双响时点过的玩家id
+	paoHuNums        int32                             //一炮多响的人数
 }
 
 type gamePrivateInfo struct {
@@ -105,7 +106,6 @@ func (self *GameSink) Ctor(config *pbgame_logic.CreateArg) error {
 
 //重置游戏
 func (self *GameSink) reset() {
-
 	//AllInfo
 	self.gameAllInfo = gameAllInfo{}
 	self.operOrder = make(map[PriorityOrder][]*OperPriority, self.game_config.PlayerCount)
@@ -121,6 +121,7 @@ func (self *GameSink) reset() {
 	self.curOutChair = -1
 	self.lastOutChair = -1
 	self.lastGangChair = -1
+	self.dbPaoHuPassChair = -1
 	//PrivateInfo
 	self.gameBalance.Reset(self.desk.curInning)
 	for _, v := range self.players {
@@ -412,6 +413,7 @@ func (self *GameSink) resetOper() {
 	}
 	self.waitHigestOper = nil
 	self.operOrder = map[PriorityOrder][]*OperPriority{}
+	self.paoHuNums = 0
 }
 
 //摸牌 last(0从牌前摸,1表示杠后从摸牌尾)
@@ -573,6 +575,9 @@ func (self *GameSink) outCard(chairId, card int32) error {
 				//发送玩家可进行的操作
 				self.desk.Log.Infof("%s 可进行的操作%+v", self.logHeadUser(int32(k)), ret)
 				self.sendData(int32(k), msg)
+				if !ret.CanHu.Empty() { //记录能炮胡的数量
+					self.paoHuNums++
+				}
 			}
 		}
 	}
@@ -990,7 +995,12 @@ func (self *GameSink) huCard(chairId int32) error {
 		self.desk.Log.Errorf("%s 操作胡执行了唤醒操作,checking!!!!", self.logHeadUser(chairId))
 		return nil
 	}
+	self.huCardDeal(chairId)
+	return nil
+}
 
+//处理胡牌之后的操作
+func (self *GameSink) huCardDeal(chairId int32) {
 	huInfo := &self.canOperInfo[chairId].CanHu
 	cardInfo := &self.players[chairId].CardInfo
 	//回放记录
@@ -1033,9 +1043,16 @@ func (self *GameSink) huCard(chairId int32) error {
 				}
 			}
 		}
-		self.gameEnd(pbgame_logic.GameEndType_EndHu)
+		//如果是一炮双响,第一个玩家先点过,第二个玩家点胡,算两个人都胡
+		if self.dbPaoHuPassChair != -1 {
+			passChair := self.dbPaoHuPassChair
+			self.dbPaoHuPassChair = -1
+			self.desk.Log.Debugf("%s 一炮双响,第一个玩家%d先点过,第二个玩家%d点胡,算两个人都胡", -1, passChair, chairId)
+			self.huCardDeal(passChair)
+		} else {
+			self.gameEnd(pbgame_logic.GameEndType_EndHu)
+		}
 	}
-	return nil
 }
 
 //取消操作
@@ -1059,6 +1076,9 @@ func (self *GameSink) cancelOper(chairId int32) error {
 	res := self.checkPlayerOperationNeedWait(chairId, NoneOrder)
 	if res == 2 { //需要等待其他人操作
 		self.desk.Log.Debugf("%s 取消操作需要等待其他人", self.logHeadUser(chairId))
+		if self.paoHuNums == 2 { //如果一炮双响时,先操作的玩家点过,记录一下点过玩家
+			self.dbPaoHuPassChair = chairId
+		}
 		return nil
 	} else if res == 3 { //唤醒等待中的操作
 		self.desk.Log.Debugf("%s 取消操作,唤醒等待中的操作", self.logHeadUser(chairId))
@@ -1067,10 +1087,16 @@ func (self *GameSink) cancelOper(chairId int32) error {
 	}
 	//判断是否已经胡
 	if self.hasHu {
-		self.desk.Log.Debugf("%s 取消操作,因为已经有人胡牌,游戏结束", self.logHeadUser(chairId))
-		self.gameEnd(pbgame_logic.GameEndType_EndHu)
+		if self.paoHuNums == 2 { //如果是一炮双响,第一个人点胡,第二个人点过,算两个人都胡
+			self.desk.Log.Debugf("%s 一炮双响,第一个玩家先点胡,第二个玩家%d点过,算两个人都胡", -1, chairId)
+			self.huCardDeal(chairId)
+		} else {
+			self.desk.Log.Debugf("%s 取消操作,因为已经有人胡牌,游戏结束", self.logHeadUser(chairId))
+			self.gameEnd(pbgame_logic.GameEndType_EndHu)
+		}
 		return nil
 	}
+	self.dbPaoHuPassChair = -1 //如果一炮双响时,两人都点过,就还原点过玩家记录
 
 	//回放记录
 
@@ -1135,7 +1161,6 @@ func (self *GameSink) gameEnd(endType pbgame_logic.GameEndType) {
 func (self *GameSink) afterGameEnd(endType pbgame_logic.GameEndType) {
 	//判断下一局庄家
 	self.nextBankerId = self.gameBalance.CalNextBankerId(self.bankerId)
-	// self.readyInfo = make(map[int32]bool, self.game_config.PlayerCount)
 	self.desk.gameEnd(endType)
 }
 
