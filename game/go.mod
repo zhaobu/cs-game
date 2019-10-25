@@ -24,5 +24,8 @@ require (
 	github.com/swaggo/gin-swagger v1.2.0
 	github.com/swaggo/swag v1.6.2
 	go.uber.org/zap v1.10.0
+	golang.org/x/net v0.0.0-20191021144547-ec77196f6094 // indirect
+	golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e // indirect
+	golang.org/x/tools v0.0.0-20191024220359-3d91e92cde03 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
 )

@@ -1,13 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"game/cache"
 	"game/codec/protobuf"
 	"game/db/mgo"
 	mj "game/logic/changshu/majiang"
 	"game/logic/tpl"
 	"game/util"
-	"fmt"
 	"os"
 	"runtime/debug"
 	"time"
@@ -162,7 +162,9 @@ func (d *Desk) doSitDown(uid uint64, chair int32, rsp *pbgame.SitDownRsp) {
 	// ip+距离判断 新加入的和每个已加入的玩家比较 <?的才能加入
 	if d.deskConfig.Args.LimitIP == 3 {
 		for _, v := range d.playChair {
-			if util.DistanceGeo(userInfo.Latitude, userInfo.Longitude, v.info.Latitude, v.info.Longitude) < 500.00 {
+			disTance := util.DistanceGeo(userInfo.Latitude, userInfo.Longitude, v.info.Latitude, v.info.Longitude)
+			d.Log.Debugf("玩家%d doSitDown坐下准备时,计算距离结果为%d", uid, disTance)
+			if disTance < 500.00 {
 				rsp.Code = pbgame.SitDownRspCode_SitDownDistanceSoClose
 				d.Tlog.Info("玩家doSitDown坐下准备时距离限制,不允许坐下", zap.Uint64("uid", uid), zap.Uint64("deksId", d.deskId))
 				return
@@ -704,27 +706,27 @@ func (d *Desk) OnOffLine(uid uint64, online bool) {
 	// 		d.doExit(uid, &pbgame.ExitDeskRsp{})
 	// 	}
 	// } else { //游戏中
-		if dUserInfo.userStatus >= pbgame.UserDeskStatus_UDSSitDown {
-			if online { //游戏玩家上线
-				//重新从mgo获取session信息
-				dUserInfo.info, _ = mgo.QueryUserInfo(uid)
-				d.sendDeskInfo(uid)
-				//如果有解散信息,就广播当前解散信息
-				if d.voteInfo != nil {
-					leftTime := dissTimeOut - time.Now().Sub(d.voteInfo.voteTime)
-					//广播选择
-					d.SendData(uid, &pbgame.VoteDestroyDeskNotif{DeskID: d.deskId, VoteUser: d.voteInfo.voteUser, LeftTime: int32(leftTime.Seconds()), VoteResult: d.getVoteResult()})
-				}
-				//广播玩家上线消息给所有玩家
-				d.SendData(0, &pbgame.GameUserOnOffLineNotif{UserID: uid, Oper: 1})
-			} else {
-				//广播玩家下线消息给所有玩家
-				d.SendData(0, &pbgame.GameUserOnOffLineNotif{UserID: uid, Oper: 0})
+	if dUserInfo.userStatus >= pbgame.UserDeskStatus_UDSSitDown {
+		if online { //游戏玩家上线
+			//重新从mgo获取session信息
+			dUserInfo.info, _ = mgo.QueryUserInfo(uid)
+			d.sendDeskInfo(uid)
+			//如果有解散信息,就广播当前解散信息
+			if d.voteInfo != nil {
+				leftTime := dissTimeOut - time.Now().Sub(d.voteInfo.voteTime)
+				//广播选择
+				d.SendData(uid, &pbgame.VoteDestroyDeskNotif{DeskID: d.deskId, VoteUser: d.voteInfo.voteUser, LeftTime: int32(leftTime.Seconds()), VoteResult: d.getVoteResult()})
 			}
+			//广播玩家上线消息给所有玩家
+			d.SendData(0, &pbgame.GameUserOnOffLineNotif{UserID: uid, Oper: 1})
 		} else {
-			if !online { //观察者下线
-				d.doExit(uid, &pbgame.ExitDeskRsp{})
-			}
+			//广播玩家下线消息给所有玩家
+			d.SendData(0, &pbgame.GameUserOnOffLineNotif{UserID: uid, Oper: 0})
 		}
+	} else {
+		if !online { //观察者下线
+			d.doExit(uid, &pbgame.ExitDeskRsp{})
+		}
+	}
 	// }
 }
