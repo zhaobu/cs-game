@@ -7,7 +7,7 @@
         "MgoURI": "mongodb://192.168.0.210:27017/game",
         "NetAddr": "http://192.168.0.207:8096"
     },
-    "HttpConf":{
+    "HttpConf": {
         "Addr": "http:8082"
     },
     "ClubConf": {
