@@ -956,6 +956,9 @@ func (self *GameSink) gangCard(chairId, card int32) error {
 					//发送玩家可进行的操作
 					self.desk.Log.Infof("%s 可进行的操作%+v", self.logHeadUser(int32(k)), ret)
 					self.sendData(int32(k), msg)
+					if !ret.CanHu.Empty() { //记录能炮胡的玩家
+						self.canPaoHuChairs = append(self.canPaoHuChairs, int32(k))
+					}
 				}
 			}
 		}
