@@ -57,6 +57,7 @@ message BriefInfo {
     string Name = 2;
     string Profile = 3;
     uint64 MasterUserID = 4; // 为了方便客户端做颜色区分
+    int32 Identity = 5;     //请求用户身份Id
 }
 
 // 俱乐部列表，订阅成功后发送 s -> c

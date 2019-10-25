@@ -56,6 +56,7 @@ func sendClubList(uid uint64) {
 		newBriefInfo.Name = cc.Name
 		newBriefInfo.Profile = cc.Profile
 		newBriefInfo.MasterUserID = cc.MasterUserID
+		newBriefInfo.Identity = cc.Members[uid].Identity
 		cc.RUnlock()
 
 		sendPb.List = append(sendPb.List, newBriefInfo)
