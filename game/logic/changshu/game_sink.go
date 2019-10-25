@@ -1001,6 +1001,8 @@ func (self *GameSink) huCard(chairId int32) error {
 	if len(self.canPaoHuChairs) > 1 {
 		for _, v := range self.canPaoHuChairs {
 			if v != chairId {
+				//如果是一炮多响,只要有一个人点胡,所有人都算胡
+				self.desk.Log.Infof("%s 一炮多响玩家%d点了胡,导致玩家%d也胡牌", self.logHeadUser(-1), chairId, v)
 				self.huCardDeal(v)
 			}
 		}
