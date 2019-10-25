@@ -115,7 +115,7 @@ func (self *GameSink) reset() {
 	self.hasFirstBuHua = make([]bool, self.game_config.PlayerCount)
 	self.laiziCard = make(map[int32]int32)
 	self.wantCards = make([][]int32, self.game_config.PlayerCount)
-	self.canPaoHuChairs = make([]int32, self.game_config.PlayerCount)
+	self.canPaoHuChairs = []int32{}
 	self.bankerId = -1
 	self.curThrowDice = -1
 	self.curOutChair = -1
@@ -412,8 +412,8 @@ func (self *GameSink) resetOper() {
 	}
 	self.waitHigestOper = nil
 	self.operOrder = map[PriorityOrder][]*OperPriority{}
-	if len(self.canPaoHuChairs) > 1 {
-		self.canPaoHuChairs = make([]int32, self.game_config.PlayerCount)
+	if len(self.canPaoHuChairs) > 0 {
+		self.canPaoHuChairs = []int32{}
 	}
 }
 

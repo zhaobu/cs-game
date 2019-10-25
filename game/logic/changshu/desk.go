@@ -164,7 +164,7 @@ func (d *Desk) doSitDown(uid uint64, chair int32, rsp *pbgame.SitDownRsp) {
 		for _, v := range d.playChair {
 			disTance := util.DistanceGeo(userInfo.Latitude, userInfo.Longitude, v.info.Latitude, v.info.Longitude)
 			d.Log.Debugf("玩家%d doSitDown坐下准备时,计算距离结果为%d", uid, disTance)
-			if disTance < 500.00 {
+			if disTance < 1000.00 {
 				rsp.Code = pbgame.SitDownRspCode_SitDownDistanceSoClose
 				d.Tlog.Info("玩家doSitDown坐下准备时距离限制,不允许坐下", zap.Uint64("uid", uid), zap.Uint64("deksId", d.deskId))
 				return
