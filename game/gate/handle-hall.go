@@ -180,7 +180,8 @@ func (s *session) handleHallUpdateBindMobileReq(userID uint64, req *pbhall.Updat
 	cache.DeleteCaptcha(req.Mobile)
 
 	isLoginSucced := (userID != 0)
-
+	udata, _ := mgo.QueryUserInfo(userID)
+	IsGive := udata.Mobile == "" //是否赠送
 	userInfo, err := mgo.QueryUserByMobile(req.Mobile)
 	if !isLoginSucced {
 		if err != nil {
@@ -194,6 +195,7 @@ func (s *session) handleHallUpdateBindMobileReq(userID uint64, req *pbhall.Updat
 			return
 		}
 	}
+
 	_, err = mgo.UpdateBindMobile(userID, req.Mobile, req.Password)
 	if err != nil {
 		rsp.Code = 5
@@ -202,12 +204,14 @@ func (s *session) handleHallUpdateBindMobileReq(userID uint64, req *pbhall.Updat
 	rsp.Code = 1
 	//推送net
 	//tlog.Info("推送用户绑定手机信息", zap.Any("Uid", userID), zap.Any("Mobile", req.Mobile))
-	go func() {
-		err = net.PushUserBindPhone(userID, 1, req.Mobile)
-		if err != nil {
-			tlog.Error("推送用户绑定手机信息 错误", zap.Any("Uid", userID), zap.Any("Mobile", req.Mobile), zap.Any("err", err.Error()))
-		}
-	}()
+	if IsGive {
+		go func() {
+			err = net.PushUserBindPhone(userID, 1, req.Mobile)
+			if err != nil {
+				tlog.Error("推送用户绑定手机信息 错误", zap.Any("Uid", userID), zap.Any("Mobile", req.Mobile), zap.Any("err", err.Error()))
+			}
+		}()
+	}
 }
 
 //绑定闲聊账号
@@ -237,6 +241,8 @@ func (s *session) handleHallBindXianLiaoAccountReq(userID uint64, req *pbhall.Bi
 			return
 		}
 	}
+	udata, _ := mgo.QueryUserInfo(userID)
+	IsGive := udata.XLID == "" //是否赠送
 	_, err := mgo.BindXianLiaoID(userID, req.XianLiaoId)
 	if err != nil {
 		rsp.Code = 5
@@ -244,12 +250,14 @@ func (s *session) handleHallBindXianLiaoAccountReq(userID uint64, req *pbhall.Bi
 	}
 	rsp.Code = 1
 
-	go func() {
-		err = net.PushUserBindPhone(userID, 2, req.XianLiaoId)
-		if err != nil {
-			tlog.Error("推送用户绑定手机信息 错误", zap.Any("Uid", userID), zap.Any("Mobile", req.XianLiaoId), zap.Any("err", err.Error()))
-		}
-	}()
+	if IsGive {
+		go func() {
+			err = net.PushUserBindPhone(userID, 2, req.XianLiaoId)
+			if err != nil {
+				tlog.Error("推送用户绑定手机信息 错误", zap.Any("Uid", userID), zap.Any("Mobile", req.XianLiaoId), zap.Any("err", err.Error()))
+			}
+		}()
+	}
 }
 
 func queryGameList() (gamelist []string, err error) {
