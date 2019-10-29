@@ -140,8 +140,6 @@ func (d *Desk) doJoin(uid uint64, rsp *pbgame.JoinDeskRsp) {
 
 //坐下后由观察者变为游戏玩家
 func (d *Desk) doSitDown(uid uint64, chair int32, rsp *pbgame.SitDownRsp) {
-	d.Tlog.Info("Tlog")
-	d.Log.Info("Log")
 	d.Tlog.Info("玩家doSitDown坐下准备", zap.Uint64("uid", uid), zap.Uint64("deksId", d.deskId))
 	userInfo, err := mgo.QueryUserInfo(uid)
 	if err != nil {
@@ -162,9 +160,9 @@ func (d *Desk) doSitDown(uid uint64, chair int32, rsp *pbgame.SitDownRsp) {
 	// ip+距离判断 新加入的和每个已加入的玩家比较 <?的才能加入
 	if d.deskConfig.Args.LimitIP == 3 {
 		for _, v := range d.playChair {
-			disTance := util.DistanceGeo(userInfo.Latitude, userInfo.Longitude, v.info.Latitude, v.info.Longitude)
-			d.Log.Debugf("玩家%d doSitDown坐下准备时,计算距离结果为%d", uid, disTance)
-			if disTance < 1000.00 {
+			disTance := util.DistanceGeo(userInfo.Latitude/1000000, userInfo.Longitude/1000000, v.info.Latitude/1000000, v.info.Longitude/1000000)
+			d.Log.Debugf("玩家%d doSitDown坐下准备时,计算距离结果为%10.2f", uid, disTance)
+			if disTance < 500.00 {
 				rsp.Code = pbgame.SitDownRspCode_SitDownDistanceSoClose
 				d.Tlog.Info("玩家doSitDown坐下准备时距离限制,不允许坐下", zap.Uint64("uid", uid), zap.Uint64("deksId", d.deskId))
 				return
