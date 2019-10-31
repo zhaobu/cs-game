@@ -106,3 +106,10 @@ message QueryUserDeskInfosRsp{
   pbcommon.RspHead Head = 1;
   repeated pbcommon.DeskInfo Desks = 2;
 }
+
+//更新大厅桌子列表
+message PushMasterDeskChangeInfo {
+	uint64 DeskID = 1;
+  int32 ChangeTyp = 2;      //1增加  2更新 3销毁
+  pbcommon.DeskInfo Desks = 3;
+}
