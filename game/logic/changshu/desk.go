@@ -318,7 +318,7 @@ func (d *Desk) updateDeskInfo(changeTyp int32) {
 	cache.UpdateDeskInfo(deskInfo)
 
 	//通知俱乐部查询桌子信息
-	d.gameNode.SendDeskChangeNotif(d.clubId, d.deskId, changeTyp)
+	d.gameNode.SendDeskChangeNotif(d.clubId, d.deskId, changeTyp, deskInfo)
 }
 
 //sendDeskInfo 有新玩家坐下,起立,重连,发送玩家信息
@@ -463,7 +463,11 @@ func (d *Desk) realDestroyDesk(reqType pbgame.DestroyDeskType) {
 	if !d.payMoney {
 		if d.deskConfig.Args.PaymentType == 3 { //俱乐部群主支付
 			d.updateWealth(d.clubMasterUid, 1)
-		} else {
+		} else if d.deskConfig.Args.PaymentType == 2 { //AA支付
+			for _, v := range d.playChair {
+				d.updateWealth(v.info.UserID, 1)
+			}
+		} else if d.deskConfig.Args.PaymentType == 1 { //房主支付
 			d.updateWealth(d.masterUid, 1)
 		}
 	}

@@ -1,13 +1,15 @@
 package tpl
 
 import (
+	"encoding/json"
 	"game/cache"
 	"game/codec"
 	"game/codec/protobuf"
+	pbcommon "game/pb/common"
 	pbgame "game/pb/game"
+	pbhall "game/pb/hall"
 	pbinner "game/pb/inner"
 	"game/util"
-	"encoding/json"
 	"time"
 
 	"github.com/RussellLuo/timingwheel"
@@ -153,7 +155,14 @@ func (self *RoomServie) ToGate(pb proto.Message, printLog bool, uids ...uint64) 
 	return self.ToGateNormal(notif, false, uids...)
 }
 
-func (self *RoomServie) SendDeskChangeNotif(cid int64, did uint64, changeTyp int32) {
+func (self *RoomServie) SendDeskChangeNotif(cid int64, did uint64, changeTyp int32, deskInfo *pbcommon.DeskInfo) {
+	//通知房主更新房间列表
+	msg := pbhall.PushMasterDeskChangeInfo{DeskID: did, ChangeTyp: changeTyp}
+	if changeTyp != 3 { //删除时不需要详细信息
+		msg.Desks = deskInfo
+	}
+	self.ToGateNormal(&msg, true, deskInfo.CreateUserID)
+
 	self.tlog.Info("SendDeskChangeNotif", zap.Int64("cid", cid), zap.Uint64("did", did), zap.Int32("changeTyp", changeTyp))
 	m := &codec.Message{}
 	dcn := &pbinner.DeskChangeNotif{

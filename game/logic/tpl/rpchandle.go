@@ -2,13 +2,13 @@ package tpl
 
 import (
 	"context"
+	"fmt"
 	"game/cache"
 	"game/codec"
 	"game/db/mgo"
 	pbcommon "game/pb/common"
 	pbgame "game/pb/game"
 	"game/util"
-	"fmt"
 	"hash/crc32"
 	"runtime/debug"
 	"time"
@@ -370,9 +370,8 @@ func (self *RpcHandle) MakeDeskReq(ctx context.Context, args *codec.Message, rep
 
 	defer func() {
 		self.service.ToGateNormal(rsp, true, args.UserID)
-
 		if rsp.Code == pbgame.MakeDeskRspCode_MakeDeskSucc && req.ClubID != 0 {
-			self.service.SendDeskChangeNotif(req.ClubID, newDeskID, 1)
+			self.service.SendDeskChangeNotif(req.ClubID, newDeskID, 1, rsp.Info)
 		}
 	}()
 
