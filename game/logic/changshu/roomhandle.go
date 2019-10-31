@@ -1,12 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"game/codec/protobuf"
 	"game/db/mgo"
 	pbcommon "game/pb/common"
 	pbgame "game/pb/game"
 	pbgame_logic "game/pb/game/mj/changshu"
-	"fmt"
 
 	"go.uber.org/zap"
 )
@@ -192,8 +192,7 @@ func (self *roomHandle) HandleSitDownReq(uid uint64, req *pbgame.SitDownReq, rsp
 
 func (self *roomHandle) HandleMakeDeskReq(uid, clubMasterUid uint64, deskID uint64, req *pbgame.MakeDeskReq, rsp *pbgame.MakeDeskRsp) bool {
 	//检查玩家是否已经在别的房间中
-	d := getDeskByUID(uid)
-	if d != nil {
+	if uid != clubMasterUid && getDeskByUID(uid) != nil {
 		rsp.Code = pbgame.MakeDeskRspCode_MakeDeskAlreadyInDesk
 		return false
 	}
