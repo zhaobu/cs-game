@@ -269,7 +269,7 @@ func (d *Desk) doExit(uid uint64, rsp *pbgame.ExitDeskRsp) {
 	}
 	//如果游戏玩家先起立
 	chairId := d.GetChairidByUid(uid)
-	if chairId != -1 {
+	if d.curInning == 0 && chairId != -1 { //游戏还没开始,已经坐下的玩家退出桌子需要退钱
 		rsp.Code = d.doStandUp(chairId)
 		if rsp.Code != pbgame.ExitDeskRspCode_ExitDeskSucc {
 			d.Tlog.Info("doExit时 d.doStandUp 失败", zap.Any("rsp.Code", rsp.Code))
@@ -464,6 +464,10 @@ func (d *Desk) realDestroyDesk(reqType pbgame.DestroyDeskType) {
 		if d.deskConfig.Args.PaymentType == 3 { //俱乐部群主支付
 			d.updateWealth(d.clubMasterUid, 1)
 		} else if d.deskConfig.Args.PaymentType == 2 { //AA支付
+			//游戏未开始,房主不在桌子中退还房主预扣的钱
+			if d.curInning == 0 && d.GetChairidByUid(d.masterUid) == -1 {
+				d.updateWealth(d.masterUid, 1)
+			}
 			for _, v := range d.playChair {
 				d.updateWealth(v.info.UserID, 1)
 			}
