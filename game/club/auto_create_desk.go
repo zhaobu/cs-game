@@ -10,6 +10,7 @@ import (
 	pbgame "game/pb/game"
 	pbinner "game/pb/inner"
 	"hash/crc32"
+	"time"
 
 	"github.com/sirupsen/logrus"
 )
@@ -119,26 +120,28 @@ func checkAutoCreate(_cid int64) (setting []*mgo.DeskSetting, cid int64, masterU
 
 func createDesk(setting []*mgo.DeskSetting, cid int64, masterUserID uint64) {
 	logrus.Infof("%d createDesk %d", cid, len(setting))
+	go func() {
+		for _, s := range setting {
+			cli, err := getGameCli(s.GameName)
+			if err != nil {
+				continue
+			}
 
-	for _, s := range setting {
-		cli, err := getGameCli(s.GameName)
-		if err != nil {
-			continue
+			reqRCall := &codec.Message{}
+			codec.Pb2Msg(&pbgame.MakeDeskReq{
+				Head:            &pbcommon.ReqHead{UserID: masterUserID},
+				GameName:        s.GameName,
+				GameArgMsgName:  s.GameArgMsgName,
+				GameArgMsgValue: s.GameArgMsgValue,
+				ClubID:          cid,
+				ClubMasterUid:   masterUserID,
+			}, reqRCall)
+			reqRCall.UserID = masterUserID
+			rspRCall := &codec.Message{}
+			cli.Go(context.Background(), "MakeDeskReq", reqRCall, rspRCall, nil)
+			time.Sleep(time.Millisecond * 10)
 		}
-
-		reqRCall := &codec.Message{}
-		codec.Pb2Msg(&pbgame.MakeDeskReq{
-			Head:            &pbcommon.ReqHead{UserID: masterUserID},
-			GameName:        s.GameName,
-			GameArgMsgName:  s.GameArgMsgName,
-			GameArgMsgValue: s.GameArgMsgValue,
-			ClubID:          cid,
-			ClubMasterUid:   masterUserID,
-		}, reqRCall)
-		reqRCall.UserID = masterUserID
-		rspRCall := &codec.Message{}
-		cli.Go(context.Background(), "MakeDeskReq", reqRCall, rspRCall, nil)
-	}
+	}()
 }
 
 //销毁桌子
