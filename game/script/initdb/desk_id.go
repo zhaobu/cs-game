@@ -7,11 +7,8 @@ import (
 )
 
 func genDeskID(startDeskID, endDeskID int) {
-	c := redisPool.Get()
-	defer c.Close()
 
-	c.Do("FLUSHDB") // dangerous
-
+	redisCli.FlushDB()
 	var deskIDs []interface{}
 	//deskIDs = append(deskIDs, "emptydesk")
 	for i := startDeskID; i <= endDeskID; i++ {
@@ -21,12 +18,10 @@ func genDeskID(startDeskID, endDeskID int) {
 	//随机打乱
 	r := rand.New(rand.NewSource(time.Now().Unix()))
 	randdeskIDs := []interface{}{}
-	randdeskIDs = append(randdeskIDs, "emptydesk")
 	for _, i := range r.Perm(len(deskIDs)) {
-		randdeskIDs = append(randdeskIDs,deskIDs[i])
+		randdeskIDs = append(randdeskIDs, deskIDs[i])
 	}
-
-	_, err := c.Do("SADD", randdeskIDs...)
+	_, err := redisCli.SAdd("emptydesk", randdeskIDs...).Result()
 	if err != nil {
 		panic(err.Error())
 	}

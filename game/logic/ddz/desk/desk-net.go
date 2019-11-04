@@ -1,22 +1,22 @@
 package desk
 
 import (
+	"encoding/json"
 	"game/codec"
 	"game/codec/protobuf"
 	"game/db/mgo"
 	pbcommon "game/pb/common"
 	pbgame "game/pb/game"
-	"encoding/json"
 
+	"github.com/go-redis/redis"
 	"github.com/golang/protobuf/proto"
-	"github.com/gomodule/redigo/redis"
 	"github.com/sirupsen/logrus"
 )
 
 var (
 	gameName  string
 	gameID    string
-	redisPool *redis.Pool
+	redisCli *redis.Client
 	log       *logrus.Entry
 )
 
@@ -30,19 +30,11 @@ func Init(redisAddr string, redisDb int, mgoURI, name, id string, log_ *logrus.E
 	gameName = name
 	gameID = id
 
-	redisPool = &redis.Pool{
-		Dial: func() (redis.Conn, error) {
-			c, err := redis.Dial("tcp", redisAddr)
-			if err != nil {
-				return nil, err
-			}
-			if _, err := c.Do("SELECT", redisDb); err != nil {
-				c.Close()
-				return nil, err
-			}
-			return c, nil
-		},
-	}
+	redisCli = redis.NewClient(&redis.Options{
+		Addr:     redisAddr,
+		Password: "",      // no password set
+		DB:       redisDb, // use default DB
+	})
 
 	return nil
 }
@@ -72,10 +64,7 @@ func toGateNormal(loge *logrus.Entry, pb proto.Message, uids ...uint64) error {
 		return err
 	}
 
-	rc := redisPool.Get()
-	defer rc.Close()
-
-	_, err = rc.Do("PUBLISH", "backend_to_gate", data)
+	_, err = redisCli.Publish("backend_to_gate", data)
 	if err != nil {
 		loge.Error(err.Error())
 	}
@@ -113,7 +102,7 @@ func (d *desk) toGate(pb proto.Message, uids ...uint64) error {
 	rc := redisPool.Get()
 	defer rc.Close()
 
-	_, err = rc.Do("PUBLISH", "backend_to_gate", data)
+	_,err=	redisCli.Publish("backend_to_gate", data)
 	return err
 }
 

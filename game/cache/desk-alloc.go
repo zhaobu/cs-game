@@ -5,19 +5,14 @@ import (
 	"math/rand"
 	"strconv"
 	"time"
-
-	"github.com/gomodule/redigo/redis"
 )
 
 func AllocDeskID() (deskID uint64, err error) {
-	c := redisPool.Get()
-	defer c.Close()
-
-	left, err := redis.Int(c.Do("SCARD", "emptydesk"))
+	cmdInt, err := redisCli.SCard("emptydesk").Result()
 	if err != nil {
 		return 0, err
 	}
-	if left == 0 {
+	if cmdInt == 0 {
 		rand.Seed(time.Now().Unix())
 		var num int = 1000
 		codeMap := make(map[int64]bool, num)
@@ -30,7 +25,7 @@ func AllocDeskID() (deskID uint64, err error) {
 				continue
 			}
 			codeMap[enter_code] = true
-			_, err := redis.Int(c.Do("SADD", "emptydesk", enter_code))
+			_, err := redisCli.SAdd("emptydesk", enter_code).Result()
 			if err != nil {
 				return 0, err
 			}
@@ -50,49 +45,33 @@ func AllocDeskID() (deskID uint64, err error) {
 		// 	num++
 		// }
 	}
-	reply, err := redis.Strings(c.Do("SPOP", "emptydesk", "1"))
-	if len(reply) == 1 {
-		return strconv.ParseUint(reply[0], 10, 64)
-	}
-	return 0, fmt.Errorf("not enough")
+	cmdStr := redisCli.SPop("emptydesk")
+	return cmdStr.Uint64()
 }
 
 func FreeDeskID(deskID uint64) (err error) {
-	c := redisPool.Get()
-	defer c.Close()
-
-	_, err = c.Do("SADD", "emptydesk", strconv.FormatUint(deskID, 10))
+	_, err = redisCli.SAdd("emptydesk", strconv.FormatUint(deskID, 10)).Result()
 	return
 }
 
 func SCAN(pattern string, count int) (find []string) {
-	c := redisPool.Get()
-	defer c.Close()
-
 	if count < 1 || count > 50 {
 		count = 50
 	}
 
-	const start = string("0")
-	var cursor string = start
+	var (
+		cursor uint64
+		n      int
+		err    error
+	)
 
 	for {
-		reply, err := redis.MultiBulk(c.Do("SCAN", cursor, "MATCH", pattern, "COUNT", count))
+		find, cursor, err = redisCli.Scan(cursor, pattern, int64(count)).Result()
 		if err != nil {
-			return
+			fmt.Printf("err=%s", err)
 		}
-
-		if len(reply) != 2 {
-			break
-		}
-
-		findN, _ := redis.ByteSlices(reply[1], nil)
-		for _, v := range findN {
-			find = append(find, string(v))
-		}
-
-		cursor = string(reply[0].([]byte))
-		if cursor == start {
+		n += len(find)
+		if cursor == 0 {
 			break
 		}
 	}

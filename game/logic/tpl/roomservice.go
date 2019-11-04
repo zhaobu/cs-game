@@ -13,8 +13,8 @@ import (
 	"time"
 
 	"github.com/RussellLuo/timingwheel"
+	"github.com/go-redis/redis"
 	"github.com/golang/protobuf/proto"
-	"github.com/gomodule/redigo/redis"
 	"go.uber.org/zap"
 )
 
@@ -52,7 +52,7 @@ type RoomServie struct {
 	Timer      *timingwheel.TimingWheel //定时器
 	GameName   string                   //游戏编号
 	GameID     string                   //游戏ip+port
-	redisPool  *redis.Pool
+	redisCli   *redis.Client
 }
 
 func (self *RoomServie) Init(gameName, gameID string, _tlog *zap.Logger, redisAddr string, redisDb int) {
@@ -73,19 +73,11 @@ func (self *RoomServie) initRedis(redisAddr string, redisDb int) {
 		panic(err.Error())
 	}
 
-	self.redisPool = &redis.Pool{
-		Dial: func() (redis.Conn, error) {
-			c, err := redis.Dial("tcp", redisAddr)
-			if err != nil {
-				return nil, err
-			}
-			if _, err := c.Do("SELECT", redisDb); err != nil {
-				c.Close()
-				return nil, err
-			}
-			return c, nil
-		},
-	}
+	self.redisCli = redis.NewClient(&redis.Options{
+		Addr:     redisAddr,
+		Password: "",      // no password set
+		DB:       redisDb, // use default DB
+	})
 }
 
 func (self *RoomServie) RegisterHandle(roomhandle IRoomHandle) {
@@ -125,10 +117,7 @@ func (self *RoomServie) ToGateNormal(pb proto.Message, printLog bool, uids ...ui
 		return err
 	}
 
-	rc := self.redisPool.Get()
-	defer rc.Close()
-
-	_, err = rc.Do("PUBLISH", "backend_to_gate", data)
+	_, err = self.redisCli.Publish("backend_to_gate", data).Result()
 	if err != nil {
 		self.log.Error(err.Error())
 	}

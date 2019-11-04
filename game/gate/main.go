@@ -2,13 +2,13 @@ package main
 
 import (
 	"crypto/tls"
+	"flag"
+	"fmt"
 	"game/cache"
 	zaplog "game/common/logger"
 	"game/configs"
 	"game/db/mgo"
 	"game/net"
-	"flag"
-	"fmt"
 	"os"
 	"runtime/debug"
 	"time"

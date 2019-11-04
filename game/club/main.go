@@ -3,6 +3,9 @@
 package main
 
 import (
+	"encoding/json"
+	"flag"
+	"fmt"
 	"game/cache"
 	"game/codec"
 	"game/codec/protobuf"
@@ -10,16 +13,13 @@ import (
 	"game/db/mgo"
 	pbinner "game/pb/inner"
 	"game/util"
-	"encoding/json"
-	"flag"
-	"fmt"
 	"log"
 	"os"
 	"runtime/debug"
 	"time"
 
+	"github.com/go-redis/redis"
 	"github.com/golang/protobuf/proto"
-	"github.com/gomodule/redigo/redis"
 	metrics "github.com/rcrowley/go-metrics"
 	"github.com/sirupsen/logrus"
 	"github.com/smallnest/rpcx/server"
@@ -35,7 +35,7 @@ var (
 	redisDb    = flag.Int("redisDb", 1, "redis db select")
 	mgoURI     = flag.String("mgo", "mongodb://192.168.0.90:27017/game", "mongo connection URI")
 
-	redisPool *redis.Pool
+	redisCli *redis.Client
 )
 
 func init() {
@@ -92,19 +92,11 @@ func main() {
 
 	go util.Subscribe(*redisAddr, *redisDb, "inner_broadcast", onMessage)
 
-	redisPool = &redis.Pool{
-		Dial: func() (redis.Conn, error) {
-			c, err := redis.Dial("tcp", *redisAddr)
-			if err != nil {
-				return nil, err
-			}
-			if _, err := c.Do("SELECT", *redisDb); err != nil {
-				c.Close()
-				return nil, err
-			}
-			return c, nil
-		},
-	}
+	redisCli = redis.NewClient(&redis.Options{
+		Addr:     *redisAddr,
+		Password: "",       // no password set
+		DB:       *redisDb, // use default DB
+	})
 
 	err = mgo.Init(*mgoURI)
 	if err != nil {
@@ -175,10 +167,7 @@ func toGateNormal(pb proto.Message, uids ...uint64) error {
 		return err
 	}
 
-	rc := redisPool.Get()
-	defer rc.Close()
-
-	_, err = rc.Do("PUBLISH", "backend_to_gate", data)
+	_, err = redisCli.Publish("backend_to_gate", data).Result()
 	if err != nil {
 		logrus.Error(err.Error())
 	}

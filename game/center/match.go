@@ -2,20 +2,20 @@ package main
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"game/cache"
 	"game/codec"
 	pbcenter "game/pb/center"
 	pbcommon "game/pb/common"
 	pbinner "game/pb/inner"
-	"encoding/json"
-	"fmt"
 	"math/rand"
 	"sync"
 	"time"
 
 	"go.uber.org/zap"
 
-	"github.com/gomodule/redigo/redis"
+	"github.com/go-redis/redis"
 )
 
 type attr struct {
@@ -175,9 +175,7 @@ func (r *matchRoom) deleteLongTime() {
 			continue
 		}
 
-		c := redisPool.Get()
-		defer c.Close()
-		_, err = c.Do("PUBLISH", "backend_to_gate", data)
+		_, err = redisCli.Publish("backend_to_gate", data).Result()
 		if err != nil {
 			tlog.Error(err.Error())
 		}
@@ -189,7 +187,7 @@ var (
 	waiter = make(map[string]*matchRoom) // key: GameName
 	mu     sync.RWMutex
 
-	redisPool *redis.Pool
+	redisCli *redis.Client
 )
 
 func enterMatch(uid uint64, gn string, rid uint32, matchRsp *pbcenter.MatchRsp) {

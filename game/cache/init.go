@@ -1,25 +1,23 @@
 package cache
 
 import (
-	"github.com/gomodule/redigo/redis"
+	"github.com/go-redis/redis"
 )
 
 var (
-	redisPool *redis.Pool
+	redisCli *redis.Client
 )
 
 func Init(address string, db int) error {
-	redisPool = &redis.Pool{
-		Dial: func() (redis.Conn, error) {
-			return redis.Dial("tcp", address, redis.DialDatabase(db))
-		},
-	}
+	redisCli = redis.NewClient(&redis.Options{
+		Addr:     address,
+		Password: "", // no password set
+		DB:       db, // use default DB
+	})
 	return nil
 }
 
 func FlushDb(db int) error {
-	c := redisPool.Get()
-	defer c.Close()
-	c.Do("FLUSHDB")
+	redisCli.Do("FLUSHDB")
 	return nil
 }
