@@ -1,9 +1,9 @@
 package main
 
 import (
-	"game/configs"
 	"flag"
 	"fmt"
+	// "game/configs"
 
 	"github.com/globalsign/mgo"
 	"github.com/gomodule/redigo/redis"
@@ -20,9 +20,9 @@ var (
 
 func init() {
 	//如果不指定启动参数,默认读取全局配置
-	*redisAddr = configs.Conf.RedisAddr
-	*redisDb = configs.Conf.RedisDb
-	*mgoURI = configs.Conf.MgoURI
+	// *redisAddr = configs.Conf.RedisAddr
+	// *redisDb = configs.Conf.RedisDb
+	// *mgoURI = configs.Conf.MgoURI
 }
 
 func main() {
