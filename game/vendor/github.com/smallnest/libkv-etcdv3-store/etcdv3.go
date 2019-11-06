@@ -188,6 +188,7 @@ func (s *EtcdV3) WatchTree(directory string, stopCh <-chan struct{}) (<-chan []*
 		if err != nil {
 			return
 		}
+
 		watchCh <- list
 
 		rch := s.client.Watch(context.Background(), directory, clientv3.WithPrefix())
@@ -195,23 +196,12 @@ func (s *EtcdV3) WatchTree(directory string, stopCh <-chan struct{}) (<-chan []*
 			select {
 			case <-s.done:
 				return
-			case wresp := <-rch:
-				if len(wresp.Events) > 0 {
-					var pairs []*store.KVPair
-					for _, event := range wresp.Events {
-						pairs = append(pairs, &store.KVPair{
-							Key:       string(event.Kv.Key),
-							Value:     event.Kv.Value,
-							LastIndex: uint64(event.Kv.Version),
-						})
-					}
-					watchCh <- pairs
-				}
-
-				// error
-				if wresp.Err() != nil {
+			case <-rch:
+				list, err := s.List(directory)
+				if err != nil {
 					return
 				}
+				watchCh <- list
 			}
 		}
 	}()
@@ -234,17 +224,19 @@ func (s *EtcdV3) NewLock(key string, options *store.LockOptions) (store.Locker, 
 // List the content of a given prefix
 func (s *EtcdV3) List(directory string) ([]*store.KVPair, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), s.timeout)
+	defer cancel()
+
 	resp, err := s.client.Get(ctx, directory, clientv3.WithPrefix())
-	cancel()
 	if err != nil {
 		return nil, err
 	}
 
+	kvpairs := make([]*store.KVPair, 0, len(resp.Kvs))
+
 	if len(resp.Kvs) == 0 {
-		return nil, store.ErrKeyExists
+		return kvpairs, nil
 	}
 
-	kvpairs := make([]*store.KVPair, 0, len(resp.Kvs))
 	for _, kv := range resp.Kvs {
 		pair := &store.KVPair{
 			Key:       string(kv.Key),

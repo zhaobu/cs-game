@@ -110,7 +110,6 @@ func main() {
 	flag.Parse()
 
 	initLog()
-
 	if *addr == "" {
 		taddr, err := util.AllocListenAddr()
 		if err != nil {

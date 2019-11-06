@@ -1,8 +1,8 @@
 # A QUIC Connection
 
-[![Godoc Reference](https://img.shields.io/badge/godoc-reference-blue.svg?style=flat-square)](https://godoc.org/github.com/marten-seemann/quic-conn)
-[![Linux Build Status](https://img.shields.io/travis/marten-seemann/quic-conn/master.svg?style=flat-square&label=linux+build)](https://travis-ci.org/marten-seemann/quic-conn)
-[![Code Coverage](https://img.shields.io/codecov/c/github/marten-seemann/quic-conn/master.svg?style=flat-square)](https://codecov.io/gh/marten-seemann/quic-conn/)
+[![Godoc Reference](https://img.shields.io/badge/godoc-reference-blue.svg?style=flat-square)](https://godoc.org/github.com/rpcx-ecosystem/quic-conn)
+[![Linux Build Status](https://img.shields.io/travis/rpcx-ecosystem/quic-conn/master.svg?style=flat-square&label=linux+build)](https://travis-ci.org/rpcx-ecosystem/quic-conn)
+[![Code Coverage](https://img.shields.io/codecov/c/github/rpcx-ecosystem/quic-conn/master.svg?style=flat-square)](https://codecov.io/gh/rpcx-ecosystem/quic-conn/)
 
 At the moment, this project is intended to figure out the right API exposed by the [quic package in quic-go](https://github.com/lucas-clemente/quic-go).
 

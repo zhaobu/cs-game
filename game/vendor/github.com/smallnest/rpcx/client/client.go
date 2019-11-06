@@ -190,11 +190,15 @@ func (client *Client) UnregisterServerMessageChan() {
 
 // IsClosing client is closing or not.
 func (client *Client) IsClosing() bool {
+	client.mutex.Lock()
+	defer client.mutex.Unlock()
 	return client.closing
 }
 
 // IsShutdown client is shutdown or not.
 func (client *Client) IsShutdown() bool {
+	client.mutex.Lock()
+	defer client.mutex.Unlock()
 	return client.shutdown
 }
 
@@ -564,9 +568,9 @@ func (client *Client) send(ctx context.Context, call *Call) {
 
 func (client *Client) input() {
 	var err error
-	var res = protocol.NewMessage()
 
 	for err == nil {
+		var res = protocol.NewMessage()
 		if client.option.ReadTimeout != 0 {
 			client.Conn.SetReadDeadline(time.Now().Add(client.option.ReadTimeout))
 		}
@@ -594,19 +598,14 @@ func (client *Client) input() {
 			if isServerMessage {
 				if client.ServerMessageChan != nil {
 					go client.handleServerRequest(res)
-					res = protocol.NewMessage()
 				}
 				continue
 			}
 		case res.MessageStatusType() == protocol.Error:
 			// We've got an error response. Give this to the request
 			if len(res.Metadata) > 0 {
-				meta := make(map[string]string, len(res.Metadata))
-				for k, v := range res.Metadata {
-					meta[k] = v
-				}
-				call.ResMetadata = meta
-				call.Error = ServiceError(meta[protocol.ServiceError])
+				call.ResMetadata = res.Metadata
+				call.Error = ServiceError(res.Metadata[protocol.ServiceError])
 			}
 
 			if call.Raw {
@@ -631,10 +630,6 @@ func (client *Client) input() {
 					}
 				}
 				if len(res.Metadata) > 0 {
-					meta := make(map[string]string, len(res.Metadata))
-					for k, v := range res.Metadata {
-						meta[k] = v
-					}
 					call.ResMetadata = res.Metadata
 				}
 
@@ -642,8 +637,6 @@ func (client *Client) input() {
 
 			call.done()
 		}
-
-		res.Reset()
 	}
 	// Terminate pending calls.
 
@@ -711,7 +704,7 @@ func (client *Client) heartbeat() {
 	t := time.NewTicker(client.option.HeartbeatInterval)
 
 	for range t.C {
-		if client.shutdown || client.closing {
+		if client.IsShutdown() || client.IsClosing() {
 			t.Stop()
 			return
 		}

@@ -24,8 +24,6 @@ type TimingWheel struct {
 	// NOTE: This field may be updated and read concurrently, through Add().
 	overflowWheel unsafe.Pointer // type: *TimingWheel
 
-	workerPoolSize int64
-
 	exitC     chan struct{}
 	waitGroup waitGroupWrapper
 }
@@ -37,7 +35,7 @@ func NewTimingWheel(tick time.Duration, wheelSize int64) *TimingWheel {
 		panic(errors.New("tick must be greater than or equal to 1ms"))
 	}
 
-	startMs := timeToMs(time.Now())
+	startMs := timeToMs(time.Now().UTC())
 
 	return newTimingWheel(
 		tickMs,
@@ -66,10 +64,11 @@ func newTimingWheel(tickMs int64, wheelSize int64, startMs int64, queue *delayqu
 
 // add inserts the timer t into the current timing wheel.
 func (tw *TimingWheel) add(t *Timer) bool {
-	if t.expiration < tw.currentTime+tw.tick {
+	currentTime := atomic.LoadInt64(&tw.currentTime)
+	if t.expiration < currentTime+tw.tick {
 		// Already expired
 		return false
-	} else if t.expiration < tw.currentTime+tw.interval {
+	} else if t.expiration < currentTime+tw.interval {
 		// Put it into its own bucket
 		virtualID := t.expiration / tw.tick
 		b := tw.buckets[virtualID%tw.wheelSize]
@@ -97,7 +96,7 @@ func (tw *TimingWheel) add(t *Timer) bool {
 				unsafe.Pointer(newTimingWheel(
 					tw.interval,
 					tw.wheelSize,
-					tw.currentTime,
+					currentTime,
 					tw.queue,
 				)),
 			)
@@ -120,13 +119,15 @@ func (tw *TimingWheel) addOrRun(t *Timer) {
 }
 
 func (tw *TimingWheel) advanceClock(expiration int64) {
-	if expiration >= tw.currentTime+tw.tick {
-		tw.currentTime = truncate(expiration, tw.tick)
+	currentTime := atomic.LoadInt64(&tw.currentTime)
+	if expiration >= currentTime+tw.tick {
+		currentTime = truncate(expiration, tw.tick)
+		atomic.StoreInt64(&tw.currentTime, currentTime)
 
 		// Try to advance the clock of the overflow wheel if present
 		overflowWheel := atomic.LoadPointer(&tw.overflowWheel)
 		if overflowWheel != nil {
-			(*TimingWheel)(overflowWheel).advanceClock(tw.currentTime)
+			(*TimingWheel)(overflowWheel).advanceClock(currentTime)
 		}
 	}
 }
@@ -135,7 +136,7 @@ func (tw *TimingWheel) advanceClock(expiration int64) {
 func (tw *TimingWheel) Start() {
 	tw.waitGroup.Wrap(func() {
 		tw.queue.Poll(tw.exitC, func() int64 {
-			return timeToMs(time.Now())
+			return timeToMs(time.Now().UTC())
 		})
 	})
 
@@ -167,9 +168,59 @@ func (tw *TimingWheel) Stop() {
 // It returns a Timer that can be used to cancel the call using its Stop method.
 func (tw *TimingWheel) AfterFunc(d time.Duration, f func()) *Timer {
 	t := &Timer{
-		expiration: timeToMs(time.Now().Add(d)),
+		expiration: timeToMs(time.Now().UTC().Add(d)),
 		task:       f,
 	}
 	tw.addOrRun(t)
 	return t
+}
+
+// Scheduler determines the execution plan of a task.
+type Scheduler interface {
+	// Next returns the next execution time after the given (previous) time.
+	// It will return a zero time if no next time is scheduled.
+	//
+	// All times must be UTC.
+	Next(time.Time) time.Time
+}
+
+// ScheduleFunc calls f (in its own goroutine) according to the execution
+// plan scheduled by s. It returns a Timer that can be used to cancel the
+// call using its Stop method.
+//
+// If the caller want to terminate the execution plan halfway, it must
+// stop the timer and ensure that the timer is stopped actually, since in
+// the current implementation, there is a gap between the expiring and the
+// restarting of the timer. The wait time for ensuring is short since the
+// gap is very small.
+//
+// Internally, ScheduleFunc will ask the first execution time (by calling
+// s.Next()) initially, and create a timer if the execution time is non-zero.
+// Afterwards, it will ask the next execution time each time f is about to
+// be executed, and f will be called at the next execution time if the time
+// is non-zero.
+func (tw *TimingWheel) ScheduleFunc(s Scheduler, f func()) (t *Timer) {
+	expiration := s.Next(time.Now().UTC())
+	if expiration.IsZero() {
+		// No time is scheduled, return nil.
+		return
+	}
+
+	t = &Timer{
+		expiration: timeToMs(expiration),
+		task: func() {
+			// Schedule the task to execute at the next time if possible.
+			expiration := s.Next(msToTime(t.expiration))
+			if !expiration.IsZero() {
+				t.expiration = timeToMs(expiration)
+				tw.addOrRun(t)
+			}
+
+			// Actually execute the task.
+			f()
+		},
+	}
+	tw.addOrRun(t)
+
+	return
 }

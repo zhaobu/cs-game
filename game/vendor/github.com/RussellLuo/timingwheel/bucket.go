@@ -53,10 +53,16 @@ func (t *Timer) Stop() bool {
 }
 
 type bucket struct {
+	// 64-bit atomic operations require 64-bit alignment, but 32-bit
+	// compilers do not ensure it. So we must keep the 64-bit field
+	// as the first field of the struct.
+	//
+	// For more explanations, see https://golang.org/pkg/sync/atomic/#pkg-note-BUG
+	// and https://go101.org/article/memory-layout.html.
+	expiration int64
+	
 	mu     sync.Mutex
 	timers *list.List
-
-	expiration int64
 }
 
 func newBucket() *bucket {
