@@ -3,6 +3,8 @@ package main
 import (
 	"bufio"
 	"context"
+	"encoding/json"
+	"fmt"
 	"game/cache"
 	"game/codec"
 	"game/codec/protobuf"
@@ -10,8 +12,6 @@ import (
 	pbhall "game/pb/hall"
 	pbinner "game/pb/inner"
 	pblogin "game/pb/login"
-	"encoding/json"
-	"fmt"
 	"net"
 	"runtime/debug"
 	"strings"
@@ -229,7 +229,7 @@ func (s *session) notifBackendOnline(online bool) {
 	if err == nil {
 		data, err := json.Marshal(m)
 		if err == nil {
-			cache.Pub("inner_broadcast", data)
+			cache.RedisXadd("inner_broadcast", m.Name, data)
 		}
 	}
 }

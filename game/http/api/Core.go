@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"game/codec"
 	zaplog "game/common/logger"
+	"game/util"
 	"os"
 	"strings"
 	"time"
@@ -90,7 +91,7 @@ func ToGateNormal(pb proto.Message, uids ...uint64) error {
 		return err
 	}
 
-	_, err = redisCli.Publish("backend_to_gate", data).Result()
+	_, err = util.RedisXadd(redisCli, "backend_to_gate", msg.Name, data)
 	if err != nil {
 		Log.Error(err.Error())
 	}

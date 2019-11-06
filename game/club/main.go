@@ -90,7 +90,7 @@ func main() {
 		return
 	}
 
-	go util.Subscribe(*redisAddr, *redisDb, "inner_broadcast", onMessage)
+	go util.RedisXread(*redisAddr, *redisDb, "inner_broadcast", onMessage)
 
 	redisCli = redis.NewClient(&redis.Options{
 		Addr:     *redisAddr,
@@ -167,16 +167,22 @@ func toGateNormal(pb proto.Message, uids ...uint64) error {
 		return err
 	}
 
-	_, err = redisCli.Publish("backend_to_gate", data).Result()
+	_, err = util.RedisXadd(redisCli, "backend_to_gate", msg.Name, data)
 	if err != nil {
 		logrus.Error(err.Error())
 	}
 	return err
 }
 
-func onMessage(channel string, data []byte) error {
-	m := &codec.Message{}
-	err := json.Unmarshal(data, m)
+func onMessage(channel string, msg map[string]interface{}) error {
+	var (
+		m    codec.Message
+		data []byte
+	)
+	for _, v := range msg {
+		data = []byte(v.(string))
+	}
+	err := json.Unmarshal(data, &m)
 	if err != nil {
 		return err
 	}

@@ -64,7 +64,7 @@ func (self *RoomServie) Init(gameName, gameID string, _tlog *zap.Logger, redisAd
 	self.Timer = timingwheel.NewTimingWheel(time.Second, 60) //一个节点一个定时器
 	self.Timer.Start()
 	// self.delInvalidDesk()
-	go util.Subscribe(redisAddr, redisDb, "inner_broadcast", self.onMessage)
+	go util.RedisXread(redisAddr, redisDb, "inner_broadcast", self.onMessage)
 }
 
 func (self *RoomServie) initRedis(redisAddr string, redisDb int) {
@@ -117,7 +117,8 @@ func (self *RoomServie) ToGateNormal(pb proto.Message, printLog bool, uids ...ui
 		return err
 	}
 
-	_, err = self.redisCli.Publish("backend_to_gate", data).Result()
+	_, err = util.RedisXadd(self.redisCli, "backend_to_gate", msg.Name, data)
+
 	if err != nil {
 		self.log.Error(err.Error())
 	}
@@ -163,7 +164,7 @@ func (self *RoomServie) SendDeskChangeNotif(cid int64, did uint64, changeTyp int
 	if err == nil {
 		data, err := json.Marshal(m)
 		if err == nil {
-			cache.Pub("inner_broadcast", data)
+			cache.RedisXadd("inner_broadcast", m.Name, data)
 		}
 	}
 }
@@ -214,8 +215,14 @@ func (self *RoomServie) SendDeskChangeNotif(cid int64, did uint64, changeTyp int
 // 	}
 // }
 
-func (self *RoomServie) onMessage(channel string, data []byte) error {
-	m := &codec.Message{}
+func (self *RoomServie) onMessage(channel string, msg map[string]interface{}) error {
+	var (
+		m    codec.Message
+		data []byte
+	)
+	for _, v := range msg {
+		data = []byte(v.(string))
+	}
 	err := json.Unmarshal(data, m)
 	if err != nil {
 		return err

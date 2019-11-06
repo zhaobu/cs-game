@@ -110,7 +110,7 @@ func main() {
 	}
 	net.Init(*netAddr) //初始化net
 
-	subscribeBackend(*redisAddr, *redisDb)
+	XreadBackend(*redisAddr, *redisDb)
 	{
 		servicePath := "center"
 		d := client.NewConsulDiscovery(*basePath, servicePath, []string{*consulAddr}, nil)

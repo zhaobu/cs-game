@@ -10,7 +10,6 @@ import (
 	pbgame "game/pb/game"
 	pbinner "game/pb/inner"
 	"hash/crc32"
-	"time"
 
 	"github.com/sirupsen/logrus"
 )
@@ -138,8 +137,8 @@ func createDesk(setting []*mgo.DeskSetting, cid int64, masterUserID uint64) {
 			}, reqRCall)
 			reqRCall.UserID = masterUserID
 			rspRCall := &codec.Message{}
-			cli.Go(context.Background(), "MakeDeskReq", reqRCall, rspRCall, nil)
-			time.Sleep(time.Millisecond * 10)
+			cli.Call(context.Background(), "MakeDeskReq", reqRCall, rspRCall)
+			// time.Sleep(time.Millisecond * 10)
 		}
 	}()
 }
@@ -159,6 +158,6 @@ func destoryDesk(uId uint64, desks ...*pbcommon.DeskInfo) {
 		}, reqRCall)
 		reqRCall.UserID = uId
 		rspRCall := &codec.Message{}
-		cli.Go(context.Background(), "DestroyDeskReq", reqRCall, rspRCall, nil)
+		cli.Call(context.Background(), "DestroyDeskReq", reqRCall, rspRCall)
 	}
 }

@@ -7,6 +7,7 @@ import (
 	"game/db/mgo"
 	pbcommon "game/pb/common"
 	pbgame "game/pb/game"
+	"game/util"
 
 	"github.com/go-redis/redis"
 	"github.com/golang/protobuf/proto"
@@ -14,10 +15,10 @@ import (
 )
 
 var (
-	gameName  string
-	gameID    string
+	gameName string
+	gameID   string
 	redisCli *redis.Client
-	log       *logrus.Entry
+	log      *logrus.Entry
 )
 
 func Init(redisAddr string, redisDb int, mgoURI, name, id string, log_ *logrus.Entry) error {
@@ -64,7 +65,7 @@ func toGateNormal(loge *logrus.Entry, pb proto.Message, uids ...uint64) error {
 		return err
 	}
 
-	_, err = redisCli.Publish("backend_to_gate", data)
+	_, err = util.RedisXadd(redisCli, "backend_to_gate", msg.Name, data)
 	if err != nil {
 		loge.Error(err.Error())
 	}
@@ -102,7 +103,7 @@ func (d *desk) toGate(pb proto.Message, uids ...uint64) error {
 	rc := redisPool.Get()
 	defer rc.Close()
 
-	_,err=	redisCli.Publish("backend_to_gate", data)
+	_, err = util.RedisXadd(redisCli, "backend_to_gate", msg.Name, data)
 	return err
 }
 

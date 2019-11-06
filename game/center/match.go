@@ -9,6 +9,7 @@ import (
 	pbcenter "game/pb/center"
 	pbcommon "game/pb/common"
 	pbinner "game/pb/inner"
+	"game/util"
 	"math/rand"
 	"sync"
 	"time"
@@ -175,7 +176,7 @@ func (r *matchRoom) deleteLongTime() {
 			continue
 		}
 
-		_, err = redisCli.Publish("backend_to_gate", data).Result()
+		_, err = util.RedisXadd(redisCli, "backend_to_gate", msg.Name, data)
 		if err != nil {
 			tlog.Error(err.Error())
 		}
