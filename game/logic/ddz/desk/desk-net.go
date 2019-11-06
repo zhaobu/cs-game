@@ -65,7 +65,7 @@ func toGateNormal(loge *logrus.Entry, pb proto.Message, uids ...uint64) error {
 		return err
 	}
 
-	_, err = util.RedisXadd(redisCli, "backend_to_gate", msg.Name, data)
+	_, err = util.RedisXadd(redisCli, "backend_to_gate", data)
 	if err != nil {
 		loge.Error(err.Error())
 	}
@@ -99,11 +99,7 @@ func (d *desk) toGate(pb proto.Message, uids ...uint64) error {
 	if err != nil {
 		return err
 	}
-
-	rc := redisPool.Get()
-	defer rc.Close()
-
-	_, err = util.RedisXadd(redisCli, "backend_to_gate", msg.Name, data)
+	_, err = util.RedisXadd(redisCli, "backend_to_gate", data)
 	return err
 }
 

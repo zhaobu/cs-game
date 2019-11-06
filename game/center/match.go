@@ -176,7 +176,7 @@ func (r *matchRoom) deleteLongTime() {
 			continue
 		}
 
-		_, err = util.RedisXadd(redisCli, "backend_to_gate", msg.Name, data)
+		_, err = util.RedisXadd(redisCli, "backend_to_gate", data)
 		if err != nil {
 			tlog.Error(err.Error())
 		}

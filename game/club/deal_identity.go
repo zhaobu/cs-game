@@ -2,29 +2,27 @@ package main
 
 import (
 	"context"
-	"game/codec"
-	"game/pb/club"
-	"game/pb/common"
 	"fmt"
-
-	"github.com/sirupsen/logrus"
+	"game/codec"
+	pbclub "game/pb/club"
+	pbcommon "game/pb/common"
 )
 
 func (p *club) DealMemberIdentityReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
-		logrus.Error(err.Error())
+		tlog.Error(err.Error())
 		return err
 	}
 
 	req, ok := pb.(*pbclub.DealMemberIdentityReq)
 	if !ok {
 		err = fmt.Errorf("not *pbclub.DealMemberIdentityReq")
-		logrus.Error(err.Error())
+		tlog.Error(err.Error())
 		return
 	}
 
-	logrus.Infof("recv %s %+v", args.Name, req)
+	log.Infof("recv %s %+v", args.Name, req)
 
 	rsp := &pbclub.DealMemberIdentityRsp{}
 	if req.Head != nil {
@@ -34,7 +32,7 @@ func (p *club) DealMemberIdentityReq(ctx context.Context, args *codec.Message, r
 	defer func() {
 		err = toGateNormal(rsp, args.UserID)
 		if err != nil {
-			logrus.Error(err.Error())
+			tlog.Error(err.Error())
 		}
 	}()
 
@@ -87,9 +85,9 @@ func (p *club) DealMemberIdentityReq(ctx context.Context, args *codec.Message, r
 
 	if req.Del {
 		delUserJoinClub(req.UserID, req.ClubID)
-		sendClubChangeInfoByuIds(cc.ID, clubChangeTypExit, req.UserID,req.Head.UserID,req.UserID)
+		sendClubChangeInfoByuIds(cc.ID, clubChangeTypExit, req.UserID, req.Head.UserID, req.UserID)
 	} else {
-		sendClubChangeInfoByuIds(cc.ID, clubChangeTypUpdateNoTips, req.UserID,req.UserID)
+		sendClubChangeInfoByuIds(cc.ID, clubChangeTypUpdateNoTips, req.UserID, req.UserID)
 	}
 	return
 }

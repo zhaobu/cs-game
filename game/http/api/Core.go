@@ -91,7 +91,7 @@ func ToGateNormal(pb proto.Message, uids ...uint64) error {
 		return err
 	}
 
-	_, err = util.RedisXadd(redisCli, "backend_to_gate", msg.Name, data)
+	_, err = util.RedisXadd(redisCli, "backend_to_gate", data)
 	if err != nil {
 		Log.Error(err.Error())
 	}

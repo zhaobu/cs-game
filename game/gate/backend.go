@@ -23,19 +23,13 @@ func XreadBackend(addr string, db int) {
 	}()
 }
 
-func onGameMsg(channel string, msg map[string]interface{}) error {
+func onGameMsg(channel string, msgData []byte) error {
 	go func() {
-		var (
-			xx struct {
-				Msg  *codec.Message
-				Uids []uint64
-			}
-			data []byte
-		)
-		for _, v := range msg {
-			data = []byte(v.(string))
+		var xx struct {
+			Msg  *codec.Message
+			Uids []uint64
 		}
-		err := json.Unmarshal(data, &xx)
+		err := json.Unmarshal(msgData, &xx)
 		if err != nil {
 			log.Errorf("%s channel recv msg err:%s", channel, err.Error())
 			return

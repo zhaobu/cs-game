@@ -2,29 +2,27 @@ package main
 
 import (
 	"context"
-	"game/codec"
-	"game/pb/club"
-	"game/pb/common"
 	"fmt"
-
-	"github.com/sirupsen/logrus"
+	"game/codec"
+	pbclub "game/pb/club"
+	pbcommon "game/pb/common"
 )
 
 func (p *club) ExitClubReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
-		logrus.Error(err.Error())
+		tlog.Error(err.Error())
 		return err
 	}
 
 	req, ok := pb.(*pbclub.ExitClubReq)
 	if !ok {
 		err = fmt.Errorf("not *pbclub.ExitClubReq")
-		logrus.Error(err.Error())
+		tlog.Error(err.Error())
 		return
 	}
 
-	logrus.Infof("recv %s %+v", args.Name, req)
+	log.Infof("recv %s %+v", args.Name, req)
 
 	rsp := &pbclub.ExitClubRsp{}
 	if req.Head != nil {
@@ -34,7 +32,7 @@ func (p *club) ExitClubReq(ctx context.Context, args *codec.Message, reply *code
 	defer func() {
 		err = toGateNormal(rsp, args.UserID)
 		if err != nil {
-			logrus.Error(err.Error())
+			tlog.Error(err.Error())
 		}
 
 	}()

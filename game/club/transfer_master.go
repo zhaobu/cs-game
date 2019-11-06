@@ -2,32 +2,31 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"game/codec"
 	"game/db/mgo"
-	"game/pb/club"
-	"game/pb/common"
-	"fmt"
+	pbclub "game/pb/club"
+	pbcommon "game/pb/common"
 	"time"
 
 	"github.com/globalsign/mgo/bson"
-	"github.com/sirupsen/logrus"
 )
 
 func (p *club) TransferMasterReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
-		logrus.Error(err.Error())
+		tlog.Error(err.Error())
 		return err
 	}
 
 	req, ok := pb.(*pbclub.TransferMasterReq)
 	if !ok {
 		err = fmt.Errorf("not *pbclub.TransferMasterReq")
-		logrus.Error(err.Error())
+		tlog.Error(err.Error())
 		return
 	}
 
-	logrus.Infof("recv %s %+v", args.Name, req)
+	log.Infof("recv %s %+v", args.Name, req)
 
 	rsp := &pbclub.TransferMasterRsp{}
 	if req.Head != nil {
@@ -37,7 +36,7 @@ func (p *club) TransferMasterReq(ctx context.Context, args *codec.Message, reply
 	defer func() {
 		err = toGateNormal(rsp, args.UserID)
 		if err != nil {
-			logrus.Error(err.Error())
+			tlog.Error(err.Error())
 		}
 	}()
 

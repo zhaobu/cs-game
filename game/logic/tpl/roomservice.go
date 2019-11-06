@@ -117,7 +117,7 @@ func (self *RoomServie) ToGateNormal(pb proto.Message, printLog bool, uids ...ui
 		return err
 	}
 
-	_, err = util.RedisXadd(self.redisCli, "backend_to_gate", msg.Name, data)
+	_, err = util.RedisXadd(self.redisCli, "backend_to_gate", data)
 
 	if err != nil {
 		self.log.Error(err.Error())
@@ -164,7 +164,7 @@ func (self *RoomServie) SendDeskChangeNotif(cid int64, did uint64, changeTyp int
 	if err == nil {
 		data, err := json.Marshal(m)
 		if err == nil {
-			cache.RedisXadd("inner_broadcast", m.Name, data)
+			cache.RedisXadd("inner_broadcast", data)
 		}
 	}
 }
@@ -215,15 +215,9 @@ func (self *RoomServie) SendDeskChangeNotif(cid int64, did uint64, changeTyp int
 // 	}
 // }
 
-func (self *RoomServie) onMessage(channel string, msg map[string]interface{}) error {
-	var (
-		m    codec.Message
-		data []byte
-	)
-	for _, v := range msg {
-		data = []byte(v.(string))
-	}
-	err := json.Unmarshal(data, m)
+func (self *RoomServie) onMessage(channel string, msgData []byte) error {
+	var m codec.Message
+	err := json.Unmarshal(msgData, m)
 	if err != nil {
 		return err
 	}

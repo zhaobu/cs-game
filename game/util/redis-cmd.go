@@ -22,7 +22,7 @@ import (
 // }
 
 //使用redsi5.0的stream方式读取消息
-func RedisXread(addr string, db int, channels string, onMessage func(channel string, msg map[string]interface{}) error) error {
+func RedisXread(addr string, db int, channels string, onMessage func(channel string, msgData []byte) error) error {
 	c := redis.NewClient(&redis.Options{
 		Addr:     addr,
 		Password: "", // no password set
@@ -41,16 +41,16 @@ func RedisXread(addr string, db int, channels string, onMessage func(channel str
 		}
 		for _, msg := range items[0].Messages {
 			//处理每一条消息
-			onMessage(items[0].Stream, msg.Values) //获取回复信息
+			onMessage(items[0].Stream, []byte(msg.Values[""].(string)))
 			lastID = msg.ID
 		}
 	}
 }
 
-func RedisXadd(c *redis.Client, channels, msgName string, msgData []byte) (string, error) {
+func RedisXadd(c *redis.Client, channels string, msgData []byte) (string, error) {
 	return c.XAdd(&redis.XAddArgs{
 		Stream:       channels,
-		Values:       map[string]interface{}{msgName: msgData},
+		Values:       map[string]interface{}{"": msgData},
 		MaxLenApprox: 10, //设置stream保存消息的上限,>=MaxLenApprox,但是不会大很多
 	}).Result()
 }

@@ -1,18 +1,18 @@
 {
-    // "go.languageServerExperimentalFeatures": {
-    //     "format": true,
-    //     "autoComplete": true,
-    //     "rename": true,
-    //     "goToDefinition": true,
-    //     "hover": true,
-    //     "signatureHelp": true,
-    //     "goToTypeDefinition": true,
-    //     "goToImplementation": true,
-    //     "documentSymbols": true,
-    //     "workspaceSymbols": true,
-    //     "findReferences": true,
-    //     "diagnostics": false
-    // },
+    "go.languageServerExperimentalFeatures": {
+        "format": true,
+        "autoComplete": true,
+        "rename": true,
+        "goToDefinition": true,
+        "hover": true,
+        "signatureHelp": true,
+        "goToTypeDefinition": true,
+        "goToImplementation": true,
+        "documentSymbols": true,
+        "workspaceSymbols": true,
+        "findReferences": true,
+        "diagnostics": false
+    },
     "go.useLanguageServer": true,
     "go.formatTool": "goimports",
     "go.delveConfig": {

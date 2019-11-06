@@ -229,7 +229,7 @@ func (s *session) notifBackendOnline(online bool) {
 	if err == nil {
 		data, err := json.Marshal(m)
 		if err == nil {
-			cache.RedisXadd("inner_broadcast", m.Name, data)
+			cache.RedisXadd("inner_broadcast", data)
 		}
 	}
 }
