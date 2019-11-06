@@ -2,13 +2,13 @@ package main
 
 import (
 	"crypto/tls"
+	"flag"
+	"fmt"
 	"game/cache"
 	zaplog "game/common/logger"
 	"game/configs"
 	"game/db/mgo"
 	"game/net"
-	"flag"
-	"fmt"
 	"os"
 	"runtime/debug"
 	"time"
@@ -110,7 +110,7 @@ func main() {
 	}
 	net.Init(*netAddr) //初始化net
 
-	subscribeBackend(*redisAddr, *redisDb)
+	XreadBackend(*redisAddr, *redisDb)
 	{
 		servicePath := "center"
 		d := client.NewConsulDiscovery(*basePath, servicePath, []string{*consulAddr}, nil)

@@ -2,24 +2,23 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"game/codec"
 	pbclub "game/pb/club"
 	pbcommon "game/pb/common"
 	pbgame "game/pb/game"
-	"fmt"
-	"github.com/sirupsen/logrus"
 )
 
 func (p *club) MakeDeskReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
-		logrus.Error(err.Error())
+		tlog.Error(err.Error())
 		return err
 	}
 	req, ok := pb.(*pbclub.MakeDeskReq)
 	if !ok {
 		err = fmt.Errorf("not *pbclub.UpdateClubNoticeReq")
-		logrus.Error(err.Error())
+		tlog.Error(err.Error())
 		return
 	}
 	rsp := &pbgame.MakeDeskRsp{}
@@ -31,7 +30,7 @@ func (p *club) MakeDeskReq(ctx context.Context, args *codec.Message, reply *code
 		if rsp.Code != 1 {
 			err = toGateNormal(rsp, args.UserID)
 			if err != nil {
-				logrus.Error(err.Error())
+				tlog.Error(err.Error())
 			}
 		}
 	}()

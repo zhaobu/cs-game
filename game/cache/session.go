@@ -1,20 +1,17 @@
 package cache
 
 import (
-	pbcommon "game/pb/common"
 	"fmt"
+	pbcommon "game/pb/common"
 	"strconv"
 	"time"
 
-	"github.com/gomodule/redigo/redis"
+	"github.com/go-redis/redis"
 )
 
 func QuerySessionInfo(userID uint64) (*pbcommon.SessionInfo, error) {
-	c := redisPool.Get()
-	defer c.Close()
-
 	key := fmt.Sprintf("sessioninfo:%d", userID)
-	reply, err := redis.StringMap(c.Do("HGETALL", key))
+	reply, err := redisCli.HGetAll(key).Result()
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +30,7 @@ func QuerySessionInfo(userID uint64) (*pbcommon.SessionInfo, error) {
 	return info, nil
 }
 
-var enterMatchScript = redis.NewScript(1, `
+var enterMatchScript = redis.NewScript(`
 	local key = KEYS[1]
 	local game_name = ARGV[1]
 	local room_id = ARGV[2]
@@ -56,25 +53,22 @@ var enterMatchScript = redis.NewScript(1, `
 	`)
 
 func EnterMatch(userID uint64, gameName string, roomID uint32) (code int64, inStatus, inGameName string, inRoomID uint32, err error) {
-	c := redisPool.Get()
-	defer c.Close()
-
-	r, err := redis.MultiBulk(enterMatchScript.Do(c,
-		fmt.Sprintf("sessioninfo:%d", userID),
+	r, err := enterMatchScript.Run(redisCli,
+		[]string{fmt.Sprintf("sessioninfo:%d", userID)},
 		gameName,
 		strconv.FormatUint(uint64(roomID), 10),
 		time.Now().UTC().Unix(),
-	))
-
-	code = r[0].(int64)
-	if r[1] != nil {
-		inStatus = string(r[1].([]byte))
+	).Result()
+	arrary := r.([]interface{})
+	code = arrary[0].(int64)
+	if arrary[1] != nil {
+		inStatus = string(arrary[1].([]byte))
 	}
-	if r[2] != nil {
-		inGameName = string(r[2].([]byte))
+	if arrary[2] != nil {
+		inGameName = string(arrary[2].([]byte))
 	}
-	if r[3] != nil {
-		rid, _ := strconv.ParseUint(string(r[3].([]byte)), 10, 64)
+	if arrary[3] != nil {
+		rid, _ := strconv.ParseUint(string(arrary[3].([]byte)), 10, 64)
 		inRoomID = uint32(rid)
 	}
 
@@ -83,7 +77,7 @@ func EnterMatch(userID uint64, gameName string, roomID uint32) (code int64, inSt
 
 // 没有加GameName和RoomID的判断
 // redis.call('HDEL', KEYS[1], 'Status', 'GameName', 'RoomID')
-var exitMatchScript = redis.NewScript(1, `
+var exitMatchScript = redis.NewScript(`
 	if(redis.call('HGET', KEYS[1], 'Status')=='InMatching')
 	then
 		redis.call('DEL', KEYS[1])
@@ -94,12 +88,9 @@ var exitMatchScript = redis.NewScript(1, `
 	`)
 
 func ExitMatch(userID uint64) (succ bool, err error) {
-	c := redisPool.Get()
-	defer c.Close()
-
-	r, err := redis.Int64(exitMatchScript.Do(c,
-		fmt.Sprintf("sessioninfo:%d", userID),
-	))
+	r, err := exitMatchScript.Run(redisCli,
+		[]string{fmt.Sprintf("sessioninfo:%d", userID)},
+	).Result()
 	if err != nil {
 		return false, err
 	}
@@ -109,7 +100,7 @@ func ExitMatch(userID uint64) (succ bool, err error) {
 	return false, nil
 }
 
-var enterGameScript = redis.NewScript(1, `
+var enterGameScript = redis.NewScript(`
 	local key = KEYS[1]
 	local from_match = ARGV[1]
 	local game_name = ARGV[2]
@@ -142,27 +133,25 @@ var enterGameScript = redis.NewScript(1, `
 	`)
 
 func EnterGame(userID uint64, gameName, gameID string, deskID uint64, fromMatch bool) (succ bool, err error) {
-	c := redisPool.Get()
-	defer c.Close()
-
-	r, err := redis.Int64(enterGameScript.Do(c,
-		fmt.Sprintf("sessioninfo:%d", userID),
+	r, err := enterGameScript.Run(redisCli,
+		[]string{fmt.Sprintf("sessioninfo:%d", userID)},
 		fromMatch,
 		gameName,
 		gameID,
 		strconv.FormatUint(deskID, 10),
-		time.Now().UTC().Unix()))
+		time.Now().UTC().Unix()).Result()
 	if err != nil {
 		return false, err
 	}
-	if r > 0 {
+
+	if r.(int64) > 0 {
 		return true, nil
 	}
 	return false, nil
 }
 
 // redis.call('HDEL', KEYS[1], 'Status', 'GameName', 'GameID', 'AtDeskID', 'LastActiveTime', 'RoomID')
-var exitGameScript = redis.NewScript(1, `
+var exitGameScript = redis.NewScript(`
 	local xx = redis.call('HMGET', KEYS[1], 'Status', 'GameName', 'GameID', 'AtDeskID')
 	if(xx[1]=='InGameing' and xx[2]==ARGV[1] and xx[3]==ARGV[2] and xx[4]==ARGV[3])
 	then
@@ -174,15 +163,12 @@ var exitGameScript = redis.NewScript(1, `
 	`)
 
 func ExitGame(userID uint64, gameName, gameID string, deskID uint64) (succ bool, err error) {
-	c := redisPool.Get()
-	defer c.Close()
-
-	r, err := redis.Int64(exitGameScript.Do(c,
-		fmt.Sprintf("sessioninfo:%d", userID),
+	r, err := exitGameScript.Run(redisCli,
+		[]string{fmt.Sprintf("sessioninfo:%d", userID)},
 		gameName,
 		gameID,
 		strconv.FormatUint(deskID, 10),
-	))
+	).Result()
 	if err != nil {
 		return false, err
 	}

@@ -8,10 +8,10 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/gomodule/redigo/redis"
+	"github.com/go-redis/redis"
 )
 
-var addDeskInfoScript = redis.NewScript(1, `
+var addDeskInfoScript = redis.NewScript(`
 	if(redis.call('EXISTS', KEYS[1]) == 1)
 	then
 		return 2
@@ -23,12 +23,8 @@ var addDeskInfoScript = redis.NewScript(1, `
 
 func AddDeskInfo(info *pbcommon.DeskInfo) (err error) {
 	sdInfo, _ := json.Marshal(info.SdInfos)
-
-	c := redisPool.Get()
-	defer c.Close()
-
-	r, err := redis.Int64(addDeskInfoScript.Do(c,
-		fmt.Sprintf("deskinfo:%d", info.ID),
+	r, err := addDeskInfoScript.Run(redisCli,
+		[]string{fmt.Sprintf("deskinfo:%d", info.ID)},
 		strconv.FormatUint(info.Uuid, 10),
 		strconv.FormatUint(info.ID, 10),
 		strconv.FormatUint(info.CreateUserID, 10),
@@ -47,12 +43,12 @@ func AddDeskInfo(info *pbcommon.DeskInfo) (err error) {
 		strconv.FormatInt(info.TotalLoop, 10),
 		strconv.FormatInt(info.CurrLoop, 10),
 		strconv.FormatUint(info.CreateVlaueHash, 10),
-	))
+	).Result()
 
 	if err != nil {
 		return err
 	}
-	if r != 1 {
+	if r.(int64) != 1 {
 		return fmt.Errorf("exists desk %d", info.ID)
 	}
 	AddUserDesk(info.CreateUserID, info.ID)
@@ -64,13 +60,11 @@ func DelDeskInfo(deskID uint64, log *zap.SugaredLogger) {
 	if err == nil {
 		DelUserDesk(deskinfo.CreateUserID, deskinfo.ID)
 	}
-	c := redisPool.Get()
-	defer c.Close()
 	// log.Debugf("测试何时删除房间信息debug stack info=%s", string(debug.Stack()))
-	c.Do("DEL", fmt.Sprintf("deskinfo:%d", deskID))
+	redisCli.Del(fmt.Sprintf("deskinfo:%d", deskID))
 }
 
-var updateDeskInfoScript = redis.NewScript(1, `
+var updateDeskInfoScript = redis.NewScript(`
 	if (redis.call('HGET', KEYS[1], 'Uuid')==ARGV[1])
 	then
 		redis.call('HINCRBY', KEYS[1], 'Uuid', 1)
@@ -84,11 +78,8 @@ var updateDeskInfoScript = redis.NewScript(1, `
 func UpdateDeskInfo(info *pbcommon.DeskInfo) error {
 	sdInfo, _ := json.Marshal(info.SdInfos)
 
-	c := redisPool.Get()
-	defer c.Close()
-
-	_, err := updateDeskInfoScript.Do(c,
-		fmt.Sprintf("deskinfo:%d", info.ID),
+	_, err := updateDeskInfoScript.Run(redisCli,
+		[]string{fmt.Sprintf("deskinfo:%d", info.ID)},
 		strconv.FormatUint(info.Uuid, 10),
 		strconv.FormatUint(info.ID, 10),
 		strconv.FormatUint(info.CreateUserID, 10),
@@ -110,20 +101,15 @@ func UpdateDeskInfo(info *pbcommon.DeskInfo) error {
 		strconv.FormatInt(info.TotalLoop, 10),
 		strconv.FormatInt(info.CurrLoop, 10),
 		strconv.FormatUint(info.CreateVlaueHash, 10),
-	)
+	).Result()
 	return err
 }
 
 func QueryDeskInfo(deskID uint64) (*pbcommon.DeskInfo, error) {
-	c := redisPool.Get()
-	defer c.Close()
-
-	key := fmt.Sprintf("deskinfo:%d", deskID)
-	reply, err := redis.StringMap(c.Do("HGETALL", key))
+	reply, err := redisCli.HGetAll(fmt.Sprintf("deskinfo:%d", deskID)).Result()
 	if err != nil {
 		return nil, err
 	}
-
 	if reply["ID"] == "" {
 		return nil, fmt.Errorf("can not find desk %d", deskID)
 	}

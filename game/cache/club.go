@@ -1,23 +1,16 @@
 package cache
 
 import (
-	"game/pb/common"
 	"fmt"
+	pbcommon "game/pb/common"
 	"strconv"
-
-	"github.com/gomodule/redigo/redis"
 )
 
 func AddClubDeskRelation(clubID int64, deskID uint64) error {
-	c := redisPool.Get()
-	defer c.Close()
-
 	key := fmt.Sprintf("clubdesk:%d", clubID)
 
-	_, err := c.Do("SADD", key,
-		strconv.FormatUint(deskID, 10),
-	)
-	return err
+	redisCli.SAdd(key, key, strconv.FormatUint(deskID, 10))
+	return nil
 }
 
 func DeleteClubDeskRelation(deskID uint64) error {
@@ -29,26 +22,18 @@ func DeleteClubDeskRelation(deskID uint64) error {
 		return nil
 	}
 
-	c := redisPool.Get()
-	defer c.Close()
-
 	key := fmt.Sprintf("clubdesk:%d", deskInfo.ClubID)
-
-	_, err = c.Do("SREM", key, strconv.FormatUint(deskID, 10))
-	return err
+	redisCli.SRem(key, strconv.FormatUint(deskID, 10))
+	return nil
 }
 
 func QueryClubDeskID(clubID int64) (deskIDs []uint64, err error) {
-	c := redisPool.Get()
-	defer c.Close()
-
 	key := fmt.Sprintf("clubdesk:%d", clubID)
-
-	reply, err := redis.ByteSlices(c.Do("SMEMBERS", key))
+	cmdStr, err := redisCli.SMembers(key).Result()
 	if err != nil {
 		return
 	}
-	for _, v := range reply {
+	for _, v := range cmdStr {
 		if x, err := strconv.ParseUint(string(v), 10, 64); err == nil {
 			deskIDs = append(deskIDs, x)
 		}

@@ -6,7 +6,7 @@ import (
 	// "game/configs"
 
 	"github.com/globalsign/mgo"
-	"github.com/gomodule/redigo/redis"
+	"github.com/go-redis/redis"
 )
 
 var (
@@ -14,8 +14,8 @@ var (
 	redisAddr = flag.String("redisAddr", "127.0.0.1:6379", "redis address")
 	redisDb   = flag.Int("redisDb", 1, "redis db select")
 
-	mgoSess   *mgo.Session
-	redisPool *redis.Pool
+	mgoSess  *mgo.Session
+	redisCli *redis.Client
 )
 
 func init() {
@@ -46,9 +46,9 @@ func initDb() {
 }
 
 func initRedis() {
-	redisPool = &redis.Pool{
-		Dial: func() (redis.Conn, error) {
-			return redis.Dial("tcp", *redisAddr, redis.DialDatabase(*redisDb))
-		},
-	}
+	redisCli = redis.NewClient(&redis.Options{
+		Addr:     *redisAddr,
+		Password: "",       // no password set
+		DB:       *redisDb, // use default DB
+	})
 }

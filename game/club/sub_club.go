@@ -2,28 +2,26 @@ package main
 
 import (
 	"context"
-	"game/codec"
-	"game/pb/club"
 	"fmt"
-
-	"github.com/sirupsen/logrus"
+	"game/codec"
+	pbclub "game/pb/club"
 )
 
 func (p *club) SubClubChange(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
-		logrus.Error(err.Error())
+		tlog.Error(err.Error())
 		return err
 	}
 
 	req, ok := pb.(*pbclub.SubClubChange)
 	if !ok {
 		err = fmt.Errorf("not *pbclub.SubClubChange")
-		logrus.Error(err.Error())
+		tlog.Error(err.Error())
 		return
 	}
 
-	logrus.Infof("recv %s %+v", args.Name, req)
+	log.Infof("recv %s %+v", args.Name, req)
 
 	cu := mustGetUserOther(args.UserID)
 	cu.Lock()

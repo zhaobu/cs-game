@@ -10,17 +10,14 @@ import (
 	pbgame "game/pb/game"
 	pbinner "game/pb/inner"
 	"hash/crc32"
-	"time"
-
-	"github.com/sirupsen/logrus"
 )
 
 func flashDesk(n *pbinner.DeskChangeNotif) {
-	logrus.Infof("DeskChangeNotif %+v\n", n)
+	log.Infof("DeskChangeNotif %+v\n", n)
 
 	cc := getClub(n.ClubID)
 	if cc == nil {
-		logrus.Warnf("can not find club %d", n.ClubID)
+		log.Warnf("can not find club %d", n.ClubID)
 		return
 	}
 
@@ -32,7 +29,7 @@ func flashDesk(n *pbinner.DeskChangeNotif) {
 		var err error
 		deskInfo, err = cache.QueryDeskInfo(n.DeskID)
 		if err != nil {
-			logrus.Warnf("QueryDeskInfo %s", err.Error())
+			log.Warnf("QueryDeskInfo %s", err.Error())
 			return
 		}
 		cc.Lock()
@@ -69,7 +66,7 @@ func flashDesk(n *pbinner.DeskChangeNotif) {
 }
 
 func checkAutoCreate(_cid int64) (setting []*mgo.DeskSetting, cid int64, masterUserID uint64) {
-	logrus.Infof("checkAutoCreate %d", _cid)
+	log.Infof("checkAutoCreate %d", _cid)
 	var needCreateGameArgs []*mgo.DeskSetting
 
 	cc := getClub(_cid)
@@ -105,7 +102,7 @@ func checkAutoCreate(_cid int64) (setting []*mgo.DeskSetting, cid int64, masterU
 			//fmt.Printf("需要创建一个房间 %d \n",crc32.ChecksumIEEE(a.GameArgMsgValue))
 			needCreateGameArgs = append(needCreateGameArgs, a)
 			if pb, err := protobuf.Unmarshal(a.GameArgMsgName, a.GameArgMsgValue); err == nil {
-				logrus.Infof("will create desk arg: %+v\n", pb)
+				log.Infof("will create desk arg: %+v\n", pb)
 			}
 		}
 		//fmt.Printf("结束查找-----------------------------------------------------------------------------------\n")
@@ -119,7 +116,7 @@ func checkAutoCreate(_cid int64) (setting []*mgo.DeskSetting, cid int64, masterU
 }
 
 func createDesk(setting []*mgo.DeskSetting, cid int64, masterUserID uint64) {
-	logrus.Infof("%d createDesk %d", cid, len(setting))
+	log.Infof("%d createDesk %d", cid, len(setting))
 	go func() {
 		for _, s := range setting {
 			cli, err := getGameCli(s.GameName)
@@ -138,8 +135,7 @@ func createDesk(setting []*mgo.DeskSetting, cid int64, masterUserID uint64) {
 			}, reqRCall)
 			reqRCall.UserID = masterUserID
 			rspRCall := &codec.Message{}
-			cli.Go(context.Background(), "MakeDeskReq", reqRCall, rspRCall, nil)
-			time.Sleep(time.Millisecond * 10)
+			cli.Call(context.Background(), "MakeDeskReq", reqRCall, rspRCall)
 		}
 	}()
 }
@@ -159,6 +155,6 @@ func destoryDesk(uId uint64, desks ...*pbcommon.DeskInfo) {
 		}, reqRCall)
 		reqRCall.UserID = uId
 		rspRCall := &codec.Message{}
-		cli.Go(context.Background(), "DestroyDeskReq", reqRCall, rspRCall, nil)
+		cli.Call(context.Background(), "DestroyDeskReq", reqRCall, rspRCall)
 	}
 }

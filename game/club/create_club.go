@@ -2,32 +2,30 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"game/codec"
 	"game/db/mgo"
 	pbclub "game/pb/club"
 	pbcommon "game/pb/common"
-	"fmt"
 	"runtime/debug"
 	"time"
-
-	"github.com/sirupsen/logrus"
 )
 
 func (p *club) CreateClubReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
-		logrus.Error(err.Error())
+		tlog.Error(err.Error())
 		return err
 	}
 
 	req, ok := pb.(*pbclub.CreateClubReq)
 	if !ok {
 		err = fmt.Errorf("not *pbclub.CreateClubReq")
-		logrus.Error(err.Error())
+		tlog.Error(err.Error())
 		return
 	}
 
-	logrus.Infof("recv %s %+v", args.Name, req)
+	log.Infof("recv %s %+v", args.Name, req)
 
 	rsp := &pbclub.CreateClubRsp{}
 	if req.Head != nil {
@@ -40,11 +38,11 @@ func (p *club) CreateClubReq(ctx context.Context, args *codec.Message, reply *co
 	defer func() {
 		r := recover()
 		if r != nil {
-			logrus.Errorf("%v %s", r, string(debug.Stack()))
+			log.Errorf("%v %s", r, string(debug.Stack()))
 		}
 		err = toGateNormal(rsp, args.UserID)
 		if err != nil {
-			logrus.Error(err.Error())
+			tlog.Error(err.Error())
 		}
 
 		if rsp.Code == 1 {
@@ -90,7 +88,7 @@ func (p *club) CreateClubReq(ctx context.Context, args *codec.Message, reply *co
 		UserID:   createUserID,
 		Identity: identityMaster,
 		Agree:    true,
-		Relation:[]uint64{},
+		Relation: []uint64{},
 	}
 	cc.GameArgs = make([]*mgo.DeskSetting, 0)
 	for _, v := range req.GameArgs {
@@ -103,9 +101,9 @@ func (p *club) CreateClubReq(ctx context.Context, args *codec.Message, reply *co
 	}
 	if cc.IsAutoCreate {
 		cc.f = func() {
-			setting,cid,masterUserID := checkAutoCreate(newID)
+			setting, cid, masterUserID := checkAutoCreate(newID)
 			if len(setting) > 0 {
-				createDesk(setting,cid,masterUserID)
+				createDesk(setting, cid, masterUserID)
 			}
 		}
 	}

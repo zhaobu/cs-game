@@ -2,30 +2,28 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"game/codec"
 	"game/db/mgo"
-	"game/pb/club"
-	"game/pb/common"
-	"fmt"
-
-	"github.com/sirupsen/logrus"
+	pbclub "game/pb/club"
+	pbcommon "game/pb/common"
 )
 
 func (p *club) RemoveClubReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
-		logrus.Error(err.Error())
+		tlog.Error(err.Error())
 		return err
 	}
 
 	req, ok := pb.(*pbclub.RemoveClubReq)
 	if !ok {
 		err = fmt.Errorf("not *pbclub.RemoveClubReq")
-		logrus.Error(err.Error())
+		tlog.Error(err.Error())
 		return
 	}
 
-	logrus.Infof("recv %s %+v", args.Name, req)
+	log.Infof("recv %s %+v", args.Name, req)
 
 	rsp := &pbclub.RemoveClubRsp{}
 	if req.Head != nil {
@@ -36,7 +34,7 @@ func (p *club) RemoveClubReq(ctx context.Context, args *codec.Message, reply *co
 	defer func() {
 		err = toGateNormal(rsp, args.UserID)
 		if err != nil {
-			logrus.Error(err.Error())
+			tlog.Error(err.Error())
 		}
 
 		if rsp.Code == 1 {
@@ -72,13 +70,13 @@ func (p *club) RemoveClubReq(ctx context.Context, args *codec.Message, reply *co
 
 	//解散空闲的桌子
 	destorydesks := []*pbcommon.DeskInfo{}
-	for _,v := range desk{
-		if v.Status == "1"{
-			destorydesks = append(destorydesks,v)
+	for _, v := range desk {
+		if v.Status == "1" {
+			destorydesks = append(destorydesks, v)
 		}
 	}
-	if len(destorydesks)> 0{
-		defer destoryDesk(0,destorydesks[0:]...)
+	if len(destorydesks) > 0 {
+		defer destoryDesk(0, destorydesks[0:]...)
 	}
 	return
 }

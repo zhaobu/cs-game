@@ -2,17 +2,19 @@ package api
 
 import (
 	"crypto/md5"
-	"game/codec"
-	zaplog "game/common/logger"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/golang/protobuf/proto"
-	"github.com/gomodule/redigo/redis"
-	"go.uber.org/zap"
+	"game/codec"
+	zaplog "game/common/logger"
+	"game/util"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/go-redis/redis"
+	"github.com/golang/protobuf/proto"
+	"go.uber.org/zap"
 )
 
 const (
@@ -36,9 +38,9 @@ type apiRsp struct {
 }
 
 var (
-	redisPool *redis.Pool
-	Log       *zap.SugaredLogger //printf风格
-	Tlog      *zap.Logger        //structured 风格
+	redisCli *redis.Client
+	Log      *zap.SugaredLogger //printf风格
+	Tlog     *zap.Logger        //structured 风格
 )
 
 func InitLog(release bool, logname string) {
@@ -55,19 +57,11 @@ func InitLog(release bool, logname string) {
 }
 
 func InitRedis(redisAddr string, redisDb int) {
-	redisPool = &redis.Pool{
-		Dial: func() (redis.Conn, error) {
-			c, err := redis.Dial("tcp", redisAddr)
-			if err != nil {
-				return nil, err
-			}
-			if _, err := c.Do("SELECT", redisDb); err != nil {
-				c.Close()
-				return nil, err
-			}
-			return c, nil
-		},
-	}
+	redisCli = redis.NewClient(&redis.Options{
+		Addr:     redisAddr,
+		Password: "",      // no password set
+		DB:       redisDb, // use default DB
+	})
 }
 
 func MakeMD5(str string) string {
@@ -96,9 +90,8 @@ func ToGateNormal(pb proto.Message, uids ...uint64) error {
 	if err != nil {
 		return err
 	}
-	rc := redisPool.Get()
-	defer rc.Close()
-	_, err = rc.Do("PUBLISH", "backend_to_gate", data)
+
+	_, err = util.RedisXadd(redisCli, "backend_to_gate", data)
 	if err != nil {
 		Log.Error(err.Error())
 	}

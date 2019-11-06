@@ -2,31 +2,29 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"game/codec"
 	"game/db/mgo"
-	"game/pb/club"
-	"game/pb/common"
-	"fmt"
+	pbclub "game/pb/club"
+	pbcommon "game/pb/common"
 	"time"
-
-	"github.com/sirupsen/logrus"
 )
 
 func (p *club) AckClubEmailReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
-		logrus.Error(err.Error())
+		tlog.Error(err.Error())
 		return err
 	}
 
 	req, ok := pb.(*pbclub.AckClubEmailReq)
 	if !ok {
 		err = fmt.Errorf("not *pbclub.AckClubEmailReq")
-		logrus.Error(err.Error())
+		tlog.Error(err.Error())
 		return
 	}
 
-	logrus.Infof("recv %s %+v", args.Name, req)
+	log.Infof("recv %s %+v", args.Name, req)
 
 	rsp := &pbclub.AckClubEmailRsp{}
 	if req.Head != nil {
@@ -36,7 +34,7 @@ func (p *club) AckClubEmailReq(ctx context.Context, args *codec.Message, reply *
 	defer func() {
 		err = toGateNormal(rsp, args.UserID)
 		if err != nil {
-			logrus.Error(err.Error())
+			tlog.Error(err.Error())
 		}
 	}()
 
@@ -82,7 +80,7 @@ func ackJoin(e *mgo.ClubEmail, req *pbclub.AckClubEmailReq) int32 {
 			UserID:   joinUID,
 			Identity: identityNormal,
 			Agree:    false,
-			Relation:[]uint64{},
+			Relation: []uint64{},
 		}
 		cc.noCommit = true
 		cc.Unlock()
@@ -106,11 +104,10 @@ func ackJoin(e *mgo.ClubEmail, req *pbclub.AckClubEmailReq) int32 {
 	mgo.AddClubEmail(ce, joinUID) // 发送给申请人
 	sendClubEmail(ce, joinUID)
 
-
 	if req.Agree {
-		ce.Content = fmt.Sprintf(`您同意[%d]加入俱乐部[%d]`,joinUID,joinClubID)
+		ce.Content = fmt.Sprintf(`您同意[%d]加入俱乐部[%d]`, joinUID, joinClubID)
 	} else {
-		ce.Content = fmt.Sprintf(`您拒绝[%d]加入俱乐部[%d]`,joinUID,joinClubID)
+		ce.Content = fmt.Sprintf(`您拒绝[%d]加入俱乐部[%d]`, joinUID, joinClubID)
 	}
 	mgo.AddClubEmail(ce, req.Head.UserID) // 发送给操作用户
 	sendClubEmail(ce, req.Head.UserID)
@@ -194,7 +191,7 @@ func ackTransferMaster(e *mgo.ClubEmail, req *pbclub.AckClubEmailReq) int32 {
 		cc.noCommit = true
 		cc.Unlock()
 
-		sendClubChangeInfoByuIds(clubID,clubChangeTypUpdate,newMaster,oldMaster,newMaster)
+		sendClubChangeInfoByuIds(clubID, clubChangeTypUpdate, newMaster, oldMaster, newMaster)
 	}
 
 	ce := &mgo.ClubEmail{

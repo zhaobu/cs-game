@@ -13,8 +13,8 @@ import (
 	"time"
 
 	"github.com/RussellLuo/timingwheel"
+	"github.com/go-redis/redis"
 	"github.com/golang/protobuf/proto"
-	"github.com/gomodule/redigo/redis"
 	"go.uber.org/zap"
 )
 
@@ -52,7 +52,7 @@ type RoomServie struct {
 	Timer      *timingwheel.TimingWheel //定时器
 	GameName   string                   //游戏编号
 	GameID     string                   //游戏ip+port
-	redisPool  *redis.Pool
+	redisCli   *redis.Client
 }
 
 func (self *RoomServie) Init(gameName, gameID string, _tlog *zap.Logger, redisAddr string, redisDb int) {
@@ -64,7 +64,7 @@ func (self *RoomServie) Init(gameName, gameID string, _tlog *zap.Logger, redisAd
 	self.Timer = timingwheel.NewTimingWheel(time.Second, 60) //一个节点一个定时器
 	self.Timer.Start()
 	// self.delInvalidDesk()
-	go util.Subscribe(redisAddr, redisDb, "inner_broadcast", self.onMessage)
+	go util.RedisXread(redisAddr, redisDb, "inner_broadcast", self.onMessage)
 }
 
 func (self *RoomServie) initRedis(redisAddr string, redisDb int) {
@@ -73,19 +73,11 @@ func (self *RoomServie) initRedis(redisAddr string, redisDb int) {
 		panic(err.Error())
 	}
 
-	self.redisPool = &redis.Pool{
-		Dial: func() (redis.Conn, error) {
-			c, err := redis.Dial("tcp", redisAddr)
-			if err != nil {
-				return nil, err
-			}
-			if _, err := c.Do("SELECT", redisDb); err != nil {
-				c.Close()
-				return nil, err
-			}
-			return c, nil
-		},
-	}
+	self.redisCli = redis.NewClient(&redis.Options{
+		Addr:     redisAddr,
+		Password: "",      // no password set
+		DB:       redisDb, // use default DB
+	})
 }
 
 func (self *RoomServie) RegisterHandle(roomhandle IRoomHandle) {
@@ -125,10 +117,8 @@ func (self *RoomServie) ToGateNormal(pb proto.Message, printLog bool, uids ...ui
 		return err
 	}
 
-	rc := self.redisPool.Get()
-	defer rc.Close()
+	_, err = util.RedisXadd(self.redisCli, "backend_to_gate", data)
 
-	_, err = rc.Do("PUBLISH", "backend_to_gate", data)
 	if err != nil {
 		self.log.Error(err.Error())
 	}
@@ -174,7 +164,7 @@ func (self *RoomServie) SendDeskChangeNotif(cid int64, did uint64, changeTyp int
 	if err == nil {
 		data, err := json.Marshal(m)
 		if err == nil {
-			cache.Pub("inner_broadcast", data)
+			cache.RedisXadd("inner_broadcast", data)
 		}
 	}
 }
@@ -225,9 +215,9 @@ func (self *RoomServie) SendDeskChangeNotif(cid int64, did uint64, changeTyp int
 // 	}
 // }
 
-func (self *RoomServie) onMessage(channel string, data []byte) error {
-	m := &codec.Message{}
-	err := json.Unmarshal(data, m)
+func (self *RoomServie) onMessage(channel string, msgData []byte) error {
+	var m codec.Message
+	err := json.Unmarshal(msgData, m)
 	if err != nil {
 		return err
 	}

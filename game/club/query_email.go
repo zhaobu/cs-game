@@ -2,30 +2,28 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"game/codec"
 	"game/db/mgo"
-	"game/pb/club"
-	"game/pb/common"
-	"fmt"
-
-	"github.com/sirupsen/logrus"
+	pbclub "game/pb/club"
+	pbcommon "game/pb/common"
 )
 
 func (p *club) ClubEmailReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
-		logrus.Error(err.Error())
+		tlog.Error(err.Error())
 		return err
 	}
 
 	req, ok := pb.(*pbclub.ClubEmailReq)
 	if !ok {
 		err = fmt.Errorf("not *pbclub.ClubEmailReq")
-		logrus.Error(err.Error())
+		tlog.Error(err.Error())
 		return
 	}
 
-	logrus.Infof("recv %s %+v", args.Name, req)
+	log.Infof("recv %s %+v", args.Name, req)
 
 	rsp := &pbclub.ClubEmailRsp{}
 	if req.Head != nil {
@@ -35,7 +33,7 @@ func (p *club) ClubEmailReq(ctx context.Context, args *codec.Message, reply *cod
 	defer func() {
 		err = toGateNormal(rsp, args.UserID)
 		if err != nil {
-			logrus.Error(err.Error())
+			tlog.Error(err.Error())
 		}
 
 	}()

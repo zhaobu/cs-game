@@ -1,19 +1,19 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"game/cache"
 	"game/configs"
 	"game/db/mgo"
 	"game/util"
-	"flag"
-	"fmt"
 	"os"
 	"runtime/debug"
 	"time"
 
 	zaplog "game/common/logger"
 
-	"github.com/gomodule/redigo/redis"
+	"github.com/go-redis/redis"
 	metrics "github.com/rcrowley/go-metrics"
 	"github.com/smallnest/rpcx/server"
 	"github.com/smallnest/rpcx/serverplugin"
@@ -100,19 +100,11 @@ func main() {
 		return
 	}
 
-	redisPool = &redis.Pool{
-		Dial: func() (redis.Conn, error) {
-			c, err := redis.Dial("tcp", *redisAddr)
-			if err != nil {
-				return nil, err
-			}
-			if _, err := c.Do("SELECT", *redisDb); err != nil {
-				c.Close()
-				return nil, err
-			}
-			return c, nil
-		},
-	}
+	redisCli = redis.NewClient(&redis.Options{
+		Addr:     *redisAddr,
+		Password: "",       // no password set
+		DB:       *redisDb, // use default DB
+	})
 
 	err = mgo.Init(*mgoURI)
 	if err != nil {

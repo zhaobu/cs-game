@@ -32,8 +32,8 @@ func loadDB() {
 }
 
 //游戏服务器异常之后 需要重新同步桌子信息
-func synchroClubdeskinfo(ClubID int64)  {
-	if v,ok :=clubMgr[ClubID] ;ok{
+func synchroClubdeskinfo(ClubID int64) {
+	if v, ok := clubMgr[ClubID]; ok {
 		v.desks = make(map[uint64]*pbcommon.DeskInfo)
 		if ds, err := cache.QueryClubDeskInfo(v.ID); err == nil {
 			for _, d := range ds {
@@ -42,7 +42,6 @@ func synchroClubdeskinfo(ClubID int64)  {
 		}
 	}
 }
-
 
 func syncDB() {
 	go func() {

@@ -2,30 +2,28 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"game/codec"
 	"game/db/mgo"
-	"game/pb/club"
-	"game/pb/common"
-	"fmt"
-
-	"github.com/sirupsen/logrus"
+	pbclub "game/pb/club"
+	pbcommon "game/pb/common"
 )
 
 func (p *club) UpdateClubReq(ctx context.Context, args *codec.Message, reply *codec.Message) (err error) {
 	pb, err := codec.Msg2Pb(args)
 	if err != nil {
-		logrus.Error(err.Error())
+		tlog.Error(err.Error())
 		return err
 	}
 
 	req, ok := pb.(*pbclub.UpdateClubReq)
 	if !ok {
 		err = fmt.Errorf("not *pbclub.UpdateClubReq")
-		logrus.Error(err.Error())
+		tlog.Error(err.Error())
 		return
 	}
 
-	logrus.Infof("recv %s %+v", args.Name, req)
+	log.Infof("recv %s %+v", args.Name, req)
 
 	rsp := &pbclub.UpdateClubRsp{}
 	if req.Head != nil {
@@ -35,7 +33,7 @@ func (p *club) UpdateClubReq(ctx context.Context, args *codec.Message, reply *co
 	defer func() {
 		err = toGateNormal(rsp, args.UserID)
 		if err != nil {
-			logrus.Error(err.Error())
+			tlog.Error(err.Error())
 		}
 
 		if rsp.Code == 1 {
@@ -69,7 +67,7 @@ func (p *club) UpdateClubReq(ctx context.Context, args *codec.Message, reply *co
 	if m, find := cc.Members[args.UserID]; find && (m.Identity == identityMaster || m.Identity == identityAdmin) {
 		permisOK = true
 	}
-	if !permisOK {	//操作用户权限够
+	if !permisOK { //操作用户权限够
 		rsp.Code = 4
 		return
 	}
@@ -92,8 +90,8 @@ func (p *club) UpdateClubReq(ctx context.Context, args *codec.Message, reply *co
 	cc.Unlock()
 	rsp.Code = 1
 	//更新房间设置时检查是否需要重新创建房间
-	if req.Base.IsAutoCreate && !IsProofe && f == nil {		//自动创建桌子 但是当前不存在桌子
-		setting,cid,masterUserID := checkAutoCreate(cc.ID)
+	if req.Base.IsAutoCreate && !IsProofe && f == nil { //自动创建桌子 但是当前不存在桌子
+		setting, cid, masterUserID := checkAutoCreate(cc.ID)
 		if len(setting) > 0 {
 			defer createDesk(setting, cid, masterUserID)
 		}
