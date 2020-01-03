@@ -2,6 +2,7 @@ package ackhandler
 
 import (
 	"github.com/lucas-clemente/quic-go/internal/protocol"
+	"github.com/lucas-clemente/quic-go/internal/qerr"
 	"github.com/lucas-clemente/quic-go/internal/utils"
 	"github.com/lucas-clemente/quic-go/internal/wire"
 )
@@ -12,9 +13,12 @@ import (
 type receivedPacketHistory struct {
 	ranges *utils.PacketIntervalList
 
-	deletedBelow protocol.PacketNumber
+	lowestInReceivedPacketNumbers protocol.PacketNumber
 }
 
+var errTooManyOutstandingReceivedAckRanges = qerr.Error(qerr.InternalError, "Too many outstanding received ACK ranges")
+
+// newReceivedPacketHistory creates a new received packet history
 func newReceivedPacketHistory() *receivedPacketHistory {
 	return &receivedPacketHistory{
 		ranges: utils.NewPacketIntervalList(),
@@ -22,25 +26,20 @@ func newReceivedPacketHistory() *receivedPacketHistory {
 }
 
 // ReceivedPacket registers a packet with PacketNumber p and updates the ranges
-func (h *receivedPacketHistory) ReceivedPacket(p protocol.PacketNumber) {
-	// ignore delayed packets, if we already deleted the range
-	if p < h.deletedBelow {
-		return
+func (h *receivedPacketHistory) ReceivedPacket(p protocol.PacketNumber) error {
+	if h.ranges.Len() >= protocol.MaxTrackedReceivedAckRanges {
+		return errTooManyOutstandingReceivedAckRanges
 	}
-	h.addToRanges(p)
-	h.maybeDeleteOldRanges()
-}
 
-func (h *receivedPacketHistory) addToRanges(p protocol.PacketNumber) {
 	if h.ranges.Len() == 0 {
 		h.ranges.PushBack(utils.PacketInterval{Start: p, End: p})
-		return
+		return nil
 	}
 
 	for el := h.ranges.Back(); el != nil; el = el.Prev() {
 		// p already included in an existing range. Nothing to do here
 		if p >= el.Value.Start && p <= el.Value.End {
-			return
+			return nil
 		}
 
 		var rangeExtended bool
@@ -58,46 +57,39 @@ func (h *receivedPacketHistory) addToRanges(p protocol.PacketNumber) {
 			if prev != nil && prev.Value.End+1 == el.Value.Start { // merge two ranges
 				prev.Value.End = el.Value.End
 				h.ranges.Remove(el)
-				return
+				return nil
 			}
-			return // if the two ranges were not merge, we're done here
+			return nil // if the two ranges were not merge, we're done here
 		}
 
 		// create a new range at the end
 		if p > el.Value.End {
 			h.ranges.InsertAfter(utils.PacketInterval{Start: p, End: p}, el)
-			return
+			return nil
 		}
 	}
 
 	// create a new range at the beginning
 	h.ranges.InsertBefore(utils.PacketInterval{Start: p, End: p}, h.ranges.Front())
-}
 
-// Delete old ranges, if we're tracking more than 500 of them.
-// This is a DoS defense against a peer that sends us too many gaps.
-func (h *receivedPacketHistory) maybeDeleteOldRanges() {
-	for h.ranges.Len() > protocol.MaxNumAckRanges {
-		h.ranges.Remove(h.ranges.Front())
-	}
+	return nil
 }
 
 // DeleteBelow deletes all entries below (but not including) p
 func (h *receivedPacketHistory) DeleteBelow(p protocol.PacketNumber) {
-	if p < h.deletedBelow {
+	if p <= h.lowestInReceivedPacketNumbers {
 		return
 	}
-	h.deletedBelow = p
+	h.lowestInReceivedPacketNumbers = p
 
 	nextEl := h.ranges.Front()
 	for el := h.ranges.Front(); nextEl != nil; el = nextEl {
 		nextEl = el.Next()
 
-		if el.Value.End < p { // delete a whole range
-			h.ranges.Remove(el)
-		} else if p > el.Value.Start && p <= el.Value.End {
+		if p > el.Value.Start && p <= el.Value.End {
 			el.Value.Start = p
-			return
+		} else if el.Value.End < p { // delete a whole range
+			h.ranges.Remove(el)
 		} else { // no ranges affected. Nothing to do
 			return
 		}

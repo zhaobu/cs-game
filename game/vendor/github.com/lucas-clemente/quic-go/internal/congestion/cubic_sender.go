@@ -20,8 +20,7 @@ type cubicSender struct {
 	stats           connectionStats
 	cubic           *Cubic
 
-	noPRR bool
-	reno  bool
+	reno bool
 
 	// Track the largest packet that has been sent.
 	largestSentPacketNumber protocol.PacketNumber
@@ -64,15 +63,12 @@ type cubicSender struct {
 }
 
 var _ SendAlgorithm = &cubicSender{}
-var _ SendAlgorithmWithDebugInfos = &cubicSender{}
+var _ SendAlgorithmWithDebugInfo = &cubicSender{}
 
 // NewCubicSender makes a new cubic sender
-func NewCubicSender(clock Clock, rttStats *RTTStats, reno bool, initialCongestionWindow, initialMaxCongestionWindow protocol.ByteCount) *cubicSender {
+func NewCubicSender(clock Clock, rttStats *RTTStats, reno bool, initialCongestionWindow, initialMaxCongestionWindow protocol.ByteCount) SendAlgorithmWithDebugInfo {
 	return &cubicSender{
 		rttStats:                   rttStats,
-		largestSentPacketNumber:    protocol.InvalidPacketNumber,
-		largestAckedPacketNumber:   protocol.InvalidPacketNumber,
-		largestSentAtLastCutback:   protocol.InvalidPacketNumber,
 		initialCongestionWindow:    initialCongestionWindow,
 		initialMaxCongestionWindow: initialMaxCongestionWindow,
 		congestionWindow:           initialCongestionWindow,
@@ -87,13 +83,17 @@ func NewCubicSender(clock Clock, rttStats *RTTStats, reno bool, initialCongestio
 
 // TimeUntilSend returns when the next packet should be sent.
 func (c *cubicSender) TimeUntilSend(bytesInFlight protocol.ByteCount) time.Duration {
-	if !c.noPRR && c.InRecovery() {
+	if c.InRecovery() {
 		// PRR is used when in recovery.
 		if c.prr.CanSend(c.GetCongestionWindow(), bytesInFlight, c.GetSlowStartThreshold()) {
 			return 0
 		}
 	}
-	return c.rttStats.SmoothedRTT() * time.Duration(protocol.DefaultTCPMSS) / time.Duration(2*c.GetCongestionWindow())
+	delay := c.rttStats.SmoothedRTT() / time.Duration(2*c.GetCongestionWindow())
+	if !c.InSlowStart() { // adjust delay, such that it's 1.25*cwd/rtt
+		delay = delay * 8 / 5
+	}
+	return delay
 }
 
 func (c *cubicSender) OnPacketSent(
@@ -114,15 +114,8 @@ func (c *cubicSender) OnPacketSent(
 	c.hybridSlowStart.OnPacketSent(packetNumber)
 }
 
-func (c *cubicSender) CanSend(bytesInFlight protocol.ByteCount) bool {
-	if !c.noPRR && c.InRecovery() {
-		return c.prr.CanSend(c.GetCongestionWindow(), bytesInFlight, c.GetSlowStartThreshold())
-	}
-	return bytesInFlight < c.GetCongestionWindow()
-}
-
 func (c *cubicSender) InRecovery() bool {
-	return c.largestAckedPacketNumber != protocol.InvalidPacketNumber && c.largestAckedPacketNumber <= c.largestSentAtLastCutback
+	return c.largestAckedPacketNumber <= c.largestSentAtLastCutback && c.largestAckedPacketNumber != 0
 }
 
 func (c *cubicSender) InSlowStart() bool {
@@ -160,9 +153,7 @@ func (c *cubicSender) OnPacketAcked(
 	c.largestAckedPacketNumber = utils.MaxPacketNumber(ackedPacketNumber, c.largestAckedPacketNumber)
 	if c.InRecovery() {
 		// PRR is used when in recovery.
-		if !c.noPRR {
-			c.prr.OnPacketAcked(ackedBytes)
-		}
+		c.prr.OnPacketAcked(ackedBytes)
 		return
 	}
 	c.maybeIncreaseCwnd(ackedPacketNumber, ackedBytes, priorInFlight, eventTime)
@@ -195,9 +186,7 @@ func (c *cubicSender) OnPacketLost(
 		c.stats.slowstartPacketsLost++
 	}
 
-	if !c.noPRR {
-		c.prr.OnPacketLost(priorInFlight)
-	}
+	c.prr.OnPacketLost(priorInFlight)
 
 	// TODO(chromium): Separate out all of slow start into a separate class.
 	if c.slowStartLargeReduction && c.InSlowStart() {
@@ -298,7 +287,7 @@ func (c *cubicSender) SetNumEmulatedConnections(n int) {
 
 // OnRetransmissionTimeout is called on an retransmission timeout
 func (c *cubicSender) OnRetransmissionTimeout(packetsRetransmitted bool) {
-	c.largestSentAtLastCutback = protocol.InvalidPacketNumber
+	c.largestSentAtLastCutback = 0
 	if !packetsRetransmitted {
 		return
 	}
@@ -312,9 +301,9 @@ func (c *cubicSender) OnRetransmissionTimeout(packetsRetransmitted bool) {
 func (c *cubicSender) OnConnectionMigration() {
 	c.hybridSlowStart.Restart()
 	c.prr = PrrSender{}
-	c.largestSentPacketNumber = protocol.InvalidPacketNumber
-	c.largestAckedPacketNumber = protocol.InvalidPacketNumber
-	c.largestSentAtLastCutback = protocol.InvalidPacketNumber
+	c.largestSentPacketNumber = 0
+	c.largestAckedPacketNumber = 0
+	c.largestSentAtLastCutback = 0
 	c.lastCutbackExitedSlowstart = false
 	c.cubic.Reset()
 	c.numAckedPackets = 0

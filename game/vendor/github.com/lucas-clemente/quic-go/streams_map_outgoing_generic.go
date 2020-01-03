@@ -1,10 +1,11 @@
 package quic
 
 import (
-	"context"
+	"fmt"
 	"sync"
 
 	"github.com/lucas-clemente/quic-go/internal/protocol"
+	"github.com/lucas-clemente/quic-go/internal/qerr"
 	"github.com/lucas-clemente/quic-go/internal/wire"
 )
 
@@ -12,35 +13,34 @@ import (
 //go:generate genny -in $GOFILE -out streams_map_outgoing_uni.go gen "item=sendStreamI Item=UniStream streamTypeGeneric=protocol.StreamTypeUni"
 type outgoingItemsMap struct {
 	mutex sync.RWMutex
+	cond  sync.Cond
 
-	streams map[protocol.StreamNum]item
+	streams map[protocol.StreamID]item
 
-	openQueue      map[uint64]chan struct{}
-	lowestInQueue  uint64
-	highestInQueue uint64
+	nextStream   protocol.StreamID // stream ID of the stream returned by OpenStream(Sync)
+	maxStream    protocol.StreamID // the maximum stream ID we're allowed to open
+	maxStreamSet bool              // was maxStream set. If not, it's not possible to any stream (also works for stream 0)
+	blockedSent  bool              // was a STREAMS_BLOCKED sent for the current maxStream
 
-	nextStream  protocol.StreamNum // stream ID of the stream returned by OpenStream(Sync)
-	maxStream   protocol.StreamNum // the maximum stream ID we're allowed to open
-	blockedSent bool               // was a STREAMS_BLOCKED sent for the current maxStream
-
-	newStream            func(protocol.StreamNum) item
+	newStream            func(protocol.StreamID) item
 	queueStreamIDBlocked func(*wire.StreamsBlockedFrame)
 
 	closeErr error
 }
 
 func newOutgoingItemsMap(
-	newStream func(protocol.StreamNum) item,
+	nextStream protocol.StreamID,
+	newStream func(protocol.StreamID) item,
 	queueControlFrame func(wire.Frame),
 ) *outgoingItemsMap {
-	return &outgoingItemsMap{
-		streams:              make(map[protocol.StreamNum]item),
-		openQueue:            make(map[uint64]chan struct{}),
-		maxStream:            protocol.InvalidStreamNum,
-		nextStream:           1,
+	m := &outgoingItemsMap{
+		streams:              make(map[protocol.StreamID]item),
+		nextStream:           nextStream,
 		newStream:            newStream,
 		queueStreamIDBlocked: func(f *wire.StreamsBlockedFrame) { queueControlFrame(f) },
 	}
+	m.cond.L = &m.mutex
+	return m
 }
 
 func (m *outgoingItemsMap) OpenStream() (item, error) {
@@ -51,141 +51,87 @@ func (m *outgoingItemsMap) OpenStream() (item, error) {
 		return nil, m.closeErr
 	}
 
-	// if there are OpenStreamSync calls waiting, return an error here
-	if len(m.openQueue) > 0 || m.nextStream > m.maxStream {
-		m.maybeSendBlockedFrame()
-		return nil, streamOpenErr{errTooManyOpenStreams}
+	str, err := m.openStreamImpl()
+	if err != nil {
+		return nil, streamOpenErr{err}
 	}
-	return m.openStream(), nil
+	return str, nil
 }
 
-func (m *outgoingItemsMap) OpenStreamSync(ctx context.Context) (item, error) {
+func (m *outgoingItemsMap) OpenStreamSync() (item, error) {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 
-	if m.closeErr != nil {
-		return nil, m.closeErr
-	}
-
-	if err := ctx.Err(); err != nil {
-		return nil, err
-	}
-
-	if len(m.openQueue) == 0 && m.nextStream <= m.maxStream {
-		return m.openStream(), nil
-	}
-
-	waitChan := make(chan struct{}, 1)
-	queuePos := m.highestInQueue
-	m.highestInQueue++
-	if len(m.openQueue) == 0 {
-		m.lowestInQueue = queuePos
-	}
-	m.openQueue[queuePos] = waitChan
-	m.maybeSendBlockedFrame()
-
 	for {
-		m.mutex.Unlock()
-		select {
-		case <-ctx.Done():
-			m.mutex.Lock()
-			delete(m.openQueue, queuePos)
-			return nil, ctx.Err()
-		case <-waitChan:
-		}
-		m.mutex.Lock()
-
 		if m.closeErr != nil {
 			return nil, m.closeErr
 		}
-		if m.nextStream > m.maxStream {
-			// no stream available. Continue waiting
-			continue
+		str, err := m.openStreamImpl()
+		if err == nil {
+			return str, nil
 		}
-		str := m.openStream()
-		delete(m.openQueue, queuePos)
-		m.unblockOpenSync()
-		return str, nil
+		if err != nil && err != errTooManyOpenStreams {
+			return nil, streamOpenErr{err}
+		}
+		m.cond.Wait()
 	}
 }
 
-func (m *outgoingItemsMap) openStream() item {
+func (m *outgoingItemsMap) openStreamImpl() (item, error) {
+	if !m.maxStreamSet || m.nextStream > m.maxStream {
+		if !m.blockedSent {
+			if m.maxStreamSet {
+				m.queueStreamIDBlocked(&wire.StreamsBlockedFrame{
+					Type:        streamTypeGeneric,
+					StreamLimit: m.maxStream.StreamNum(),
+				})
+			} else {
+				m.queueStreamIDBlocked(&wire.StreamsBlockedFrame{
+					Type:        streamTypeGeneric,
+					StreamLimit: 0,
+				})
+			}
+			m.blockedSent = true
+		}
+		return nil, errTooManyOpenStreams
+	}
 	s := m.newStream(m.nextStream)
 	m.streams[m.nextStream] = s
-	m.nextStream++
-	return s
+	m.nextStream += 4
+	return s, nil
 }
 
-func (m *outgoingItemsMap) maybeSendBlockedFrame() {
-	if m.blockedSent {
-		return
-	}
-
-	var streamNum protocol.StreamNum
-	if m.maxStream != protocol.InvalidStreamNum {
-		streamNum = m.maxStream
-	}
-	m.queueStreamIDBlocked(&wire.StreamsBlockedFrame{
-		Type:        streamTypeGeneric,
-		StreamLimit: streamNum,
-	})
-	m.blockedSent = true
-}
-
-func (m *outgoingItemsMap) GetStream(num protocol.StreamNum) (item, error) {
+func (m *outgoingItemsMap) GetStream(id protocol.StreamID) (item, error) {
 	m.mutex.RLock()
-	if num >= m.nextStream {
+	if id >= m.nextStream {
 		m.mutex.RUnlock()
-		return nil, streamError{
-			message: "peer attempted to open stream %d",
-			nums:    []protocol.StreamNum{num},
-		}
+		return nil, qerr.Error(qerr.StreamStateError, fmt.Sprintf("peer attempted to open stream %d", id))
 	}
-	s := m.streams[num]
+	s := m.streams[id]
 	m.mutex.RUnlock()
 	return s, nil
 }
 
-func (m *outgoingItemsMap) DeleteStream(num protocol.StreamNum) error {
+func (m *outgoingItemsMap) DeleteStream(id protocol.StreamID) error {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 
-	if _, ok := m.streams[num]; !ok {
-		return streamError{
-			message: "Tried to delete unknown stream %d",
-			nums:    []protocol.StreamNum{num},
-		}
+	if _, ok := m.streams[id]; !ok {
+		return fmt.Errorf("Tried to delete unknown stream %d", id)
 	}
-	delete(m.streams, num)
+	delete(m.streams, id)
 	return nil
 }
 
-func (m *outgoingItemsMap) SetMaxStream(num protocol.StreamNum) {
+func (m *outgoingItemsMap) SetMaxStream(id protocol.StreamID) {
 	m.mutex.Lock()
-	defer m.mutex.Unlock()
-
-	if num <= m.maxStream {
-		return
+	if !m.maxStreamSet || id > m.maxStream {
+		m.maxStream = id
+		m.maxStreamSet = true
+		m.blockedSent = false
+		m.cond.Broadcast()
 	}
-	m.maxStream = num
-	m.blockedSent = false
-	m.unblockOpenSync()
-}
-
-func (m *outgoingItemsMap) unblockOpenSync() {
-	if len(m.openQueue) == 0 {
-		return
-	}
-	for qp := m.lowestInQueue; qp <= m.highestInQueue; qp++ {
-		c, ok := m.openQueue[qp]
-		if !ok { // entry was deleted because the context was canceled
-			continue
-		}
-		close(c)
-		m.openQueue[qp] = nil
-		m.lowestInQueue = qp + 1
-		return
-	}
+	m.mutex.Unlock()
 }
 
 func (m *outgoingItemsMap) CloseWithError(err error) {
@@ -194,10 +140,6 @@ func (m *outgoingItemsMap) CloseWithError(err error) {
 	for _, str := range m.streams {
 		str.closeForShutdown(err)
 	}
-	for _, c := range m.openQueue {
-		if c != nil {
-			close(c)
-		}
-	}
+	m.cond.Broadcast()
 	m.mutex.Unlock()
 }

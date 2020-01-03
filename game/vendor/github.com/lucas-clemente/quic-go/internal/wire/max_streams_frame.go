@@ -9,8 +9,8 @@ import (
 
 // A MaxStreamsFrame is a MAX_STREAMS frame
 type MaxStreamsFrame struct {
-	Type         protocol.StreamType
-	MaxStreamNum protocol.StreamNum
+	Type       protocol.StreamType
+	MaxStreams uint64
 }
 
 func parseMaxStreamsFrame(r *bytes.Reader, _ protocol.VersionNumber) (*MaxStreamsFrame, error) {
@@ -30,7 +30,7 @@ func parseMaxStreamsFrame(r *bytes.Reader, _ protocol.VersionNumber) (*MaxStream
 	if err != nil {
 		return nil, err
 	}
-	f.MaxStreamNum = protocol.StreamNum(streamID)
+	f.MaxStreams = streamID
 	return f, nil
 }
 
@@ -41,11 +41,11 @@ func (f *MaxStreamsFrame) Write(b *bytes.Buffer, _ protocol.VersionNumber) error
 	case protocol.StreamTypeUni:
 		b.WriteByte(0x13)
 	}
-	utils.WriteVarInt(b, uint64(f.MaxStreamNum))
+	utils.WriteVarInt(b, f.MaxStreams)
 	return nil
 }
 
 // Length of a written frame
 func (f *MaxStreamsFrame) Length(protocol.VersionNumber) protocol.ByteCount {
-	return 1 + utils.VarIntLen(uint64(f.MaxStreamNum))
+	return 1 + utils.VarIntLen(f.MaxStreams)
 }

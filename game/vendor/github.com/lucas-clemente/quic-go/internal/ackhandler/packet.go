@@ -11,7 +11,6 @@ import (
 type Packet struct {
 	PacketNumber    protocol.PacketNumber
 	PacketType      protocol.PacketType
-	Ack             *wire.AckFrame
 	Frames          []wire.Frame
 	Length          protocol.ByteCount
 	EncryptionLevel protocol.EncryptionLevel

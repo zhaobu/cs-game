@@ -4,7 +4,6 @@ import (
 	"sync"
 
 	"github.com/lucas-clemente/quic-go/internal/protocol"
-	"github.com/lucas-clemente/quic-go/internal/utils"
 	"github.com/lucas-clemente/quic-go/internal/wire"
 )
 
@@ -13,7 +12,7 @@ type framer interface {
 	AppendControlFrames([]wire.Frame, protocol.ByteCount) ([]wire.Frame, protocol.ByteCount)
 
 	AddActiveStream(protocol.StreamID)
-	AppendStreamFrames([]wire.Frame, protocol.ByteCount) ([]wire.Frame, protocol.ByteCount)
+	AppendStreamFrames([]wire.Frame, protocol.ByteCount) []wire.Frame
 }
 
 type framerI struct {
@@ -74,14 +73,13 @@ func (f *framerI) AddActiveStream(id protocol.StreamID) {
 	f.mutex.Unlock()
 }
 
-func (f *framerI) AppendStreamFrames(frames []wire.Frame, maxLen protocol.ByteCount) ([]wire.Frame, protocol.ByteCount) {
+func (f *framerI) AppendStreamFrames(frames []wire.Frame, maxLen protocol.ByteCount) []wire.Frame {
 	var length protocol.ByteCount
-	var frameAdded bool
 	f.mutex.Lock()
 	// pop STREAM frames, until less than MinStreamFrameSize bytes are left in the packet
 	numActiveStreams := len(f.streamQueue)
 	for i := 0; i < numActiveStreams; i++ {
-		if protocol.MinStreamFrameSize+length > maxLen {
+		if maxLen-length < protocol.MinStreamFrameSize {
 			break
 		}
 		id := f.streamQueue[0]
@@ -94,12 +92,7 @@ func (f *framerI) AppendStreamFrames(frames []wire.Frame, maxLen protocol.ByteCo
 			delete(f.activeStreams, id)
 			continue
 		}
-		remainingLen := maxLen - length
-		// For the last STREAM frame, we'll remove the DataLen field later.
-		// Therefore, we can pretend to have more bytes avaibalbe when popping
-		// the STREAM frame (which will always have the DataLen set).
-		remainingLen += utils.VarIntLen(uint64(remainingLen))
-		frame, hasMoreData := str.popStreamFrame(remainingLen)
+		frame, hasMoreData := str.popStreamFrame(maxLen - length)
 		if hasMoreData { // put the stream back in the queue (at the end)
 			f.streamQueue = append(f.streamQueue, id)
 		} else { // no more data to send. Stream is not active any more
@@ -110,11 +103,7 @@ func (f *framerI) AppendStreamFrames(frames []wire.Frame, maxLen protocol.ByteCo
 		}
 		frames = append(frames, frame)
 		length += frame.Length(f.version)
-		frameAdded = true
 	}
 	f.mutex.Unlock()
-	if frameAdded {
-		frames[len(frames)-1].(*wire.StreamFrame).DataLenPresent = false
-	}
-	return frames, length
+	return frames
 }

@@ -109,8 +109,8 @@ func NewXClient(servicePath string, failMode FailMode, selectMode SelectMode, di
 		option:       option,
 	}
 
-	servers := make(map[string]string)
 	pairs := discovery.GetServices()
+	servers := make(map[string]string, len(pairs))
 	for _, p := range pairs {
 		servers[p.Key] = p.Value
 	}
@@ -144,8 +144,8 @@ func NewBidirectionalXClient(servicePath string, failMode FailMode, selectMode S
 		serverMessageChan: serverMessageChan,
 	}
 
-	servers := make(map[string]string)
 	pairs := discovery.GetServices()
+	servers := make(map[string]string, len(pairs))
 	for _, p := range pairs {
 		servers[p.Key] = p.Value
 	}
@@ -199,7 +199,7 @@ func (c *xClient) Auth(auth string) {
 // watch changes of service and update cached clients.
 func (c *xClient) watch(ch chan []*KVPair) {
 	for pairs := range ch {
-		servers := make(map[string]string)
+		servers := make(map[string]string, len(pairs))
 		for _, p := range pairs {
 			servers[p.Key] = p.Value
 		}
@@ -241,7 +241,14 @@ func (c *xClient) selectClient(ctx context.Context, servicePath, serviceMethod s
 
 func (c *xClient) getCachedClient(k string) (RPCClient, error) {
 	// TODO: improve the lock
+	var client RPCClient
+	var needCallPlugin bool
 	c.mu.Lock()
+	defer func() {
+		if needCallPlugin {
+			c.Plugins.DoClientConnected((client.(*Client)).Conn)
+		}
+	}()
 	defer c.mu.Unlock()
 
 	breaker, ok := c.breakers.Load(k)
@@ -249,7 +256,7 @@ func (c *xClient) getCachedClient(k string) (RPCClient, error) {
 		return nil, ErrBreakerOpen
 	}
 
-	client := c.cachedClient[k]
+	client = c.cachedClient[k]
 	if client != nil {
 		if !client.IsClosing() && !client.IsShutdown() {
 			return client, nil
@@ -281,9 +288,8 @@ func (c *xClient) getCachedClient(k string) (RPCClient, error) {
 				return nil, err
 			}
 			if c.Plugins != nil {
-				c.Plugins.DoClientConnected((client.(*Client)).Conn)
+				needCallPlugin = true
 			}
-
 		}
 
 		client.RegisterServerMessageChan(c.serverMessageChan)
@@ -405,7 +411,7 @@ func (c *xClient) Call(ctx context.Context, serviceMethod string, args interface
 	switch c.failMode {
 	case Failtry:
 		retries := c.option.Retries
-		for retries > 0 {
+		for retries >= 0 {
 			retries--
 
 			if client != nil {
@@ -418,7 +424,9 @@ func (c *xClient) Call(ctx context.Context, serviceMethod string, args interface
 				}
 			}
 
-			c.removeClient(k, client)
+			if uncoverError(err) {
+				c.removeClient(k, client)
+			}
 			client, e = c.getCachedClient(k)
 		}
 		if err == nil {
@@ -427,7 +435,7 @@ func (c *xClient) Call(ctx context.Context, serviceMethod string, args interface
 		return err
 	case Failover:
 		retries := c.option.Retries
-		for retries > 0 {
+		for retries >= 0 {
 			retries--
 
 			if client != nil {
@@ -440,7 +448,9 @@ func (c *xClient) Call(ctx context.Context, serviceMethod string, args interface
 				}
 			}
 
-			c.removeClient(k, client)
+			if uncoverError(err) {
+				c.removeClient(k, client)
+			}
 			//select another server
 			k, client, e = c.selectClient(ctx, c.servicePath, serviceMethod, args)
 		}
@@ -480,7 +490,7 @@ func (c *xClient) Call(ctx context.Context, serviceMethod string, args interface
 		}
 		_, err2 := c.Go(ctx, serviceMethod, args, reply2, call2)
 		if err2 != nil {
-			if _, ok := err.(ServiceError); !ok {
+			if uncoverError(err2) {
 				c.removeClient(k, client)
 			}
 			err = err1
@@ -506,7 +516,7 @@ func (c *xClient) Call(ctx context.Context, serviceMethod string, args interface
 	default: //Failfast
 		err = c.wrapCall(ctx, client, serviceMethod, args, reply)
 		if err != nil {
-			if _, ok := err.(ServiceError); !ok {
+			if uncoverError(err) {
 				c.removeClient(k, client)
 			}
 		}
@@ -515,6 +525,21 @@ func (c *xClient) Call(ctx context.Context, serviceMethod string, args interface
 	}
 }
 
+func uncoverError(err error) bool {
+	if _, ok := err.(ServiceError); ok {
+		return false
+	}
+
+	if err == context.DeadlineExceeded {
+		return false
+	}
+
+	if err == context.Canceled {
+		return false
+	}
+
+	return true
+}
 func (c *xClient) SendRaw(ctx context.Context, r *protocol.Message) (map[string]string, []byte, error) {
 	if c.isShutdown {
 		return nil, nil, ErrXClientShutdown
@@ -547,7 +572,7 @@ func (c *xClient) SendRaw(ctx context.Context, r *protocol.Message) (map[string]
 	switch c.failMode {
 	case Failtry:
 		retries := c.option.Retries
-		for retries > 0 {
+		for retries >= 0 {
 			retries--
 			if client != nil {
 				m, payload, err := client.SendRaw(ctx, r)
@@ -559,7 +584,9 @@ func (c *xClient) SendRaw(ctx context.Context, r *protocol.Message) (map[string]
 				}
 			}
 
-			c.removeClient(k, client)
+			if uncoverError(err) {
+				c.removeClient(k, client)
+			}
 			client, e = c.getCachedClient(k)
 		}
 
@@ -569,7 +596,7 @@ func (c *xClient) SendRaw(ctx context.Context, r *protocol.Message) (map[string]
 		return nil, nil, err
 	case Failover:
 		retries := c.option.Retries
-		for retries > 0 {
+		for retries >= 0 {
 			retries--
 			if client != nil {
 				m, payload, err := client.SendRaw(ctx, r)
@@ -581,7 +608,9 @@ func (c *xClient) SendRaw(ctx context.Context, r *protocol.Message) (map[string]
 				}
 			}
 
-			c.removeClient(k, client)
+			if uncoverError(err) {
+				c.removeClient(k, client)
+			}
 			//select another server
 			k, client, e = c.selectClient(ctx, r.ServicePath, r.ServiceMethod, r.Payload)
 		}
@@ -595,7 +624,7 @@ func (c *xClient) SendRaw(ctx context.Context, r *protocol.Message) (map[string]
 		m, payload, err := client.SendRaw(ctx, r)
 
 		if err != nil {
-			if _, ok := err.(ServiceError); !ok {
+			if uncoverError(err) {
 				c.removeClient(k, client)
 			}
 		}
@@ -659,7 +688,9 @@ func (c *xClient) Broadcast(ctx context.Context, serviceMethod string, args inte
 			e := c.wrapCall(ctx, client, serviceMethod, args, reply)
 			done <- (e == nil)
 			if e != nil {
-				c.removeClient(k, client)
+				if uncoverError(err) {
+					c.removeClient(k, client)
+				}
 				err.Append(e)
 			}
 		}()
@@ -736,7 +767,9 @@ func (c *xClient) Fork(ctx context.Context, serviceMethod string, args interface
 			}
 			done <- (e == nil)
 			if e != nil {
-				c.removeClient(k, client)
+				if uncoverError(err) {
+					c.removeClient(k, client)
+				}
 				err.Append(e)
 			}
 

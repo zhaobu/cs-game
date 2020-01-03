@@ -27,7 +27,7 @@ func ParseConnectionID(data []byte, shortHeaderConnIDLen int) (protocol.Connecti
 	if len(data) < 6 {
 		return nil, io.EOF
 	}
-	destConnIDLen := int(data[5])
+	destConnIDLen, _ := decodeConnIDLen(data[5])
 	if len(data) < 6+destConnIDLen {
 		return nil, io.EOF
 	}
@@ -139,19 +139,16 @@ func (h *Header) parseLongHeader(b *bytes.Reader) error {
 	if h.Version != 0 && h.typeByte&0x40 == 0 {
 		return errors.New("not a QUIC packet")
 	}
-	destConnIDLen, err := b.ReadByte()
+	connIDLenByte, err := b.ReadByte()
 	if err != nil {
 		return err
 	}
-	h.DestConnectionID, err = protocol.ReadConnectionID(b, int(destConnIDLen))
+	dcil, scil := decodeConnIDLen(connIDLenByte)
+	h.DestConnectionID, err = protocol.ReadConnectionID(b, dcil)
 	if err != nil {
 		return err
 	}
-	srcConnIDLen, err := b.ReadByte()
-	if err != nil {
-		return err
-	}
-	h.SrcConnectionID, err = protocol.ReadConnectionID(b, int(srcConnIDLen))
+	h.SrcConnectionID, err = protocol.ReadConnectionID(b, scil)
 	if err != nil {
 		return err
 	}
@@ -175,11 +172,8 @@ func (h *Header) parseLongHeader(b *bytes.Reader) error {
 	}
 
 	if h.Type == protocol.PacketTypeRetry {
-		origDestConnIDLen, err := b.ReadByte()
-		if err != nil {
-			return err
-		}
-		h.OrigDestConnectionID, err = protocol.ReadConnectionID(b, int(origDestConnIDLen))
+		odcil := decodeSingleConnIDLen(h.typeByte & 0xf)
+		h.OrigDestConnectionID, err = protocol.ReadConnectionID(b, odcil)
 		if err != nil {
 			return err
 		}
@@ -214,10 +208,10 @@ func (h *Header) parseLongHeader(b *bytes.Reader) error {
 
 func (h *Header) parseVersionNegotiationPacket(b *bytes.Reader) error {
 	if b.Len() == 0 {
-		return errors.New("Version Negotiation packet has empty version list")
+		return errors.New("Version Negoation packet has empty version list")
 	}
 	if b.Len()%4 != 0 {
-		return errors.New("Version Negotiation packet has a version list with an invalid length")
+		return errors.New("Version Negotation packet has a version list with an invalid length")
 	}
 	h.SupportedVersions = make([]protocol.VersionNumber, b.Len()/4)
 	for i := 0; b.Len() > 0; i++ {
@@ -243,4 +237,15 @@ func (h *Header) ParseExtended(b *bytes.Reader, ver protocol.VersionNumber) (*Ex
 
 func (h *Header) toExtendedHeader() *ExtendedHeader {
 	return &ExtendedHeader{Header: *h}
+}
+
+func decodeConnIDLen(enc byte) (int /*dest conn id len*/, int /*src conn id len*/) {
+	return decodeSingleConnIDLen(enc >> 4), decodeSingleConnIDLen(enc & 0xf)
+}
+
+func decodeSingleConnIDLen(enc uint8) int {
+	if enc == 0 {
+		return 0
+	}
+	return int(enc) + 3
 }

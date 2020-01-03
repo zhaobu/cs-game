@@ -96,8 +96,11 @@ type Server struct {
 // NewServer returns a server.
 func NewServer(options ...OptionFn) *Server {
 	s := &Server{
-		Plugins: &pluginContainer{},
-		options: make(map[string]interface{}),
+		Plugins:    &pluginContainer{},
+		options:    make(map[string]interface{}),
+		activeConn: make(map[net.Conn]struct{}),
+		doneChan:   make(chan struct{}),
+		serviceMap: make(map[string]*service),
 	}
 
 	for _, op := range options {
@@ -119,8 +122,7 @@ func (s *Server) Address() net.Addr {
 
 // ActiveClientConn returns active connections.
 func (s *Server) ActiveClientConn() []net.Conn {
-	var result []net.Conn
-
+	result := make([]net.Conn, 0, len(s.activeConn))
 	s.mu.RLock()
 	for clientConn := range s.activeConn {
 		result = append(result, clientConn)
@@ -160,12 +162,6 @@ func (s *Server) SendMessage(conn net.Conn, servicePath, serviceMethod string, m
 }
 
 func (s *Server) getDoneChan() <-chan struct{} {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	if s.doneChan == nil {
-		s.doneChan = make(chan struct{})
-	}
 	return s.doneChan
 }
 
@@ -210,17 +206,11 @@ func (s *Server) Serve(network, address string) (err error) {
 // creating a new service goroutine for each.
 // The service goroutines read requests and then call services to reply to them.
 func (s *Server) serveListener(ln net.Listener) error {
-	if s.Plugins == nil {
-		s.Plugins = &pluginContainer{}
-	}
 
 	var tempDelay time.Duration
 
 	s.mu.Lock()
 	s.ln = ln
-	if s.activeConn == nil {
-		s.activeConn = make(map[net.Conn]struct{})
-	}
 	s.mu.Unlock()
 
 	for {
@@ -257,15 +247,15 @@ func (s *Server) serveListener(ln net.Listener) error {
 			tc.SetLinger(10)
 		}
 
-		s.mu.Lock()
-		s.activeConn[conn] = struct{}{}
-		s.mu.Unlock()
-
 		conn, ok := s.Plugins.DoPostConnAccept(conn)
 		if !ok {
 			closeChannel(s, conn)
 			continue
 		}
+
+		s.mu.Lock()
+		s.activeConn[conn] = struct{}{}
+		s.mu.Unlock()
 
 		go s.serveConn(conn)
 	}
@@ -276,21 +266,11 @@ func (s *Server) serveListener(ln net.Listener) error {
 func (s *Server) serveByHTTP(ln net.Listener, rpcPath string) {
 	s.ln = ln
 
-	if s.Plugins == nil {
-		s.Plugins = &pluginContainer{}
-	}
-
 	if rpcPath == "" {
 		rpcPath = share.DefaultRPCPath
 	}
 	http.Handle(rpcPath, s)
 	srv := &http.Server{Handler: nil}
-
-	s.mu.Lock()
-	if s.activeConn == nil {
-		s.activeConn = make(map[net.Conn]struct{})
-	}
-	s.mu.Unlock()
 
 	srv.Serve(ln)
 }
@@ -311,10 +291,6 @@ func (s *Server) serveConn(conn net.Conn) {
 		delete(s.activeConn, conn)
 		s.mu.Unlock()
 		conn.Close()
-
-		if s.Plugins == nil {
-			s.Plugins = &pluginContainer{}
-		}
 
 		s.Plugins.DoPostConnClose(conn)
 	}()
@@ -395,16 +371,15 @@ func (s *Server) serveConn(conn net.Conn) {
 			protocol.FreeMsg(req)
 			// auth failed, closed the connection
 			if closeConn {
-				log.Info("auth failed for conn %s: %v", conn.RemoteAddr().String(), err)
+				log.Infof("auth failed for conn %s: %v", conn.RemoteAddr().String(), err)
 				return
 			}
 			continue
 		}
 		go func() {
 			atomic.AddInt32(&s.handlerMsgNum, 1)
-			defer func() {
-				atomic.AddInt32(&s.handlerMsgNum, -1)
-			}()
+			defer atomic.AddInt32(&s.handlerMsgNum, -1)
+
 			if req.IsHeartbeat() {
 				req.SetMessageType(protocol.Response)
 				data := req.Encode()
@@ -630,7 +605,7 @@ var connected = "200 Connected to rpcx"
 
 // ServeHTTP implements an http.Handler that answers RPC requests.
 func (s *Server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	if req.Method != "CONNECT" {
+	if req.Method != http.MethodConnect {
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		io.WriteString(w, "405 must CONNECT\n")
@@ -654,17 +629,17 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 func (s *Server) Close() error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.closeDoneChanLocked()
+
 	var err error
 	if s.ln != nil {
 		err = s.ln.Close()
 	}
-
 	for c := range s.activeConn {
 		c.Close()
 		delete(s.activeConn, c)
 		s.Plugins.DoPostConnClose(c)
 	}
+	s.closeDoneChanLocked()
 	return err
 }
 
@@ -686,8 +661,20 @@ var shutdownPollInterval = 1000 * time.Millisecond
 // Shutdown returns the context's error, otherwise it returns any
 // error returned from closing the Server's underlying Listener.
 func (s *Server) Shutdown(ctx context.Context) error {
+	var err error
 	if atomic.CompareAndSwapInt32(&s.inShutdown, 0, 1) {
 		log.Info("shutdown begin")
+
+		s.mu.Lock()
+		s.ln.Close()
+		for conn := range s.activeConn {
+			if tcpConn, ok := conn.(*net.TCPConn); ok {
+				tcpConn.CloseRead()
+			}
+		}
+		s.mu.Unlock()
+
+		// wait all in-processing requests finish.
 		ticker := time.NewTicker(shutdownPollInterval)
 		defer ticker.Stop()
 		for {
@@ -696,11 +683,11 @@ func (s *Server) Shutdown(ctx context.Context) error {
 			}
 			select {
 			case <-ctx.Done():
-				return ctx.Err()
+				err = ctx.Err()
+				break
 			case <-ticker.C:
 			}
 		}
-		s.Close()
 
 		if s.gatewayHTTPServer != nil {
 			if err := s.closeHTTP1APIGateway(ctx); err != nil {
@@ -709,14 +696,25 @@ func (s *Server) Shutdown(ctx context.Context) error {
 				log.Info("closed gateway")
 			}
 		}
+
+		s.mu.Lock()
+		for conn := range s.activeConn {
+			conn.Close()
+			delete(s.activeConn, conn)
+			s.Plugins.DoPostConnClose(conn)
+		}
+		s.closeDoneChanLocked()
+		s.mu.Unlock()
+
 		log.Info("shutdown end")
+
 	}
-	return nil
+	return err
 }
 
 func (s *Server) checkProcessMsg() bool {
-	size := s.handlerMsgNum
-	log.Info("need handle msg size:", size)
+	size := atomic.LoadInt32(&s.handlerMsgNum)
+	log.Info("need handle in-processing msg size:", size)
 	if size == 0 {
 		return true
 	}
@@ -724,21 +722,14 @@ func (s *Server) checkProcessMsg() bool {
 }
 
 func (s *Server) closeDoneChanLocked() {
-	ch := s.getDoneChanLocked()
 	select {
-	case <-ch:
+	case <-s.doneChan:
 		// Already closed. Don't close again.
 	default:
 		// Safe to close here. We're the only closer, guarded
-		// by s.mu.
-		close(ch)
+		// by s.mu.RegisterName
+		close(s.doneChan)
 	}
-}
-func (s *Server) getDoneChanLocked() chan struct{} {
-	if s.doneChan == nil {
-		s.doneChan = make(chan struct{})
-	}
-	return s.doneChan
 }
 
 var ip4Reg = regexp.MustCompile(`^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$`)

@@ -141,6 +141,7 @@ func (h *packetHandlerMap) close(e error) error {
 		h.mutex.Unlock()
 		return nil
 	}
+	h.closed = true
 
 	var wg sync.WaitGroup
 	for _, handler := range h.handlers {
@@ -152,9 +153,8 @@ func (h *packetHandlerMap) close(e error) error {
 	}
 
 	if h.server != nil {
-		h.server.setCloseError(e)
+		h.server.closeWithError(e)
 	}
-	h.closed = true
 	h.mutex.Unlock()
 	wg.Wait()
 	return getMultiplexer().RemoveConn(h.conn)

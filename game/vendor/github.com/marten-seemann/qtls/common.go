@@ -107,13 +107,6 @@ const (
 	scsvRenegotiation uint16 = 0x00ff
 )
 
-type EncryptionLevel uint8
-
-const (
-	EncryptionHandshake EncryptionLevel = iota
-	EncryptionApplication
-)
-
 // CurveID is a tls.CurveID
 type CurveID = tls.CurveID
 
@@ -568,17 +561,11 @@ type Config struct {
 
 	// AlternativeRecordLayer is used by QUIC
 	AlternativeRecordLayer RecordLayer
-
-	// Enforce the selection of a supported application protocol.
-	// Only works for TLS 1.3.
-	// If enabled, client and server have to agree on an application protocol.
-	// Otherwise, connection establishment fails.
-	EnforceNextProtoSelection bool
 }
 
 type RecordLayer interface {
-	SetReadKey(encLevel EncryptionLevel, suite *CipherSuite, trafficSecret []byte)
-	SetWriteKey(encLevel EncryptionLevel, suite *CipherSuite, trafficSecret []byte)
+	SetReadKey(suite *CipherSuite, trafficSecret []byte)
+	SetWriteKey(suite *CipherSuite, trafficSecret []byte)
 	ReadHandshakeMessage() ([]byte, error)
 	WriteRecord([]byte) (int, error)
 	SendAlert(uint8)
@@ -653,7 +640,6 @@ func (c *Config) Clone() *Config {
 		GetExtensions:               c.GetExtensions,
 		ReceivedExtensions:          c.ReceivedExtensions,
 		sessionTicketKeys:           sessionTicketKeys,
-		EnforceNextProtoSelection:   c.EnforceNextProtoSelection,
 	}
 }
 

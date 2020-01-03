@@ -7,10 +7,9 @@ import (
 
 // A QuicError consists of an error code plus a error reason
 type QuicError struct {
-	ErrorCode          ErrorCode
-	ErrorMessage       string
-	isTimeout          bool
-	isApplicationError bool
+	ErrorCode    ErrorCode
+	ErrorMessage string
+	isTimeout    bool
 }
 
 var _ net.Error = &QuicError{}
@@ -39,21 +38,7 @@ func CryptoError(tlsAlert uint8, errorMessage string) *QuicError {
 	}
 }
 
-func ApplicationError(errorCode ErrorCode, errorMessage string) *QuicError {
-	return &QuicError{
-		ErrorCode:          errorCode,
-		ErrorMessage:       errorMessage,
-		isApplicationError: true,
-	}
-}
-
 func (e *QuicError) Error() string {
-	if e.isApplicationError {
-		if len(e.ErrorMessage) == 0 {
-			return fmt.Sprintf("Application error %#x", uint64(e.ErrorCode))
-		}
-		return fmt.Sprintf("Application error %#x: %s", uint64(e.ErrorCode), e.ErrorMessage)
-	}
 	if len(e.ErrorMessage) == 0 {
 		return e.ErrorCode.Error()
 	}

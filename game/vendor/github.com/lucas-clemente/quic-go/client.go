@@ -3,10 +3,8 @@ package quic
 import (
 	"context"
 	"crypto/tls"
-	"errors"
 	"fmt"
 	"net"
-	"strings"
 	"sync"
 
 	"github.com/lucas-clemente/quic-go/internal/handshake"
@@ -89,7 +87,6 @@ func DialAddrContext(
 // The same PacketConn can be used for multiple calls to Dial and Listen,
 // QUIC connection IDs are used for demultiplexing the different connections.
 // The host parameter is used for SNI.
-// The tls.Config must define an application protocol (using NextProtos).
 func Dial(
 	pconn net.PacketConn,
 	remoteAddr net.Addr,
@@ -122,9 +119,6 @@ func dialContext(
 	config *Config,
 	createdPacketConn bool,
 ) (Session, error) {
-	if tlsConf == nil {
-		return nil, errors.New("quic: tls.Config not set")
-	}
 	config = populateClientConfig(config, createdPacketConn)
 	packetHandlers, err := getMultiplexer().AddConn(pconn, config.ConnectionIDLength, config.StatelessResetKey)
 	if err != nil {
@@ -153,16 +147,11 @@ func newClient(
 		tlsConf = &tls.Config{}
 	}
 	if tlsConf.ServerName == "" {
-		sni := host
-		if strings.IndexByte(sni, ':') != -1 {
-			var err error
-			sni, _, err = net.SplitHostPort(sni)
-			if err != nil {
-				return nil, err
-			}
+		var err error
+		tlsConf.ServerName, _, err = net.SplitHostPort(host)
+		if err != nil {
+			return nil, err
 		}
-
-		tlsConf.ServerName = sni
 	}
 
 	// check that all versions are actually supported
@@ -252,7 +241,6 @@ func populateClientConfig(config *Config, createdPacketConn bool) *Config {
 		MaxIncomingUniStreams:                 maxIncomingUniStreams,
 		KeepAlive:                             config.KeepAlive,
 		StatelessResetKey:                     config.StatelessResetKey,
-		QuicTracer:                            config.QuicTracer,
 	}
 }
 
@@ -362,9 +350,8 @@ func (c *client) createNewTLSSession(version protocol.VersionNumber) error {
 		InitialMaxStreamDataUni:        protocol.InitialMaxStreamData,
 		InitialMaxData:                 protocol.InitialMaxData,
 		IdleTimeout:                    c.config.IdleTimeout,
-		MaxBidiStreamNum:               protocol.StreamNum(c.config.MaxIncomingStreams),
-		MaxUniStreamNum:                protocol.StreamNum(c.config.MaxIncomingUniStreams),
-		MaxAckDelay:                    protocol.MaxAckDelayInclGranularity,
+		MaxBidiStreams:                 uint64(c.config.MaxIncomingStreams),
+		MaxUniStreams:                  uint64(c.config.MaxIncomingUniStreams),
 		AckDelayExponent:               protocol.AckDelayExponent,
 		DisableMigration:               true,
 	}

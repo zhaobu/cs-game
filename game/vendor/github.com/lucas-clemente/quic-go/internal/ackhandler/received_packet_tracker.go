@@ -16,14 +16,14 @@ type receivedPacketTracker struct {
 
 	packetHistory *receivedPacketHistory
 
-	maxAckDelay time.Duration
-	rttStats    *congestion.RTTStats
+	ackSendDelay time.Duration
+	rttStats     *congestion.RTTStats
 
-	packetsReceivedSinceLastAck             int
-	ackElicitingPacketsReceivedSinceLastAck int
-	ackQueued                               bool
-	ackAlarm                                time.Time
-	lastAck                                 *wire.AckFrame
+	packetsReceivedSinceLastAck                int
+	retransmittablePacketsReceivedSinceLastAck int
+	ackQueued                                  bool
+	ackAlarm                                   time.Time
+	lastAck                                    *wire.AckFrame
 
 	logger utils.Logger
 
@@ -37,16 +37,16 @@ func newReceivedPacketTracker(
 ) *receivedPacketTracker {
 	return &receivedPacketTracker{
 		packetHistory: newReceivedPacketHistory(),
-		maxAckDelay:   protocol.MaxAckDelay,
+		ackSendDelay:  ackSendDelay,
 		rttStats:      rttStats,
 		logger:        logger,
 		version:       version,
 	}
 }
 
-func (h *receivedPacketTracker) ReceivedPacket(packetNumber protocol.PacketNumber, rcvTime time.Time, shouldInstigateAck bool) {
+func (h *receivedPacketTracker) ReceivedPacket(packetNumber protocol.PacketNumber, rcvTime time.Time, shouldInstigateAck bool) error {
 	if packetNumber < h.ignoreBelow {
-		return
+		return nil
 	}
 
 	isMissing := h.isMissing(packetNumber)
@@ -55,8 +55,11 @@ func (h *receivedPacketTracker) ReceivedPacket(packetNumber protocol.PacketNumbe
 		h.largestObservedReceivedTime = rcvTime
 	}
 
-	h.packetHistory.ReceivedPacket(packetNumber)
+	if err := h.packetHistory.ReceivedPacket(packetNumber); err != nil {
+		return err
+	}
 	h.maybeQueueAck(packetNumber, rcvTime, shouldInstigateAck, isMissing)
+	return nil
 }
 
 // IgnoreBelow sets a lower limit for acking packets.
@@ -112,35 +115,35 @@ func (h *receivedPacketTracker) maybeQueueAck(packetNumber protocol.PacketNumber
 	}
 
 	if !h.ackQueued && shouldInstigateAck {
-		h.ackElicitingPacketsReceivedSinceLastAck++
+		h.retransmittablePacketsReceivedSinceLastAck++
 
 		if packetNumber > minReceivedBeforeAckDecimation {
 			// ack up to 10 packets at once
-			if h.ackElicitingPacketsReceivedSinceLastAck >= ackElicitingPacketsBeforeAck {
+			if h.retransmittablePacketsReceivedSinceLastAck >= retransmittablePacketsBeforeAck {
 				h.ackQueued = true
 				if h.logger.Debug() {
-					h.logger.Debugf("\tQueueing ACK because packet %d packets were received after the last ACK (using threshold: %d).", h.ackElicitingPacketsReceivedSinceLastAck, ackElicitingPacketsBeforeAck)
+					h.logger.Debugf("\tQueueing ACK because packet %d packets were received after the last ACK (using threshold: %d).", h.retransmittablePacketsReceivedSinceLastAck, retransmittablePacketsBeforeAck)
 				}
 			} else if h.ackAlarm.IsZero() {
 				// wait for the minimum of the ack decimation delay or the delayed ack time before sending an ack
-				ackDelay := utils.MinDuration(h.maxAckDelay, time.Duration(float64(h.rttStats.MinRTT())*float64(ackDecimationDelay)))
+				ackDelay := utils.MinDuration(ackSendDelay, time.Duration(float64(h.rttStats.MinRTT())*float64(ackDecimationDelay)))
 				h.ackAlarm = rcvTime.Add(ackDelay)
 				if h.logger.Debug() {
 					h.logger.Debugf("\tSetting ACK timer to min(1/4 min-RTT, max ack delay): %s (%s from now)", ackDelay, time.Until(h.ackAlarm))
 				}
 			}
 		} else {
-			// send an ACK every 2 ack-eliciting packets
-			if h.ackElicitingPacketsReceivedSinceLastAck >= initialAckElicitingPacketsBeforeAck {
+			// send an ACK every 2 retransmittable packets
+			if h.retransmittablePacketsReceivedSinceLastAck >= initialRetransmittablePacketsBeforeAck {
 				if h.logger.Debug() {
-					h.logger.Debugf("\tQueueing ACK because packet %d packets were received after the last ACK (using initial threshold: %d).", h.ackElicitingPacketsReceivedSinceLastAck, initialAckElicitingPacketsBeforeAck)
+					h.logger.Debugf("\tQueueing ACK because packet %d packets were received after the last ACK (using initial threshold: %d).", h.retransmittablePacketsReceivedSinceLastAck, initialRetransmittablePacketsBeforeAck)
 				}
 				h.ackQueued = true
 			} else if h.ackAlarm.IsZero() {
 				if h.logger.Debug() {
-					h.logger.Debugf("\tSetting ACK timer to max ack delay: %s", h.maxAckDelay)
+					h.logger.Debugf("\tSetting ACK timer to max ack delay: %s", ackSendDelay)
 				}
-				h.ackAlarm = rcvTime.Add(h.maxAckDelay)
+				h.ackAlarm = rcvTime.Add(ackSendDelay)
 			}
 		}
 		// If there are new missing packets to report, set a short timer to send an ACK.
@@ -181,7 +184,7 @@ func (h *receivedPacketTracker) GetAckFrame() *wire.AckFrame {
 	h.ackAlarm = time.Time{}
 	h.ackQueued = false
 	h.packetsReceivedSinceLastAck = 0
-	h.ackElicitingPacketsReceivedSinceLastAck = 0
+	h.retransmittablePacketsReceivedSinceLastAck = 0
 	return ack
 }
 
