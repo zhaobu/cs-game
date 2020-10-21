@@ -1,0 +1,120 @@
+syntax = "proto3";
+
+import "game/pb/common/head.proto";
+
+package pbgamerecord;
+
+message GameAction {
+  string ActName = 1;  //命令名称
+  bytes ActValue = 2;  //命令序列化值
+}
+
+//查询房间游戏记录数据请求(点击战绩按钮或者俱乐部内查找)
+message QueryRoomRecordReq {
+  pbcommon.ReqHead Head = 1;
+  //查询类型 1按userId 查询2按俱乐部id 查询3按俱乐部+房间号查询
+  int32 UserIdentity = 2;    //查询者身份 只有俱乐部查询才需要
+  int32 QueryType = 3;
+  uint64 QueryUserId = 4;    //要查询的uid
+  int64 QueryClubId = 5;     //俱乐部Id
+  uint64 QueryRoomId = 6;    //房间号
+  int64 QueryStartTime = 7;  //开始时间
+  int64 QueryEndTime = 8;    //结束时间
+  int32 CurPage = 9;         //当前页面
+  int32 Limit = 10;          //每页的数量
+}
+
+message RoomPlayerInfo {
+  uint64 UserId = 1;     //用户Id
+  string Name = 2;       //用户名
+  string HeadUrl = 3;    //用户头像地址
+  int32 TotalScore = 4;  //输赢积分 房间内的统计数据
+}
+
+//房间记录
+message RoomRecord {
+  string RoomRecordId = 1;  //房间记录Id 关联房间的数据库唯一id
+  int64 GameStartTime = 2;  //开始时间
+  uint64 DeskId = 3;        //房间号
+  string GameId = 4;        //游戏Id
+  uint32 TotalInning = 5;   //总局数
+  uint32 PayType = 6;       //支付方式 1 个人支付 2 AA支付
+  int64 ClubId = 7;         //俱乐部Id 当 AreaType 1 时需要填写
+  GameAction DeskInfo = 8;  //房间信息
+  repeated RoomPlayerInfo GamePlayers = 9;  //游戏参与玩家信息
+  repeated string GameRecordIds = 10;       //房间内游戏数据 数组
+}
+
+//查询房间游戏记录数据回应
+message QueryRoomRecordRsp {
+  pbcommon.RspHead Head = 1;
+  int32 Error = 2;  // 0 查询成功 1参数异常(不存在此人或者此俱乐部) 2权限不足
+  uint64 QueryUserId = 3;         //用户Id
+  uint32 TotalRooms = 4;           //总房间数
+  uint32 TotalFree = 5;             //总花费砖石数
+  repeated RoomRecord Datas = 6;  //房间记录数据
+  int32 PageCount = 7;            //总页数
+}
+
+//查询游戏记录请求(点击详情按钮)
+message QueryGameRecordReq {
+  pbcommon.ReqHead Head = 1;
+  string RoomRecordId = 2;  //要查询的房间记录id
+}
+
+message GamePlayerInfo {
+  uint64 UserId = 1;   //用户Id
+  string Name = 2;     //用户名
+  int32 Score = 3;     //输赢积分
+  int32 PreScore = 4;  //前几局累积总分
+}
+
+//游戏单局记录
+message GameRecord {
+  string GameRecordId = 1;                  //游戏记录Id
+  uint32 Index = 2;                         //第几局
+  int64 GameStartTime = 3;                  //开始时间 存储时间错
+  int64 GameEndTime = 4;                    //结束时间 存储时间错
+  repeated GamePlayerInfo GamePlayers = 5;  //游戏参与玩家信息
+}
+
+//查询游戏记录请求
+message QueryGameRecordRsp {
+  pbcommon.RspHead Head = 1;
+  int32 Error = 2;                  // 0 查询成功 1 参数异常
+  repeated GameRecord Records = 3;  //游戏记录
+}
+
+//查询游戏复盘数据请求(点击游戏回放按钮)
+message QueryGameRePlaydReq {
+  pbcommon.ReqHead Head = 1;
+  string GameRecordId = 2;  //游戏记录id
+}
+
+message QueryGameRePlaydRsp {
+  pbcommon.RspHead Head = 1;
+  int32 Error = 2;                     // 0查询成功 2记录不存在
+  repeated GameAction RePlayData = 3;  //复盘数据
+}
+
+//查询俱乐部统计请求
+message QueryClubStatisticsReq {
+  pbcommon.ReqHead Head = 1;
+  int32 QueryType = 2;       //查询类型 1 对局排名 2 积分排名
+  uint64 QueryClubId = 3;    //查询俱乐部Id
+  int64 QueryStartTime = 4;  //查询时间范围
+  int64 QueryEndTime = 5;    //查询时间范围
+}
+//统计数据
+message StatisticsData {
+  uint64 UserId = 1;  //用户Id
+  string Name = 2;    //姓名
+  string HeadUrl = 3;   //用户头像
+  int64 Statistics = 4;  //统计数据  积分统计 为积分 对局次数统计 为对局数
+}
+//查询俱乐部统计回应
+message QueryClubStatisticsRsp {
+  pbcommon.RspHead Head = 1;
+  int32 Error = 2;  // 0 查询成功 1参数异常(不存在此人或者此俱乐部) 2权限不足
+  repeated StatisticsData StatisticsDatas = 3;  //统计结果数据
+}

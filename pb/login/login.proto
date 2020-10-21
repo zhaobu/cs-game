@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+import "game/pb/common/head.proto";
+import "game/pb/common/common.proto";
+
+package pblogin;
+
+// 登陆方式
+enum LoginType {
+    NotUse1 = 0;   
+    WX     = 1;
+    QQ     = 2;
+	Phone  = 3;
+    Email  = 4;
+    XianLiao = 5;       //闲聊登陆方式
+}
+
+// 登陆回应code
+enum LoginRspCode {
+    NotUse2 = 0;
+    IdOrPwdFailed = 1;
+    Succ = 2;
+    Other = 3;
+    MobileNoBind = 4; // 手机登陆时，此手机没有被绑定
+    XLNoBind  = 5;     // 闲聊登陆时，此 闲聊没有被绑定
+}
+
+// 登陆请求 c -> s
+message LoginReq {
+    pbcommon.ReqHead Head = 1;
+    LoginType LoginType = 2;     
+    string ID = 3; // WX:为微信ID Phone:手机号码 XianLiao:openid
+    string Password = 4; // WX:为空 Phone:登陆密码 XianLiao:为空
+    string Version = 5;
+    string DeviceType = 6;
+    string Sex = 7;
+    string PlatformID = 8;    
+    string Name = 9;		           
+    string Profile = 10; // 头像地址
+    double Longitude = 13; // 经度
+    double Latitude = 14; // 维度
+    string Place = 15;    //定位地址名名称
+    string IsSimulator = 16;
+    string NetworkType = 17;
+    string Energy = 18; //电量
+}
+
+// s -> c
+message LoginRsp {
+    pbcommon.RspHead Head = 1;
+    LoginRspCode Code = 2;       
+    string StrCode = 3;
+    pbcommon.UserInfo User = 4;
+}
+
+// c -> s
+message KeepAliveReq {    
+}
+
+message KeepAliveRsp {    
+}
+
+// 登陆时获取验证码 c -> s
+message MobileCaptchaReq {
+    pbcommon.ReqHead Head = 1;
+    string Mobile = 2;        
+}
+
+message MobileCaptchaRsp {
+    pbcommon.RspHead Head = 1;
+    // 1 成功发送 2 参数错误 3 此号码没有绑定 4 被其他人绑定了 5 超过发送限制 6 内部服务错误 7 外部服务错误
+    uint32 Code = 2;
+    string TestCaptcha = 3; // 临时字段
+}

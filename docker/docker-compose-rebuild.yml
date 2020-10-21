@@ -1,0 +1,281 @@
+version: "3.7"
+
+# 申明同一个网络
+networks:
+  gamenet:
+    name: gamenet
+    # external: true # 申明网络已经在外部创建
+
+# 游戏数据卷
+volumes:
+  consuldata:
+    # external:true # 申明卷已经在外部创建
+    name: consuldata
+  # gamedata:
+  #   name: gamedata
+  mongodata:
+    name: mongodata
+  redisdata:
+    name: redisdata
+
+# 服务
+services:
+  gate:
+    build:
+      #指定  Dockerfile  所在文件夹的路径
+      context: ./
+      # 指定  Dockerfile  文件名
+      dockerfile: Dockerfile.golang
+      # 指定构建参数
+      # args:
+      #   # 需要编译的服务名称
+      #   nodename: gate
+      #   # 是否需要重新编译
+      #   rebuild: "true"
+      #   NodeType: gate
+    # 覆盖容器启动后默认执行的命令
+    command: ["gate", "true"]
+    volumes:
+      # GOPATH目录
+      - ../:/go/src/cy/game:rw
+    labels:
+      - name="liwei"
+    # working_dir: /go/src
+    # 打开标准输入，可以接受外部输入
+    stdin_open: true
+    # 模拟一个伪终端
+    tty: true
+    # 指定启动顺序
+    depends_on:
+      - mongodb
+      - redis
+      - consul
+      - club
+      - center
+    networks:
+      - gamenet
+    environment:
+      # 设置节点类型
+      NodeType: gate
+      NodeName: gate
+    ports:
+      - 9876:9876
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1000k"
+        max-file: "20"
+
+  center:
+    build:
+      #指定  Dockerfile  所在文件夹的路径
+      context: ./
+      # 指定  Dockerfile  文件名
+      dockerfile: Dockerfile.golang
+    command: ["center", "true"]
+    volumes:
+      # GOPATH目录
+      - ../:/go/src/cy/game:rw
+    labels:
+      - name="liwei"
+    # working_dir: /go/src
+    # 打开标准输入，可以接受外部输入
+    stdin_open: true
+    # 模拟一个伪终端
+    tty: true
+    # 指定启动顺序
+    depends_on:
+      - mongodb
+      - redis
+      - consul
+    networks:
+      - gamenet
+    environment:
+      # 设置节点类型
+      NodeType: center
+      NodeName: center
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1000k"
+        max-file: "20"
+
+  club:
+    build:
+      #指定  Dockerfile  所在文件夹的路径
+      context: ./
+      # 指定  Dockerfile  文件名
+      dockerfile: Dockerfile.golang
+    command: ["club", "true"]
+    volumes:
+      # GOPATH目录
+      - ../:/go/src/cy/game:rw
+    labels:
+      - name="liwei"
+    # working_dir: /go/src
+    # 打开标准输入，可以接受外部输入
+    stdin_open: true
+    # 模拟一个伪终端
+    tty: true
+    # 指定启动顺序
+    depends_on:
+      - mongodb
+      - redis
+      - consul
+    networks:
+      - gamenet
+    environment:
+      # 设置节点类型
+      NodeType: club
+      NodeName: club
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1000k"
+        max-file: "20"
+
+  http:
+    build:
+      #指定  Dockerfile  所在文件夹的路径
+      context: ./
+      # 指定  Dockerfile  文件名
+      dockerfile: Dockerfile.golang
+    command: ["http", "true"]
+    volumes:
+      # GOPATH目录
+      - ../:/go/src/cy/game:rw
+    labels:
+      - name="liwei"
+    # working_dir: /go/src
+    # 打开标准输入，可以接受外部输入
+    stdin_open: true
+    # 模拟一个伪终端
+    tty: true
+    # 指定启动顺序
+    depends_on:
+      - mongodb
+      - redis
+      - consul
+    networks:
+      - gamenet
+    ports:
+      - 8082:8082
+    environment:
+      # 设置节点类型
+      NodeType: http
+      NodeName: http
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1000k"
+        max-file: "20"
+
+  changshu:
+    build:
+      #指定  Dockerfile  所在文件夹的路径
+      context: ./
+      # 指定  Dockerfile  文件名
+      dockerfile: Dockerfile.golang
+    command: ["changshu", "true"]
+    volumes:
+      # GOPATH目录
+      - ../:/go/src/cy/game:rw
+    labels:
+      - name="liwei"
+    # working_dir: /go/src
+    # 打开标准输入，可以接受外部输入
+    stdin_open: true
+    # 模拟一个伪终端
+    tty: true
+    # 指定启动顺序
+    depends_on:
+      - mongodb
+      - redis
+      - consul
+    networks:
+      - gamenet
+    environment:
+      # 设置节点类型
+      NodeType: game
+      NodeName: changshu
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1000k"
+        max-file: "20"
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    networks:
+      gamenet:
+        # 给网络取别名,可以用redis和cache找到
+        aliases:
+          - cache
+    command: /usr/local/etc/redis/redis.conf
+    volumes:
+      # 持久存储redis的数据
+      - redisdata:/data
+      # 挂载本地配置文件
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    networks:
+      gamenet:
+        # 给网络取别名,可以用mongodb和db找到
+        aliases:
+          - db
+    command: ["mongod", "-f", "/etc/mongo/mongod.conf"]
+    volumes:
+      # 持久存储mongodb的数据
+      - mongodata:/data/db:rw
+      - mongodata:/data/configdb:rw
+      # 挂载本地配置文件
+      - ./mongod.conf:/etc/mongo/mongod.conf:rw
+
+  consul:
+    image: consul:latest
+    ports:
+      - "8500:8500"
+    command: consul agent -dev -client 0.0.0.0 -node=game_consul -bind=0.0.0.0
+
+    networks:
+      gamenet:
+        # 给网络取别名,可以用consul和discovery找到
+        aliases:
+          - discovery
+    volumes:
+      - consuldata:/consul/data
+  # initdb:
+  #   image: golang:alpine
+  #   working_dir: /go/src/cy/game/bin/linux
+  #   command: chmod +x $NodeName &&./$NodeName
+  #   volumes:
+  #     # GOPATH目录
+  #     - ../:/go/src/cy/game:rw
+  #   labels:
+  #     - name="liwei"
+  #   # working_dir: /go/src
+  #   # 打开标准输入，可以接受外部输入
+  #   stdin_open: true
+  #   # 模拟一个伪终端
+  #   tty: true
+  #   # 指定启动顺序
+  #   depends_on:
+  #     - mongodb
+  #     - redis
+  #     - consul
+  #   networks:
+  #     - gamenet
+  #   environment:
+  #     # 设置节点类型
+  #     NodeName: initdb
+  #   logging:
+  #     driver: "json-file"
+  #     options:
+  #       max-size: "1000k"
+  #       max-file: "20"

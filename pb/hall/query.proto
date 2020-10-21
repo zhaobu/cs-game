@@ -1,0 +1,113 @@
+syntax = "proto3";
+
+import "game/pb/common/head.proto";
+import "game/pb/common/common.proto";
+
+package pbhall;
+
+// 查询支持游戏 c -> s
+message QueryGameListReq {
+  pbcommon.ReqHead Head = 1;
+}
+
+message QueryGameListRsp {
+  pbcommon.RspHead Head = 1;
+  repeated string GameNames = 2;
+}
+
+// 查询会话信息 c -> s
+message QuerySessionInfoReq {
+  pbcommon.ReqHead Head = 1;
+}
+
+message QuerySessionInfoRsp {
+  pbcommon.RspHead Head = 1;
+  pbcommon.SessionInfo Info = 2;
+}
+
+// 查询用户信息 c -> s
+message QueryUserInfoReq {
+  pbcommon.ReqHead Head = 1;
+}
+
+message QueryUserInfoRsp {
+  pbcommon.RspHead Head = 1;
+  pbcommon.UserInfo Info = 2;
+}
+
+//查询用户绑定信息
+message QueryUserBuildInfoReq {
+  pbcommon.ReqHead Head = 1;
+}
+
+//查询用户绑定信息
+message QueryUserBuildInfoRsp {
+  pbcommon.RspHead Head = 1;
+  bool IsBuildPhone = 2;       //是否绑定了手机号
+  string PhoneNumber = 3;      //绑定的手机号
+  bool IsBuildXianLiao = 4;    //是否绑定了闲聊账号
+  string XianLiaoAccount = 5;  //绑定的闲聊Account
+}
+
+// 查询玩家建的桌子  c -> s
+message QueryUserOwnDeskReq {
+  pbcommon.ReqHead Head = 1;
+}
+
+message QueryUserOwnDeskRsp {
+  pbcommon.RspHead Head = 1;
+  repeated pbcommon.DeskInfo Infos = 2;
+}
+
+// s -> c
+message UserWealthChange {
+  uint64 UserID = 1;
+  uint64 Gold = 2;
+  int64 GoldChange = 3;
+  uint64 Masonry = 4;
+  int64 MasonryChange = 5;
+}
+
+// c-s 查询用户点卡信息
+message QueryUserPointCardInfoReq {
+  pbcommon.ReqHead Head = 1;
+}
+
+message PointCardInfo {
+  string PcId = 1;
+  int64 BuyTime = 2;
+  uint32 ExchangeNum = 3;
+  uint32 ExchangeState = 4;  // 0未兑换 1已兑换
+  int64 ExchangeTime = 5;    //兑换时间
+}
+
+// c-s 查询用户点卡信息
+message QueryUserPointCardInfoRsp {
+  pbcommon.RspHead Head = 1;
+  repeated PointCardInfo PCards = 2;
+}
+
+message PointCardExchangeReq {
+  pbcommon.ReqHead Head = 1;
+  string PcId = 2;
+}
+
+message PointCardExchangeRsp {
+  pbcommon.RspHead Head = 1;
+  uint32 ErrorCode = 2;  // 0成功 1点卡不存在 2点卡已失效
+}
+
+message QueryUserDeskInfosReq {
+  pbcommon.ReqHead Head = 1;
+}
+message QueryUserDeskInfosRsp {
+  pbcommon.RspHead Head = 1;
+  repeated pbcommon.DeskInfo Desks = 2;
+}
+
+//更新大厅桌子列表
+message PushMasterDeskChangeInfo {
+  uint64 DeskID = 1;
+  int32 ChangeTyp = 2;  // 1create 2update 3delete
+  pbcommon.DeskInfo Desks = 3;
+}

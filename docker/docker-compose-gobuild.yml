@@ -1,0 +1,15 @@
+version: "3.7"
+
+# 服务
+services:
+  gobuild:
+    container_name: gobuild
+    image: golang:alpine
+    volumes:
+      # GOPATH目录
+      - ../:/go/src/cy/game:rw
+    working_dir: /go/src
+    # 打开标准输入，可以接受外部输入
+    stdin_open: true
+    # 模拟一个伪终端
+    tty: true

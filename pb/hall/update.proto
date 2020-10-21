@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+import "game/pb/common/head.proto";
+
+package pbhall;
+
+
+// 更新用户绑定的手机和登陆密码 c -> s
+message UpdateBindMobileReq {
+    pbcommon.ReqHead Head = 1;
+    string Mobile = 2;
+    string Captcha = 3;
+    string Password = 4;
+}
+
+message UpdateBindMobileRsp {
+    pbcommon.RspHead Head = 1;
+    // 1 成功 2 参数空 3 验证码错误 4 此号码被其他人绑定了 5 内部服务错误
+    uint32 Code = 2;   
+}
+
+// 绑定闲聊账号 c -> s
+message BindXianLiaoAccountReq {
+    pbcommon.ReqHead Head = 1;
+    string XianLiaoId = 2;
+}
+
+// 绑定闲聊账号 c -> s
+message BindXianLiaoAccountRsp {
+    pbcommon.RspHead Head = 1;
+    // 1 成功 2 参数空 3未登录不能绑定 4 此号码被其他人绑定了  5 内部服务错误
+    uint32 Code = 2;
+}
+
+
+// 身份证绑定验证
+message UpdateIdCardReq {
+    pbcommon.ReqHead Head = 1;
+    string IdCard = 2;
+    string Cnname = 3;
+}
+
+message UpdateIdCardRsp {
+    pbcommon.RspHead Head = 1;
+    // 1 成功 2 参数无效 3 验证失败 4 验证不通过 5 更新失败
+    uint32 Code = 2;
+    string CodeStr = 3;
+}

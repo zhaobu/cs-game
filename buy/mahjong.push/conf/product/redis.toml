@@ -1,5 +1,0 @@
-[node]
-[node.redisNode1]
-host="xxooxxoo"
-port=6379
-auth="xxooxxoo"

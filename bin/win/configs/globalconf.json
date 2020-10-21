@@ -1,0 +1,33 @@
+{
+    "GlobalConf": {
+        "ConsulAddr": "127.0.0.1:8500",
+        "Release": false,
+        "RedisAddr": "127.0.0.1:6379",
+        "RedisDb": 1,
+        "MgoURI": "mongodb://127.0.0.1:27017/game",
+        "NetAddr": "http://120.79.114.124:8056/"
+    },
+    "HttpConf": {
+        "Addr": "http:8082"
+    },
+    "ClubConf": {
+        "Addr": "127.0.0.1:9301"
+    },
+    "CenterConf": {
+        "Addr": "127.0.0.1:9201"
+    },
+    "GateConf": {
+        "Addr": "127.0.0.1:9876"
+    },
+    "GameConfs": {
+        "MjLibPath": "./configs/mjhulib",
+        "GameNode": {
+            "11101": {
+                "Addr": "127.0.0.1:9603",
+                "TplName": "./configs/changshu.json",
+                "GameName": "changshu",
+                "GameTest": "./configs/changshutest.json"
+            }
+        }
+    }
+}
