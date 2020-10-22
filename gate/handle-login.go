@@ -135,7 +135,7 @@ func backendLoginReq(s *session, loginReq *pblogin.LoginReq) (loginRsp *pblogin.
 		if err != nil {
 			tlog.Info("更新用户IP 错误", zap.Any("uId", loginRsp.User.UserID), zap.Any("IP", loginRsp.User.IP))
 		}
-		if loginReq.Longitude != 0 || loginReq.Latitude != 0 ||  loginReq.Place != "" {
+		if loginReq.Longitude != 0 || loginReq.Latitude != 0 || loginReq.Place != "" {
 			err = mgo.UpdateUserLocation(loginRsp.User.UserID, loginReq.Longitude, loginReq.Latitude, loginReq.Place) //写入数据库
 			if err != nil {
 				tlog.Info("更新用户定位 错误", zap.Any("uId", loginRsp.User.UserID))
@@ -244,7 +244,7 @@ func generateMobileCaptcha() string {
 }
 
 func sendMobileCaptcha(mobile string, captcha string) error {
-	client, err := sdk.NewClientWithAccessKey("default", "LTAI4FeBZzVGdJ4uJ6Jk4Xjo", "69Q6D7zHrsbP8kgWoAw80GO4WddxNC")
+	client, err := sdk.NewClientWithAccessKey("default", "accessKeyId", "accessKeySecret")
 	if err != nil {
 		return err
 	}
@@ -255,8 +255,8 @@ func sendMobileCaptcha(mobile string, captcha string) error {
 	request.Version = "2017-05-25"
 	request.ApiName = "SendSms"
 	request.QueryParams["PhoneNumbers"] = mobile
-	request.QueryParams["SignName"] = "三格软件"
-	request.QueryParams["TemplateCode"] = "SMS_137655450"
+	request.QueryParams["SignName"] = "SignName"
+	request.QueryParams["TemplateCode"] = "TemplateCode"
 	request.QueryParams["TemplateParam"] = "{\"code\":\"" + captcha + "\"}"
 
 	response, err := client.ProcessCommonRequest(request)
